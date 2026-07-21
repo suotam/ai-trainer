@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.2  
+**Verze:** 0.3  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-21
@@ -47,11 +47,13 @@ Nižší vrstva nesmí obejít vyšší.
 docs/01-vision/vision.md
 docs/01-vision/product-principles.md
 docs/02-product/product-scope.md
+docs/02-product/functional-requirements.md
 ```
 
 - `vision.md` vlastní poslání, dlouhodobou vizi, odlišení a definici úspěchu.
 - `product-principles.md` vlastní neměnné produktové zásady.
 - `product-scope.md` vlastní cílový funkční rozsah a základní etapizaci.
+- `functional-requirements.md` vlastní testovatelné cílové schopnosti `FR-001` až `FR-192`.
 
 ## Users and UX
 
@@ -200,16 +202,12 @@ aktualizovat DOCUMENTATION_STATUS.md
 Podle současného auditu následuje:
 
 ```text
-docs/02-product/functional-requirements.md
-```
-
-Poté:
-
-```text
 docs/02-product/non-functional-requirements.md
 ```
 
-Přesné další pořadí se vždy řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
+Poté budou následovat release scope, traceability a acceptance criteria před hlavními technickými architekturami.
+
+Přesné pořadí se vždy řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
 
 ---
 
@@ -245,7 +243,7 @@ Základní návaznost je:
 ```text
 Vision
     ↓
-Product requirements
+Product scope and requirements
     ↓
 User scenarios and UX
     ↓
