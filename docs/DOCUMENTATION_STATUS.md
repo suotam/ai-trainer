@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 0.2  
+**Verze:** 0.3  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -17,13 +17,13 @@ Jeho cílem je:
 
 - rozlišit existující a pouze plánované soubory,
 - určit hlavní zdroj pravdy pro jednotlivá témata,
-- zabránit vytváření duplicitních dokumentů,
+- zabránit duplicitám,
 - identifikovat skutečné mezery,
 - sledovat připravenost oblastí pro implementaci,
 - určit další dokument podle aktuálního stavu repozitáře,
 - usnadnit budoucímu coding agentovi výběr kontextu.
 
-Tento dokument se musí aktualizovat po dokončení každé významné dokumentační části.
+Tento dokument se aktualizuje po dokončení každé významné dokumentační části.
 
 ---
 
@@ -44,7 +44,7 @@ Každý dokument je posuzován podle:
 - **FOUNDATION_READY** – stabilní základ, zbývá konsistenční nebo odborné review.
 - **SUBSTANTIAL_DRAFT** – rozsáhlý použitelný draft, zatím ne finálně schválený.
 - **PARTIAL** – oblast je pokryta pouze částečně.
-- **NEEDS_CONSOLIDATION** – informace existují, ale je nutné je sjednotit nebo odstranit duplicity.
+- **NEEDS_CONSOLIDATION** – informace existují, ale musí se sjednotit nebo zbavit duplicit.
 - **PLANNED** – potřeba samostatného dokumentu byla potvrzena.
 - **NOT_NEEDED_AS_SEPARATE_FILE** – obsah je již dostatečně pokryt.
 - **EXPERT_REVIEW_REQUIRED** – vyžaduje právní, medicínské nebo jiné odborné ověření.
@@ -62,25 +62,15 @@ Projekt má velmi rozsáhlý základ v oblastech:
 - uživatelské persony a scénáře,
 - informační architektura a hlavní UX flow,
 - specifikace hlavních obrazovek,
-- doménový přehled,
-- sporty a cíle,
-- plány,
-- workouty,
-- scheduling,
-- aktivity,
-- recovery a omezení,
-- AI návrhy a bezpečné změny,
-- metriky,
-- integrace,
-- offline a synchronizace,
-- identity a profil,
+- kompletní sada hlavních doménových modelů,
 - doménové události,
-- globální a cross-domain invariance.
+- globální cross-domain invariance,
+- kanonické doménové názvosloví.
 
 Největší zbývající mezery jsou:
 
-- kanonický slovník,
 - testovatelné funkční a nefunkční požadavky,
+- traceability mezi požadavky, UX, doménou a testy,
 - technické architektury,
 - bezpečnost a právní konkretizace,
 - fyzický datový model,
@@ -98,15 +88,15 @@ Největší zbývající mezery jsou:
 
 | Soubor | Stav auditu | Úloha |
 |---|---|---|
-| `docs/README.md` | NEEDS_CONSOLIDATION | Mapa dokumentace; po glossary bude zkrácena a sladěna s auditem. |
-| `docs/DOCUMENTATION_STATUS.md` | FOUNDATION_READY | Řídicí stav a gap analysis. |
+| `docs/README.md` | FOUNDATION_READY | Stručná mapa dokumentace, zdroje pravdy a pracovní pravidla. |
+| `docs/DOCUMENTATION_STATUS.md` | FOUNDATION_READY | Řídicí stav, audit a gap analysis. |
 
 ## 4.2 Vision
 
 | Soubor | Stav auditu | Zdroj pravdy pro |
 |---|---|---|
 | `docs/01-vision/vision.md` | FOUNDATION_READY | Poslání, dlouhodobá vize, co produkt je a není, odlišení a definice úspěchu. |
-| `docs/01-vision/product-principles.md` | FOUNDATION_READY | Neměnné produktové principy, kontrola uživatele, vysvětlitelnost, bezpečnost, společný multisportovní systém. |
+| `docs/01-vision/product-principles.md` | FOUNDATION_READY | Neměnné produktové principy, kontrola uživatele, vysvětlitelnost, bezpečnost a multisportovní systém. |
 
 ## 4.3 Product
 
@@ -147,10 +137,37 @@ Největší zbývající mezery jsou:
 | `docs/06-domain/identity-and-profile-model.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Identity, účet, profil, onboarding, preference, souhlasy a vztahy. |
 | `docs/06-domain/domain-events.md` | SUBSTANTIAL_DRAFT | Event envelope, katalog, outbox/inbox, retry, replay a projekce. |
 | `docs/06-domain/domain-invariants.md` | SUBSTANTIAL_DRAFT | Globální priority, cross-domain konzistence a registr `INV-001` až `INV-100`. |
+| `docs/06-domain/glossary.md` | SUBSTANTIAL_DRAFT | Kanonické názvosloví, vlastníci pojmů, zakázaná synonyma a kritická rozlišení. |
 
 ---
 
-# 5. Výsledek auditu duplicit
+# 5. Dokončená fáze – základ domény
+
+Doménový základ nyní obsahuje:
+
+- mapu bounded contexts,
+- detailní modely všech hlavních oblastí,
+- příkazy a události,
+- model AI návrhů a řízených změn,
+- offline a integrační model,
+- globální invarianty,
+- kanonický glossary.
+
+## 5.1 Co ještě neznamená „doména hotová“
+
+Před stavem `IMPLEMENTATION_READY` je stále nutné:
+
+- provést cross-document consistency review,
+- vyřešit otevřené terminologické otázky z glossary,
+- zkontrolovat kardinality a vlastnictví agregátů,
+- namapovat invariance na požadavky, API a testy,
+- provést medicínské review recovery a pain pravidel,
+- provést právní review souhlasů, health dat a minors,
+- potvrdit, které budoucí modely skutečně patří do cílové V1.
+
+---
+
+# 6. Výsledek auditu duplicit
 
 Následující soubory nyní nevytvářet jako samostatné dokumenty:
 
@@ -160,7 +177,7 @@ Následující soubory nyní nevytvářet jako samostatné dokumenty:
 | `01-vision/non-goals.md` | Co produkt není a co je mimo scope již existuje. | `vision.md`, `product-scope.md` |
 | `01-vision/product-positioning.md` | Základní odlišení je popsáno; samostatně pouze při marketingové potřebě. | `vision.md` |
 | `03-users/multisport-user-model.md` | Obsah je v personách, scénářích a doméně sportů. | persony, scénáře, sports model |
-| `03-users/returning-user-model.md` | Návrat je scénář a část profilu, nikoli samostatná doména. | scenarios, identity/profile model |
+| `03-users/returning-user-model.md` | Návrat je scénář a část profilu. | scenarios, identity/profile model |
 | `04-ux/screen-inventory.md` | Seznam a detail obrazovek již existují. | information architecture, screen specifications |
 | obecný `offline-principles.md` | Offline pravidla jsou detailně pokryta. | sync-and-offline model |
 | obecný `event-catalog.md` | Katalog je součástí domain events. | domain-events.md |
@@ -170,74 +187,62 @@ Nový samostatný soubor vznikne pouze s jasně odlišným účelem, vlastníkem
 
 ---
 
-# 6. Dokončený krok – globální invariance
+# 7. Bezprostředně následující dokumenty
 
-`docs/06-domain/domain-invariants.md` byl vytvořen a obsahuje:
+Další fáze převádí rozsáhlou produktovou a doménovou dokumentaci na jednoznačně testovatelné požadavky.
 
-- stabilní identifikátory `INV-001` až `INV-100`,
-- pořadí globálních priorit,
-- pravidla vlastnictví a izolace dat,
-- historii, verze a opravy,
-- čas a schedule,
-- vztah plán–workout–activity,
-- recovery a safety pravidla,
-- metriky,
-- AI a ChangeSet,
-- souhlasy a citlivá data,
-- integrace,
-- offline a multi-device synchronizaci,
-- eventy a audit,
-- mazání, export a retenci,
-- notifikace a automatizace,
-- konflikt resolution hierarchy,
-- povinné testovací skupiny.
-
-## 6.1 Potřebná budoucí review
-
-Před stavem `IMPLEMENTATION_READY` dokument vyžaduje:
-
-- cross-check proti všem detailním doménovým modelům,
-- bezpečnostní review,
-- medicínské review pravidel bolesti a omezení,
-- právní review souhlasů a nezletilých,
-- mapování invariant na testy, API a architektury.
-
----
-
-# 7. Bezprostředně následující dokument
-
-Další dokument je:
+## 7.1 Další soubor
 
 ```text
-docs/06-domain/glossary.md
+docs/02-product/functional-requirements.md
 ```
 
-Jeho úkolem bude:
+Má obsahovat:
 
-- definovat kanonické pojmy,
-- určit vlastnící dokument každého pojmu,
-- rozlišit snadno zaměnitelné objekty,
-- určit povolená a zakázaná synonyma,
-- sjednotit názvy mezi produktem, UX, doménou, API, backendem, mobilem a AI.
+- stabilní identifikátory `FR-xxx`,
+- testovatelné formulace,
+- prioritu a cílovou release fázi,
+- vazbu na persony a scénáře,
+- vazbu na UX flow a obrazovky,
+- vazbu na vlastnící doménu,
+- základní acceptance criteria,
+- explicitní out-of-scope a odložené požadavky.
 
-Nebude opakovat celé modely nebo jejich invariance.
+## 7.2 Poté
+
+```text
+docs/02-product/non-functional-requirements.md
+```
+
+Má pokrýt zejména:
+
+- dostupnost a spolehlivost,
+- offline schopnosti,
+- konzistenci a obnovu,
+- výkon a odezvu,
+- bezpečnost a privacy,
+- accessibility a localization,
+- mobilní battery/network limity,
+- škálovatelnost,
+- observabilitu,
+- data retention a recovery.
 
 ---
 
 # 8. Následující pořadí práce
 
-## Fáze 1 – uzavření doménového základu
+## Fáze 1 – doménový základ
 
 1. ✅ `docs/DOCUMENTATION_STATUS.md`
 2. ✅ `docs/06-domain/domain-invariants.md`
-3. ⏭️ `docs/06-domain/glossary.md`
-4. aktualizace a zkrácení `docs/README.md`
-5. cross-document domain consistency review
-6. doplnění metadat, ID a odkazů do základních dokumentů
+3. ✅ `docs/06-domain/glossary.md`
+4. ✅ aktualizace a zkrácení `docs/README.md`
+5. ⏳ cross-document domain consistency review
+6. ⏳ doplnění metadat, ID a odkazů do základních dokumentů
 
-## Fáze 2 – testovatelné požadavky
+## Fáze 2 – produktové požadavky
 
-1. `docs/02-product/functional-requirements.md`
+1. ⏭️ `docs/02-product/functional-requirements.md`
 2. `docs/02-product/non-functional-requirements.md`
 3. release scope a priority matrix
 4. traceability matrix požadavek → scénář → flow → doména → test
@@ -297,16 +302,10 @@ Nebude opakovat celé modely nebo jejich invariance.
 
 # 9. Potvrzené hlavní budoucí dokumenty
 
-Následující dokumenty mají potvrzenou samostatnou potřebu:
-
 ## Product
 
 - `docs/02-product/functional-requirements.md`
 - `docs/02-product/non-functional-requirements.md`
-
-## Domain
-
-- `docs/06-domain/glossary.md`
 
 ## Architecture
 
@@ -317,7 +316,7 @@ Následující dokumenty mají potvrzenou samostatnou potřebu:
 - `docs/11-security/security-architecture.md`
 - `docs/12-data/data-architecture.md`
 
-Další soubory budou určeny až uvnitř těchto architektur podle skutečných hranic a kontraktů.
+Další soubory budou určeny uvnitř těchto architektur podle skutečných hranic a kontraktů.
 
 ---
 
@@ -357,38 +356,32 @@ ID se nesmí recyklovat pro jiný význam.
 
 ## Duplicity
 
-**Riziko:** Stejná pravidla existují ve více dlouhých dokumentech.
-
+**Riziko:** Stejná pravidla existují ve více dlouhých dokumentech.  
 **Opatření:** glossary, ID, vlastníci a cross-references.
 
 ## Délka dokumentů
 
-**Riziko:** Obtížné review a načítání do AI kontextu.
-
+**Riziko:** Obtížné review a načítání do AI kontextu.  
 **Opatření:** indexy a oddělení pouze skutečných kontraktů; ne mechanické štěpení.
 
 ## Vše ve stavu Draft
 
-**Riziko:** Není jasné, co je rozhodnutí.
-
+**Riziko:** Není jasné, co je rozhodnutí.  
 **Opatření:** po tematických fázích review na `APPROVED` nebo `IMPLEMENTATION_READY`.
 
 ## Otevřené otázky
 
-**Riziko:** Rozptýlené decision backlogy.
-
-**Opatření:** po glossary vytvořit pouze v případě potřeby `docs/OPEN_DECISIONS.md` a převádět rozhodnutí do ADR.
+**Riziko:** Rozptýlené decision backlogy.  
+**Opatření:** skutečná rozhodnutí převádět do ADR; centrální backlog vytvořit jen při praktické potřebě.
 
 ## Integrace
 
-**Riziko:** Doménová možnost neznamená dostupné provider API.
-
+**Riziko:** Doménová možnost neznamená dostupné provider API.  
 **Opatření:** capability audit a oficiální provider dokumentace.
 
 ## Medicína a právo
 
-**Riziko:** Pain, health data, souhlasy a minors vyžadují odborné potvrzení.
-
+**Riziko:** Pain, health data, souhlasy a minors vyžadují odborné potvrzení.  
 **Opatření:** explicitní `EXPERT_REVIEW_REQUIRED` a zákaz označit oblast za implementation-ready bez review.
 
 ---
@@ -403,8 +396,9 @@ ID se nesmí recyklovat pro jiný význam.
 | Users | vysoká | střední | ID a traceability |
 | UX | vysoká | střední | states, routes, acceptance criteria |
 | Design system | nízká | nízká | hlavní design-system dokument |
-| Domain models | velmi vysoká | střední | glossary a consistency review |
+| Domain models | velmi vysoká | střední | consistency review |
 | Domain invariants | vysoká | střední | odborné review a test mapping |
+| Domain glossary | vysoká | střední | vyřešit otevřené terminologické otázky |
 | Backend | nízká | nízká | backend architecture |
 | Mobile | nízká | nízká | mobile architecture |
 | AI runtime | střední doménově | nízká | AI architecture a tools |
@@ -438,7 +432,9 @@ Cílem není konkrétní počet. Dokumentace je úplná, když lze každé důle
 
 # 15. Závěr
 
-Doménová vrstva nyní obsahuje jak detailní modely, tak společný registr globálních invariant. Další hodnotu přinese stabilizace názvosloví v `glossary.md`, nikoli další obecný doménový model.
+Doménová vrstva nyní obsahuje detailní modely, globální invarianty i společný kanonický jazyk.
+
+Další hodnotu přinese převod produktu do testovatelných `FR-xxx` a `NFR-xxx`, nikoli další obecný doménový model.
 
 Pracovní cyklus zůstává:
 
