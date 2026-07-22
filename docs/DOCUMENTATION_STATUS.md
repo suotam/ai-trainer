@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 0.8  
+**Verze:** 0.9  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -54,18 +54,18 @@ Projekt má rozsáhlý základ v oblastech:
 - nefunkční požadavky `NFR-001` až `NFR-172`,
 - backendová architektura a pravidla `BAR-001` až `BAR-015`,
 - datová architektura a pravidla `DAR-001` až `DAR-015`,
-- mobilní architektura a pravidla `MAR-001` až `MAR-015`.
+- mobilní architektura a pravidla `MAR-001` až `MAR-015`,
+- AI runtime architektura a pravidla `AIR-001` až `AIR-015`.
 
 Největší zbývající mezery:
 
-- AI runtime architecture,
 - security architecture,
 - integration architecture,
 - release scope a prioritizace,
 - traceability požadavek → scénář → UX → doména → test,
 - fyzický relační a lokální datový model,
 - API, sync a event kontrakty,
-- AI tool kontrakty,
+- AI tool, context, prompt a structured-output kontrakty,
 - design system,
 - kvalita, DevOps, release a provoz,
 - implementační instrukce pro coding agenta.
@@ -105,21 +105,21 @@ Největší zbývající mezery:
 
 | Soubor | Stav | Zdroj pravdy pro |
 |---|---|---|
-| `docs/06-domain/domain-overview.md` | SUBSTANTIAL_DRAFT | Bounded contexts, agregáty a mapa domény. |
-| `docs/06-domain/sports-and-goals-model.md` | SUBSTANTIAL_DRAFT | Sporty, zkušenost, cíle a progres. |
-| `docs/06-domain/training-plan-model.md` | SUBSTANTIAL_DRAFT | TrainingPlan, verze, bloky a týdny. |
-| `docs/06-domain/workout-model.md` | SUBSTANTIAL_DRAFT | Workout struktura, instance, revize a session. |
-| `docs/06-domain/scheduling-model.md` | SUBSTANTIAL_DRAFT | ScheduleEvent, recurrence a konflikty. |
-| `docs/06-domain/activity-model.md` | SUBSTANTIAL_DRAFT | Activity, provenance, opravy a deduplikace. |
-| `docs/06-domain/recovery-and-limitations-model.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Recovery, bolest, omezení a safety. |
-| `docs/06-domain/ai-and-change-model.md` | SUBSTANTIAL_DRAFT | AIProposal, ChangeSet, potvrzení a undo. |
-| `docs/06-domain/metrics-model.md` | SUBSTANTIAL_DRAFT | Metriky, agregace, trendy a rekordy. |
-| `docs/06-domain/integration-model.md` | SUBSTANTIAL_DRAFT | Provider connection, import/export a lineage. |
-| `docs/06-domain/sync-and-offline-model.md` | SUBSTANTIAL_DRAFT | Offline-first, konflikty a multi-device sync. |
-| `docs/06-domain/identity-and-profile-model.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Identity, profil, onboarding, souhlasy a vztahy. |
-| `docs/06-domain/domain-events.md` | SUBSTANTIAL_DRAFT | Event envelope, katalog, outbox/inbox a replay. |
-| `docs/06-domain/domain-invariants.md` | SUBSTANTIAL_DRAFT | Globální pravidla `INV-001` až `INV-100`. |
-| `docs/06-domain/glossary.md` | SUBSTANTIAL_DRAFT | Kanonické názvosloví a vlastníci pojmů. |
+| `domain-overview.md` | SUBSTANTIAL_DRAFT | Bounded contexts, agregáty a mapa domény. |
+| `sports-and-goals-model.md` | SUBSTANTIAL_DRAFT | Sporty, zkušenost, cíle a progres. |
+| `training-plan-model.md` | SUBSTANTIAL_DRAFT | TrainingPlan, verze, bloky a týdny. |
+| `workout-model.md` | SUBSTANTIAL_DRAFT | Workout struktura, instance, revize a session. |
+| `scheduling-model.md` | SUBSTANTIAL_DRAFT | ScheduleEvent, recurrence a konflikty. |
+| `activity-model.md` | SUBSTANTIAL_DRAFT | Activity, provenance, opravy a deduplikace. |
+| `recovery-and-limitations-model.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Recovery, bolest, omezení a safety. |
+| `ai-and-change-model.md` | SUBSTANTIAL_DRAFT | AIProposal, ChangeSet, potvrzení a undo. |
+| `metrics-model.md` | SUBSTANTIAL_DRAFT | Metriky, agregace, trendy a rekordy. |
+| `integration-model.md` | SUBSTANTIAL_DRAFT | Provider connection, import/export a lineage. |
+| `sync-and-offline-model.md` | SUBSTANTIAL_DRAFT | Offline-first, konflikty a multi-device sync. |
+| `identity-and-profile-model.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Identity, profil, onboarding, souhlasy a vztahy. |
+| `domain-events.md` | SUBSTANTIAL_DRAFT | Event envelope, katalog, outbox/inbox a replay. |
+| `domain-invariants.md` | SUBSTANTIAL_DRAFT | Globální pravidla `INV-001` až `INV-100`. |
+| `glossary.md` | SUBSTANTIAL_DRAFT | Kanonické názvosloví a vlastníci pojmů. |
 
 ## 4.5 Architecture
 
@@ -127,50 +127,52 @@ Největší zbývající mezery:
 |---|---|---|
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Modulární monolit, vrstvy, moduly, transactions, events, jobs a boundaries. |
 | `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy, ownership, autorita, historie, storage, migrace, retence a backup. |
-| `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Flutter klient, feature boundaries, local DB, offline commands, sync, lifecycle, workout runtime a platform adapters. |
+| `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Flutter klient, feature boundaries, local DB, offline commands, sync, lifecycle a platform adapters. |
+| `docs/09-ai/ai-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | AI runtime, provider abstraction, context, prompts, tools, safety, fallback, cost, observability a evaluace. |
 
 ---
 
-# 5. Dokončený krok – mobile architecture
+# 5. Dokončený krok – AI architecture
 
-`docs/08-mobile/mobile-architecture.md` obsahuje:
+`docs/09-ai/ai-architecture.md` obsahuje:
 
-- Flutter jako společný Android/iOS klient,
-- izolaci nativních adapterů,
-- presentation, application, domain-facing, repository a data vrstvy,
-- feature-first strukturu,
-- dependency rules,
-- oddělení persistentního, UI, runtime, navigation, sync a permission stavu,
-- lokální databázi jako základ čtení,
-- offline-first tok,
-- OfflineCommand queue,
-- sync engine a konflikty,
-- průběžnou persistenci a recovery aktivní WorkoutSession,
-- navigation a authentication boundaries,
-- AI chat a Proposal review,
-- notifications a background execution,
-- app lifecycle,
-- permissions,
-- GPS, health platforms a wearables,
-- secure storage,
-- networking a error model,
-- observability, performance, battery a storage policy,
-- compatibility, migrations a testování,
-- pravidla `MAR-001` až `MAR-015`.
+- AI entry point, request classification a context planning,
+- autorizovaný Context Builder,
+- verzovanou prompt assembly,
+- provider-independent Model Gateway,
+- structured-output validation,
+- Tool Registry a Tool Authorization Gateway,
+- Proposal Builder a Change Execution Boundary,
+- oddělení generovaného textu od skutečné doménové změny,
+- model routing a fallback chain,
+- minimalizaci citlivého kontextu,
+- conversation memory hranice,
+- prompt-injection ochranu,
+- zákaz ukládání chain-of-thought,
+- risk classes nástrojů,
+- deterministické safety guardrails,
+- streaming a mobilní recovery,
+- latency, token a cost controls,
+- observabilitu, audit a evaluaci,
+- rollout a rollback,
+- pravidla `AIR-001` až `AIR-015`.
 
 ## 5.1 Co ještě vyžaduje review
 
 Před `IMPLEMENTATION_READY` je nutné:
 
-- přijmout mobile ADR,
-- vytvořit fyzický local data model,
-- definovat sync protocol,
-- definovat route a deep-link kontrakty,
-- potvrdit lokální encryption a token storage,
-- vytvořit active-workout persistence kontrakt,
-- ověřit background, GPS a notification limity Android/iOS,
-- namapovat CORE FR a CRITICAL NFR,
-- definovat architecture, migration, process-death a offline testy.
+- přijmout model/provider ADR,
+- potvrdit provider data-use a retention policy,
+- vytvořit AIContext schema,
+- vytvořit prompt registry,
+- definovat počáteční tool a structured-output schemas,
+- vytvořit tool authorization a confirmation matrix,
+- provést security a prompt-injection review,
+- provést medicínské review pain a safety workflow,
+- potvrdit latency, token a cost budgety,
+- vytvořit eval dataset, release gate a rollback,
+- definovat streaming API contract,
+- namapovat CORE FR a CRITICAL NFR.
 
 ---
 
@@ -184,13 +186,13 @@ Před `IMPLEMENTATION_READY` je nutné:
 | `multisport-user-model.md` | persony, scénáře, sports model |
 | `returning-user-model.md` | scénáře, identity/profile model |
 | `screen-inventory.md` | information architecture, screen specifications |
-| obecný `offline-principles.md` | sync-and-offline model + mobile architecture |
+| obecný `offline-principles.md` | sync model + mobile architecture |
 | obecný `event-catalog.md` | domain-events.md |
-| obecný `ai-responsibilities.md` | product principles, AI/change model |
-| samostatný `feature-catalog.md` | functional requirements, dokud nevznikne skutečná potřeba |
+| obecný `ai-responsibilities.md` | product principles, AI/change model a AI architecture |
 | samostatný `modular-monolith-strategy.md` | backend architecture |
 | samostatný obecný `data-ownership.md` | data architecture |
-| samostatný obecný `flutter-project-structure.md` | zatím mobile architecture; oddělit až při konkrétním repository kontraktu |
+| samostatný obecný `flutter-project-structure.md` | mobile architecture; oddělit až při repository kontraktu |
+| obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do ADR |
 
 ---
 
@@ -201,11 +203,9 @@ Doporučené pořadí hlavních architektur:
 1. ✅ `docs/07-backend/backend-architecture.md`
 2. ✅ `docs/12-data/data-architecture.md`
 3. ✅ `docs/08-mobile/mobile-architecture.md`
-4. ⏭️ `docs/09-ai/ai-architecture.md`
-5. `docs/11-security/security-architecture.md`
+4. ✅ `docs/09-ai/ai-architecture.md`
+5. ⏭️ `docs/11-security/security-architecture.md`
 6. `docs/10-integrations/integration-architecture.md`
-
-Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale jejich detail bude dokončen společně s architekturami a acceptance strategií.
 
 ---
 
@@ -216,8 +216,8 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 1. ✅ backend architecture,
 2. ✅ data architecture,
 3. ✅ mobile architecture,
-4. ⏭️ AI architecture,
-5. security architecture,
+4. ✅ AI architecture,
+5. ⏭️ security architecture,
 6. integration architecture.
 
 ## Fáze 2 – konkrétní kontrakty
@@ -226,7 +226,7 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 - fyzická databázová schémata,
 - API,
 - sync protocol,
-- AI tool schemas,
+- AI context, prompt, tool a structured-output schemas,
 - event schemas,
 - provider capability matrix.
 
@@ -270,6 +270,7 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 - `BAR-xxx` – Backend Architecture Rule
 - `DAR-xxx` – Data Architecture Rule
 - `MAR-xxx` – Mobile Architecture Rule
+- `AIR-xxx` – AI Architecture Rule
 - `SCN-xxx` – User Scenario
 - `FLOW-xxx` – UX Flow
 - `SCR-xxx` – Screen
@@ -292,7 +293,7 @@ ID se nesmí recyklovat.
 | Backend | vysoká | střední | ADR, API a architecture tests |
 | Data | vysoká | nízká až střední | physical schema, local model a ADR |
 | Mobile | vysoká | nízká až střední | ADR, local schema, sync a platform contracts |
-| AI runtime | střední doménově | nízká | AI architecture |
+| AI runtime | vysoká | nízká až střední | provider ADR, tools, prompts, safety a evals |
 | Security | nízká až střední | nízká | security architecture |
 | Integrations | střední obecně | nízká | integration architecture a capability audit |
 | Quality | nízká | nízká | quality strategy |
@@ -322,5 +323,5 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/09-ai/ai-architecture.md
+docs/11-security/security-architecture.md
 ```
