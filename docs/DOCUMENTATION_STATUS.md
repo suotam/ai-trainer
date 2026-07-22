@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 0.7  
+**Verze:** 0.8  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -53,11 +53,11 @@ Projekt má rozsáhlý základ v oblastech:
 - funkční požadavky `FR-001` až `FR-192`,
 - nefunkční požadavky `NFR-001` až `NFR-172`,
 - backendová architektura a pravidla `BAR-001` až `BAR-015`,
-- datová architektura a pravidla `DAR-001` až `DAR-015`.
+- datová architektura a pravidla `DAR-001` až `DAR-015`,
+- mobilní architektura a pravidla `MAR-001` až `MAR-015`.
 
 Největší zbývající mezery:
 
-- mobile architecture,
 - AI runtime architecture,
 - security architecture,
 - integration architecture,
@@ -126,50 +126,51 @@ Největší zbývající mezery:
 | Soubor | Stav | Zdroj pravdy pro |
 |---|---|---|
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Modulární monolit, vrstvy, moduly, transactions, events, jobs a boundaries. |
-| `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy, ownership, autorita, historie, storage, migrace, retence, backup a pravidla `DAR-001` až `DAR-015`. |
+| `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy, ownership, autorita, historie, storage, migrace, retence a backup. |
+| `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Flutter klient, feature boundaries, local DB, offline commands, sync, lifecycle, workout runtime a platform adapters. |
 
 ---
 
-# 5. Dokončený krok – data architecture
+# 5. Dokončený krok – mobile architecture
 
-`docs/12-data/data-architecture.md` obsahuje:
+`docs/08-mobile/mobile-architecture.md` obsahuje:
 
-- relační autoritativní jádro,
-- mobilní lokální databázi a server authority,
-- ownership dat podle backendových modulů,
-- read modely, cache, analytics a search,
-- identifikátory a offline vytváření objektů,
-- časový model,
-- jednotky, precision a numerické hodnoty,
-- historii, verze, revize a opravy,
-- transakce, constraints, optimistic concurrency a outbox,
-- time-series a raw sensor data,
-- blob storage,
-- provider lineage a deduplikaci,
-- sync metadata a merge policy,
-- security a klasifikaci dat,
-- retenci, export a deletion,
-- migrace a backfill,
-- backup, RPO, RTO a disaster recovery,
-- data quality,
-- schema conventions a reference data,
-- multi-profile a budoucí tenancy,
-- pravidla `DAR-001` až `DAR-015`.
+- Flutter jako společný Android/iOS klient,
+- izolaci nativních adapterů,
+- presentation, application, domain-facing, repository a data vrstvy,
+- feature-first strukturu,
+- dependency rules,
+- oddělení persistentního, UI, runtime, navigation, sync a permission stavu,
+- lokální databázi jako základ čtení,
+- offline-first tok,
+- OfflineCommand queue,
+- sync engine a konflikty,
+- průběžnou persistenci a recovery aktivní WorkoutSession,
+- navigation a authentication boundaries,
+- AI chat a Proposal review,
+- notifications a background execution,
+- app lifecycle,
+- permissions,
+- GPS, health platforms a wearables,
+- secure storage,
+- networking a error model,
+- observability, performance, battery a storage policy,
+- compatibility, migrations a testování,
+- pravidla `MAR-001` až `MAR-015`.
 
 ## 5.1 Co ještě vyžaduje review
 
 Před `IMPLEMENTATION_READY` je nutné:
 
-- přijmout storage ADR,
-- vytvořit fyzické relační schema,
-- vytvořit lokální mobilní schema,
+- přijmout mobile ADR,
+- vytvořit fyzický local data model,
 - definovat sync protocol,
-- klasifikovat konkrétní pole a tabulky,
-- potvrdit time-series a blob strategii,
-- definovat retention/deletion matrix,
-- potvrdit backup, RPO a RTO,
+- definovat route a deep-link kontrakty,
+- potvrdit lokální encryption a token storage,
+- vytvořit active-workout persistence kontrakt,
+- ověřit background, GPS a notification limity Android/iOS,
 - namapovat CORE FR a CRITICAL NFR,
-- definovat migration, restore a data-quality testy.
+- definovat architecture, migration, process-death a offline testy.
 
 ---
 
@@ -183,12 +184,13 @@ Před `IMPLEMENTATION_READY` je nutné:
 | `multisport-user-model.md` | persony, scénáře, sports model |
 | `returning-user-model.md` | scénáře, identity/profile model |
 | `screen-inventory.md` | information architecture, screen specifications |
-| obecný `offline-principles.md` | sync-and-offline model |
+| obecný `offline-principles.md` | sync-and-offline model + mobile architecture |
 | obecný `event-catalog.md` | domain-events.md |
 | obecný `ai-responsibilities.md` | product principles, AI/change model |
 | samostatný `feature-catalog.md` | functional requirements, dokud nevznikne skutečná potřeba |
 | samostatný `modular-monolith-strategy.md` | backend architecture |
-| samostatný obecný `data-ownership.md` | data architecture; oddělit pouze jako strojový katalog nebo detailní kontrakt |
+| samostatný obecný `data-ownership.md` | data architecture |
+| samostatný obecný `flutter-project-structure.md` | zatím mobile architecture; oddělit až při konkrétním repository kontraktu |
 
 ---
 
@@ -198,8 +200,8 @@ Doporučené pořadí hlavních architektur:
 
 1. ✅ `docs/07-backend/backend-architecture.md`
 2. ✅ `docs/12-data/data-architecture.md`
-3. ⏭️ `docs/08-mobile/mobile-architecture.md`
-4. `docs/09-ai/ai-architecture.md`
+3. ✅ `docs/08-mobile/mobile-architecture.md`
+4. ⏭️ `docs/09-ai/ai-architecture.md`
 5. `docs/11-security/security-architecture.md`
 6. `docs/10-integrations/integration-architecture.md`
 
@@ -213,8 +215,8 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 
 1. ✅ backend architecture,
 2. ✅ data architecture,
-3. ⏭️ mobile architecture,
-4. AI architecture,
+3. ✅ mobile architecture,
+4. ⏭️ AI architecture,
 5. security architecture,
 6. integration architecture.
 
@@ -267,6 +269,7 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 - `INV-xxx` – Domain Invariant
 - `BAR-xxx` – Backend Architecture Rule
 - `DAR-xxx` – Data Architecture Rule
+- `MAR-xxx` – Mobile Architecture Rule
 - `SCN-xxx` – User Scenario
 - `FLOW-xxx` – UX Flow
 - `SCR-xxx` – Screen
@@ -288,7 +291,7 @@ ID se nesmí recyklovat.
 | Domain | velmi vysoká | střední | consistency a odborné review |
 | Backend | vysoká | střední | ADR, API a architecture tests |
 | Data | vysoká | nízká až střední | physical schema, local model a ADR |
-| Mobile | nízká | nízká | mobile architecture |
+| Mobile | vysoká | nízká až střední | ADR, local schema, sync a platform contracts |
 | AI runtime | střední doménově | nízká | AI architecture |
 | Security | nízká až střední | nízká | security architecture |
 | Integrations | střední obecně | nízká | integration architecture a capability audit |
@@ -319,5 +322,5 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/08-mobile/mobile-architecture.md
+docs/09-ai/ai-architecture.md
 ```
