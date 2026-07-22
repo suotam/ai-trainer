@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.5  
+**Verze:** 0.6  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -52,11 +52,11 @@ docs/02-product/functional-requirements.md
 docs/02-product/non-functional-requirements.md
 ```
 
-- `vision.md` vlastní poslání, dlouhodobou vizi, odlišení a definici úspěchu.
+- `vision.md` vlastní poslání, dlouhodobou vizi a odlišení produktu.
 - `product-principles.md` vlastní neměnné produktové zásady.
-- `product-scope.md` vlastní cílový funkční rozsah a základní etapizaci.
-- `functional-requirements.md` vlastní testovatelné cílové schopnosti `FR-001` až `FR-192`.
-- `non-functional-requirements.md` vlastní kvalitativní a provozní požadavky `NFR-001` až `NFR-172`.
+- `product-scope.md` vlastní cílový rozsah a základní etapizaci.
+- `functional-requirements.md` vlastní `FR-001` až `FR-192`.
+- `non-functional-requirements.md` vlastní `NFR-001` až `NFR-172`.
 
 ## 3.2 Users and UX
 
@@ -92,29 +92,19 @@ docs/06-domain/glossary.md
 
 - `domain-overview.md` je mapa bounded contexts a vlastnictví.
 - Detailní model vlastní význam svých agregátů, entit a stavů.
-- `domain-invariants.md` vlastní globální a cross-domain pravidla `INV-001` až `INV-100`.
-- `glossary.md` vlastní kanonické názvosloví a zakázaná nejednoznačná synonyma.
-- `domain-events.md` vlastní význam, obálku a katalog doménových událostí.
+- `domain-invariants.md` vlastní `INV-001` až `INV-100`.
+- `glossary.md` vlastní kanonické názvosloví.
+- `domain-events.md` vlastní význam a katalog doménových událostí.
 
 ## 3.4 Architecture
 
 ```text
 docs/07-backend/backend-architecture.md
+docs/12-data/data-architecture.md
 ```
 
-`backend-architecture.md` vlastní:
-
-- modulární monolit jako výchozí architektonický styl,
-- backendové modulární hranice,
-- vrstvy a dependency rules,
-- command/query execution,
-- transakční model,
-- outbox a event processing,
-- background jobs,
-- AI, sync, integration a security boundaries,
-- backendová pravidla `BAR-001` až `BAR-015`.
-
-Další hlavní architektury budou doplněny podle auditu.
+- `backend-architecture.md` vlastní backendový styl, moduly, vrstvy, transakce, event processing a pravidla `BAR-001` až `BAR-015`.
+- `data-architecture.md` vlastní datové vrstvy, ownership, autoritu, historii, storage, migrace, retenci, backup a pravidla `DAR-001` až `DAR-015`.
 
 ---
 
@@ -122,7 +112,7 @@ Další hlavní architektury budou doplněny podle auditu.
 
 ## 4.1 Jeden význam, jeden vlastník
 
-Každý významný pojem, pravidlo nebo kontrakt musí mít jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
+Každý významný pojem nebo pravidlo musí mít jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
 
 ## 4.2 Nový soubor pouze pro skutečnou mezeru
 
@@ -139,7 +129,7 @@ Původní orientační seznam stovek souborů není závazný.
 
 ## 4.3 AI není zdroj pravdy
 
-AI může interpretovat, navrhovat a vysvětlovat. Doménovou změnu však provádí pouze autorizovaný a validovaný systémový proces podle `AIProposal`, `ChangeSet`, potvrzovací policy a globálních invariant.
+AI může interpretovat, navrhovat a vysvětlovat. Doménovou změnu provádí pouze autorizovaný a validovaný systémový proces podle `AIProposal`, `ChangeSet`, potvrzovací policy a globálních invariant.
 
 ## 4.4 Historie se nepřepisuje
 
@@ -147,7 +137,7 @@ Opravy a změny musí zachovat původ, revize, audit a historickou interpretovat
 
 ## 4.5 Offline-first
 
-Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md` a měřitelné cíle `non-functional-requirements.md`.
+Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, měřitelné cíle NFR a datové vrstvy `data-architecture.md`.
 
 ---
 
@@ -169,7 +159,7 @@ Současné hlavní specifikace jsou převážně `Draft`. Stav auditu je veden o
 
 ---
 
-# 6. Doporučená metadata a identifikátory
+# 6. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -191,6 +181,7 @@ Doporučené identifikátory:
 - `NFR-xxx` – Non-functional Requirement,
 - `INV-xxx` – Domain Invariant,
 - `BAR-xxx` – Backend Architecture Rule,
+- `DAR-xxx` – Data Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -216,7 +207,7 @@ vytvořit nebo upravit dokument
     ↓
 commitnout změnu
     ↓
-aktualizovat DOCUMENTATION_STATUS.md
+aktualizovat DOCUMENTATION_STATUS.md a případně README
 ```
 
 ---
@@ -226,13 +217,12 @@ aktualizovat DOCUMENTATION_STATUS.md
 Podle současného auditu následuje:
 
 ```text
-docs/12-data/data-architecture.md
+docs/08-mobile/mobile-architecture.md
 ```
 
 Poté:
 
 ```text
-docs/08-mobile/mobile-architecture.md
 docs/09-ai/ai-architecture.md
 docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
@@ -251,9 +241,9 @@ Před implementací změny musí agent:
 3. určit vlastnící doménu,
 4. načíst `domain-invariants.md` a relevantní části `glossary.md`,
 5. načíst příslušný doménový model,
-6. načíst funkční a nefunkční požadavky,
-7. načíst relevantní architekturu,
-8. načíst UX, API, data a security kontrakty,
+6. načíst FR a NFR,
+7. načíst backend, data, mobile, AI, security a integration architekturu podle dopadu,
+8. načíst API, sync, event a storage kontrakty,
 9. ověřit ADR a acceptance criteria,
 10. až poté měnit kód.
 
@@ -261,7 +251,6 @@ Agent nesmí:
 
 - zavádět nový doménový pojem bez dokumentace,
 - použít nejednoznačný technický název zakázaný glossary,
-- porušit modulární hranice,
 - měnit veřejný kontrakt bez aktualizace dokumentace,
 - obcházet invarianty nebo bezpečnost,
 - ignorovat CRITICAL NFR,
@@ -282,9 +271,11 @@ User scenarios and UX
     ↓
 Domain model, invariants and glossary
     ↓
-Architecture and ADR
+Backend and data architecture
     ↓
-API, data and event contracts
+Mobile, AI, security and integration architecture
+    ↓
+API, sync, event and physical data contracts
     ↓
 Testing, delivery and operations
     ↓
