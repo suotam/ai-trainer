@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 1.3  
+**Verze:** 1.4  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -50,7 +50,8 @@ Projekt má obsahově pokryté:
 - `FR-001` až `FR-192`,
 - `NFR-001` až `NFR-172`,
 - backend, data, mobile, AI, security a integration architecture,
-- repository strategy a pravidla `RER-001` až `RER-015`.
+- repository strategy a pravidla `RER-001` až `RER-015`,
+- počáteční technologická rozhodnutí `ADR-001` až `ADR-010` pro R0 a R1.
 
 Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení malého startovního implementačního minima; není nutné předem dokončit všechny kontrakty pro pozdější AI, sync, provider a operations slices.
 
@@ -94,6 +95,7 @@ Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals
 
 | Soubor | Stav | Zdroj pravdy pro |
 |---|---|---|
+| `docs/05-architecture/initial-architecture-decisions.md` | SUBSTANTIAL_DRAFT | Flutter, Riverpod, GoRouter, Drift/SQLite, Kotlin/Spring Boot, PostgreSQL/Flyway, OpenAPI, Compose, GitHub Actions a test baseline. |
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Backendové hranice a `BAR-001` až `BAR-015`. |
 | `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy a `DAR-001` až `DAR-015`. |
 | `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Mobilní runtime a `MAR-001` až `MAR-015`. |
@@ -104,34 +106,37 @@ Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals
 
 ---
 
-# 5. Dokončený krok – Repository strategy
+# 5. Dokončený krok – Initial architecture decisions
 
-`docs/13-delivery/repository-strategy.md` definuje:
+`docs/05-architecture/initial-architecture-decisions.md` přijímá:
 
-- monorepo jako výchozí repository model,
-- top-level strukturu `apps`, `packages`, `database`, `tooling` a `docs`,
-- oddělení mobile, backendu a explicitních contracts,
-- feature-first strukturu mobilu,
-- modulární backend boundaries,
-- ownership serverových a lokálních migrací,
-- umístění unit, integration, contract a end-to-end testů,
-- dependency direction a zákaz cycles,
-- generated-code policy,
-- configuration a secrets boundaries,
-- R0 a R1 repository exit criteria,
-- pravidla `RER-001` až `RER-015`.
+- Flutter a Dart pro mobilní aplikaci,
+- Riverpod pro state management a dependency composition,
+- GoRouter pro navigaci,
+- Drift nad SQLite pro lokální persistence,
+- Kotlin a Spring Boot pro backend,
+- PostgreSQL a Flyway pro serverová data,
+- OpenAPI jako zdroj HTTP kontraktu,
+- Docker Compose pro lokální infrastrukturu,
+- GitHub Actions pro počáteční CI,
+- Flutter, Spring, Testcontainers a repository smoke test baseline,
+- explicitně odložená rozhodnutí pro R2 až R5,
+- pravidla `ADR-001` až `ADR-010`.
 
-## 5.1 Co ještě vyžaduje rozhodnutí
+## 5.1 Praktický dopad
 
-Před `IMPLEMENTATION_READY` pro R0/R1 je nutné přijmout zejména:
+R0 a R1 už nejsou blokovány volbou základních technologií. Následující dokument musí převést doménový workout model a R1 flow na konkrétní lokální tabulky, constraints, migrace a persistence hranice.
 
-- ADR pro backendový jazyk a framework,
-- ADR pro mobilní state management a dependency injection,
-- ADR pro lokální mobilní databázi,
-- ADR pro serverovou databázi a migrace,
-- ADR pro contracts a code generation,
-- ADR pro CI a development environment,
-- minimální test strategy.
+## 5.2 Co ještě vyžaduje rozhodnutí
+
+Před `IMPLEMENTATION_READY` pro R0/R1 zbývá zejména:
+
+- minimální fyzický datový model R1,
+- minimální API contract pro R0,
+- test strategy a release gates,
+- Definition of Ready a Done,
+- vertical-slice implementation plan,
+- coding-agent instructions a context-loading guide.
 
 ---
 
@@ -146,10 +151,14 @@ Před `IMPLEMENTATION_READY` pro R0/R1 je nutné přijmout zejména:
 | obecný `flutter-project-structure.md` | mobile architecture + repository strategy |
 | obecný `backend-project-structure.md` | backend architecture + repository strategy |
 | obecný `test-folder-layout.md` | repository strategy; podrobnosti patří do test strategy |
+| samostatný `mobile-tech-stack.md` | initial architecture decisions |
+| samostatný `backend-tech-stack.md` | initial architecture decisions |
+| samostatný `database-choice.md` | initial architecture decisions |
+| samostatný `ci-provider.md` | initial architecture decisions |
 | obecný `offline-principles.md` | sync model + mobile architecture |
 | obecný `event-catalog.md` | `domain-events.md` |
-| obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do ADR |
-| obecný `authentication-overview.md` | security architecture; konkrétní volba patří do ADR |
+| obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do pozdějšího ADR |
+| obecný `authentication-overview.md` | security architecture; konkrétní volba patří do pozdějšího ADR |
 | obecný `integration-principles.md` | integration model + integration architecture |
 
 ---
@@ -173,8 +182,8 @@ Doporučené pořadí:
 
 1. ✅ release scope,
 2. ✅ repository strategy a projektová struktura,
-3. ⏭️ počáteční ADR balík,
-4. minimální fyzický datový model R1,
+3. ✅ počáteční ADR balík,
+4. ⏭️ minimální fyzický datový model R1,
 5. minimální API contract,
 6. test strategy,
 7. Definition of Ready a Done,
@@ -212,17 +221,18 @@ ID se nesmí recyklovat.
 | Vision | vysoká | nevztahuje se přímo | konzistenční review |
 | Product requirements | vysoká | střední až vysoká | FR/NFR mapování a AC |
 | Release scope | vysoká | střední | backlog a traceability R0/R1 |
-| Repository strategy | vysoká | střední | ADR a skutečný R0 skeleton |
+| Repository strategy | vysoká | vysoká | skutečný R0 skeleton |
+| Initial ADR | vysoká | vysoká pro R0/R1 | ověřit implementací |
 | Users and UX | vysoká | střední | states, routes a accessibility |
 | Domain | velmi vysoká | střední | consistency a odborné review |
-| Backend | vysoká | střední | ADR, API a architecture tests |
+| Backend | vysoká | střední až vysoká | API a architecture tests |
 | Data | vysoká | nízká až střední | physical schema R1 |
-| Mobile | vysoká | střední | ADR, local schema a platform contracts |
+| Mobile | vysoká | střední až vysoká | local schema a platform contracts |
 | AI runtime | vysoká | nízká až střední | kontrakty před R4 |
 | Security | vysoká | nízká až střední | threat model před produkčními flows |
 | Integrations | vysoká | nízká až střední | kontrakty před první integrací |
 | Quality | nízká | nízká | test strategy |
-| DevOps | nízká | nízká | ADR, environments a CI baseline |
+| DevOps | střední | střední | environments a CI implementace |
 | Coding agent | nízká | nízká | instrukce po startovních kontraktech |
 
 ---
@@ -246,7 +256,7 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/05-architecture/initial-architecture-decisions.md
+docs/12-data/r1-physical-data-model.md
 ```
 
-Tento dokument má vytvořit malý počáteční ADR balík pouze pro technologická rozhodnutí, která skutečně blokují R0 a R1.
+Tento dokument má konkretizovat lokální SQLite/Drift schema, constraints, migrace, recovery a persistence mapping pro R1 bez navrhování celého budoucího produkčního datového modelu.
