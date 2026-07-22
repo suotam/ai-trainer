@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.8  
+**Verze:** 1.9  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -11,13 +11,13 @@
 
 Tato složka obsahuje produktovou, UX, doménovou, technickou, bezpečnostní, integrační, delivery, testovací a provozní dokumentaci AI Traineru.
 
-Aktuální stav, mezery a pořadí práce vlastní:
+Aktuální stav, mezery a kanonický další krok vlastní:
 
 ```text
 docs/DOCUMENTATION_STATUS.md
 ```
 
-Před vytvořením nového dokumentu je nutné načíst skutečný stav repozitáře, související zdroje pravdy a audit.
+Před dokumentační nebo implementační změnou je nutné načíst aktuální repozitář, tento README, audit a vlastnící zdroje pravdy.
 
 ---
 
@@ -99,19 +99,21 @@ docs/12-data/data-architecture.md
 docs/12-data/r1-physical-data-model.md
 ```
 
-## 3.5 Delivery and quality
+## 3.5 Delivery, quality and coding agent
 
 ```text
 docs/13-delivery/repository-strategy.md
 docs/13-delivery/definition-of-ready-and-done.md
 docs/13-delivery/r0-r1-vertical-slice-plan.md
 docs/14-quality/test-strategy.md
+docs/15-coding-agent/coding-agent-guide.md
 ```
 
-- `repository-strategy.md` vlastní monorepo layout, boundaries a tooling pravidla `RER-001` až `RER-015`.
+- `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
-- `r0-r1-vertical-slice-plan.md` vlastní implementační pořadí, dependencies, backlog decomposition a `VSP-001` až `VSP-015`.
+- `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace a `VSP-001` až `VSP-015`.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
+- `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
 ---
 
@@ -124,7 +126,7 @@ R0 – Technical Foundation
 R1 – Local Workout Slice
 ```
 
-Startovní dokumentační minimum:
+Startovní dokumentační minimum je dokončeno:
 
 1. ✅ release scope,
 2. ✅ repository strategy,
@@ -134,9 +136,13 @@ Startovní dokumentační minimum:
 6. ✅ test strategy,
 7. ✅ Definition of Ready and Done,
 8. ✅ R0/R1 vertical-slice implementation plan,
-9. ⏭️ coding-agent instructions a context-loading guide.
+9. ✅ coding-agent instructions a context-loading guide.
 
-Po posledním dokumentu lze začít implementovat `R0-01 – Repository Skeleton`.
+Dalším kanonickým krokem je implementace:
+
+```text
+R0-01 – Repository Skeleton
+```
 
 ---
 
@@ -173,7 +179,26 @@ R1 musí zůstat použitelné bez backendu, účtu, synchronizace, AI a externí
 
 ---
 
-# 6. Delivery baseline
+# 6. Coding-agent protocol
+
+Před každou změnou musí agent:
+
+1. načíst aktuální branch,
+2. přečíst tento README a `DOCUMENTATION_STATUS.md`,
+3. určit backlog item a release slice,
+4. ověřit jeho Ready stav,
+5. načíst vlastnící doménové, architektonické, kontraktní a testovací dokumenty,
+6. respektovat vertical-slice plan a non-goals,
+7. provést nejmenší smysluplnou změnu,
+8. spustit relevantní testy a gates,
+9. aktualizovat dokumentaci a evidence,
+10. uvést commit pouze tehdy, pokud skutečně vznikl.
+
+Detail vlastní `docs/15-coding-agent/coding-agent-guide.md`.
+
+---
+
+# 7. Delivery baseline
 
 Backlog item smí vstoupit do implementace pouze pokud je `Ready`:
 
@@ -187,14 +212,14 @@ Backlog item smí vstoupit do implementace pouze pokud je `Ready`:
 Pull request ani slice není `Done` bez:
 
 - splněných acceptance criteria,
-- relevantních testů a zelených CI gates,
+- relevantních testů a zelených gates,
 - contract/migration evidence podle dopadu,
 - aktuální dokumentace,
 - vyřešených blocker a critical vad.
 
 ---
 
-# 7. Quality baseline
+# 8. Quality baseline
 
 Pro R0 a R1 platí zejména:
 
@@ -209,7 +234,7 @@ Pro R0 a R1 platí zejména:
 
 ---
 
-# 8. R0 API baseline
+# 9. R0 API baseline
 
 R0 backend poskytuje pouze:
 
@@ -222,7 +247,7 @@ Workout, identity, sync, AI ani integration API do R0 nepatří.
 
 ---
 
-# 9. Technology baseline
+# 10. Technology baseline
 
 Pro R0 a R1 platí:
 
@@ -239,7 +264,7 @@ Pro R0 a R1 platí:
 
 ---
 
-# 10. Repository baseline
+# 11. Repository baseline
 
 ```text
 ai-trainer/
@@ -258,60 +283,48 @@ Mobile a backend jsou samostatné aplikace. Contracts nejsou společný interní
 
 ---
 
-# 11. Pravidla práce s dokumentací
+# 12. Pravidla práce s dokumentací
 
 - Jeden význam má jeden hlavní vlastnící dokument.
 - Nový dokument vznikne pouze pro skutečnou mezeru nebo samostatný kontrakt.
 - AI může interpretovat a navrhovat, ale není autoritou pro doménovou změnu.
 - Kritické workout flow musí fungovat bez sítě.
-- Implementace postupuje po spustitelných vertikálních slices.
+- Implementace postupuje po spustitelných vertical slices.
 - ID se nerecyklují.
+- Po dokončení startovního minima se další obecná dokumentace nevytváří místo `R0-01`, pokud audit nepotvrdí novou blokující mezeru.
 
-Používané řady zahrnují `PP`, `FR`, `NFR`, `INV`, `ADR`, `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`, `DRD`, `VSP`, `SCN`, `FLOW`, `SCR`, `AC` a `EVT`.
+Používané řady zahrnují `PP`, `FR`, `NFR`, `INV`, `ADR`, `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`, `DRD`, `VSP`, `CAG`, `SCN`, `FLOW`, `SCR`, `AC` a `EVT`.
 
 ---
 
-# 12. Pracovní cyklus
+# 13. Pracovní cyklus
 
 ```text
 načíst aktuální GitHub
     ↓
-přečíst DOCUMENTATION_STATUS.md
+přečíst README a DOCUMENTATION_STATUS
     ↓
-vybrat skutečnou mezeru nebo Ready backlog item
+vybrat Ready backlog item
     ↓
 načíst vlastnící zdroje pravdy
     ↓
-vytvořit nebo upravit dokument či kód
+implementovat nejmenší smysluplnou změnu
     ↓
 spustit povinné testy a gates
     ↓
+zkontrolovat diff, secrets a dokumentační dopad
+    ↓
 commitnout skutečnou změnu
     ↓
-aktualizovat dokumentaci a evidence
+uvést pravdivou evidence summary
 ```
 
 ---
 
-# 13. Aktuální další krok
+# 14. Aktuální další krok
 
 ```text
-docs/15-coding-agent/coding-agent-guide.md
+R0-01 – Repository Skeleton
 ```
 
-Má definovat povinné načítání kontextu, výběr backlog itemu, Ready kontrolu, implementační postup, testy, dokumentační aktualizace, commit discipline a formát evidence. Nemá duplikovat architektury, test strategy ani vertical-slice plan.
-
----
-
-# 14. Minimální instrukce pro coding agenta
-
-Před implementací změny musí agent:
-
-1. načíst tento README a `DOCUMENTATION_STATUS.md`,
-2. určit backlog item a release slice,
-3. ověřit jeho Ready stav,
-4. načíst relevantní invariance, glossary, doménový model, FR/NFR, ADR, architektury a kontrakty,
-5. respektovat `r0-r1-vertical-slice-plan.md`,
-6. spustit povinné testy a gates,
-7. aktualizovat dokumentaci a evidence,
-8. tvrdit commit pouze tehdy, pokud skutečně vznikl.
+Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
