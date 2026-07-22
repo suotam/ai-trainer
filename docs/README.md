@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.5  
+**Verze:** 1.6  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -104,13 +104,15 @@ docs/10-integrations/integration-architecture.md
 - `r1-physical-data-model.md` vlastní lokální SQLite/Drift schema, transakce, migrace, recovery a pravidla `PDR-001` až `PDR-015`.
 - Architektonické řady pravidel jsou `BAR`, `DAR`, `MAR`, `AIR`, `SAR` a `IAR`.
 
-## 3.5 Delivery
+## 3.5 Delivery and quality
 
 ```text
 docs/13-delivery/repository-strategy.md
+docs/14-quality/test-strategy.md
 ```
 
-`repository-strategy.md` vlastní monorepo layout, hranice mobile/backend/contracts, migrations ownership, test placement, tooling, generated-code policy a pravidla `RER-001` až `RER-015`.
+- `repository-strategy.md` vlastní monorepo layout, hranice mobile/backend/contracts, migrations ownership, test placement, tooling, generated-code policy a pravidla `RER-001` až `RER-015`.
+- `test-strategy.md` vlastní test levels, ownership, R0/R1 critical paths, CI gates, flaky-test policy, coverage interpretation, release evidence a pravidla `QTR-001` až `QTR-015`.
 
 ---
 
@@ -132,8 +134,8 @@ Startovní implementační minimum:
 3. ✅ počáteční ADR balík,
 4. ✅ minimální fyzický datový model R1,
 5. ✅ minimální API contract,
-6. ⏭️ test strategy,
-7. Definition of Ready a Done,
+6. ✅ test strategy,
+7. ⏭️ Definition of Ready a Done,
 8. vertical-slice implementation plan,
 9. coding-agent instructions a context-loading guide.
 
@@ -141,7 +143,26 @@ Detailní kontrakty pro R2 až R5 vznikají nejpozději před implementací slic
 
 ---
 
-# 5. R0 API baseline
+# 5. Quality baseline R0/R1
+
+Pro R0 a R1 platí zejména:
+
+- static checks jsou povinné,
+- doménová pravidla se testují unit testy,
+- Drift a PostgreSQL integrace se testují proti skutečným databázovým enginům,
+- OpenAPI a implementace mají contract testy,
+- každá schema změna má migration test,
+- R0 critical path ověřuje startup, Flyway, liveness a readiness,
+- R1 critical path ověřuje start session, zápis, restart, recovery a dokončení,
+- flaky test není zelený důkaz,
+- coverage je risk-based diagnostika, nikoli jediný gate,
+- slice musí mít dohledatelné release evidence.
+
+Detail vlastní `docs/14-quality/test-strategy.md`.
+
+---
+
+# 6. R0 API baseline
 
 R0 backend poskytuje pouze:
 
@@ -158,14 +179,13 @@ Platí zejména:
 - každá response má `X-Request-Id`,
 - chyby používají standardní bezpečný error envelope,
 - health odpovědi jsou `no-store` a bez side effects,
-- interní Actuator endpoint není veřejný aplikační kontrakt,
 - workout, identity, sync, AI ani integration API do R0 nepatří.
 
 Detail vlastní `docs/07-backend/r0-api-contract.md`.
 
 ---
 
-# 6. Přijatá technologická baseline R0/R1
+# 7. Přijatá technologická baseline R0/R1
 
 Pro R0 a R1 platí:
 
@@ -184,7 +204,7 @@ Detail vlastní `docs/05-architecture/initial-architecture-decisions.md`.
 
 ---
 
-# 7. R1 persistence baseline
+# 8. R1 persistence baseline
 
 R1 používá lokální Drift/SQLite schema pro:
 
@@ -202,7 +222,7 @@ Detail vlastní `docs/12-data/r1-physical-data-model.md`.
 
 ---
 
-# 8. Repository baseline
+# 9. Repository baseline
 
 Výchozí top-level struktura je:
 
@@ -233,7 +253,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 9. Pravidla práce s dokumentací
+# 10. Pravidla práce s dokumentací
 
 - Jeden význam má jeden hlavní vlastnící dokument.
 - Nový dokument vznikne pouze pro skutečnou mezeru nebo samostatný kontrakt.
@@ -243,7 +263,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 10. Metadata a identifikátory
+# 11. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -261,14 +281,14 @@ Vlastněné pojmy nebo kontrakty:
 Používané identifikátory zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nerecyklují.
 
 ---
 
-# 11. Pracovní cyklus
+# 12. Pracovní cyklus
 
 ```text
 zkontrolovat aktuální GitHub
@@ -288,19 +308,19 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 ---
 
-# 12. Aktuální další krok
+# 13. Aktuální další krok
 
 Podle současného auditu následuje:
 
 ```text
-docs/14-quality/test-strategy.md
+docs/13-delivery/definition-of-ready-and-done.md
 ```
 
-Má definovat testovací pyramid, ownership, R0/R1 critical paths, contract a migration tests, CI gates, flaky-test policy, coverage interpretaci a release evidence. Nemá duplikovat konkrétní test cases již vlastněné jednotlivými kontrakty.
+Má převést existující kontrakty na praktické podmínky, kdy je backlog item připravený k implementaci a kdy lze pull request nebo celý R0/R1 slice označit za dokončený. Nemá duplikovat konkrétní acceptance criteria ani detail test strategy.
 
 ---
 
-# 13. Instrukce pro coding agenta
+# 14. Instrukce pro coding agenta
 
 Před implementací změny musí agent:
 
@@ -309,7 +329,7 @@ Před implementací změny musí agent:
 3. načíst relevantní invarianty a glossary,
 4. načíst příslušný doménový model,
 5. načíst FR, NFR a release scope,
-6. načíst dotčená ADR, architektury, repository strategy a kontrakty,
+6. načíst dotčená ADR, architektury, repository strategy, contracts a test strategy,
 7. ověřit acceptance criteria a Definition of Done,
 8. až poté měnit kód.
 
