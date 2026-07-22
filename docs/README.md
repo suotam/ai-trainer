@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.8  
+**Verze:** 0.9  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -103,12 +103,14 @@ docs/07-backend/backend-architecture.md
 docs/12-data/data-architecture.md
 docs/08-mobile/mobile-architecture.md
 docs/09-ai/ai-architecture.md
+docs/11-security/security-architecture.md
 ```
 
 - `backend-architecture.md` vlastní backendový styl, moduly, vrstvy, transakce, event processing a pravidla `BAR-001` až `BAR-015`.
 - `data-architecture.md` vlastní datové vrstvy, ownership, autoritu, historii, storage, migrace, retenci, backup a pravidla `DAR-001` až `DAR-015`.
 - `mobile-architecture.md` vlastní Flutter klient, offline-first tok, local DB, sync, lifecycle, aktivní workout runtime a pravidla `MAR-001` až `MAR-015`.
 - `ai-architecture.md` vlastní AI runtime, context, provider abstraction, prompts, tools, safety, fallback, observability, evaluaci a pravidla `AIR-001` až `AIR-015`.
+- `security-architecture.md` vlastní trust zones, autentizaci, autorizaci, session a device security, kryptografické hranice, secrets, mobile/offline, API, AI a integration security, audit, abuse protection a pravidla `SAR-001` až `SAR-015`.
 
 ---
 
@@ -141,7 +143,11 @@ Opravy a změny musí zachovat původ, revize, audit a historickou interpretovat
 
 ## 4.5 Offline-first
 
-Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, měřitelné cíle NFR, datové vrstvy `data-architecture.md` a klientský runtime `mobile-architecture.md`.
+Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, měřitelné cíle NFR, datové vrstvy `data-architecture.md`, klientský runtime `mobile-architecture.md` a bezpečnostní vynucení `security-architecture.md`.
+
+## 4.6 Security by design
+
+Klient, externí obsah, AI model ani integration provider nejsou autoritou pro přístup nebo doménovou změnu. Chráněná operace musí projít serverovou autorizací, validací, relevantními invariantami a auditní policy podle `security-architecture.md`.
 
 ---
 
@@ -188,6 +194,7 @@ Doporučené identifikátory:
 - `DAR-xxx` – Data Architecture Rule,
 - `MAR-xxx` – Mobile Architecture Rule,
 - `AIR-xxx` – AI Architecture Rule,
+- `SAR-xxx` – Security Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -223,16 +230,10 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Podle současného auditu následuje:
 
 ```text
-docs/11-security/security-architecture.md
-```
-
-Poté:
-
-```text
 docs/10-integrations/integration-architecture.md
 ```
 
-Přesné pořadí se vždy řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
+Poté se pořadí konkrétních kontraktů a delivery dokumentace řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
 
 ---
 
@@ -247,7 +248,7 @@ Před implementací změny musí agent:
 5. načíst příslušný doménový model,
 6. načíst FR a NFR,
 7. načíst backend, data, mobile, AI, security a integration architekturu podle dopadu,
-8. načíst API, sync, event, AI-tool a storage kontrakty,
+8. načíst API, sync, event, AI-tool, security a storage kontrakty,
 9. ověřit ADR a acceptance criteria,
 10. až poté měnit kód.
 
@@ -258,7 +259,9 @@ Agent nesmí:
 - měnit veřejný kontrakt bez aktualizace dokumentace,
 - obcházet invarianty nebo bezpečnost,
 - ignorovat CRITICAL NFR,
+- důvěřovat klientské roli, ownershipu nebo active profile bez serverového ověření,
 - umožnit AI přímý zápis mimo Proposal a ChangeSet flow,
+- vložit produkční secret do repozitáře, klienta nebo logu,
 - označit úkol za hotový bez testů a Definition of Done.
 
 ---
@@ -276,11 +279,11 @@ User scenarios and UX
     ↓
 Domain model, invariants and glossary
     ↓
-Backend, data, mobile and AI architecture
+Backend, data, mobile, AI and security architecture
     ↓
-Security and integration architecture
+Integration architecture
     ↓
-API, sync, event, AI-tool and physical data contracts
+API, sync, event, AI-tool, security and physical data contracts
     ↓
 Testing, delivery and operations
     ↓
