@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.6  
+**Verze:** 1.7  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -108,10 +108,12 @@ docs/10-integrations/integration-architecture.md
 
 ```text
 docs/13-delivery/repository-strategy.md
+docs/13-delivery/definition-of-ready-and-done.md
 docs/14-quality/test-strategy.md
 ```
 
 - `repository-strategy.md` vlastní monorepo layout, hranice mobile/backend/contracts, migrations ownership, test placement, tooling, generated-code policy a pravidla `RER-001` až `RER-015`.
+- `definition-of-ready-and-done.md` vlastní vstupní a výstupní delivery gates pro backlog item, pull request, R0 a R1 a pravidla `DRD-001` až `DRD-015`.
 - `test-strategy.md` vlastní test levels, ownership, R0/R1 critical paths, CI gates, flaky-test policy, coverage interpretation, release evidence a pravidla `QTR-001` až `QTR-015`.
 
 ---
@@ -135,15 +137,44 @@ Startovní implementační minimum:
 4. ✅ minimální fyzický datový model R1,
 5. ✅ minimální API contract,
 6. ✅ test strategy,
-7. ⏭️ Definition of Ready a Done,
-8. vertical-slice implementation plan,
+7. ✅ Definition of Ready a Done,
+8. ⏭️ vertical-slice implementation plan,
 9. coding-agent instructions a context-loading guide.
 
 Detailní kontrakty pro R2 až R5 vznikají nejpozději před implementací slice, který je používá.
 
 ---
 
-# 5. Quality baseline R0/R1
+# 5. Delivery baseline R0/R1
+
+Před zahájením backlog itemu musí být jasné:
+
+- release slice a vlastník,
+- očekávaný výsledek a non-goals,
+- relevantní zdroje pravdy,
+- pozorovatelná acceptance criteria,
+- dependencies a rizika,
+- test approach a požadované evidence,
+- security, data, offline a recovery dopad.
+
+Pull request ani slice není Done bez:
+
+- splněných acceptance criteria,
+- relevantních zelených CI gates,
+- contract a migration evidence podle dopadu,
+- testu kritického toku podle rizika,
+- aktuální dokumentace,
+- vyřešených blocker a critical vad.
+
+R0 Done zahrnuje reprodukovatelný mobile/backend build, Flyway od prázdné PostgreSQL, validní OpenAPI, liveness/readiness a aktivní CI gates.
+
+R1 Done zahrnuje offline start workoutu, zápis výkonu, restart recovery, atomické a idempotentní dokončení a historický záznam bez ztráty potvrzených dat.
+
+Detail vlastní `docs/13-delivery/definition-of-ready-and-done.md`.
+
+---
+
+# 6. Quality baseline R0/R1
 
 Pro R0 a R1 platí zejména:
 
@@ -162,7 +193,7 @@ Detail vlastní `docs/14-quality/test-strategy.md`.
 
 ---
 
-# 6. R0 API baseline
+# 7. R0 API baseline
 
 R0 backend poskytuje pouze:
 
@@ -185,7 +216,7 @@ Detail vlastní `docs/07-backend/r0-api-contract.md`.
 
 ---
 
-# 7. Přijatá technologická baseline R0/R1
+# 8. Přijatá technologická baseline R0/R1
 
 Pro R0 a R1 platí:
 
@@ -204,7 +235,7 @@ Detail vlastní `docs/05-architecture/initial-architecture-decisions.md`.
 
 ---
 
-# 8. R1 persistence baseline
+# 9. R1 persistence baseline
 
 R1 používá lokální Drift/SQLite schema pro:
 
@@ -222,7 +253,7 @@ Detail vlastní `docs/12-data/r1-physical-data-model.md`.
 
 ---
 
-# 9. Repository baseline
+# 10. Repository baseline
 
 Výchozí top-level struktura je:
 
@@ -253,7 +284,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 10. Pravidla práce s dokumentací
+# 11. Pravidla práce s dokumentací
 
 - Jeden význam má jeden hlavní vlastnící dokument.
 - Nový dokument vznikne pouze pro skutečnou mezeru nebo samostatný kontrakt.
@@ -263,7 +294,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 11. Metadata a identifikátory
+# 12. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -281,14 +312,14 @@ Vlastněné pojmy nebo kontrakty:
 Používané identifikátory zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`, `DRD`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nerecyklují.
 
 ---
 
-# 12. Pracovní cyklus
+# 13. Pracovní cyklus
 
 ```text
 zkontrolovat aktuální GitHub
@@ -308,19 +339,19 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 ---
 
-# 13. Aktuální další krok
+# 14. Aktuální další krok
 
 Podle současného auditu následuje:
 
 ```text
-docs/13-delivery/definition-of-ready-and-done.md
+docs/13-delivery/r0-r1-vertical-slice-plan.md
 ```
 
-Má převést existující kontrakty na praktické podmínky, kdy je backlog item připravený k implementaci a kdy lze pull request nebo celý R0/R1 slice označit za dokončený. Nemá duplikovat konkrétní acceptance criteria ani detail test strategy.
+Má převést R0 a R1 na konkrétní pořadí implementačních slices, dependencies, artefakty, acceptance/evidence gates a doporučené backlog položky. Nemá znovu definovat produktový scope, test strategy ani Definition of Done.
 
 ---
 
-# 14. Instrukce pro coding agenta
+# 15. Instrukce pro coding agenta
 
 Před implementací změny musí agent:
 
@@ -329,8 +360,8 @@ Před implementací změny musí agent:
 3. načíst relevantní invarianty a glossary,
 4. načíst příslušný doménový model,
 5. načíst FR, NFR a release scope,
-6. načíst dotčená ADR, architektury, repository strategy, contracts a test strategy,
-7. ověřit acceptance criteria a Definition of Done,
+6. načíst dotčená ADR, architektury, repository strategy, contracts, test strategy a Definition of Ready and Done,
+7. ověřit acceptance criteria a povinné evidence,
 8. až poté měnit kód.
 
-Agent nesmí obcházet invariance, vytvářet paralelní repository strukturu bez rozhodnutí, sdílet interní model mezi mobilem a backendem, vložit secret do repozitáře ani označit práci za hotovou bez testů.
+Agent nesmí obcházet invariance, vytvářet paralelní repository strukturu bez rozhodnutí, sdílet interní model mezi mobilem a backendem, vložit secret do repozitáře ani označit práci za hotovou bez povinných důkazů.
