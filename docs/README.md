@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.3  
+**Verze:** 0.4  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-07-21
+**Poslední aktualizace:** 2026-07-22
 
 ---
 
@@ -48,12 +48,14 @@ docs/01-vision/vision.md
 docs/01-vision/product-principles.md
 docs/02-product/product-scope.md
 docs/02-product/functional-requirements.md
+docs/02-product/non-functional-requirements.md
 ```
 
 - `vision.md` vlastní poslání, dlouhodobou vizi, odlišení a definici úspěchu.
 - `product-principles.md` vlastní neměnné produktové zásady.
 - `product-scope.md` vlastní cílový funkční rozsah a základní etapizaci.
 - `functional-requirements.md` vlastní testovatelné cílové schopnosti `FR-001` až `FR-192`.
+- `non-functional-requirements.md` vlastní kvalitativní a provozní požadavky `NFR-001` až `NFR-172`.
 
 ## Users and UX
 
@@ -124,7 +126,7 @@ Opravy a změny musí zachovat původ, revize, audit a historickou interpretovat
 
 ## 4.5 Offline-first
 
-Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`.
+Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md` a měřitelné cíle `non-functional-requirements.md`.
 
 ---
 
@@ -202,10 +204,20 @@ aktualizovat DOCUMENTATION_STATUS.md
 Podle současného auditu následuje:
 
 ```text
-docs/02-product/non-functional-requirements.md
+docs/07-backend/backend-architecture.md
 ```
 
-Poté budou následovat release scope, traceability a acceptance criteria před hlavními technickými architekturami.
+Poté budou následovat:
+
+```text
+docs/12-data/data-architecture.md
+docs/08-mobile/mobile-architecture.md
+docs/09-ai/ai-architecture.md
+docs/11-security/security-architecture.md
+docs/10-integrations/integration-architecture.md
+```
+
+Release scope, traceability a acceptance criteria zůstávají potvrzené potřebné dokumenty a budou dokončeny společně s architekturami a quality strategií.
 
 Přesné pořadí se vždy řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
 
@@ -220,9 +232,10 @@ Před implementací změny musí agent:
 3. určit vlastnící doménu,
 4. načíst `domain-invariants.md` a relevantní části `glossary.md`,
 5. načíst příslušný doménový model,
-6. načíst produktové požadavky, UX, API, data a security kontrakty,
-7. ověřit ADR a acceptance criteria,
-8. až poté měnit kód.
+6. načíst funkční a nefunkční požadavky,
+7. načíst UX, API, data a security kontrakty,
+8. ověřit ADR a acceptance criteria,
+9. až poté měnit kód.
 
 Agent nesmí:
 
@@ -230,6 +243,7 @@ Agent nesmí:
 - použít nejednoznačný technický název zakázaný glossary,
 - měnit veřejný kontrakt bez aktualizace dokumentace,
 - obcházet invarianty nebo bezpečnost,
+- ignorovat CRITICAL NFR,
 - označit úkol za hotový bez testů a Definition of Done.
 
 ---
@@ -243,7 +257,7 @@ Základní návaznost je:
 ```text
 Vision
     ↓
-Product scope and requirements
+Product scope, FR and NFR
     ↓
 User scenarios and UX
     ↓
