@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.7  
+**Verze:** 0.8  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -102,11 +102,13 @@ docs/06-domain/glossary.md
 docs/07-backend/backend-architecture.md
 docs/12-data/data-architecture.md
 docs/08-mobile/mobile-architecture.md
+docs/09-ai/ai-architecture.md
 ```
 
 - `backend-architecture.md` vlastní backendový styl, moduly, vrstvy, transakce, event processing a pravidla `BAR-001` až `BAR-015`.
 - `data-architecture.md` vlastní datové vrstvy, ownership, autoritu, historii, storage, migrace, retenci, backup a pravidla `DAR-001` až `DAR-015`.
-- `mobile-architecture.md` vlastní Flutter klienta, feature boundaries, lokální data, offline commands, sync, lifecycle, workout runtime, platform adapters a pravidla `MAR-001` až `MAR-015`.
+- `mobile-architecture.md` vlastní Flutter klient, offline-first tok, local DB, sync, lifecycle, aktivní workout runtime a pravidla `MAR-001` až `MAR-015`.
+- `ai-architecture.md` vlastní AI runtime, context, provider abstraction, prompts, tools, safety, fallback, observability, evaluaci a pravidla `AIR-001` až `AIR-015`.
 
 ---
 
@@ -139,7 +141,7 @@ Opravy a změny musí zachovat původ, revize, audit a historickou interpretovat
 
 ## 4.5 Offline-first
 
-Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, NFR, `data-architecture.md` a `mobile-architecture.md`.
+Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, měřitelné cíle NFR, datové vrstvy `data-architecture.md` a klientský runtime `mobile-architecture.md`.
 
 ---
 
@@ -185,6 +187,7 @@ Doporučené identifikátory:
 - `BAR-xxx` – Backend Architecture Rule,
 - `DAR-xxx` – Data Architecture Rule,
 - `MAR-xxx` – Mobile Architecture Rule,
+- `AIR-xxx` – AI Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -220,13 +223,12 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Podle současného auditu následuje:
 
 ```text
-docs/09-ai/ai-architecture.md
+docs/11-security/security-architecture.md
 ```
 
 Poté:
 
 ```text
-docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
 ```
 
@@ -245,7 +247,7 @@ Před implementací změny musí agent:
 5. načíst příslušný doménový model,
 6. načíst FR a NFR,
 7. načíst backend, data, mobile, AI, security a integration architekturu podle dopadu,
-8. načíst API, sync, event a storage kontrakty,
+8. načíst API, sync, event, AI-tool a storage kontrakty,
 9. ověřit ADR a acceptance criteria,
 10. až poté měnit kód.
 
@@ -256,6 +258,7 @@ Agent nesmí:
 - měnit veřejný kontrakt bez aktualizace dokumentace,
 - obcházet invarianty nebo bezpečnost,
 - ignorovat CRITICAL NFR,
+- umožnit AI přímý zápis mimo Proposal a ChangeSet flow,
 - označit úkol za hotový bez testů a Definition of Done.
 
 ---
@@ -273,11 +276,11 @@ User scenarios and UX
     ↓
 Domain model, invariants and glossary
     ↓
-Backend, data and mobile architecture
+Backend, data, mobile and AI architecture
     ↓
-AI, security and integration architecture
+Security and integration architecture
     ↓
-API, sync, event and physical data contracts
+API, sync, event, AI-tool and physical data contracts
     ↓
 Testing, delivery and operations
     ↓
