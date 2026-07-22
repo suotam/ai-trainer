@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.4  
+**Verze:** 1.5  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -85,11 +85,12 @@ docs/06-domain/domain-invariants.md
 docs/06-domain/glossary.md
 ```
 
-## 3.4 Architecture and data contracts
+## 3.4 Architecture and contracts
 
 ```text
 docs/05-architecture/initial-architecture-decisions.md
 docs/07-backend/backend-architecture.md
+docs/07-backend/r0-api-contract.md
 docs/12-data/data-architecture.md
 docs/12-data/r1-physical-data-model.md
 docs/08-mobile/mobile-architecture.md
@@ -99,6 +100,7 @@ docs/10-integrations/integration-architecture.md
 ```
 
 - `initial-architecture-decisions.md` vlastní `ADR-001` až `ADR-010` pro technologie blokující R0 a R1.
+- `r0-api-contract.md` vlastní R0 liveness, readiness, error envelope, versioning, correlation a pravidla `APR-001` až `APR-015`.
 - `r1-physical-data-model.md` vlastní lokální SQLite/Drift schema, transakce, migrace, recovery a pravidla `PDR-001` až `PDR-015`.
 - Architektonické řady pravidel jsou `BAR`, `DAR`, `MAR`, `AIR`, `SAR` a `IAR`.
 
@@ -129,8 +131,8 @@ Startovní implementační minimum:
 2. ✅ repository strategy a projektová struktura,
 3. ✅ počáteční ADR balík,
 4. ✅ minimální fyzický datový model R1,
-5. ⏭️ minimální API contract,
-6. test strategy,
+5. ✅ minimální API contract,
+6. ⏭️ test strategy,
 7. Definition of Ready a Done,
 8. vertical-slice implementation plan,
 9. coding-agent instructions a context-loading guide.
@@ -139,7 +141,31 @@ Detailní kontrakty pro R2 až R5 vznikají nejpozději před implementací slic
 
 ---
 
-# 5. Přijatá technologická baseline R0/R1
+# 5. R0 API baseline
+
+R0 backend poskytuje pouze:
+
+```text
+GET /api/v1/health/live
+GET /api/v1/health/ready
+```
+
+Platí zejména:
+
+- kanonický HTTP kontrakt je OpenAPI v `packages/contracts`,
+- liveness neověřuje externí dependency,
+- readiness ověřuje povinné dependency prostředí,
+- každá response má `X-Request-Id`,
+- chyby používají standardní bezpečný error envelope,
+- health odpovědi jsou `no-store` a bez side effects,
+- interní Actuator endpoint není veřejný aplikační kontrakt,
+- workout, identity, sync, AI ani integration API do R0 nepatří.
+
+Detail vlastní `docs/07-backend/r0-api-contract.md`.
+
+---
+
+# 6. Přijatá technologická baseline R0/R1
 
 Pro R0 a R1 platí:
 
@@ -158,7 +184,7 @@ Detail vlastní `docs/05-architecture/initial-architecture-decisions.md`.
 
 ---
 
-# 6. R1 persistence baseline
+# 7. R1 persistence baseline
 
 R1 používá lokální Drift/SQLite schema pro:
 
@@ -176,7 +202,7 @@ Detail vlastní `docs/12-data/r1-physical-data-model.md`.
 
 ---
 
-# 7. Repository baseline
+# 8. Repository baseline
 
 Výchozí top-level struktura je:
 
@@ -207,7 +233,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 8. Pravidla práce s dokumentací
+# 9. Pravidla práce s dokumentací
 
 - Jeden význam má jeden hlavní vlastnící dokument.
 - Nový dokument vznikne pouze pro skutečnou mezeru nebo samostatný kontrakt.
@@ -217,7 +243,7 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 9. Metadata a identifikátory
+# 10. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -235,14 +261,14 @@ Vlastněné pojmy nebo kontrakty:
 Používané identifikátory zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nerecyklují.
 
 ---
 
-# 10. Pracovní cyklus
+# 11. Pracovní cyklus
 
 ```text
 zkontrolovat aktuální GitHub
@@ -262,19 +288,19 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 ---
 
-# 11. Aktuální další krok
+# 12. Aktuální další krok
 
 Podle současného auditu následuje:
 
 ```text
-docs/07-backend/r0-api-contract.md
+docs/14-quality/test-strategy.md
 ```
 
-Má definovat pouze minimální OpenAPI/HTTP kontrakt nutný pro R0: health, readiness, standardní error envelope a contract/versioning pravidla. Workout API ani sync endpointy do R0 nepatří.
+Má definovat testovací pyramid, ownership, R0/R1 critical paths, contract a migration tests, CI gates, flaky-test policy, coverage interpretaci a release evidence. Nemá duplikovat konkrétní test cases již vlastněné jednotlivými kontrakty.
 
 ---
 
-# 12. Instrukce pro coding agenta
+# 13. Instrukce pro coding agenta
 
 Před implementací změny musí agent:
 
