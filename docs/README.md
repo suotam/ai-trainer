@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.9  
+**Verze:** 1.0  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -9,7 +9,7 @@
 
 # 1. Účel
 
-Tato složka obsahuje produktovou, UX, doménovou, technickou, bezpečnostní, testovací a provozní dokumentaci aplikace AI Trainer.
+Tato složka obsahuje produktovou, UX, doménovou, technickou, bezpečnostní, integrační, testovací a provozní dokumentaci aplikace AI Trainer.
 
 Tento soubor je stručný rozcestník. Aktuální stav, mezery a pořadí další práce jsou vedeny v:
 
@@ -104,6 +104,7 @@ docs/12-data/data-architecture.md
 docs/08-mobile/mobile-architecture.md
 docs/09-ai/ai-architecture.md
 docs/11-security/security-architecture.md
+docs/10-integrations/integration-architecture.md
 ```
 
 - `backend-architecture.md` vlastní backendový styl, moduly, vrstvy, transakce, event processing a pravidla `BAR-001` až `BAR-015`.
@@ -111,6 +112,7 @@ docs/11-security/security-architecture.md
 - `mobile-architecture.md` vlastní Flutter klient, offline-first tok, local DB, sync, lifecycle, aktivní workout runtime a pravidla `MAR-001` až `MAR-015`.
 - `ai-architecture.md` vlastní AI runtime, context, provider abstraction, prompts, tools, safety, fallback, observability, evaluaci a pravidla `AIR-001` až `AIR-015`.
 - `security-architecture.md` vlastní trust zones, autentizaci, autorizaci, session a device security, kryptografické hranice, secrets, mobile/offline, API, AI a integration security, audit, abuse protection a pravidla `SAR-001` až `SAR-015`.
+- `integration-architecture.md` vlastní adapter boundaries, provider registry, connection lifecycle, import/export pipeline, webhooky, polling, canonical mapping, idempotenci, deduplikaci, rate limits, degradation, observabilitu a pravidla `IAR-001` až `IAR-015`.
 
 ---
 
@@ -148,6 +150,10 @@ Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě
 ## 4.6 Security by design
 
 Klient, externí obsah, AI model ani integration provider nejsou autoritou pro přístup nebo doménovou změnu. Chráněná operace musí projít serverovou autorizací, validací, relevantními invariantami a auditní policy podle `security-architecture.md`.
+
+## 4.7 Provider isolation
+
+Provider-specific API, enumy, chyby a lifecycle se převádějí uvnitř integrační anti-corruption layer. Provider Adapter nesmí přímo měnit interní doménové agregáty ani obcházet canonical mapping, autorizaci, idempotenci a provenance pravidla z `integration-architecture.md`.
 
 ---
 
@@ -195,6 +201,7 @@ Doporučené identifikátory:
 - `MAR-xxx` – Mobile Architecture Rule,
 - `AIR-xxx` – AI Architecture Rule,
 - `SAR-xxx` – Security Architecture Rule,
+- `IAR-xxx` – Integration Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -227,13 +234,15 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 # 8. Aktuální další krok
 
+Hlavní architektonická fáze je nyní obsahově pokryta.
+
 Podle současného auditu následuje:
 
 ```text
-docs/10-integrations/integration-architecture.md
+docs/02-product/release-scope.md
 ```
 
-Poté se pořadí konkrétních kontraktů a delivery dokumentace řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
+Poté se pořadí konkrétních technických kontraktů, traceability a delivery dokumentace řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
 
 ---
 
@@ -248,7 +257,7 @@ Před implementací změny musí agent:
 5. načíst příslušný doménový model,
 6. načíst FR a NFR,
 7. načíst backend, data, mobile, AI, security a integration architekturu podle dopadu,
-8. načíst API, sync, event, AI-tool, security a storage kontrakty,
+8. načíst API, sync, event, AI-tool, security, integration a storage kontrakty,
 9. ověřit ADR a acceptance criteria,
 10. až poté měnit kód.
 
@@ -261,6 +270,7 @@ Agent nesmí:
 - ignorovat CRITICAL NFR,
 - důvěřovat klientské roli, ownershipu nebo active profile bez serverového ověření,
 - umožnit AI přímý zápis mimo Proposal a ChangeSet flow,
+- umožnit Provider Adapteru přímý zápis do doménového agregátu,
 - vložit produkční secret do repozitáře, klienta nebo logu,
 - označit úkol za hotový bez testů a Definition of Done.
 
@@ -279,11 +289,11 @@ User scenarios and UX
     ↓
 Domain model, invariants and glossary
     ↓
-Backend, data, mobile, AI and security architecture
+Backend, data, mobile, AI, security and integration architecture
     ↓
-Integration architecture
+Release scope and concrete technical contracts
     ↓
-API, sync, event, AI-tool, security and physical data contracts
+API, sync, event, AI-tool, security, integration and physical data contracts
     ↓
 Testing, delivery and operations
     ↓
