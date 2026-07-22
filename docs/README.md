@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.4  
+**Verze:** 0.5  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -30,10 +30,11 @@ Pokud si dokumenty odporují, platí toto pořadí:
 3. globální doménové invariance,
 4. detailní vlastnící doménový model,
 5. schválené ADR,
-6. API, event nebo datový kontrakt,
-7. UX specifikace,
-8. implementační doporučení,
-9. příklady.
+6. architektonický kontrakt,
+7. API, event nebo datový kontrakt,
+8. UX specifikace,
+9. implementační doporučení,
+10. příklady.
 
 Nižší vrstva nesmí obejít vyšší.
 
@@ -41,7 +42,7 @@ Nižší vrstva nesmí obejít vyšší.
 
 # 3. Hlavní zdroje pravdy
 
-## Vision and product
+## 3.1 Vision and product
 
 ```text
 docs/01-vision/vision.md
@@ -57,7 +58,7 @@ docs/02-product/non-functional-requirements.md
 - `functional-requirements.md` vlastní testovatelné cílové schopnosti `FR-001` až `FR-192`.
 - `non-functional-requirements.md` vlastní kvalitativní a provozní požadavky `NFR-001` až `NFR-172`.
 
-## Users and UX
+## 3.2 Users and UX
 
 ```text
 docs/03-users/user-personas.md
@@ -69,7 +70,7 @@ docs/04-ux/screen-specifications.md
 
 Tyto dokumenty vlastní potřeby uživatelů, scénáře, informační hierarchii, hlavní flow a funkční chování obrazovek.
 
-## Domain
+## 3.3 Domain
 
 ```text
 docs/06-domain/domain-overview.md
@@ -91,9 +92,29 @@ docs/06-domain/glossary.md
 
 - `domain-overview.md` je mapa bounded contexts a vlastnictví.
 - Detailní model vlastní význam svých agregátů, entit a stavů.
-- `domain-invariants.md` vlastní globální a cross-domain pravidla.
+- `domain-invariants.md` vlastní globální a cross-domain pravidla `INV-001` až `INV-100`.
 - `glossary.md` vlastní kanonické názvosloví a zakázaná nejednoznačná synonyma.
 - `domain-events.md` vlastní význam, obálku a katalog doménových událostí.
+
+## 3.4 Architecture
+
+```text
+docs/07-backend/backend-architecture.md
+```
+
+`backend-architecture.md` vlastní:
+
+- modulární monolit jako výchozí architektonický styl,
+- backendové modulární hranice,
+- vrstvy a dependency rules,
+- command/query execution,
+- transakční model,
+- outbox a event processing,
+- background jobs,
+- AI, sync, integration a security boundaries,
+- backendová pravidla `BAR-001` až `BAR-015`.
+
+Další hlavní architektury budou doplněny podle auditu.
 
 ---
 
@@ -101,7 +122,7 @@ docs/06-domain/glossary.md
 
 ## 4.1 Jeden význam, jeden vlastník
 
-Každý významný pojem nebo pravidlo musí mít jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
+Každý významný pojem, pravidlo nebo kontrakt musí mít jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
 
 ## 4.2 Nový soubor pouze pro skutečnou mezeru
 
@@ -148,7 +169,7 @@ Současné hlavní specifikace jsou převážně `Draft`. Stav auditu je veden o
 
 ---
 
-# 6. Doporučená metadata
+# 6. Doporučená metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -169,6 +190,7 @@ Doporučené identifikátory:
 - `FR-xxx` – Functional Requirement,
 - `NFR-xxx` – Non-functional Requirement,
 - `INV-xxx` – Domain Invariant,
+- `BAR-xxx` – Backend Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -204,20 +226,17 @@ aktualizovat DOCUMENTATION_STATUS.md
 Podle současného auditu následuje:
 
 ```text
-docs/07-backend/backend-architecture.md
+docs/12-data/data-architecture.md
 ```
 
-Poté budou následovat:
+Poté:
 
 ```text
-docs/12-data/data-architecture.md
 docs/08-mobile/mobile-architecture.md
 docs/09-ai/ai-architecture.md
 docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
 ```
-
-Release scope, traceability a acceptance criteria zůstávají potvrzené potřebné dokumenty a budou dokončeny společně s architekturami a quality strategií.
 
 Přesné pořadí se vždy řídí aktuální verzí `DOCUMENTATION_STATUS.md`.
 
@@ -233,14 +252,16 @@ Před implementací změny musí agent:
 4. načíst `domain-invariants.md` a relevantní části `glossary.md`,
 5. načíst příslušný doménový model,
 6. načíst funkční a nefunkční požadavky,
-7. načíst UX, API, data a security kontrakty,
-8. ověřit ADR a acceptance criteria,
-9. až poté měnit kód.
+7. načíst relevantní architekturu,
+8. načíst UX, API, data a security kontrakty,
+9. ověřit ADR a acceptance criteria,
+10. až poté měnit kód.
 
 Agent nesmí:
 
 - zavádět nový doménový pojem bez dokumentace,
 - použít nejednoznačný technický název zakázaný glossary,
+- porušit modulární hranice,
 - měnit veřejný kontrakt bez aktualizace dokumentace,
 - obcházet invarianty nebo bezpečnost,
 - ignorovat CRITICAL NFR,
@@ -251,8 +272,6 @@ Agent nesmí:
 # 10. Závěr
 
 Dokumentace se neřídí počtem souborů, ale úplností, dohledatelností a konzistencí.
-
-Základní návaznost je:
 
 ```text
 Vision
