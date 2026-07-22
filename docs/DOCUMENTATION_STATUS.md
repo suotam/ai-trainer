@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 0.5  
+**Verze:** 0.6  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -53,17 +53,21 @@ Projekt má rozsáhlý základ v oblastech:
 - globální invariance,
 - kanonické názvosloví,
 - číslované funkční požadavky `FR-001` až `FR-192`,
-- číslované nefunkční požadavky `NFR-001` až `NFR-172`.
+- číslované nefunkční požadavky `NFR-001` až `NFR-172`,
+- hlavní backendovou architekturu a pravidla `BAR-001` až `BAR-015`.
 
 Největší zbývající mezery:
 
+- data architecture,
+- mobile architecture,
+- AI runtime architecture,
+- security architecture,
+- integration architecture,
 - release scope a prioritizace,
 - traceability požadavek → scénář → UX → doména → test,
-- technické architektury,
-- bezpečnostní a právní konkretizace,
 - fyzický datový model,
 - API, sync a event kontrakty,
-- AI runtime a tool kontrakty,
+- AI tool kontrakty,
 - design system,
 - kvalita, DevOps, release a provoz,
 - implementační instrukce pro coding agenta.
@@ -129,43 +133,48 @@ Největší zbývající mezery:
 | `domain-invariants.md` | SUBSTANTIAL_DRAFT | `INV-001` až `INV-100`. |
 | `glossary.md` | SUBSTANTIAL_DRAFT | Kanonické názvosloví a vlastníci pojmů. |
 
+## 4.7 Architecture
+
+| Soubor | Stav | Zdroj pravdy pro |
+|---|---|---|
+| `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Modulární monolit, backendové moduly, vrstvy, dependency rules, commands, queries, transactions, events, jobs, AI a sync boundaries. |
+
 ---
 
-# 5. Dokončený krok – nefunkční požadavky
+# 5. Dokončený krok – backend architecture
 
-`docs/02-product/non-functional-requirements.md` obsahuje:
+`docs/07-backend/backend-architecture.md` obsahuje:
 
-- stabilní identifikátory `NFR-001` až `NFR-172`,
-- dostupnost a degradovaný režim,
-- spolehlivost, idempotenci a odolnost,
-- offline-first a lokální použitelnost,
-- synchronizaci a konzistenci,
-- mobilní a backendový výkon,
-- AI latenci, fallback, validaci a cost controls,
-- bezpečnost,
-- privacy, consent, retention a deletion,
-- accessibility,
-- lokalizaci, timezone a jednotky,
-- battery, GPS, síť a mobilní zdroje,
-- škálovatelnost a backpressure,
-- observabilitu a audit,
-- zálohy, RPO, RTO a disaster recovery,
-- maintainability, kompatibilitu a migrace,
-- quality gates a release testy,
-- uživatelskou srozumitelnost a důvěru.
+- modulární monolit jako výchozí styl,
+- kritéria budoucí extrakce služeb,
+- transport, application, domain, ports a adapters,
+- mapu hlavních backendových modulů,
+- pravidla závislostí a minimální shared kernel,
+- command a query execution model,
+- transakční hranice,
+- outbox, event consumers a replay,
+- background jobs,
+- AI orchestration boundary,
+- sync a integration boundaries,
+- security a error boundaries,
+- data ownership, caching a observability,
+- API principles,
+- testing implications,
+- deployment topology,
+- pravidla `BAR-001` až `BAR-015`,
+- seznam ADR nutných před implementací.
 
 ## 5.1 Co ještě vyžaduje review
 
 Před `IMPLEMENTATION_READY` je nutné:
 
-- určit referenční device, OS, síť a dataset profily,
-- potvrdit číselné latency, availability, RPO a RTO cíle,
-- namapovat každý CRITICAL NFR na kontrolu a test,
-- provést security a privacy review,
-- provést medicínské review pain a safety wordingů,
-- sladit AI cíle s model selection a cost policy,
-- sladit performance cíle s cloud a mobile proof-of-concept měřením,
-- převést quality gates do quality a release dokumentace.
+- přijmout klíčové ADR,
+- sladit backend s data architecture,
+- sladit backend se security architecture,
+- definovat API a sync contract směr,
+- potvrdit module boundaries a transakční hranice,
+- namapovat CORE FR a CRITICAL NFR,
+- definovat architecture tests a quality gates.
 
 ---
 
@@ -182,24 +191,23 @@ Před `IMPLEMENTATION_READY` je nutné:
 | obecný `offline-principles.md` | sync-and-offline model |
 | obecný `event-catalog.md` | domain-events.md |
 | obecný `ai-responsibilities.md` | product principles, AI/change model |
-| samostatný `feature-catalog.md` | zatím functional requirements; rozdělit jen při skutečné potřebě |
+| samostatný `feature-catalog.md` | functional requirements, dokud nevznikne skutečná potřeba |
+| samostatný `modular-monolith-strategy.md` | zatím backend architecture; oddělit pouze při výrazném rozšíření |
 
 ---
 
 # 7. Bezprostředně následující fáze
 
-Produktové a doménové základy jsou nyní dostatečně podrobné pro návrh hlavních technických architektur.
+Doporučené pořadí hlavních architektur:
 
-Doporučené pořadí:
-
-1. `docs/07-backend/backend-architecture.md`
-2. `docs/12-data/data-architecture.md`
+1. ✅ `docs/07-backend/backend-architecture.md`
+2. ⏭️ `docs/12-data/data-architecture.md`
 3. `docs/08-mobile/mobile-architecture.md`
 4. `docs/09-ai/ai-architecture.md`
 5. `docs/11-security/security-architecture.md`
 6. `docs/10-integrations/integration-architecture.md`
 
-Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale jejich detail je účelné dokončit společně s architekturami a acceptance strategií, aby neobsahovaly pouze odhady technické náročnosti.
+Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale jejich detail je účelné dokončit společně s architekturami a acceptance strategií.
 
 ---
 
@@ -207,8 +215,8 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 
 ## Fáze 1 – hlavní architektury
 
-1. ⏭️ backend architecture,
-2. data architecture,
+1. ✅ backend architecture,
+2. ⏭️ data architecture,
 3. mobile architecture,
 4. AI architecture,
 5. security architecture,
@@ -261,6 +269,7 @@ Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale j
 - `FR-xxx` – Functional Requirement
 - `NFR-xxx` – Non-functional Requirement
 - `INV-xxx` – Domain Invariant
+- `BAR-xxx` – Backend Architecture Rule
 - `SCN-xxx` – User Scenario
 - `FLOW-xxx` – UX Flow
 - `SCR-xxx` – Screen
@@ -283,7 +292,7 @@ ID se nesmí recyklovat.
 | Users | vysoká | střední | ID a traceability |
 | UX | vysoká | střední | states, routes, accessibility |
 | Domain | velmi vysoká | střední | consistency a odborné review |
-| Backend | nízká | nízká | backend architecture |
+| Backend | vysoká | střední | ADR, data/security/API mapping |
 | Data | nízká | nízká | data architecture |
 | Mobile | nízká | nízká | mobile architecture |
 | AI runtime | střední doménově | nízká | AI architecture |
@@ -316,5 +325,5 @@ aktualizovat DOCUMENTATION_STATUS.md
 Další potvrzený dokument je:
 
 ```text
-docs/07-backend/backend-architecture.md
+docs/12-data/data-architecture.md
 ```
