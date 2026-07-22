@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 1.7  
+**Verze:** 1.8  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -54,9 +54,10 @@ Projekt má obsahově pokryté:
 - počáteční technologická rozhodnutí `ADR-001` až `ADR-010`,
 - fyzický lokální datový model R1 a pravidla `PDR-001` až `PDR-015`,
 - minimální R0 HTTP/OpenAPI kontrakt a pravidla `APR-001` až `APR-015`,
-- test strategy, quality gates a pravidla `QTR-001` až `QTR-015`.
+- test strategy a pravidla `QTR-001` až `QTR-015`,
+- Definition of Ready and Done a pravidla `DRD-001` až `DRD-015`.
 
-Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení tří zbývajících delivery dokumentů; kontrakty pro pozdější AI, sync, provider a operations slices předem blokovat nemají.
+Programování R0 a R1 může začít po dokončení dvou zbývajících delivery dokumentů: vertical-slice implementation planu a coding-agent/context-loading guide. Kontrakty pro pozdější AI, sync, provider a operations slices předem blokovat nemají.
 
 ---
 
@@ -100,44 +101,41 @@ Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals
 |---|---|---|
 | `docs/05-architecture/initial-architecture-decisions.md` | SUBSTANTIAL_DRAFT | Technologie blokující R0/R1 a `ADR-001` až `ADR-010`. |
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Backendové hranice a `BAR-001` až `BAR-015`. |
-| `docs/07-backend/r0-api-contract.md` | SUBSTANTIAL_DRAFT | R0 liveness, readiness, error envelope, compatibility a `APR-001` až `APR-015`. |
+| `docs/07-backend/r0-api-contract.md` | SUBSTANTIAL_DRAFT | R0 liveness, readiness, error envelope a `APR-001` až `APR-015`. |
 | `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy a `DAR-001` až `DAR-015`. |
-| `docs/12-data/r1-physical-data-model.md` | SUBSTANTIAL_DRAFT | Lokální SQLite/Drift schema R1, transakce, migrace, recovery a `PDR-001` až `PDR-015`. |
+| `docs/12-data/r1-physical-data-model.md` | SUBSTANTIAL_DRAFT | Lokální SQLite/Drift schema R1 a `PDR-001` až `PDR-015`. |
 | `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Mobilní runtime a `MAR-001` až `MAR-015`. |
 | `docs/09-ai/ai-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | AI runtime a `AIR-001` až `AIR-015`. |
 | `docs/11-security/security-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Security boundaries a `SAR-001` až `SAR-015`. |
 | `docs/10-integrations/integration-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Integrace a `IAR-001` až `IAR-015`. |
-| `docs/13-delivery/repository-strategy.md` | SUBSTANTIAL_DRAFT | Monorepo layout, boundaries, tests, migrations, tooling a `RER-001` až `RER-015`. |
-| `docs/14-quality/test-strategy.md` | SUBSTANTIAL_DRAFT | Test levels, ownership, CI gates, critical paths, flaky policy, release evidence a `QTR-001` až `QTR-015`. |
+| `docs/13-delivery/repository-strategy.md` | SUBSTANTIAL_DRAFT | Monorepo layout a `RER-001` až `RER-015`. |
+| `docs/13-delivery/definition-of-ready-and-done.md` | SUBSTANTIAL_DRAFT | Ready/Done gates pro backlog, PR, R0 a R1 a `DRD-001` až `DRD-015`. |
+| `docs/14-quality/test-strategy.md` | SUBSTANTIAL_DRAFT | Test levels, CI gates a `QTR-001` až `QTR-015`. |
 
 ---
 
-# 5. Dokončený krok – Test strategy
+# 5. Dokončený krok – Definition of Ready and Done
 
-`docs/14-quality/test-strategy.md` definuje:
+`docs/13-delivery/definition-of-ready-and-done.md` definuje:
 
-- static, unit, widget, integration, contract, migration, architecture a end-to-end test levels,
-- test ownership,
-- R0 backend critical path,
-- R1 offline workout critical path,
-- skutečné SQLite a PostgreSQL integration testy,
-- OpenAPI compatibility tests,
-- mobile a server migration tests,
-- CI pull-request, main a release-candidate gates,
-- flaky-test quarantine policy,
-- risk-based interpretaci coverage,
-- test data a test-double pravidla,
-- release evidence,
-- security a reliability baseline,
-- pravidla `QTR-001` až `QTR-015`.
+- úrovně Backlog Item Ready, Pull Request Done, Feature/Slice Done a Release Slice Done,
+- povinný scope, ownership, zdroje pravdy a acceptance criteria před implementací,
+- test approach, dependency, security, data, UX a recovery readiness,
+- PR completion gates pro testy, migrace, contracts, security a dokumentaci,
+- konkrétní R0 Definition of Done,
+- konkrétní R1 Definition of Done,
+- evidence místo nedoloženého tvrzení,
+- blocker a critical defect policy,
+- řízené výjimky,
+- automatizovatelné delivery gates,
+- pravidla `DRD-001` až `DRD-015`.
 
 ## 5.1 Praktický dopad
 
-R0 a R1 mají jednoznačně definované důkazy dokončení. Zelený build bez relevantních integration, contract a migration testů není dostatečný. Kritický R1 tok musí automatizovaně ověřit restart a recovery aktivní session a dokončení bez ztráty potvrzených dat.
+Backlog item nyní nesmí vstoupit do implementace s chybějícím rozhodnutím, nejasným scope nebo netestovatelnými kritérii. Pull request ani slice nesmí být označen jako Done bez odpovídajících testů, contract/migration evidence a aktuální dokumentace.
 
 ## 5.2 Co ještě zbývá před programováním R0/R1
 
-- Definition of Ready a Done,
 - vertical-slice implementation plan,
 - coding-agent instructions a context-loading guide.
 
@@ -149,26 +147,19 @@ R0 a R1 mají jednoznačně definované důkazy dokončení. Zelený build bez r
 |---|---|
 | `mvp-overview.md` | `release-scope.md` |
 | `roadmap-overview.md` | `product-scope.md` + `release-scope.md` |
-| `stage-plan.md` | `release-scope.md`; detail patří do vertical-slice planu |
 | obecný `monorepo-overview.md` | `repository-strategy.md` |
-| obecný `flutter-project-structure.md` | mobile architecture + repository strategy |
-| obecný `backend-project-structure.md` | backend architecture + repository strategy |
 | obecný `test-folder-layout.md` | repository strategy + test strategy |
-| samostatný `mobile-test-overview.md` | `test-strategy.md` |
-| samostatný `backend-test-overview.md` | `test-strategy.md` |
 | samostatný `flaky-test-policy.md` | `test-strategy.md` |
 | samostatný `coverage-policy.md` | `test-strategy.md` |
-| samostatný `contract-test-overview.md` | `test-strategy.md` + vlastnící kontrakt |
-| samostatný `mobile-tech-stack.md` | initial architecture decisions |
-| samostatný `backend-tech-stack.md` | initial architecture decisions |
-| samostatný `database-choice.md` | initial architecture decisions |
+| samostatný `pull-request-done.md` | `definition-of-ready-and-done.md` |
+| samostatný `backlog-ready.md` | `definition-of-ready-and-done.md` |
+| samostatný `r0-done-checklist.md` | release scope + `definition-of-ready-and-done.md` |
+| samostatný `r1-done-checklist.md` | release scope + `definition-of-ready-and-done.md` |
 | obecný `r1-local-database-overview.md` | `r1-physical-data-model.md` |
 | obecný `health-endpoints.md` | `r0-api-contract.md` |
-| obecný `error-envelope.md` | `r0-api-contract.md` |
 | obecný `offline-principles.md` | sync model + mobile architecture |
 | obecný `event-catalog.md` | `domain-events.md` |
 | obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do pozdějšího ADR |
-| obecný `authentication-overview.md` | security architecture; konkrétní volba patří do pozdějšího ADR |
 
 ---
 
@@ -186,8 +177,8 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 4. ✅ minimální fyzický datový model R1,
 5. ✅ minimální API contract,
 6. ✅ test strategy,
-7. ⏭️ Definition of Ready a Done,
-8. vertical-slice implementation plan,
+7. ✅ Definition of Ready a Done,
+8. ⏭️ vertical-slice implementation plan,
 9. coding-agent instructions a context-loading guide.
 
 Po tomto balíku lze začít programovat R0 a R1.
@@ -207,7 +198,7 @@ Po tomto balíku lze začít programovat R0 a R1.
 Používané řady zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`, `DRD`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nesmí recyklovat.
@@ -219,17 +210,17 @@ ID se nesmí recyklovat.
 | Oblast | Obsahová připravenost | Implementační připravenost | Hlavní další krok |
 |---|---:|---:|---|
 | Product requirements | vysoká | střední až vysoká | FR/NFR mapování a AC |
-| Release scope | vysoká | střední až vysoká | backlog a traceability R0/R1 |
+| Release scope | vysoká | vysoká | implementation backlog |
 | Repository strategy | vysoká | vysoká | skutečný R0 skeleton |
 | Initial ADR | vysoká | vysoká pro R0/R1 | ověřit implementací |
 | R1 local data | vysoká | vysoká | Drift implementace a tests |
 | R0 API | vysoká | vysoká | OpenAPI a backend implementace |
 | Quality | vysoká | vysoká pro R0/R1 baseline | implementovat CI gates a suites |
+| Delivery workflow | vysoká | vysoká | vertical-slice plan |
 | Backend | vysoká | vysoká pro R0 základ | architecture a contract tests |
 | Mobile | vysoká | vysoká pro R1 základ | repository a persistence implementace |
 | DevOps | střední | střední až vysoká | environments a CI implementace |
-| Delivery workflow | střední | nízká až střední | Definition of Ready and Done |
-| Coding agent | nízká | nízká | instrukce po delivery kontraktech |
+| Coding agent | nízká | nízká | instrukce po vertical-slice planu |
 
 ---
 
@@ -252,7 +243,7 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/13-delivery/definition-of-ready-and-done.md
+docs/13-delivery/r0-r1-vertical-slice-plan.md
 ```
 
-Tento dokument má převést existující produktové, technické a testovací kontrakty na praktické vstupní a výstupní podmínky pro backlog item, pull request, R0 a R1 slice. Nemá duplikovat detailní test strategy ani acceptance criteria jednotlivých funkcí.
+Tento dokument má převést R0 a R1 na pořadí konkrétních implementačních slices, dependencies, výsledné artefakty, acceptance/evidence gates a doporučené backlog položky. Nemá znovu definovat produktový scope, test strategy ani Definition of Done.
