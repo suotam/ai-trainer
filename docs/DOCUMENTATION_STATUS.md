@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 1.0  
+**Verze:** 1.1  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -56,16 +56,18 @@ Projekt má rozsáhlý základ v oblastech:
 - datová architektura a pravidla `DAR-001` až `DAR-015`,
 - mobilní architektura a pravidla `MAR-001` až `MAR-015`,
 - AI runtime architektura a pravidla `AIR-001` až `AIR-015`,
-- security architektura a pravidla `SAR-001` až `SAR-015`.
+- security architektura a pravidla `SAR-001` až `SAR-015`,
+- integration architektura a pravidla `IAR-001` až `IAR-015`.
 
-Největší zbývající mezery:
+Hlavní architektonická vrstva je nyní pokryta. Největší zbývající mezery:
 
-- integration architecture,
 - release scope a prioritizace,
 - traceability požadavek → scénář → UX → doména → test,
 - fyzický relační a lokální datový model,
 - API, sync a event kontrakty,
 - AI tool, context, prompt a structured-output kontrakty,
+- provider capability matrix a konkrétní integration kontrakty,
+- security threat model, capability matrix a data classification,
 - design system,
 - kvalita, DevOps, release a provoz,
 - implementační instrukce pro coding agenta.
@@ -127,46 +129,47 @@ Největší zbývající mezery:
 |---|---|---|
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Modulární monolit, vrstvy, moduly, transactions, events, jobs a boundaries. |
 | `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy, ownership, autorita, historie, storage, migrace, retence a backup. |
-| `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Flutter klient, feature boundaries, local DB, offline commands, sync, lifecycle a platform adapters. |
-| `docs/09-ai/ai-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | AI runtime, provider abstraction, context, prompts, tools, safety, fallback, cost, observability a evaluace. |
-| `docs/11-security/security-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Trust zones, authn, authz, sessions, cryptografie, secrets, mobile/offline, AI a integration security, audit, abuse protection a pravidla `SAR-001` až `SAR-015`. |
+| `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Flutter klient, local DB, offline commands, sync, lifecycle a platform adapters. |
+| `docs/09-ai/ai-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | AI runtime, provider abstraction, context, prompts, tools, safety, fallback, observability a evaluace. |
+| `docs/11-security/security-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Trust zones, authn, authz, sessions, kryptografie, secrets, audit, abuse protection a pravidla `SAR-001` až `SAR-015`. |
+| `docs/10-integrations/integration-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Adapter boundaries, connection lifecycle, import/export pipelines, webhooks, polling, canonical mapping, deduplikace, rate limits, observabilita a pravidla `IAR-001` až `IAR-015`. |
 
 ---
 
-# 5. Dokončený krok – Security architecture
+# 5. Dokončený krok – Integration architecture
 
-`docs/11-security/security-architecture.md` obsahuje:
+`docs/10-integrations/integration-architecture.md` obsahuje:
 
-- chráněná aktiva, trust zones a bezpečnostní hranice,
-- datovou klasifikaci,
-- authentication a authorization architekturu,
-- session, device a revocation model,
-- kryptografické hranice a secrets management,
-- mobile a offline security,
-- API a backend security,
-- AI context, prompt-injection, tool a ChangeSet security,
-- integration credential a webhook security,
-- secure logging, security audit a observability,
-- abuse protection,
-- supply-chain a vulnerability management,
-- security testing a incident readiness,
-- threat-model proces,
-- pravidla `SAR-001` až `SAR-015`.
+- Provider Registry a Capability Resolver,
+- Provider Adapter jako anti-corruption layer,
+- connection lifecycle a Credential Broker,
+- import a export pipeline,
+- webhook receiver a polling scheduler,
+- canonical mapping boundary,
+- provenance, idempotency a deduplikaci,
+- cursor safety a partial failure model,
+- retry, rate limits, quotas a circuit breakers,
+- degradation model,
+- integration events a transakční hranice,
+- security, privacy a observabilitu,
+- adapter testing, provider onboarding a ukončení,
+- pravidla `IAR-001` až `IAR-015`.
 
 ## 5.1 Co ještě vyžaduje review
 
 Před `IMPLEMENTATION_READY` je nutné:
 
-- vytvořit threat model,
-- vytvořit data-classification matrix,
-- přijmout identity, session a authorization ADR,
-- vytvořit capability a authorization matrix,
-- definovat mobile secure-storage kontrakt,
-- definovat secrets a key-management policy,
-- doplnit API, sync, AI tool a integration security kontrakty,
-- schválit logging a telemetry redaction pravidla,
-- vytvořit security test strategy a incident-response minimum,
-- provést privacy, právní, medicínské a nezávislé security review relevantních částí.
+- vytvořit provider capability matrix,
+- přijmout ADR pro první providery,
+- definovat OAuth, PKCE, callback a credential contract,
+- definovat canonical inbound a outbound schemas,
+- definovat webhook a import/export job kontrakty,
+- vytvořit mapping schemas a provider fixtures,
+- stanovit provider rate-limit a quota policy,
+- vytvořit adapter repository contract,
+- vytvořit integration test strategy, dashboardy a runbooky,
+- provést security, privacy a provider terms review,
+- namapovat relevantní CORE FR a CRITICAL NFR.
 
 ---
 
@@ -181,47 +184,42 @@ Před `IMPLEMENTATION_READY` je nutné:
 | `returning-user-model.md` | scénáře, identity/profile model |
 | `screen-inventory.md` | information architecture, screen specifications |
 | obecný `offline-principles.md` | sync model + mobile architecture |
-| obecný `event-catalog.md` | domain-events.md |
+| obecný `event-catalog.md` | `domain-events.md` |
 | obecný `ai-responsibilities.md` | product principles, AI/change model a AI architecture |
 | samostatný `modular-monolith-strategy.md` | backend architecture |
 | samostatný obecný `data-ownership.md` | data architecture |
 | samostatný obecný `flutter-project-structure.md` | mobile architecture; oddělit až při repository kontraktu |
 | obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do ADR |
 | obecný `authentication-overview.md` | security architecture; konkrétní provider a token model patří do ADR |
-| obecný `authorization-principles.md` | security architecture; capability matrix bude samostatný implementační kontrakt |
+| obecný `authorization-principles.md` | security architecture; capability matrix bude samostatný kontrakt |
 | obecný `secrets-overview.md` | security architecture; konkrétní provozní policy vznikne později |
+| obecný `integration-principles.md` | integration model + integration architecture |
+| obecný `provider-adapter-overview.md` | integration architecture; konkrétní adapter patří do provider specifikace |
+| obecný `webhook-overview.md` | integration architecture; přesný envelope patří do webhook kontraktu |
 
 ---
 
-# 7. Bezprostředně následující fáze
-
-Doporučené pořadí hlavních architektur:
+# 7. Stav hlavních architektur
 
 1. ✅ `docs/07-backend/backend-architecture.md`
 2. ✅ `docs/12-data/data-architecture.md`
 3. ✅ `docs/08-mobile/mobile-architecture.md`
 4. ✅ `docs/09-ai/ai-architecture.md`
 5. ✅ `docs/11-security/security-architecture.md`
-6. ⏭️ `docs/10-integrations/integration-architecture.md`
+6. ✅ `docs/10-integrations/integration-architecture.md`
+
+Hlavní architektonická fáze je obsahově dokončena. Následují konkrétní kontrakty a delivery rozhodnutí.
 
 ---
 
 # 8. Následující pořadí práce
 
-## Fáze 1 – hlavní architektury
-
-1. ✅ backend architecture,
-2. ✅ data architecture,
-3. ✅ mobile architecture,
-4. ✅ AI architecture,
-5. ✅ security architecture,
-6. ⏭️ integration architecture.
-
 ## Fáze 2 – konkrétní kontrakty
 
+- release scope a priority matrix jako další doporučený dokument,
 - ADR technologických voleb,
 - fyzická databázová schémata,
-- API,
+- API contract,
 - sync protocol,
 - AI context, prompt, tool a structured-output schemas,
 - event schemas,
@@ -231,7 +229,6 @@ Doporučené pořadí hlavních architektur:
 
 ## Fáze 3 – product delivery kontrakty
 
-- release scope a priority matrix,
 - traceability matrix,
 - acceptance criteria strategy,
 - UX routes a globální stavy,
@@ -241,7 +238,7 @@ Doporučené pořadí hlavních architektur:
 
 - test strategy,
 - AI evaluation,
-- security a performance tests,
+- security, integration a performance tests,
 - DevOps,
 - release,
 - observability,
@@ -272,6 +269,7 @@ Doporučené pořadí hlavních architektur:
 - `MAR-xxx` – Mobile Architecture Rule
 - `AIR-xxx` – AI Architecture Rule
 - `SAR-xxx` – Security Architecture Rule
+- `IAR-xxx` – Integration Architecture Rule
 - `SCN-xxx` – User Scenario
 - `FLOW-xxx` – UX Flow
 - `SCR-xxx` – Screen
@@ -296,12 +294,12 @@ ID se nesmí recyklovat.
 | Mobile | vysoká | nízká až střední | ADR, local schema, sync a platform contracts |
 | AI runtime | vysoká | nízká až střední | provider ADR, tools, prompts, safety a evals |
 | Security | vysoká | nízká až střední | threat model, ADR, matrices, contracts a tests |
-| Integrations | střední obecně | nízká | integration architecture a capability audit |
+| Integrations | vysoká | nízká až střední | provider matrix, contracts, adapters a tests |
 | Quality | nízká | nízká | quality strategy |
 | DevOps | nízká | nízká | environments a deployment architecture |
-| Release | nízká | nízká | release strategy |
+| Release | nízká | nízká | release scope a release strategy |
 | Operations | nízká | nízká | SLO, incident response a runbooks |
-| Claude implementation guide | nízká | nízká | až po architekturách a kontraktech |
+| Claude implementation guide | nízká | nízká | až po kontraktech a delivery rozhodnutích |
 
 ---
 
@@ -324,5 +322,5 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/10-integrations/integration-architecture.md
+docs/02-product/release-scope.md
 ```
