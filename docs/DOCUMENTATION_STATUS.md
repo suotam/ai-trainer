@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.0  
+**Verze:** 2.1  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -58,10 +58,12 @@ Projekt má obsahově pokryté:
 
 **Startovní dokumentační minimum pro R0 a R1 je dokončeno.**
 
+`R0-01 – Repository Skeleton` je implementován: existuje kanonická root struktura (`apps/mobile`, `apps/backend`, `packages/contracts`, `tooling/scripts`), root `README.md`, `.editorconfig`, rozšířený `.gitignore` a repository smoke check `tooling/scripts/repo-smoke-check.sh`. Adresáře `database/`, `.github/` a `compose.yaml` vzniknou až se slices, které je skutečně potřebují (R0-05, R0-06).
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-01 – Repository Skeleton
+R0-02 – Mobile Bootstrap
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -194,7 +196,7 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 ## Fáze 3 – implementace R0 a R1
 
 ```text
-R0-01 Repository Skeleton
+R0-01 Repository Skeleton ✅
 R0-02 Mobile Bootstrap
 R0-03 Backend Bootstrap
 R0-04 Contracts and Health API
@@ -241,7 +243,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-01 – Repository Skeleton
+R0-02 – Mobile Bootstrap
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
