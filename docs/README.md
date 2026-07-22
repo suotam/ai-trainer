@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 0.6  
+**Verze:** 0.7  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -101,10 +101,12 @@ docs/06-domain/glossary.md
 ```text
 docs/07-backend/backend-architecture.md
 docs/12-data/data-architecture.md
+docs/08-mobile/mobile-architecture.md
 ```
 
 - `backend-architecture.md` vlastní backendový styl, moduly, vrstvy, transakce, event processing a pravidla `BAR-001` až `BAR-015`.
 - `data-architecture.md` vlastní datové vrstvy, ownership, autoritu, historii, storage, migrace, retenci, backup a pravidla `DAR-001` až `DAR-015`.
+- `mobile-architecture.md` vlastní Flutter klienta, feature boundaries, lokální data, offline commands, sync, lifecycle, workout runtime, platform adapters a pravidla `MAR-001` až `MAR-015`.
 
 ---
 
@@ -137,7 +139,7 @@ Opravy a změny musí zachovat původ, revize, audit a historickou interpretovat
 
 ## 4.5 Offline-first
 
-Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, měřitelné cíle NFR a datové vrstvy `data-architecture.md`.
+Mobilní aplikace musí podporovat kritické každodenní použití i bez sítě. Detailní pravidla vlastní `sync-and-offline-model.md`, NFR, `data-architecture.md` a `mobile-architecture.md`.
 
 ---
 
@@ -182,6 +184,7 @@ Doporučené identifikátory:
 - `INV-xxx` – Domain Invariant,
 - `BAR-xxx` – Backend Architecture Rule,
 - `DAR-xxx` – Data Architecture Rule,
+- `MAR-xxx` – Mobile Architecture Rule,
 - `SCN-xxx` – User Scenario,
 - `FLOW-xxx` – UX Flow,
 - `SCR-xxx` – Screen,
@@ -217,13 +220,12 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Podle současného auditu následuje:
 
 ```text
-docs/08-mobile/mobile-architecture.md
+docs/09-ai/ai-architecture.md
 ```
 
 Poté:
 
 ```text
-docs/09-ai/ai-architecture.md
 docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
 ```
@@ -271,9 +273,9 @@ User scenarios and UX
     ↓
 Domain model, invariants and glossary
     ↓
-Backend and data architecture
+Backend, data and mobile architecture
     ↓
-Mobile, AI, security and integration architecture
+AI, security and integration architecture
     ↓
 API, sync, event and physical data contracts
     ↓
