@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 0.4  
+**Verze:** 0.5  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-07-21  
+**Poslední aktualizace:** 2026-07-22  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -52,11 +52,11 @@ Projekt má rozsáhlý základ v oblastech:
 - doménové události,
 - globální invariance,
 - kanonické názvosloví,
-- číslované funkční požadavky `FR-001` až `FR-192`.
+- číslované funkční požadavky `FR-001` až `FR-192`,
+- číslované nefunkční požadavky `NFR-001` až `NFR-172`.
 
 Největší zbývající mezery:
 
-- nefunkční požadavky,
 - release scope a prioritizace,
 - traceability požadavek → scénář → UX → doména → test,
 - technické architektury,
@@ -92,6 +92,7 @@ Největší zbývající mezery:
 |---|---|---|
 | `docs/02-product/product-scope.md` | SUBSTANTIAL_DRAFT | Cílový rozsah a základní etapizace. |
 | `docs/02-product/functional-requirements.md` | SUBSTANTIAL_DRAFT | Testovatelné cílové schopnosti `FR-001` až `FR-192`. |
+| `docs/02-product/non-functional-requirements.md` | SUBSTANTIAL_DRAFT | Kvalitativní a provozní požadavky `NFR-001` až `NFR-172`. |
 
 ## 4.4 Users
 
@@ -130,36 +131,41 @@ Největší zbývající mezery:
 
 ---
 
-# 5. Dokončený krok – funkční požadavky
+# 5. Dokončený krok – nefunkční požadavky
 
-`docs/02-product/functional-requirements.md` obsahuje:
+`docs/02-product/non-functional-requirements.md` obsahuje:
 
-- stabilní identifikátory `FR-001` až `FR-192`,
-- priority CORE, IMPORTANT, ADVANCED a FUTURE,
-- účet, profil a onboarding,
-- sporty, cíle, dostupnost a vybavení,
-- plán, kalendář, workout a tracker,
-- Activity, recovery, pain a limitations,
-- AI návrhy a adaptace,
-- metriky a progres,
-- integrace,
-- offline a synchronizaci,
-- notifikace,
-- privacy, export a smazání,
-- budoucí coach a guardian funkce,
-- audit a fallbacky,
-- traceability a readiness pravidla.
+- stabilní identifikátory `NFR-001` až `NFR-172`,
+- dostupnost a degradovaný režim,
+- spolehlivost, idempotenci a odolnost,
+- offline-first a lokální použitelnost,
+- synchronizaci a konzistenci,
+- mobilní a backendový výkon,
+- AI latenci, fallback, validaci a cost controls,
+- bezpečnost,
+- privacy, consent, retention a deletion,
+- accessibility,
+- lokalizaci, timezone a jednotky,
+- battery, GPS, síť a mobilní zdroje,
+- škálovatelnost a backpressure,
+- observabilitu a audit,
+- zálohy, RPO, RTO a disaster recovery,
+- maintainability, kompatibilitu a migrace,
+- quality gates a release testy,
+- uživatelskou srozumitelnost a důvěru.
 
 ## 5.1 Co ještě vyžaduje review
 
 Před `IMPLEMENTATION_READY` je nutné:
 
-- ověřit úplnost proti celému `product-scope.md`,
-- namapovat FR na scénáře, UX a doménu,
-- přiřadit release disposition,
-- vytvořit AcceptanceCriterion pro CORE a IMPORTANT,
-- provést medicínské a právní review označených požadavků,
-- ověřit, že žádné dva FR nemají konfliktní význam.
+- určit referenční device, OS, síť a dataset profily,
+- potvrdit číselné latency, availability, RPO a RTO cíle,
+- namapovat každý CRITICAL NFR na kontrolu a test,
+- provést security a privacy review,
+- provést medicínské review pain a safety wordingů,
+- sladit AI cíle s model selection a cost policy,
+- sladit performance cíle s cloud a mobile proof-of-concept měřením,
+- převést quality gates do quality a release dokumentace.
 
 ---
 
@@ -180,49 +186,35 @@ Před `IMPLEMENTATION_READY` je nutné:
 
 ---
 
-# 7. Bezprostředně následující dokument
+# 7. Bezprostředně následující fáze
 
-```text
-docs/02-product/non-functional-requirements.md
-```
+Produktové a doménové základy jsou nyní dostatečně podrobné pro návrh hlavních technických architektur.
 
-Má zavést stabilní identifikátory `NFR-xxx` a měřitelné požadavky pro:
+Doporučené pořadí:
 
-- dostupnost a spolehlivost,
-- výkon a odezvu,
-- offline fungování,
-- konzistenci, idempotenci a obnovu,
-- bezpečnost a privacy,
-- data retention a deletion,
-- accessibility a localization,
-- mobilní battery, storage a network limity,
-- škálovatelnost,
-- observabilitu,
-- portability a maintainability,
-- provider a AI fallbacky.
+1. `docs/07-backend/backend-architecture.md`
+2. `docs/12-data/data-architecture.md`
+3. `docs/08-mobile/mobile-architecture.md`
+4. `docs/09-ai/ai-architecture.md`
+5. `docs/11-security/security-architecture.md`
+6. `docs/10-integrations/integration-architecture.md`
+
+Release scope a traceability zůstávají potvrzené potřebné dokumenty, ale jejich detail je účelné dokončit společně s architekturami a acceptance strategií, aby neobsahovaly pouze odhady technické náročnosti.
 
 ---
 
 # 8. Následující pořadí práce
 
-## Fáze 1 – požadavky
+## Fáze 1 – hlavní architektury
 
-1. ✅ `functional-requirements.md`
-2. ⏭️ `non-functional-requirements.md`
-3. release scope a priority matrix
-4. traceability matrix
-5. acceptance criteria strategy
-
-## Fáze 2 – hlavní architektury
-
-1. backend architecture,
+1. ⏭️ backend architecture,
 2. data architecture,
 3. mobile architecture,
 4. AI architecture,
 5. security architecture,
 6. integration architecture.
 
-## Fáze 3 – konkrétní kontrakty
+## Fáze 2 – konkrétní kontrakty
 
 - ADR technologických voleb,
 - fyzická databázová schémata,
@@ -232,15 +224,15 @@ Má zavést stabilní identifikátory `NFR-xxx` a měřitelné požadavky pro:
 - event schemas,
 - provider capability matrix.
 
-## Fáze 4 – UX a design
+## Fáze 3 – product delivery kontrakty
 
-- routes a deep links,
-- globální loading/error/offline/conflict stavy,
-- accessibility,
-- design tokens a komponenty,
-- kritické interaction contracts.
+- release scope a priority matrix,
+- traceability matrix,
+- acceptance criteria strategy,
+- UX routes a globální stavy,
+- design system.
 
-## Fáze 5 – kvalita, delivery a provoz
+## Fáze 4 – kvalita, delivery a provoz
 
 - test strategy,
 - AI evaluation,
@@ -250,7 +242,7 @@ Má zavést stabilní identifikátory `NFR-xxx` a měřitelné požadavky pro:
 - observability,
 - SLO a runbooks.
 
-## Fáze 6 – implementační balíček
+## Fáze 5 – implementační balíček
 
 - repository strategy,
 - vertical slices,
@@ -282,30 +274,47 @@ ID se nesmí recyklovat.
 
 # 10. Připravenost oblastí
 
-| Oblast | Obsahová připravenost | Implementační připravenost | Další krok |
+| Oblast | Obsahová připravenost | Implementační připravenost | Hlavní další krok |
 |---|---:|---:|---|
-| Vision | vysoká | nevztahuje se přímo | review |
-| Product principles | vysoká | střední | ID principů |
-| Product scope | vysoká | střední | NFR, release scope |
-| Functional requirements | vysoká | střední | traceability, AC, review |
+| Vision | vysoká | nevztahuje se přímo | konzistenční review |
+| Product scope | vysoká | střední | release scope |
+| Functional requirements | vysoká | střední | traceability a acceptance criteria |
+| Non-functional requirements | vysoká | střední | architecture mapping a quality gates |
 | Users | vysoká | střední | ID a traceability |
-| UX | vysoká | střední | routes, states, AC |
-| Domain | velmi vysoká | střední | consistency a expert review |
+| UX | vysoká | střední | states, routes, accessibility |
+| Domain | velmi vysoká | střední | consistency a odborné review |
 | Backend | nízká | nízká | backend architecture |
-| Mobile | nízká | nízká | mobile architecture |
-| AI runtime | střední doménově | nízká | AI architecture a tools |
-| Integrations | střední obecně | nízká | capability matrix |
-| Security | nízká až střední | nízká | architecture a threat model |
 | Data | nízká | nízká | data architecture |
-| API | nízká | nízká | API principles a contracts |
+| Mobile | nízká | nízká | mobile architecture |
+| AI runtime | střední doménově | nízká | AI architecture |
+| Security | nízká až střední | nízká | security architecture |
+| Integrations | střední obecně | nízká | integration architecture a capability audit |
 | Quality | nízká | nízká | quality strategy |
-| DevOps/Release/Operations | nízká | nízká | až po architekturách |
-| Claude implementation guide | nízká | nízká | až po kontraktech |
+| DevOps | nízká | nízká | environments a deployment architecture |
+| Release | nízká | nízká | release strategy |
+| Operations | nízká | nízká | SLO a runbooks |
+| Claude implementation guide | nízká | nízká | až po architekturách a kontraktech |
 
 ---
 
-# 11. Závěr
+# 11. Pracovní cyklus
 
-Produktový rozsah je nyní převeden do stabilního registru funkčních požadavků. Dalším krokem je definovat měřitelné kvalitativní vlastnosti systému v `non-functional-requirements.md`.
+```text
+zkontrolovat aktuální GitHub
+    ↓
+ověřit související zdroje pravdy
+    ↓
+vybrat skutečnou mezeru
+    ↓
+vytvořit nebo upravit dokument
+    ↓
+commitnout změnu
+    ↓
+aktualizovat DOCUMENTATION_STATUS.md
+```
 
-Cílem není maximální počet dokumentů, ale úplnost bez duplicit a jednoznačná dohledatelnost od vize přes požadavek až k implementaci a testu.
+Další potvrzený dokument je:
+
+```text
+docs/07-backend/backend-architecture.md
+```
