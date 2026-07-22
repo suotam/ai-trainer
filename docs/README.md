@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.1  
+**Verze:** 1.2  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -9,7 +9,7 @@
 
 # 1. Účel
 
-Tato složka obsahuje produktovou, UX, doménovou, technickou, bezpečnostní, integrační, testovací a provozní dokumentaci aplikace AI Trainer.
+Tato složka obsahuje produktovou, UX, doménovou, technickou, bezpečnostní, integrační, delivery, testovací a provozní dokumentaci aplikace AI Trainer.
 
 Aktuální stav, mezery a pořadí práce vlastní:
 
@@ -53,12 +53,7 @@ docs/02-product/non-functional-requirements.md
 docs/02-product/release-scope.md
 ```
 
-- `vision.md` vlastní poslání, dlouhodobou vizi a odlišení.
-- `product-principles.md` vlastní neměnné zásady.
-- `product-scope.md` vlastní dlouhodobý rozsah a orientační etapy.
-- `functional-requirements.md` vlastní `FR-001` až `FR-192`.
-- `non-functional-requirements.md` vlastní `NFR-001` až `NFR-172`.
-- `release-scope.md` vlastní skutečnou implementační baseline R0 až R5, priority P0 až P3, exit criteria a pravidla `RSR-001` až `RSR-015`.
+`release-scope.md` vlastní skutečnou implementační baseline R0 až R5, priority P0 až P3, exit criteria a pravidla `RSR-001` až `RSR-015`.
 
 ## 3.2 Users and UX
 
@@ -69,8 +64,6 @@ docs/04-ux/information-architecture.md
 docs/04-ux/core-user-flows.md
 docs/04-ux/screen-specifications.md
 ```
-
-Tyto dokumenty vlastní potřeby uživatelů, scénáře, informační hierarchii, hlavní flow a funkční chování obrazovek.
 
 ## 3.3 Domain
 
@@ -92,7 +85,7 @@ docs/06-domain/domain-invariants.md
 docs/06-domain/glossary.md
 ```
 
-Detailní model vlastní význam svých agregátů, entit, stavů a pravidel. `domain-invariants.md` vlastní `INV-001` až `INV-100`; `glossary.md` kanonické názvosloví a `domain-events.md` význam doménových událostí.
+Detailní model vlastní význam svých agregátů, entit, stavů a pravidel. `domain-invariants.md` vlastní globální invariance; `glossary.md` kanonické názvosloví a `domain-events.md` význam doménových událostí.
 
 ## 3.4 Architecture
 
@@ -105,12 +98,15 @@ docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
 ```
 
-- backend vlastní `BAR-001` až `BAR-015`,
-- data vlastní `DAR-001` až `DAR-015`,
-- mobile vlastní `MAR-001` až `MAR-015`,
-- AI vlastní `AIR-001` až `AIR-015`,
-- security vlastní `SAR-001` až `SAR-015`,
-- integrations vlastní `IAR-001` až `IAR-015`.
+Architektonické řady pravidel jsou `BAR`, `DAR`, `MAR`, `AIR`, `SAR` a `IAR`.
+
+## 3.5 Delivery
+
+```text
+docs/13-delivery/repository-strategy.md
+```
+
+`repository-strategy.md` vlastní monorepo layout, hranice mobile/backend/contracts, migrations ownership, test placement, tooling, generated-code policy a pravidla `RER-001` až `RER-015`.
 
 ---
 
@@ -127,11 +123,11 @@ R1 – Local Workout Slice
 
 R0 a R1 nesmí blokovat účet, cloudový sync, generativní AI, wearables ani externí kalendáře.
 
-Před zahájením programování je potřeba dokončit pouze startovní implementační minimum:
+Startovní implementační minimum:
 
-1. release scope,
-2. repository strategy a projektovou strukturu,
-3. počáteční ADR balík,
+1. ✅ release scope,
+2. ✅ repository strategy a projektová struktura,
+3. ⏭️ počáteční ADR balík,
 4. minimální fyzický datový model R1,
 5. minimální API contract,
 6. test strategy,
@@ -143,42 +139,63 @@ Detailní kontrakty pro R2 až R5 vznikají nejpozději před implementací slic
 
 ---
 
-# 5. Pravidla práce s dokumentací
+# 5. Repository baseline
 
-## 5.1 Jeden význam, jeden vlastník
+Výchozí top-level struktura je:
+
+```text
+ai-trainer/
+├── apps/
+│   ├── mobile/
+│   └── backend/
+├── packages/
+│   └── contracts/
+├── database/
+├── tooling/
+├── docs/
+└── .github/
+```
+
+Platí zejména:
+
+- mobile a backend jsou samostatné aplikace,
+- mobile je feature-first,
+- backend respektuje modulární boundaries,
+- contracts nejsou sdílený interní doménový model,
+- serverové a mobilní migrace mají odlišný lifecycle,
+- testy mají jednoznačné ownership,
+- R1 je lokální a nevyžaduje backend,
+- secrets a skutečná uživatelská data nepatří do repozitáře.
+
+Detail vlastní `docs/13-delivery/repository-strategy.md`.
+
+---
+
+# 6. Pravidla práce s dokumentací
+
+## 6.1 Jeden význam, jeden vlastník
 
 Každý významný pojem nebo pravidlo má jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
 
-## 5.2 Nový soubor pouze pro skutečnou mezeru
+## 6.2 Nový soubor pouze pro skutečnou mezeru
 
-Nový dokument vznikne pouze pokud:
+Nový dokument vznikne pouze pokud téma dosud nemá zdroj pravdy, tvoří samostatný kontrakt nebo významně zlepší implementaci, audit, testování či provoz.
 
-- téma dosud nemá zdroj pravdy,
-- existující dokument je příliš obecný pro implementaci,
-- téma má jiného vlastníka nebo životní cyklus,
-- obsah tvoří samostatný kontrakt,
-- rozdělení významně zlepší práci lidí nebo coding agentů,
-- soubor je nutný pro audit, test, provoz nebo provider integraci.
+## 6.3 AI není zdroj pravdy
 
-## 5.3 AI není zdroj pravdy
+AI může interpretovat a navrhovat. Doménovou změnu provádí pouze autorizovaný a validovaný proces podle `AIProposal`, `ChangeSet`, potvrzovací policy a invariant.
 
-AI může interpretovat, navrhovat a vysvětlovat. Doménovou změnu provádí pouze autorizovaný a validovaný proces podle `AIProposal`, `ChangeSet`, potvrzovací policy a invariant.
+## 6.4 Offline-first
 
-## 5.4 Historie se nepřepisuje
+Kritické workout flow musí fungovat bez sítě. R1 je záměrně lokální slice.
 
-Opravy a změny musí zachovat původ, revize, audit a historickou interpretovatelnost.
-
-## 5.5 Offline-first
-
-Kritické workout flow musí fungovat bez sítě. Detailní pravidla vlastní sync model, data architecture, mobile architecture, security architecture a release scope.
-
-## 5.6 Vertical slice first
+## 6.5 Vertical slice first
 
 Implementace postupuje po spustitelných produktových slices. Dlouhé izolované budování technologických vrstev bez ověřitelného uživatelského flow není cílový postup.
 
 ---
 
-# 6. Metadata a identifikátory
+# 7. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -195,16 +212,15 @@ Vlastněné pojmy nebo kontrakty:
 
 Používané identifikátory zahrnují:
 
-- `PP-xxx`, `FR-xxx`, `NFR-xxx`, `INV-xxx`,
-- `BAR-xxx`, `DAR-xxx`, `MAR-xxx`, `AIR-xxx`, `SAR-xxx`, `IAR-xxx`, `RSR-xxx`,
-- `SCN-xxx`, `FLOW-xxx`, `SCR-xxx`,
-- `ADR-xxx`, `AC-xxx`, `EVT-xxx`.
+- `PP`, `FR`, `NFR`, `INV`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`,
+- `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
-ID se nerecyklují pro jiný význam.
+ID se nerecyklují.
 
 ---
 
-# 7. Pracovní cyklus
+# 8. Pracovní cyklus
 
 ```text
 zkontrolovat aktuální GitHub
@@ -224,19 +240,19 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 ---
 
-# 8. Aktuální další krok
+# 9. Aktuální další krok
 
 Podle současného auditu následuje:
 
 ```text
-docs/13-delivery/repository-strategy.md
+docs/05-architecture/initial-architecture-decisions.md
 ```
 
-Tento dokument má konkretizovat skutečnou strukturu repozitáře, hranice mobilu, backendu, shared contracts, migrations, tests, tooling a dokumentace pro R0 a R1.
+Má obsahovat malý počáteční ADR balík pouze pro rozhodnutí blokující R0 a R1: backend, mobile state management a DI, lokální a serverovou databázi, contracts/code generation a CI/development environment.
 
 ---
 
-# 9. Instrukce pro coding agenta
+# 10. Instrukce pro coding agenta
 
 Před implementací změny musí agent:
 
@@ -245,22 +261,14 @@ Před implementací změny musí agent:
 3. načíst relevantní invarianty a glossary,
 4. načíst příslušný doménový model,
 5. načíst FR, NFR a release scope,
-6. načíst dotčené architektury a kontrakty,
+6. načíst dotčené architektury, repository strategy a kontrakty,
 7. ověřit ADR, acceptance criteria a Definition of Done,
 8. až poté měnit kód.
 
-Agent nesmí:
-
-- zavádět nový doménový pojem bez dokumentace,
-- obcházet invariance, autorizaci nebo safety,
-- umožnit AI přímý zápis mimo Proposal a ChangeSet flow,
-- důvěřovat klientské roli nebo ownershipu bez serverového ověření,
-- vložit secret do repozitáře, klienta nebo logu,
-- implementovat odloženou P3 funkci bez změny release scope,
-- označit úkol za hotový bez testů a Definition of Done.
+Agent nesmí obcházet invariance, vytvářet paralelní repository strukturu bez rozhodnutí, sdílet interní model mezi mobilem a backendem, vložit secret do repozitáře ani označit práci za hotovou bez testů.
 
 ---
 
-# 10. Závěr
+# 11. Závěr
 
-`docs/README.md` určuje orientaci, `DOCUMENTATION_STATUS.md` aktuální stav, `release-scope.md` skutečnou implementační baseline a každý vlastnící dokument přesný význam své oblasti.
+`docs/README.md` určuje orientaci, `DOCUMENTATION_STATUS.md` aktuální stav, `release-scope.md` implementační baseline, `repository-strategy.md` fyzické hranice repozitáře a každý vlastnící dokument přesný význam své oblasti.
