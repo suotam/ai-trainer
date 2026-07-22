@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 1.6  
+**Verze:** 1.7  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -53,9 +53,10 @@ Projekt má obsahově pokryté:
 - repository strategy a pravidla `RER-001` až `RER-015`,
 - počáteční technologická rozhodnutí `ADR-001` až `ADR-010`,
 - fyzický lokální datový model R1 a pravidla `PDR-001` až `PDR-015`,
-- minimální R0 HTTP/OpenAPI kontrakt a pravidla `APR-001` až `APR-015`.
+- minimální R0 HTTP/OpenAPI kontrakt a pravidla `APR-001` až `APR-015`,
+- test strategy, quality gates a pravidla `QTR-001` až `QTR-015`.
 
-Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení zbývajícího malého startovního implementačního minima; není nutné předem dokončit kontrakty pro pozdější AI, sync, provider a operations slices.
+Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení tří zbývajících delivery dokumentů; kontrakty pro pozdější AI, sync, provider a operations slices předem blokovat nemají.
 
 ---
 
@@ -93,7 +94,7 @@ Hlavní architektonická fáze je dokončena. Programování R0 a R1 může zač
 
 Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals, training plan, workout, scheduling, activity, recovery/limitations, AI/change, metrics, integrations, sync/offline, domain events, invariants a glossary. Obsahová připravenost je vysoká; zbývá consistency a odborné review.
 
-## 4.5 Architecture, contracts, data and delivery
+## 4.5 Architecture, contracts, data, quality and delivery
 
 | Soubor | Stav | Zdroj pravdy pro |
 |---|---|---|
@@ -107,34 +108,35 @@ Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals
 | `docs/11-security/security-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Security boundaries a `SAR-001` až `SAR-015`. |
 | `docs/10-integrations/integration-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Integrace a `IAR-001` až `IAR-015`. |
 | `docs/13-delivery/repository-strategy.md` | SUBSTANTIAL_DRAFT | Monorepo layout, boundaries, tests, migrations, tooling a `RER-001` až `RER-015`. |
+| `docs/14-quality/test-strategy.md` | SUBSTANTIAL_DRAFT | Test levels, ownership, CI gates, critical paths, flaky policy, release evidence a `QTR-001` až `QTR-015`. |
 
 ---
 
-# 5. Dokončený krok – R0 API contract
+# 5. Dokončený krok – Test strategy
 
-`docs/07-backend/r0-api-contract.md` definuje:
+`docs/14-quality/test-strategy.md` definuje:
 
-- kanonický OpenAPI source path,
-- `/api/v1` namespace,
-- liveness endpoint,
-- readiness endpoint,
-- bezpečný standardní error envelope,
-- request correlation přes `X-Request-Id`,
-- status code, media type, cache a retry pravidla,
-- bezpečnostní omezení health payloadů,
-- versioning a compatibility policy,
-- implementační hranice controller/application/adapters,
-- automatizované contract a integration test minimum,
-- R0 API exit criteria,
-- pravidla `APR-001` až `APR-015`.
+- static, unit, widget, integration, contract, migration, architecture a end-to-end test levels,
+- test ownership,
+- R0 backend critical path,
+- R1 offline workout critical path,
+- skutečné SQLite a PostgreSQL integration testy,
+- OpenAPI compatibility tests,
+- mobile a server migration tests,
+- CI pull-request, main a release-candidate gates,
+- flaky-test quarantine policy,
+- risk-based interpretaci coverage,
+- test data a test-double pravidla,
+- release evidence,
+- security a reliability baseline,
+- pravidla `QTR-001` až `QTR-015`.
 
 ## 5.1 Praktický dopad
 
-R0 backend má nyní jednoznačný minimální transportní kontrakt. Workout, identity, sync, AI ani integration endpointy se předčasně nezavádějí. Liveness nezávisí na externích službách, readiness ověřuje povinné závislosti a HTTP chyby nesmí odhalovat interní detaily.
+R0 a R1 mají jednoznačně definované důkazy dokončení. Zelený build bez relevantních integration, contract a migration testů není dostatečný. Kritický R1 tok musí automatizovaně ověřit restart a recovery aktivní session a dokončení bez ztráty potvrzených dat.
 
 ## 5.2 Co ještě zbývá před programováním R0/R1
 
-- test strategy a release gates,
 - Definition of Ready a Done,
 - vertical-slice implementation plan,
 - coding-agent instructions a context-loading guide.
@@ -151,20 +153,22 @@ R0 backend má nyní jednoznačný minimální transportní kontrakt. Workout, i
 | obecný `monorepo-overview.md` | `repository-strategy.md` |
 | obecný `flutter-project-structure.md` | mobile architecture + repository strategy |
 | obecný `backend-project-structure.md` | backend architecture + repository strategy |
-| obecný `test-folder-layout.md` | repository strategy; podrobnosti patří do test strategy |
+| obecný `test-folder-layout.md` | repository strategy + test strategy |
+| samostatný `mobile-test-overview.md` | `test-strategy.md` |
+| samostatný `backend-test-overview.md` | `test-strategy.md` |
+| samostatný `flaky-test-policy.md` | `test-strategy.md` |
+| samostatný `coverage-policy.md` | `test-strategy.md` |
+| samostatný `contract-test-overview.md` | `test-strategy.md` + vlastnící kontrakt |
 | samostatný `mobile-tech-stack.md` | initial architecture decisions |
 | samostatný `backend-tech-stack.md` | initial architecture decisions |
 | samostatný `database-choice.md` | initial architecture decisions |
 | obecný `r1-local-database-overview.md` | `r1-physical-data-model.md` |
-| obecný `workout-persistence.md` | workout model + `r1-physical-data-model.md` |
 | obecný `health-endpoints.md` | `r0-api-contract.md` |
-| obecný `error-envelope.md` | `r0-api-contract.md`; budoucí API jej rozšíří bez duplikace |
-| obecný `api-versioning.md` | `r0-api-contract.md`; širší policy vznikne pouze při skutečné potřebě |
+| obecný `error-envelope.md` | `r0-api-contract.md` |
 | obecný `offline-principles.md` | sync model + mobile architecture |
 | obecný `event-catalog.md` | `domain-events.md` |
 | obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do pozdějšího ADR |
 | obecný `authentication-overview.md` | security architecture; konkrétní volba patří do pozdějšího ADR |
-| obecný `integration-principles.md` | integration model + integration architecture |
 
 ---
 
@@ -181,8 +185,8 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 3. ✅ počáteční ADR balík,
 4. ✅ minimální fyzický datový model R1,
 5. ✅ minimální API contract,
-6. ⏭️ test strategy,
-7. Definition of Ready a Done,
+6. ✅ test strategy,
+7. ⏭️ Definition of Ready a Done,
 8. vertical-slice implementation plan,
 9. coding-agent instructions a context-loading guide.
 
@@ -203,7 +207,7 @@ Po tomto balíku lze začít programovat R0 a R1.
 Používané řady zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`, `APR`, `QTR`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nesmí recyklovat.
@@ -215,16 +219,17 @@ ID se nesmí recyklovat.
 | Oblast | Obsahová připravenost | Implementační připravenost | Hlavní další krok |
 |---|---:|---:|---|
 | Product requirements | vysoká | střední až vysoká | FR/NFR mapování a AC |
-| Release scope | vysoká | střední | backlog a traceability R0/R1 |
+| Release scope | vysoká | střední až vysoká | backlog a traceability R0/R1 |
 | Repository strategy | vysoká | vysoká | skutečný R0 skeleton |
 | Initial ADR | vysoká | vysoká pro R0/R1 | ověřit implementací |
 | R1 local data | vysoká | vysoká | Drift implementace a tests |
 | R0 API | vysoká | vysoká | OpenAPI a backend implementace |
+| Quality | vysoká | vysoká pro R0/R1 baseline | implementovat CI gates a suites |
 | Backend | vysoká | vysoká pro R0 základ | architecture a contract tests |
 | Mobile | vysoká | vysoká pro R1 základ | repository a persistence implementace |
-| Quality | nízká | nízká | test strategy |
-| DevOps | střední | střední | environments a CI implementace |
-| Coding agent | nízká | nízká | instrukce po startovních kontraktech |
+| DevOps | střední | střední až vysoká | environments a CI implementace |
+| Delivery workflow | střední | nízká až střední | Definition of Ready and Done |
+| Coding agent | nízká | nízká | instrukce po delivery kontraktech |
 
 ---
 
@@ -247,7 +252,7 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/14-quality/test-strategy.md
+docs/13-delivery/definition-of-ready-and-done.md
 ```
 
-Tento dokument má definovat testovací pyramid, test ownership, R0/R1 critical paths, contract a migration tests, CI gates, flaky-test policy, coverage interpretation a release evidence bez duplikace konkrétních test cases z jednotlivých kontraktů.
+Tento dokument má převést existující produktové, technické a testovací kontrakty na praktické vstupní a výstupní podmínky pro backlog item, pull request, R0 a R1 slice. Nemá duplikovat detailní test strategy ani acceptance criteria jednotlivých funkcí.
