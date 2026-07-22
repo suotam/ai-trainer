@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.2  
+**Verze:** 1.3  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -90,6 +90,7 @@ Detailní model vlastní význam svých agregátů, entit, stavů a pravidel. `d
 ## 3.4 Architecture
 
 ```text
+docs/05-architecture/initial-architecture-decisions.md
 docs/07-backend/backend-architecture.md
 docs/12-data/data-architecture.md
 docs/08-mobile/mobile-architecture.md
@@ -98,7 +99,8 @@ docs/11-security/security-architecture.md
 docs/10-integrations/integration-architecture.md
 ```
 
-Architektonické řady pravidel jsou `BAR`, `DAR`, `MAR`, `AIR`, `SAR` a `IAR`.
+- `initial-architecture-decisions.md` vlastní `ADR-001` až `ADR-010` pro technologie blokující R0 a R1.
+- Architektonické řady pravidel jsou `BAR`, `DAR`, `MAR`, `AIR`, `SAR` a `IAR`.
 
 ## 3.5 Delivery
 
@@ -127,8 +129,8 @@ Startovní implementační minimum:
 
 1. ✅ release scope,
 2. ✅ repository strategy a projektová struktura,
-3. ⏭️ počáteční ADR balík,
-4. minimální fyzický datový model R1,
+3. ✅ počáteční ADR balík,
+4. ⏭️ minimální fyzický datový model R1,
 5. minimální API contract,
 6. test strategy,
 7. Definition of Ready a Done,
@@ -139,7 +141,28 @@ Detailní kontrakty pro R2 až R5 vznikají nejpozději před implementací slic
 
 ---
 
-# 5. Repository baseline
+# 5. Přijatá technologická baseline R0/R1
+
+Pro R0 a R1 platí:
+
+- Flutter a Dart,
+- Riverpod,
+- GoRouter,
+- Drift nad SQLite,
+- Kotlin a Spring Boot,
+- PostgreSQL a Flyway,
+- OpenAPI,
+- Docker Compose,
+- GitHub Actions,
+- Flutter tests, Spring tests a Testcontainers.
+
+Rozhodnutí pro identity, sync, AI providery, externí integrace a produkční deployment jsou záměrně odložená do pozdějších slices.
+
+Detail vlastní `docs/05-architecture/initial-architecture-decisions.md`.
+
+---
+
+# 6. Repository baseline
 
 Výchozí top-level struktura je:
 
@@ -171,31 +194,31 @@ Detail vlastní `docs/13-delivery/repository-strategy.md`.
 
 ---
 
-# 6. Pravidla práce s dokumentací
+# 7. Pravidla práce s dokumentací
 
-## 6.1 Jeden význam, jeden vlastník
+## 7.1 Jeden význam, jeden vlastník
 
 Každý významný pojem nebo pravidlo má jeden hlavní vlastnící dokument. Ostatní dokumenty na něj odkazují a konkretizují pouze svůj kontext.
 
-## 6.2 Nový soubor pouze pro skutečnou mezeru
+## 7.2 Nový soubor pouze pro skutečnou mezeru
 
 Nový dokument vznikne pouze pokud téma dosud nemá zdroj pravdy, tvoří samostatný kontrakt nebo významně zlepší implementaci, audit, testování či provoz.
 
-## 6.3 AI není zdroj pravdy
+## 7.3 AI není zdroj pravdy
 
 AI může interpretovat a navrhovat. Doménovou změnu provádí pouze autorizovaný a validovaný proces podle `AIProposal`, `ChangeSet`, potvrzovací policy a invariant.
 
-## 6.4 Offline-first
+## 7.4 Offline-first
 
 Kritické workout flow musí fungovat bez sítě. R1 je záměrně lokální slice.
 
-## 6.5 Vertical slice first
+## 7.5 Vertical slice first
 
 Implementace postupuje po spustitelných produktových slices. Dlouhé izolované budování technologických vrstev bez ověřitelného uživatelského flow není cílový postup.
 
 ---
 
-# 7. Metadata a identifikátory
+# 8. Metadata a identifikátory
 
 Každý nový nebo revidovaný dokument má obsahovat:
 
@@ -220,7 +243,7 @@ ID se nerecyklují.
 
 ---
 
-# 8. Pracovní cyklus
+# 9. Pracovní cyklus
 
 ```text
 zkontrolovat aktuální GitHub
@@ -240,19 +263,19 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 
 ---
 
-# 9. Aktuální další krok
+# 10. Aktuální další krok
 
 Podle současného auditu následuje:
 
 ```text
-docs/05-architecture/initial-architecture-decisions.md
+docs/12-data/r1-physical-data-model.md
 ```
 
-Má obsahovat malý počáteční ADR balík pouze pro rozhodnutí blokující R0 a R1: backend, mobile state management a DI, lokální a serverovou databázi, contracts/code generation a CI/development environment.
+Má konkretizovat pouze lokální SQLite/Drift schema, constraints, migrace, recovery a persistence mapping pro R1. Nemá navrhovat celé budoucí produkční schéma.
 
 ---
 
-# 10. Instrukce pro coding agenta
+# 11. Instrukce pro coding agenta
 
 Před implementací změny musí agent:
 
@@ -261,14 +284,8 @@ Před implementací změny musí agent:
 3. načíst relevantní invarianty a glossary,
 4. načíst příslušný doménový model,
 5. načíst FR, NFR a release scope,
-6. načíst dotčené architektury, repository strategy a kontrakty,
-7. ověřit ADR, acceptance criteria a Definition of Done,
+6. načíst dotčená ADR, architektury, repository strategy a kontrakty,
+7. ověřit acceptance criteria a Definition of Done,
 8. až poté měnit kód.
 
 Agent nesmí obcházet invariance, vytvářet paralelní repository strukturu bez rozhodnutí, sdílet interní model mezi mobilem a backendem, vložit secret do repozitáře ani označit práci za hotovou bez testů.
-
----
-
-# 11. Závěr
-
-`docs/README.md` určuje orientaci, `DOCUMENTATION_STATUS.md` aktuální stav, `release-scope.md` implementační baseline, `repository-strategy.md` fyzické hranice repozitáře a každý vlastnící dokument přesný význam své oblasti.
