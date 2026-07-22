@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 1.4  
+**Verze:** 1.5  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -51,9 +51,10 @@ Projekt má obsahově pokryté:
 - `NFR-001` až `NFR-172`,
 - backend, data, mobile, AI, security a integration architecture,
 - repository strategy a pravidla `RER-001` až `RER-015`,
-- počáteční technologická rozhodnutí `ADR-001` až `ADR-010` pro R0 a R1.
+- počáteční technologická rozhodnutí `ADR-001` až `ADR-010`,
+- fyzický lokální datový model R1 a pravidla `PDR-001` až `PDR-015`.
 
-Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení malého startovního implementačního minima; není nutné předem dokončit všechny kontrakty pro pozdější AI, sync, provider a operations slices.
+Hlavní architektonická fáze je dokončena. Programování R0 a R1 může začít po dokončení zbývajícího malého startovního implementačního minima; není nutné předem dokončit kontrakty pro pozdější AI, sync, provider a operations slices.
 
 ---
 
@@ -91,13 +92,14 @@ Hlavní architektonická fáze je dokončena. Programování R0 a R1 může zač
 
 Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals, training plan, workout, scheduling, activity, recovery/limitations, AI/change, metrics, integrations, sync/offline, domain events, invariants a glossary. Obsahová připravenost je vysoká; zbývá consistency a odborné review.
 
-## 4.5 Architecture and delivery
+## 4.5 Architecture, data and delivery
 
 | Soubor | Stav | Zdroj pravdy pro |
 |---|---|---|
-| `docs/05-architecture/initial-architecture-decisions.md` | SUBSTANTIAL_DRAFT | Flutter, Riverpod, GoRouter, Drift/SQLite, Kotlin/Spring Boot, PostgreSQL/Flyway, OpenAPI, Compose, GitHub Actions a test baseline. |
+| `docs/05-architecture/initial-architecture-decisions.md` | SUBSTANTIAL_DRAFT | Technologie blokující R0/R1 a `ADR-001` až `ADR-010`. |
 | `docs/07-backend/backend-architecture.md` | SUBSTANTIAL_DRAFT | Backendové hranice a `BAR-001` až `BAR-015`. |
 | `docs/12-data/data-architecture.md` | SUBSTANTIAL_DRAFT | Datové vrstvy a `DAR-001` až `DAR-015`. |
+| `docs/12-data/r1-physical-data-model.md` | SUBSTANTIAL_DRAFT | Lokální SQLite/Drift schema R1, transakce, migrace, recovery a `PDR-001` až `PDR-015`. |
 | `docs/08-mobile/mobile-architecture.md` | SUBSTANTIAL_DRAFT | Mobilní runtime a `MAR-001` až `MAR-015`. |
 | `docs/09-ai/ai-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | AI runtime a `AIR-001` až `AIR-015`. |
 | `docs/11-security/security-architecture.md` | SUBSTANTIAL_DRAFT / EXPERT_REVIEW_REQUIRED | Security boundaries a `SAR-001` až `SAR-015`. |
@@ -106,32 +108,28 @@ Doménová vrstva obsahuje vlastnící modely pro identity/profile, sports/goals
 
 ---
 
-# 5. Dokončený krok – Initial architecture decisions
+# 5. Dokončený krok – R1 physical data model
 
-`docs/05-architecture/initial-architecture-decisions.md` přijímá:
+`docs/12-data/r1-physical-data-model.md` definuje:
 
-- Flutter a Dart pro mobilní aplikaci,
-- Riverpod pro state management a dependency composition,
-- GoRouter pro navigaci,
-- Drift nad SQLite pro lokální persistence,
-- Kotlin a Spring Boot pro backend,
-- PostgreSQL a Flyway pro serverová data,
-- OpenAPI jako zdroj HTTP kontraktu,
-- Docker Compose pro lokální infrastrukturu,
-- GitHub Actions pro počáteční CI,
-- Flutter, Spring, Testcontainers a repository smoke test baseline,
-- explicitně odložená rozhodnutí pro R2 až R5,
-- pravidla `ADR-001` až `ADR-010`.
+- lokální SQLite/Drift schema pouze pro R1,
+- WorkoutInstance snapshot,
+- sections, steps a set plans,
+- WorkoutSession, step a set performances,
+- feedback a ActivitySummary,
+- transakční hranice startu, zápisu a dokončení,
+- repository a mapping boundaries,
+- seed data,
+- migrace, recovery, integritu a retenci,
+- testovací minimum,
+- pravidla `PDR-001` až `PDR-015`.
 
 ## 5.1 Praktický dopad
 
-R0 a R1 už nejsou blokovány volbou základních technologií. Následující dokument musí převést doménový workout model a R1 flow na konkrétní lokální tabulky, constraints, migrace a persistence hranice.
+R1 už má konkrétní persistence kontrakt. Aktivní session musí přežít restart aplikace, potvrzený výkon se nesmí ztratit a dokončení workoutu musí být atomické a idempotentní.
 
-## 5.2 Co ještě vyžaduje rozhodnutí
+## 5.2 Co ještě zbývá před programováním R0/R1
 
-Před `IMPLEMENTATION_READY` pro R0/R1 zbývá zejména:
-
-- minimální fyzický datový model R1,
 - minimální API contract pro R0,
 - test strategy a release gates,
 - Definition of Ready a Done,
@@ -154,7 +152,8 @@ Před `IMPLEMENTATION_READY` pro R0/R1 zbývá zejména:
 | samostatný `mobile-tech-stack.md` | initial architecture decisions |
 | samostatný `backend-tech-stack.md` | initial architecture decisions |
 | samostatný `database-choice.md` | initial architecture decisions |
-| samostatný `ci-provider.md` | initial architecture decisions |
+| obecný `r1-local-database-overview.md` | `r1-physical-data-model.md` |
+| obecný `workout-persistence.md` | workout model + `r1-physical-data-model.md` |
 | obecný `offline-principles.md` | sync model + mobile architecture |
 | obecný `event-catalog.md` | `domain-events.md` |
 | obecný `AI-provider-overview.md` | AI architecture; konkrétní volba patří do pozdějšího ADR |
@@ -167,24 +166,15 @@ Před `IMPLEMENTATION_READY` pro R0/R1 zbývá zejména:
 
 ## Fáze 1 – hlavní architektury
 
-Dokončeno obsahově:
-
-1. backend,
-2. data,
-3. mobile,
-4. AI,
-5. security,
-6. integrations.
+Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 
 ## Fáze 2 – startovní implementační minimum
-
-Doporučené pořadí:
 
 1. ✅ release scope,
 2. ✅ repository strategy a projektová struktura,
 3. ✅ počáteční ADR balík,
-4. ⏭️ minimální fyzický datový model R1,
-5. minimální API contract,
+4. ✅ minimální fyzický datový model R1,
+5. ⏭️ minimální API contract,
 6. test strategy,
 7. Definition of Ready a Done,
 8. vertical-slice implementation plan,
@@ -207,7 +197,7 @@ Po tomto balíku lze začít programovat R0 a R1.
 Používané řady zahrnují:
 
 - `PP`, `FR`, `NFR`, `INV`,
-- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`,
+- `BAR`, `DAR`, `MAR`, `AIR`, `SAR`, `IAR`, `RSR`, `RER`, `PDR`,
 - `SCN`, `FLOW`, `SCR`, `ADR`, `AC`, `EVT`.
 
 ID se nesmí recyklovat.
@@ -218,19 +208,13 @@ ID se nesmí recyklovat.
 
 | Oblast | Obsahová připravenost | Implementační připravenost | Hlavní další krok |
 |---|---:|---:|---|
-| Vision | vysoká | nevztahuje se přímo | konzistenční review |
 | Product requirements | vysoká | střední až vysoká | FR/NFR mapování a AC |
 | Release scope | vysoká | střední | backlog a traceability R0/R1 |
 | Repository strategy | vysoká | vysoká | skutečný R0 skeleton |
 | Initial ADR | vysoká | vysoká pro R0/R1 | ověřit implementací |
-| Users and UX | vysoká | střední | states, routes a accessibility |
-| Domain | velmi vysoká | střední | consistency a odborné review |
-| Backend | vysoká | střední až vysoká | API a architecture tests |
-| Data | vysoká | nízká až střední | physical schema R1 |
-| Mobile | vysoká | střední až vysoká | local schema a platform contracts |
-| AI runtime | vysoká | nízká až střední | kontrakty před R4 |
-| Security | vysoká | nízká až střední | threat model před produkčními flows |
-| Integrations | vysoká | nízká až střední | kontrakty před první integrací |
+| R1 local data | vysoká | vysoká | Drift implementace a tests |
+| Backend | vysoká | střední až vysoká | minimální API contract |
+| Mobile | vysoká | vysoká pro R1 základ | repository a persistence implementace |
 | Quality | nízká | nízká | test strategy |
 | DevOps | střední | střední | environments a CI implementace |
 | Coding agent | nízká | nízká | instrukce po startovních kontraktech |
@@ -256,7 +240,7 @@ aktualizovat DOCUMENTATION_STATUS.md a případně README
 Další potvrzený dokument je:
 
 ```text
-docs/12-data/r1-physical-data-model.md
+docs/07-backend/r0-api-contract.md
 ```
 
-Tento dokument má konkretizovat lokální SQLite/Drift schema, constraints, migrace, recovery a persistence mapping pro R1 bez navrhování celého budoucího produkčního datového modelu.
+Tento dokument má definovat pouze minimální OpenAPI/HTTP kontrakt nutný pro R0: health, readiness, standardní error envelope a contract/versioning pravidla. Workout API ani sync endpointy do R0 nepatří.
