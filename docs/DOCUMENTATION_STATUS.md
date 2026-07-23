@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.1  
+**Verze:** 2.2  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -60,10 +60,12 @@ Projekt má obsahově pokryté:
 
 `R0-01 – Repository Skeleton` je implementován: existuje kanonická root struktura (`apps/mobile`, `apps/backend`, `packages/contracts`, `tooling/scripts`), root `README.md`, `.editorconfig`, rozšířený `.gitignore` a repository smoke check `tooling/scripts/repo-smoke-check.sh`. Adresáře `database/`, `.github/` a `compose.yaml` vzniknou až se slices, které je skutečně potřebují (R0-05, R0-06).
 
+`R0-02 – Mobile Bootstrap` je implementován: Flutter aplikace v `apps/mobile` s Riverpod composition rootem, GoRouter shellem, základním theme, lokalizací (en + cs), environment configuration boundary a technickou úvodní obrazovkou; `flutter analyze` a testy jsou zelené, Android build a spuštění na emulátoru ověřeno. Explicitní výjimka (DRD-013): iOS build nebyl ověřen — vývojové prostředí nemá v Xcode nainstalovanou iOS platformu; validita iOS workspace ověřena přes `xcodebuild -list`. Výjimku vlastní mobile delivery a odstraní se ověřením iOS buildu v podporovaném prostředí, nejpozději v R0-06 CI.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-02 – Mobile Bootstrap
+R0-03 – Backend Bootstrap
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -197,7 +199,7 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 
 ```text
 R0-01 Repository Skeleton ✅
-R0-02 Mobile Bootstrap
+R0-02 Mobile Bootstrap ✅ (výjimka: iOS build evidence, viz §3)
 R0-03 Backend Bootstrap
 R0-04 Contracts and Health API
 R0-05 Local Infrastructure and Migrations
@@ -243,7 +245,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-02 – Mobile Bootstrap
+R0-03 – Backend Bootstrap
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
