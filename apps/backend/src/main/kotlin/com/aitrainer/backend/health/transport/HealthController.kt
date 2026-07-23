@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.RestController
  */
 @RestController
 @RequestMapping("/api/v1/health")
-class HealthController(private val healthQueryService: HealthQueryService) {
-
+class HealthController(
+    private val healthQueryService: HealthQueryService,
+) {
     @GetMapping("/live")
     fun getLiveness(): ResponseEntity<LivenessResponseDto> {
         val result = healthQueryService.liveness()
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .cacheControl(CacheControl.noStore())
             .body(
                 LivenessResponseDto(
@@ -38,7 +40,8 @@ class HealthController(private val healthQueryService: HealthQueryService) {
         if (!result.ready) {
             throw ServiceNotReadyException()
         }
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .cacheControl(CacheControl.noStore())
             .body(
                 ReadinessResponseDto(

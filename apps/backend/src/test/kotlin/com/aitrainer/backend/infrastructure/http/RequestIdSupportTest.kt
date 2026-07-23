@@ -1,13 +1,12 @@
 package com.aitrainer.backend.infrastructure.http
 
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class RequestIdSupportTest {
-
     @Test
     fun `validni prichozi hodnota se prijme beze zmeny`() {
         val incoming = "01J3EXAMPLE8R0-request.ID_1"

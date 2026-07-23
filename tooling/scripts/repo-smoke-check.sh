@@ -19,12 +19,15 @@ fail() {
   failures=$((failures + 1))
 }
 
-# 1. Kanonická struktura (stav po R0-05; .github/ přibude v R0-06).
+# 1. Kanonická struktura (stav po R0-06).
 required_paths=(
   "README.md"
   ".editorconfig"
   ".gitignore"
   "compose.yaml"
+  ".github/workflows/repository.yml"
+  ".github/workflows/mobile.yml"
+  ".github/workflows/backend.yml"
   "apps/mobile"
   "apps/backend"
   "packages/contracts"

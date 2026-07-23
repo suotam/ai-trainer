@@ -1,11 +1,11 @@
 package com.aitrainer.backend.health.infrastructure
 
 import com.aitrainer.backend.health.application.ReadinessIndicator
-import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
+import javax.sql.DataSource
 
 /**
  * Composition databázových readiness adapterů (R0-05). PostgreSQL a
@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.JdbcTemplate
  */
 @Configuration
 class DatabaseHealthConfiguration {
-
     @Bean
     fun databaseReadinessIndicator(dataSource: DataSource): ReadinessIndicator {
         val jdbcTemplate = JdbcTemplate(dataSource)
@@ -24,6 +23,5 @@ class DatabaseHealthConfiguration {
     }
 
     @Bean
-    fun migrationsReadinessIndicator(flyway: Flyway): ReadinessIndicator =
-        MigrationsReadinessIndicator(flyway)
+    fun migrationsReadinessIndicator(flyway: Flyway): ReadinessIndicator = MigrationsReadinessIndicator(flyway)
 }

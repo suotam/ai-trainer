@@ -1,0 +1,49 @@
+# Backend gates (R0-06): wrapper validace, ktlint, build, čerstvý test run.
+# Testy zahrnují OpenAPI validaci, contract testy a PostgreSQL/Flyway
+# migration testy přes Testcontainers (Docker je na ubuntu runnerech
+# dostupný). Lokální ekvivalenty viz apps/backend/README.md.
+name: backend
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    working-directory: apps/backend
+
+jobs:
+  build-and-test:
+    name: ktlint, build, tests (Testcontainers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('apps/backend/**/*.gradle.kts', 'apps/backend/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+      - name: ktlint check
+        run: ./gradlew --no-daemon ktlintCheck
+      - name: Build (includes tests and OpenAPI contract tests)
+        run: ./gradlew --no-daemon build
+      - name: Fresh test run evidence
+        run: ./gradlew --no-daemon test --rerun

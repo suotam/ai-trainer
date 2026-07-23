@@ -1,7 +1,6 @@
 package com.aitrainer.backend.infrastructure.http
 
 import com.aitrainer.backend.health.application.ServiceNotReadyException
-import java.time.Clock
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.http.CacheControl
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.time.Clock
 
 /**
  * Centralizované bezpečné mapování chyb na standardní error envelope
@@ -22,8 +22,9 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
  * odpovědi nikdy nepatří stack trace, interní třídy, SQL ani secrets.
  */
 @RestControllerAdvice
-class ApiErrorHandler(private val clock: Clock) {
-
+class ApiErrorHandler(
+    private val clock: Clock,
+) {
     private val log = LoggerFactory.getLogger(ApiErrorHandler::class.java)
 
     @ExceptionHandler(ServiceNotReadyException::class)
@@ -63,7 +64,8 @@ class ApiErrorHandler(private val clock: Clock) {
         message: String,
     ): ResponseEntity<ErrorResponseDto> {
         val requestId = MDC.get(RequestIdSupport.MDC_KEY) ?: RequestIdSupport.generate()
-        return ResponseEntity.status(status)
+        return ResponseEntity
+            .status(status)
             .cacheControl(CacheControl.noStore())
             .body(
                 ErrorResponseDto(

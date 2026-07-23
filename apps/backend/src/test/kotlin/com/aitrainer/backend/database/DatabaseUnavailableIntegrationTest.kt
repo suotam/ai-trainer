@@ -2,8 +2,6 @@ package com.aitrainer.backend.database
 
 import com.aitrainer.backend.infrastructure.http.RequestIdSupport
 import com.jayway.jsonpath.JsonPath
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.TestRestTemplate
@@ -14,6 +12,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean
 import org.springframework.test.annotation.DirtiesContext
 import org.testcontainers.containers.PostgreSQLContainer
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Failure path nedostupné databáze (`r0-api-contract.md` §14, QTR-007):
@@ -29,7 +29,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 @AutoConfigureTestRestTemplate
 @DirtiesContext
 class DatabaseUnavailableIntegrationTest {
-
     @TestConfiguration(proxyBeanMethods = false)
     class DedicatedPostgresConfiguration {
         @Bean

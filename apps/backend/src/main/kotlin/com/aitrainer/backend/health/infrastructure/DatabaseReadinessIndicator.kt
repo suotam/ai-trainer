@@ -9,8 +9,9 @@ import org.springframework.jdbc.core.JdbcTemplate
  * v [com.aitrainer.backend.health.application.HealthQueryService] mapuje
  * na DOWN — interní výjimka nikdy neopustí health boundary (APR-004).
  */
-class DatabaseReadinessIndicator(private val jdbcTemplate: JdbcTemplate) : ReadinessIndicator {
-
+class DatabaseReadinessIndicator(
+    private val jdbcTemplate: JdbcTemplate,
+) : ReadinessIndicator {
     override val name: String = "database"
 
     override fun check(): CheckStatus {

@@ -18,7 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class RequestIdFilter : OncePerRequestFilter() {
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

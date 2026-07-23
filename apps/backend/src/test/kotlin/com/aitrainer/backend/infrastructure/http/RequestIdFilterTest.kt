@@ -1,17 +1,16 @@
 package com.aitrainer.backend.infrastructure.http
 
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class RequestIdFilterTest {
-
     private val filter = RequestIdFilter()
 
     @Test
@@ -44,19 +43,20 @@ class RequestIdFilterTest {
         request.addHeader(RequestIdSupport.HEADER_NAME, "mdc-check-id")
         val response = MockHttpServletResponse()
         var observedMdcValue: String? = null
-        val chain = MockFilterChain(
-            object : jakarta.servlet.http.HttpServlet() {},
-            object : jakarta.servlet.Filter {
-                override fun doFilter(
-                    req: jakarta.servlet.ServletRequest,
-                    res: jakarta.servlet.ServletResponse,
-                    innerChain: jakarta.servlet.FilterChain,
-                ) {
-                    observedMdcValue = MDC.get(RequestIdSupport.MDC_KEY)
-                    innerChain.doFilter(req, res)
-                }
-            },
-        )
+        val chain =
+            MockFilterChain(
+                object : jakarta.servlet.http.HttpServlet() {},
+                object : jakarta.servlet.Filter {
+                    override fun doFilter(
+                        req: jakarta.servlet.ServletRequest,
+                        res: jakarta.servlet.ServletResponse,
+                        innerChain: jakarta.servlet.FilterChain,
+                    ) {
+                        observedMdcValue = MDC.get(RequestIdSupport.MDC_KEY)
+                        innerChain.doFilter(req, res)
+                    }
+                },
+            )
 
         filter.doFilter(request, response, chain)
 

@@ -10,8 +10,9 @@ import org.flywaydb.core.Flyway
  * nečeká. Check pouze čte stav — health endpoint nesmí migrovat ani jinak
  * měnit stav (APR-010).
  */
-class MigrationsReadinessIndicator(private val flyway: Flyway) : ReadinessIndicator {
-
+class MigrationsReadinessIndicator(
+    private val flyway: Flyway,
+) : ReadinessIndicator {
     override val name: String = "migrations"
 
     override fun check(): CheckStatus {
