@@ -1,0 +1,7 @@
+{
+  "@@locale": "cs",
+  "appTitle": "AI Trainer",
+  "startupScreenTitle": "AI Trainer",
+  "startupScreenSubtitle": "Technický bootstrap (R0)",
+  "startupScreenEnvironmentLabel": "Prostředí: {environment}"
+}

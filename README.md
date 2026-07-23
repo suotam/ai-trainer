@@ -10,7 +10,7 @@ Aktuální stav dokumentace a kanonický další krok vlastní `docs/DOCUMENTATI
 ```text
 ai-trainer/
 ├── apps/
-│   ├── mobile/      # Flutter aplikace (Android + iOS), vznikne v R0-02
+│   ├── mobile/      # Flutter aplikace (Android + iOS)
 │   └── backend/     # Kotlin/Spring Boot modulární monolit, vznikne v R0-03
 ├── packages/
 │   └── contracts/   # explicitní mezisystémové kontrakty (OpenAPI), vznikne v R0-04
@@ -31,8 +31,19 @@ a zjevných secrets ve verzovaných souborech):
 ./tooling/scripts/repo-smoke-check.sh
 ```
 
-Build, test a spouštěcí příkazy pro mobile a backend budou doplněny spolu
-s jejich bootstrapem (`R0-02`, `R0-03`).
+Mobile aplikace (detail v `apps/mobile/README.md`):
+
+```bash
+cd apps/mobile
+flutter pub get
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test
+flutter run
+```
+
+Build, test a spouštěcí příkazy pro backend budou doplněny spolu
+s jeho bootstrapem (`R0-03`).
 
 ## Pravidla práce
 
