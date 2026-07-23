@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.6  
+**Verze:** 2.7  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -70,10 +70,27 @@ Projekt má obsahově pokryté:
 
 `R0-06 – CI and Repository Gates` je implementován: `.github/workflows/` obsahuje `repository` (smoke check, gitleaks secret scan nad plnou historií, Compose validace), `mobile` (Flutter 3.44.4: format/analyze/test/Android debug build + iOS no-codesign build na macOS runneru) a `backend` (Gradle wrapper validace, JDK 25, ktlint gate, build + čerstvý test run včetně OpenAPI contract a PostgreSQL/Flyway Testcontainers testů). Všechna workflow běží na PR i push do `main` s `contents: read`; lokální příkazy odpovídají CI. Backend ktlint gate (`./gradlew ktlintCheck`, ktlint-cli 1.8.0) je zapojen do `check`. První PR run: všech 6 jobs zelených.
 
+`R0-07 – Mobile-to-Backend Smoke Flow` je implementován: mobilní `BackendHealthClient` boundary s HTTP adapterem volá health API podle kanonického OpenAPI (`live` + `ready`), backend base URL řídí environment boundary (`--dart-define=BACKEND_BASE_URL`, dev default `http://10.0.2.2:8080`), technický stavový blok na úvodní obrazovce má stavy loading/success/not-ready/failure s explicitním Retry (bez automatického retry loopu, bez interních detailů v chybách). Pokryto unit, provider a widget testy s fake clientem; runtime end-to-end ověřeno na Android emulátoru proti lokálnímu stacku (Compose PostgreSQL + backend): success, failure po zastavení backendu bez pádu aplikace, retry po obnově → success, korelační request ID v backend logu bez secrets. Backend beze změny.
+
+## R0 Exit Review (2026-07-23)
+
+R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R0-07:
+
+1. mobile i backend se reprodukovatelně sestaví lokálně i v CI (Android APK, iOS no-codesign na GitHub macOS runneru, Gradle build),
+2. backend, PostgreSQL a Flyway se lokálně spustí přes `compose.yaml`; migrace od čisté databáze testovány přes Testcontainers,
+3. health API odpovídá kanonickému OpenAPI (contract testy, integration testy success i failure path),
+4. mobile-to-backend smoke flow funguje (runtime evidence R0-07 výše),
+5. CI (repository, mobile, backend) prochází na čistém checkoutu; push runy na `main` zelené,
+6. test a migration evidence existují (36 backend testů, 25 mobile testů, JUnit/CI záznamy),
+7. žádný secret v repozitáři (gitleaks nad plnou historií v CI),
+8. R1 není závislé na backendu (VSP §5 R1 lokální; smoke flow je technický, ne produktová závislost),
+9. všechny dřívější řízené výjimky uzavřeny (iOS build evidence uzavřena v R0-06),
+10. žádný známý blocker ani critical defect; otevřené neblokující položky: potvrzení `com.aitrainer.*` identifikátorů před distribucí, branch protection (admin úkon).
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-07 – Mobile-to-Backend Smoke Flow
+R1-01 – Local Workout Seed and Read Model
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -212,7 +229,8 @@ R0-03 Backend Bootstrap ✅
 R0-04 Contracts and Health API ✅
 R0-05 Local Infrastructure and Migrations ✅
 R0-06 CI and Repository Gates ✅
-R0-07 Mobile-to-Backend Smoke Flow
+R0-07 Mobile-to-Backend Smoke Flow ✅
+R0 Exit Review ✅ (viz §3)
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -253,7 +271,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-07 – Mobile-to-Backend Smoke Flow
+R1-01 – Local Workout Seed and Read Model
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

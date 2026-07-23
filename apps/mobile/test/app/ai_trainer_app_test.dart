@@ -23,7 +23,10 @@ void main() {
         ProviderScope(
           overrides: [
             appEnvironmentProvider.overrideWithValue(
-              const AppEnvironment(type: AppEnvironmentType.staging),
+              AppEnvironment(
+                type: AppEnvironmentType.staging,
+                backendBaseUrl: Uri.parse('http://localhost:8080'),
+              ),
             ),
           ],
           child: const AiTrainerApp(),
