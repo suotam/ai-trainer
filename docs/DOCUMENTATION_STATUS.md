@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.2  
+**Verze:** 2.3  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -62,10 +62,12 @@ Projekt má obsahově pokryté:
 
 `R0-02 – Mobile Bootstrap` je implementován: Flutter aplikace v `apps/mobile` s Riverpod composition rootem, GoRouter shellem, základním theme, lokalizací (en + cs), environment configuration boundary a technickou úvodní obrazovkou; `flutter analyze` a testy jsou zelené, Android build a spuštění na emulátoru ověřeno. Explicitní výjimka (DRD-013): iOS build nebyl ověřen — vývojové prostředí nemá v Xcode nainstalovanou iOS platformu; validita iOS workspace ověřena přes `xcodebuild -list`. Výjimku vlastní mobile delivery a odstraní se ověřením iOS buildu v podporovaném prostředí, nejpozději v R0-06 CI.
 
+`R0-03 – Backend Bootstrap` je implementován: Kotlin/Spring Boot aplikace v `apps/backend` (Gradle wrapper, JDK 25, Spring Boot 4.1) s bezpečnou konfigurací bez secrets, testovatelným `Clock` beanem, `X-Request-Id` infrastrukturou s MDC korelací logů a service name/version providerem; build a testy zelené, lokální start ověřen včetně kontroly logů (bez secrets a environment dumpu). Produktové moduly a health API vzniknou v navazujících slices.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-03 – Backend Bootstrap
+R0-04 – Contracts and Health API
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -200,7 +202,7 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 ```text
 R0-01 Repository Skeleton ✅
 R0-02 Mobile Bootstrap ✅ (výjimka: iOS build evidence, viz §3)
-R0-03 Backend Bootstrap
+R0-03 Backend Bootstrap ✅
 R0-04 Contracts and Health API
 R0-05 Local Infrastructure and Migrations
 R0-06 CI and Repository Gates
@@ -245,7 +247,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-03 – Backend Bootstrap
+R0-04 – Contracts and Health API
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
