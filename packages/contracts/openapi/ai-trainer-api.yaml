@@ -153,6 +153,8 @@ components:
             $ref: "#/components/schemas/CheckStatus"
           example:
             application: UP
+            database: UP
+            migrations: UP
     CheckStatus:
       type: string
       enum: [UP, DOWN]

@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.4  
+**Verze:** 2.5  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -66,10 +66,12 @@ Projekt má obsahově pokryté:
 
 `R0-04 – Contracts and Health API` je implementován: kanonický OpenAPI `packages/contracts/openapi/ai-trainer-api.yaml` (getLiveness, getReadiness, error envelope, X-Request-Id headers), backend implementuje `GET /api/v1/health/live` a `/ready` s `Cache-Control: no-store`, centralizovaným bezpečným error envelope a rozšiřitelným `ReadinessIndicator` portem (nyní pravdivě pouze `application` check; database/migrations checky doplní R0-05 bez změny veřejného kontraktu). Contract testy (swagger-parser nad kanonickým souborem), unit a integration testy včetně 503 failure path jsou zelené; runtime ověřeno lokálně přes curl. PostgreSQL readiness evidence (skutečná nedostupná databáze, Testcontainers) bude dokončena v R0-05.
 
+`R0-05 – Local Infrastructure and Migrations` je implementován: root `compose.yaml` spouští lokální PostgreSQL 17 s development-only credentials a healthcheckem (host port přepsatelný přes `AITRAINER_POSTGRES_PORT`), kanonické serverové Flyway migrace žijí v `database/migrations` (build je balí do backend classpath — jedna kopie), minimální `V1__schema_baseline` bez produktových tabulek, readiness rozšířena o `database` a `migrations` checky přes existující `ReadinessIndicator` port (aditivní, kontrakt beze změny). Testy používají skutečný PostgreSQL přes Testcontainers včetně migration testu od prázdné databáze, nevalidního schema stavu (503 → recovery migrací → 200) a zastavené databáze (liveness 200, readiness 503). Compose runtime evidence ověřena lokálně včetně failure path. Lokální start backendu nově vyžaduje běžící PostgreSQL (Flyway při startu).
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-05 – Local Infrastructure and Migrations
+R0-06 – CI and Repository Gates
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -206,7 +208,7 @@ R0-01 Repository Skeleton ✅
 R0-02 Mobile Bootstrap ✅ (výjimka: iOS build evidence, viz §3)
 R0-03 Backend Bootstrap ✅
 R0-04 Contracts and Health API ✅
-R0-05 Local Infrastructure and Migrations
+R0-05 Local Infrastructure and Migrations ✅
 R0-06 CI and Repository Gates
 R0-07 Mobile-to-Backend Smoke Flow
 R1-01 až R1-08 podle vertical-slice planu
@@ -249,7 +251,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-05 – Local Infrastructure and Migrations
+R0-06 – CI and Repository Gates
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

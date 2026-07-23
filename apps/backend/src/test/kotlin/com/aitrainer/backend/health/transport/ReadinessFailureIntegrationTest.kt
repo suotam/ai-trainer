@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Bean
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
+@org.springframework.context.annotation.Import(
+    com.aitrainer.backend.testsupport.TestPostgresConfiguration::class,
+)
 class ReadinessFailureIntegrationTest {
 
     @TestConfiguration

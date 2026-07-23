@@ -19,15 +19,16 @@ fail() {
   failures=$((failures + 1))
 }
 
-# 1. Kanonická struktura (stav po R0-01; database/, .github/ a compose.yaml
-#    přibudou v R0-05 a R0-06).
+# 1. Kanonická struktura (stav po R0-05; .github/ přibude v R0-06).
 required_paths=(
   "README.md"
   ".editorconfig"
   ".gitignore"
+  "compose.yaml"
   "apps/mobile"
   "apps/backend"
   "packages/contracts"
+  "database/migrations"
   "tooling/scripts"
   "docs/README.md"
   "docs/DOCUMENTATION_STATUS.md"

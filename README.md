@@ -14,13 +14,16 @@ ai-trainer/
 │   └── backend/     # Kotlin/Spring Boot modulární monolit
 ├── packages/
 │   └── contracts/   # explicitní mezisystémové kontrakty (OpenAPI)
+├── database/
+│   └── migrations/  # kanonické serverové Flyway migrace (append-only)
 ├── tooling/
 │   └── scripts/     # opakovatelné repository úlohy (smoke check)
-└── docs/            # produktová, doménová a technická dokumentace
+├── docs/            # produktová, doménová a technická dokumentace
+└── compose.yaml     # lokální PostgreSQL (development-only)
 ```
 
-Adresáře `database/` (serverové migrace, seeds, fixtures) a `.github/` (CI workflows)
-vzniknou spolu se slices `R0-05` a `R0-06`, které je skutečně potřebují.
+Adresář `.github/` (CI workflows) vznikne se slicem `R0-06`, který jej
+skutečně potřebuje.
 
 ## Lokální příkazy
 
@@ -42,11 +45,23 @@ flutter test
 flutter run
 ```
 
-Backend (detail v `apps/backend/README.md`, vyžaduje JDK 25):
+Lokální infrastruktura (PostgreSQL, vyžaduje Docker):
+
+```bash
+docker compose up -d     # start lokální databáze
+docker compose down      # zastavení (volume zůstává zachován)
+```
+
+Pokud port 5432 drží jiný lokální projekt, použij
+`AITRAINER_POSTGRES_PORT=5433 docker compose up -d` a backendu nastav
+odpovídající `DATABASE_URL`.
+
+Backend (detail v `apps/backend/README.md`, vyžaduje JDK 25 a běžící
+PostgreSQL z Compose):
 
 ```bash
 cd apps/backend
-./gradlew build
+./gradlew build          # testy vyžadují Docker (Testcontainers)
 ./gradlew bootRun
 ```
 
