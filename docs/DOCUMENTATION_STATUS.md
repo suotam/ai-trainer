@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.5  
+**Verze:** 2.6  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -60,7 +60,7 @@ Projekt má obsahově pokryté:
 
 `R0-01 – Repository Skeleton` je implementován: existuje kanonická root struktura (`apps/mobile`, `apps/backend`, `packages/contracts`, `tooling/scripts`), root `README.md`, `.editorconfig`, rozšířený `.gitignore` a repository smoke check `tooling/scripts/repo-smoke-check.sh`. Adresáře `database/`, `.github/` a `compose.yaml` vzniknou až se slices, které je skutečně potřebují (R0-05, R0-06).
 
-`R0-02 – Mobile Bootstrap` je implementován: Flutter aplikace v `apps/mobile` s Riverpod composition rootem, GoRouter shellem, základním theme, lokalizací (en + cs), environment configuration boundary a technickou úvodní obrazovkou; `flutter analyze` a testy jsou zelené, Android build a spuštění na emulátoru ověřeno. Explicitní výjimka (DRD-013): iOS build nebyl ověřen — vývojové prostředí nemá v Xcode nainstalovanou iOS platformu; validita iOS workspace ověřena přes `xcodebuild -list`. Výjimku vlastní mobile delivery a odstraní se ověřením iOS buildu v podporovaném prostředí, nejpozději v R0-06 CI.
+`R0-02 – Mobile Bootstrap` je implementován: Flutter aplikace v `apps/mobile` s Riverpod composition rootem, GoRouter shellem, základním theme, lokalizací (en + cs), environment configuration boundary a technickou úvodní obrazovkou; `flutter analyze` a testy jsou zelené, Android build a spuštění na emulátoru ověřeno. Dřívější výjimka DRD-013 pro iOS build evidence byla uzavřena v R0-06: `flutter build ios --no-codesign` prošel na GitHub macOS runneru (mobile workflow, job `iOS build (no codesign)`).
 
 `R0-03 – Backend Bootstrap` je implementován: Kotlin/Spring Boot aplikace v `apps/backend` (Gradle wrapper, JDK 25, Spring Boot 4.1) s bezpečnou konfigurací bez secrets, testovatelným `Clock` beanem, `X-Request-Id` infrastrukturou s MDC korelací logů a service name/version providerem; build a testy zelené, lokální start ověřen včetně kontroly logů (bez secrets a environment dumpu). Produktové moduly a health API vzniknou v navazujících slices.
 
@@ -68,10 +68,12 @@ Projekt má obsahově pokryté:
 
 `R0-05 – Local Infrastructure and Migrations` je implementován: root `compose.yaml` spouští lokální PostgreSQL 17 s development-only credentials a healthcheckem (host port přepsatelný přes `AITRAINER_POSTGRES_PORT`), kanonické serverové Flyway migrace žijí v `database/migrations` (build je balí do backend classpath — jedna kopie), minimální `V1__schema_baseline` bez produktových tabulek, readiness rozšířena o `database` a `migrations` checky přes existující `ReadinessIndicator` port (aditivní, kontrakt beze změny). Testy používají skutečný PostgreSQL přes Testcontainers včetně migration testu od prázdné databáze, nevalidního schema stavu (503 → recovery migrací → 200) a zastavené databáze (liveness 200, readiness 503). Compose runtime evidence ověřena lokálně včetně failure path. Lokální start backendu nově vyžaduje běžící PostgreSQL (Flyway při startu).
 
+`R0-06 – CI and Repository Gates` je implementován: `.github/workflows/` obsahuje `repository` (smoke check, gitleaks secret scan nad plnou historií, Compose validace), `mobile` (Flutter 3.44.4: format/analyze/test/Android debug build + iOS no-codesign build na macOS runneru) a `backend` (Gradle wrapper validace, JDK 25, ktlint gate, build + čerstvý test run včetně OpenAPI contract a PostgreSQL/Flyway Testcontainers testů). Všechna workflow běží na PR i push do `main` s `contents: read`; lokální příkazy odpovídají CI. Backend ktlint gate (`./gradlew ktlintCheck`, ktlint-cli 1.8.0) je zapojen do `check`. První PR run: všech 6 jobs zelených.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R0-06 – CI and Repository Gates
+R0-07 – Mobile-to-Backend Smoke Flow
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -205,11 +207,11 @@ Dokončeno obsahově: backend, data, mobile, AI, security a integrations.
 
 ```text
 R0-01 Repository Skeleton ✅
-R0-02 Mobile Bootstrap ✅ (výjimka: iOS build evidence, viz §3)
+R0-02 Mobile Bootstrap ✅ (iOS výjimka uzavřena v R0-06)
 R0-03 Backend Bootstrap ✅
 R0-04 Contracts and Health API ✅
 R0-05 Local Infrastructure and Migrations ✅
-R0-06 CI and Repository Gates
+R0-06 CI and Repository Gates ✅
 R0-07 Mobile-to-Backend Smoke Flow
 R1-01 až R1-08 podle vertical-slice planu
 ```
@@ -251,7 +253,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R0-06 – CI and Repository Gates
+R0-07 – Mobile-to-Backend Smoke Flow
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

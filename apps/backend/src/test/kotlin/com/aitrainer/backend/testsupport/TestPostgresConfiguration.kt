@@ -22,7 +22,6 @@ object SharedPostgres {
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestPostgresConfiguration {
-
     @Bean
     @ServiceConnection
     fun postgresContainer(): PostgreSQLContainer<*> = SharedPostgres.container

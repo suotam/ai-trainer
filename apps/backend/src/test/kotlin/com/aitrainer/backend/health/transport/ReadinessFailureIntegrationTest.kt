@@ -4,15 +4,15 @@ import com.aitrainer.backend.health.application.CheckStatus
 import com.aitrainer.backend.health.application.ReadinessIndicator
 import com.aitrainer.backend.infrastructure.http.RequestIdSupport
 import com.jayway.jsonpath.JsonPath
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Failure-path readiness (`r0-api-contract.md` §14, QTR-007): nedostupná
@@ -25,14 +25,15 @@ import org.springframework.context.annotation.Bean
     com.aitrainer.backend.testsupport.TestPostgresConfiguration::class,
 )
 class ReadinessFailureIntegrationTest {
-
     @TestConfiguration
     class FailingDependencyConfiguration {
         @Bean
-        fun failingReadinessIndicator(): ReadinessIndicator = object : ReadinessIndicator {
-            override val name: String = "test-required-dependency"
-            override fun check(): CheckStatus = CheckStatus.DOWN
-        }
+        fun failingReadinessIndicator(): ReadinessIndicator =
+            object : ReadinessIndicator {
+                override val name: String = "test-required-dependency"
+
+                override fun check(): CheckStatus = CheckStatus.DOWN
+            }
     }
 
     @Autowired

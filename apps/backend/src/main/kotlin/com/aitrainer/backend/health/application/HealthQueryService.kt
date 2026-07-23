@@ -29,7 +29,6 @@ class HealthQueryService(
     private val clock: Clock,
     private val readinessIndicators: List<ReadinessIndicator>,
 ) {
-
     /** Liveness nesmí záviset na žádné externí závislosti (APR-003). */
     fun liveness(): LivenessResult =
         LivenessResult(
@@ -39,9 +38,10 @@ class HealthQueryService(
         )
 
     fun readiness(): ReadinessResult {
-        val checks = readinessIndicators.associate { indicator ->
-            indicator.name to safeCheck(indicator)
-        }
+        val checks =
+            readinessIndicators.associate { indicator ->
+                indicator.name to safeCheck(indicator)
+            }
         return ReadinessResult(
             ready = checks.isNotEmpty() && checks.values.all { it == CheckStatus.UP },
             service = serviceInfo.name,

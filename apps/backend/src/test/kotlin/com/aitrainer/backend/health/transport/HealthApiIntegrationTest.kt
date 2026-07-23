@@ -3,20 +3,20 @@ package com.aitrainer.backend.health.transport
 import com.aitrainer.backend.infrastructure.http.RequestIdSupport
 import com.aitrainer.backend.testsupport.TestPostgresConfiguration
 import com.jayway.jsonpath.JsonPath
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.resttestclient.TestRestTemplate
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 
 /**
  * Integration testy R0 health API proti skutečnému HTTP serveru
@@ -27,11 +27,13 @@ import org.springframework.http.ResponseEntity
 @AutoConfigureTestRestTemplate
 @org.springframework.context.annotation.Import(TestPostgresConfiguration::class)
 class HealthApiIntegrationTest {
-
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 
-    private fun get(path: String, headers: Map<String, String> = emptyMap()): ResponseEntity<String> {
+    private fun get(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+    ): ResponseEntity<String> {
         val httpHeaders = HttpHeaders()
         headers.forEach { (name, value) -> httpHeaders.set(name, value) }
         return restTemplate.exchange(path, HttpMethod.GET, HttpEntity<Void>(httpHeaders), String::class.java)
@@ -48,7 +50,11 @@ class HealthApiIntegrationTest {
         val response = get("/api/v1/health/live")
 
         assertEquals(200, response.statusCode.value())
-        assertTrue(response.headers.contentType.toString().startsWith("application/json"))
+        assertTrue(
+            response.headers.contentType
+                .toString()
+                .startsWith("application/json"),
+        )
         assertEquals("no-store", response.headers.cacheControl)
         assertTrue(RequestIdSupport.isValid(response.headers.getFirst(RequestIdSupport.HEADER_NAME)))
 
@@ -111,12 +117,13 @@ class HealthApiIntegrationTest {
 
     @Test
     fun `nepodporovana metoda vraci 405 envelope`() {
-        val response = restTemplate.exchange(
-            "/api/v1/health/live",
-            HttpMethod.POST,
-            HttpEntity<Void>(HttpHeaders()),
-            String::class.java,
-        )
+        val response =
+            restTemplate.exchange(
+                "/api/v1/health/live",
+                HttpMethod.POST,
+                HttpEntity<Void>(HttpHeaders()),
+                String::class.java,
+            )
 
         assertEquals(405, response.statusCode.value())
         val body = JsonPath.parse(response.body).read<Map<String, Any>>("$")

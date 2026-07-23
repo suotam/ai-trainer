@@ -3,8 +3,6 @@ package com.aitrainer.backend.database
 import com.aitrainer.backend.infrastructure.http.RequestIdSupport
 import com.aitrainer.backend.testsupport.TestPostgresConfiguration
 import com.jayway.jsonpath.JsonPath
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -17,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Readiness při nevalidním migration stavu (`r0-api-contract.md` §14):
@@ -28,7 +28,6 @@ import javax.sql.DataSource
 @Import(TestPostgresConfiguration::class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class MigrationStateReadinessIntegrationTest {
-
     @Autowired
     lateinit var restTemplate: TestRestTemplate
 

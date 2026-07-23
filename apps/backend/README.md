@@ -62,7 +62,9 @@ vyžaduje PostgreSQL z root `compose.yaml`).
 docker compose up -d     # lokální PostgreSQL (musí běžet před bootRun)
 
 cd apps/backend
-./gradlew build          # kompilace + testy (Testcontainers)
+./gradlew ktlintCheck    # Kotlin formátovací a style gate (ktlint)
+./gradlew ktlintFormat   # lokální oprava formátování
+./gradlew build          # kompilace + testy (Testcontainers); spouští i ktlintCheck
 ./gradlew test           # pouze testy
 ./gradlew bootRun        # lokální spuštění (port 8080, přepis přes SERVER_PORT);
                          # při startu proběhnou Flyway migrace
@@ -80,6 +82,9 @@ curl -si http://localhost:8080/api/v1/health/ready
 
 Contract testy (OpenAPI validace + shoda implementace) jsou součástí
 `./gradlew test` a čtou kanonický soubor z `packages/contracts`.
+
+CI (`.github/workflows/backend.yml`) spouští stejné příkazy: wrapper
+validaci, `ktlintCheck`, `build` a čerstvý `test --rerun`.
 
 ## Konfigurace
 
