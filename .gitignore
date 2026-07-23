@@ -1,14 +1,40 @@
+# Build outputs
+build/
+dist/
+out/
+*.apk
+*.aab
+*.ipa
+*.jar
+*.war
+
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+
+# Gradle / JVM
+.gradle/
+local.properties
+
 # Dependencies
 node_modules/
 
-# Build outputs
-dist/
-build/
-out/
+# Lokální databáze a stav
+*.sqlite
+*.db
 
-# Environment
+# Environment a secrets
 .env
 .env.*
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.vscode/
 
 # Local tool settings
 .claude/settings.local.json

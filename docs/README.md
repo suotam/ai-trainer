@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 1.9  
+**Verze:** 2.0  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -138,10 +138,10 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-Dalším kanonickým krokem je implementace:
+`R0-01 – Repository Skeleton` je implementován. Dalším kanonickým krokem je implementace:
 
 ```text
-R0-01 – Repository Skeleton
+R0-02 – Mobile Bootstrap
 ```
 
 ---
@@ -324,7 +324,7 @@ uvést pravdivou evidence summary
 # 14. Aktuální další krok
 
 ```text
-R0-01 – Repository Skeleton
+R0-02 – Mobile Bootstrap
 ```
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
