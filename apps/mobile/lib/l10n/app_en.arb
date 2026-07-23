@@ -1,0 +1,25 @@
+{
+  "@@locale": "en",
+  "appTitle": "AI Trainer",
+  "@appTitle": {
+    "description": "Application title shown in the app shell."
+  },
+  "startupScreenTitle": "AI Trainer",
+  "@startupScreenTitle": {
+    "description": "Title on the technical startup screen."
+  },
+  "startupScreenSubtitle": "Technical bootstrap (R0)",
+  "@startupScreenSubtitle": {
+    "description": "Subtitle explaining this is a technical R0 screen, not a product feature."
+  },
+  "startupScreenEnvironmentLabel": "Environment: {environment}",
+  "@startupScreenEnvironmentLabel": {
+    "description": "Shows which build environment the app is running in.",
+    "placeholders": {
+      "environment": {
+        "type": "String",
+        "example": "development"
+      }
+    }
+  }
+}
