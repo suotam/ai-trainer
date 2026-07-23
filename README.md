@@ -22,8 +22,12 @@ ai-trainer/
 └── compose.yaml     # lokální PostgreSQL (development-only)
 ```
 
-Adresář `.github/` (CI workflows) vznikne se slicem `R0-06`, který jej
-skutečně potřebuje.
+CI běží v GitHub Actions (`.github/workflows/`): `repository` (smoke
+check, gitleaks secret scan, Compose validace), `mobile` (format,
+analyze, testy, Android + iOS build) a `backend` (wrapper validace,
+ktlint, build, testy s Testcontainers). Všechna workflow běží na pull
+requestech i push do `main` a spouštějí stejné příkazy jako lokální
+vývoj (viz README jednotlivých aplikací).
 
 ## Lokální příkazy
 

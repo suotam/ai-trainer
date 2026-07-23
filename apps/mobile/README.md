@@ -48,6 +48,10 @@ Generovaná lokalizace (`lib/l10n/generated/`) není commitovaná; reprodukuje s
 automaticky při `flutter pub get`/`flutter test`/build nebo ručně přes
 `flutter gen-l10n` (RER-010).
 
+CI (`.github/workflows/mobile.yml`) spouští stejné příkazy na Flutter 3.44.4:
+format check, analyze, testy, Android debug build a iOS no-codesign build
+na macOS runneru.
+
 ## Otevřené rozhodnutí
 
 Application/bundle ID je zatím neutrální `com.aitrainer.ai_trainer_mobile`
