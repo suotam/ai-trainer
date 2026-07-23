@@ -11,7 +11,7 @@ Aktuální stav dokumentace a kanonický další krok vlastní `docs/DOCUMENTATI
 ai-trainer/
 ├── apps/
 │   ├── mobile/      # Flutter aplikace (Android + iOS)
-│   └── backend/     # Kotlin/Spring Boot modulární monolit, vznikne v R0-03
+│   └── backend/     # Kotlin/Spring Boot modulární monolit
 ├── packages/
 │   └── contracts/   # explicitní mezisystémové kontrakty (OpenAPI), vznikne v R0-04
 ├── tooling/
@@ -42,8 +42,13 @@ flutter test
 flutter run
 ```
 
-Build, test a spouštěcí příkazy pro backend budou doplněny spolu
-s jeho bootstrapem (`R0-03`).
+Backend (detail v `apps/backend/README.md`, vyžaduje JDK 25):
+
+```bash
+cd apps/backend
+./gradlew build
+./gradlew bootRun
+```
 
 ## Pravidla práce
 

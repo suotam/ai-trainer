@@ -38,8 +38,10 @@ for path in "${required_paths[@]}"; do
 done
 
 # 2. Build artefakty a lokální stav nesmí být verzované.
+#    Výjimka: gradle-wrapper.jar je standardní bootstrap Gradle wrapperu
+#    a commituje se, aby čistý checkout uměl build (./gradlew).
 forbidden_tracked='(^|/)(build|dist|out|node_modules|\.gradle|\.dart_tool|\.idea)/|\.(apk|aab|ipa|jar|war|keystore|jks|sqlite|db)$|(^|/)local\.properties$|(^|/)\.env(\..+)?$'
-if git ls-files | grep -E "$forbidden_tracked" >&2; then
+if git ls-files | grep -E "$forbidden_tracked" | grep -vE '(^|/)gradle/wrapper/gradle-wrapper\.jar$' >&2; then
   fail "repozitář obsahuje verzované build artefakty nebo lokální stav (viz výše)"
 fi
 

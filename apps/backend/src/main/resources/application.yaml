@@ -1,0 +1,21 @@
+# Bezpečné development defaults (repository-strategy §12).
+# Žádné secrets, credentials ani produkční hodnoty (RER-011).
+# Environment-specific hodnoty se předávají přes environment proměnné
+# nebo Spring profily, nikoli úpravou tohoto souboru.
+
+spring:
+  application:
+    name: ai-trainer-backend
+
+server:
+  port: ${SERVER_PORT:8080}
+
+aitrainer:
+  service:
+    name: ai-trainer-backend
+    version: ${AITRAINER_SERVICE_VERSION:0.0.1-dev}
+
+logging:
+  pattern:
+    # requestId z MDC koreluje logy s X-Request-Id odpovědi (APR-007).
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX, UTC} %-5level [%thread] [%X{requestId:-}] %logger{36} - %msg%n"
