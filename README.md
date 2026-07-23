@@ -38,6 +38,15 @@ a zjevných secrets ve verzovaných souborech):
 ./tooling/scripts/repo-smoke-check.sh
 ```
 
+Celý lokální stack pro mobile-to-backend smoke flow (R0-07):
+
+```bash
+docker compose up -d                       # 1. PostgreSQL
+(cd apps/backend && ./gradlew bootRun)     # 2. backend s Flyway migracemi
+(cd apps/mobile && flutter run \
+  --dart-define=BACKEND_BASE_URL=http://10.0.2.2:8080)  # 3. Android emulátor
+```
+
 Mobile aplikace (detail v `apps/mobile/README.md`):
 
 ```bash

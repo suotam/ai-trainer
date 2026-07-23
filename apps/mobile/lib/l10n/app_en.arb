@@ -21,5 +21,29 @@
         "example": "development"
       }
     }
+  },
+  "backendStatusChecking": "Checking backend availability…",
+  "@backendStatusChecking": {
+    "description": "Loading state of the technical backend smoke check."
+  },
+  "backendStatusReady": "Backend is available and ready ({service} {version})",
+  "@backendStatusReady": {
+    "description": "Backend liveness and readiness both succeeded.",
+    "placeholders": {
+      "service": {"type": "String", "example": "ai-trainer-backend"},
+      "version": {"type": "String", "example": "0.0.1-dev"}
+    }
+  },
+  "backendStatusNotReady": "Backend is running but not ready to accept traffic",
+  "@backendStatusNotReady": {
+    "description": "Liveness succeeded but readiness returned not-ready."
+  },
+  "backendStatusUnavailable": "Backend is not reachable",
+  "@backendStatusUnavailable": {
+    "description": "Safe failure message; no internal details."
+  },
+  "backendStatusRetry": "Retry",
+  "@backendStatusRetry": {
+    "description": "Retry button of the backend smoke check."
   }
 }
