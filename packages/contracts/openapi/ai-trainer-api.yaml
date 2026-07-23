@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: AI Trainer API
+  description: >
+    Kanonický veřejný HTTP kontrakt AI Traineru. Zdrojem transportního
+    kontraktu je tento soubor (APR-001); doménový význam vlastní doménové
+    dokumenty. Pro R0 obsahuje pouze health endpointy podle
+    docs/07-backend/r0-api-contract.md.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+    description: Local development (bez produkčních hodnot)
+tags:
+  - name: Health
+    description: Technické liveness a readiness endpointy (bez autentizace).
+paths:
+  /api/v1/health/live:
+    get:
+      tags: [Health]
+      operationId: getLiveness
+      summary: Liveness probe
+      description: >
+        Ověřuje pouze, že proces běží a HTTP vrstva odpovídá. Nesmí selhat
+        kvůli nedostupné externí závislosti (APR-003). Bez side effects
+        (APR-010).
+      responses:
+        "200":
+          description: Proces je spuštěný a schopný obsloužit HTTP request.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LivenessResponse"
+        "500":
+          description: Neočekávaná interní chyba.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/health/ready:
+    get:
+      tags: [Health]
+      operationId: getReadiness
+      summary: Readiness probe
+      description: >
+        Ověřuje připravenost instance přijímat provoz podle povinných
+        závislostí aktuálního prostředí. Objekt `checks` je rozšiřitelný —
+        další povinné závislosti (např. database, migrations v R0-05) se
+        přidávají bez breaking změny kontraktu.
+      responses:
+        "200":
+          description: Instance je připravená přijímat provoz.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadinessResponse"
+        "503":
+          description: Instance není připravená přijímat provoz.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Neočekávaná interní chyba.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  headers:
+    XRequestId:
+      description: >
+        Korelační identifikátor odpovědi (APR-007). Server vrátí validní
+        příchozí hodnotu, jinak vygeneruje vlastní neprůhledný identifikátor.
+      schema:
+        type: string
+        maxLength: 128
+        pattern: "^[A-Za-z0-9._-]{1,128}$"
+    CacheControlNoStore:
+      description: Health odpovědi jsou necacheovatelné (APR-009).
+      schema:
+        type: string
+        enum: [no-store]
+  schemas:
+    LivenessResponse:
+      type: object
+      required: [status, service, timestamp, version]
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [UP]
+          description: Pro R0 vždy UP při odpovědi 200.
+        service:
+          type: string
+          description: Stabilní technický název služby.
+          example: ai-trainer-backend
+        timestamp:
+          type: string
+          format: date-time
+          description: Serverový UTC čas vytvoření odpovědi (RFC 3339).
+          example: "2026-07-22T09:15:30Z"
+        version:
+          type: string
+          description: Bezpečný release nebo build identifikátor.
+          example: 0.1.0
+    ReadinessResponse:
+      type: object
+      required: [status, service, timestamp, version, checks]
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [READY]
+          description: Pro R0 vždy READY při odpovědi 200.
+        service:
+          type: string
+          example: ai-trainer-backend
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-07-22T09:15:30Z"
+        version:
+          type: string
+          example: 0.1.0
+        checks:
+          type: object
+          description: >
+            Stav jednotlivých povinných závislostí. Množina klíčů se může
+            aditivně rozšiřovat (např. database, migrations); klienti musí
+            neznámé klíče ignorovat.
+          additionalProperties:
+            $ref: "#/components/schemas/CheckStatus"
+          example:
+            application: UP
+    CheckStatus:
+      type: string
+      enum: [UP, DOWN]
+    ErrorResponse:
+      type: object
+      required: [code, message, requestId, timestamp]
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]*$"
+          description: Stabilní machine-readable kód (APR-006).
+          example: SERVICE_NOT_READY
+        message:
+          type: string
+          description: Bezpečná obecná zpráva bez interních detailů.
+          example: Service is not ready to accept traffic.
+        requestId:
+          type: string
+          maxLength: 128
+          description: Korelační ID shodné s X-Request-Id headerem.
+          example: 01J3EXAMPLE8R0REQUESTID
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-07-22T09:15:30Z"
+        details:
+          type: array
+          description: Strukturované bezpečné detaily, pouze pokud je kontrakt definuje.
+          items:
+            type: object
+            additionalProperties: true
