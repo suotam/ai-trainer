@@ -23,7 +23,11 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("tools.jackson.module:jackson-module-kotlin")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	// TestRestTemplate autokonfigurace vyžaduje restclient modul (Boot 4 modularizace).
+	testImplementation("org.springframework.boot:spring-boot-restclient")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	// Contract test: validace kanonického OpenAPI z packages/contracts (APR-001).
+	testImplementation("io.swagger.parser.v3:swagger-parser:2.1.31")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

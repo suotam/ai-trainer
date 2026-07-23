@@ -13,7 +13,7 @@ ai-trainer/
 │   ├── mobile/      # Flutter aplikace (Android + iOS)
 │   └── backend/     # Kotlin/Spring Boot modulární monolit
 ├── packages/
-│   └── contracts/   # explicitní mezisystémové kontrakty (OpenAPI), vznikne v R0-04
+│   └── contracts/   # explicitní mezisystémové kontrakty (OpenAPI)
 ├── tooling/
 │   └── scripts/     # opakovatelné repository úlohy (smoke check)
 └── docs/            # produktová, doménová a technická dokumentace
