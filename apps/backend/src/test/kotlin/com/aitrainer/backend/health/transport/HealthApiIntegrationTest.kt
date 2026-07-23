@@ -1,6 +1,7 @@
 package com.aitrainer.backend.health.transport
 
 import com.aitrainer.backend.infrastructure.http.RequestIdSupport
+import com.aitrainer.backend.testsupport.TestPostgresConfiguration
 import com.jayway.jsonpath.JsonPath
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
+@org.springframework.context.annotation.Import(TestPostgresConfiguration::class)
 class HealthApiIntegrationTest {
 
     @Autowired
@@ -70,7 +72,10 @@ class HealthApiIntegrationTest {
         val body = JsonPath.parse(response.body).read<Map<String, Any>>("$")
         assertEquals(setOf("status", "service", "timestamp", "version", "checks"), body.keys)
         assertEquals("READY", body["status"])
-        assertEquals(mapOf("application" to "UP"), body["checks"])
+        assertEquals(
+            mapOf("application" to "UP", "database" to "UP", "migrations" to "UP"),
+            body["checks"],
+        )
         assertNoInternalDetails(response.body!!)
     }
 

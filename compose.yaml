@@ -1,0 +1,30 @@
+# Lokální vývojová infrastruktura (ADR-008).
+# Pouze development — žádná produkční topologie ani produkční secrets.
+# Credentials níže jsou výhradně lokální neprodukční hodnoty (RER-011);
+# nesmí být znovu použity mimo lokální vývoj.
+name: ai-trainer
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ai-trainer-postgres
+    environment:
+      POSTGRES_DB: aitrainer
+      POSTGRES_USER: aitrainer
+      # Development-only heslo pro lokální PostgreSQL. Není to secret
+      # produkčního prostředí a nikdy jím nesmí být.
+      POSTGRES_PASSWORD: aitrainer-local-dev
+    ports:
+      # Host port lze přepsat, pokud 5432 drží jiný lokální projekt:
+      # AITRAINER_POSTGRES_PORT=5433 docker compose up -d
+      - "${AITRAINER_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ai-trainer-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aitrainer -d aitrainer"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ai-trainer-postgres-data:

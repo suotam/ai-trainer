@@ -6,6 +6,19 @@
 spring:
   application:
     name: ai-trainer-backend
+  datasource:
+    # Development defaults odpovídají lokálnímu compose.yaml. Nejsou to
+    # produkční credentials a produkce je vždy přepíše env proměnnými.
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/aitrainer}
+    username: ${DATABASE_USER:aitrainer}
+    password: ${DATABASE_PASSWORD:aitrainer-local-dev}
+    hikari:
+      # Bounded čekání na connection, aby readiness check neblokoval
+      # (r0-api-contract §13.2 — timeouty).
+      connection-timeout: ${DATABASE_CONNECT_TIMEOUT_MS:5000}
+  flyway:
+    # Migrace se balí z kanonického database/migrations (viz build.gradle.kts).
+    locations: classpath:db/migration
 
 server:
   port: ${SERVER_PORT:8080}
