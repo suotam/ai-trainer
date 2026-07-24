@@ -39,6 +39,12 @@ jobs:
       # výstup není commitovaný a vzniká standardním Flutter procesem.
       - name: Resolve dependencies
         run: flutter pub get
+      # Drift generated kód je commitovaný; CI hlídá drift proti zdrojům
+      # (RER-010 — generated musí být reprodukovatelný a bez tichého driftu).
+      - name: Verify generated code is up to date
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code -- '*.g.dart'
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
