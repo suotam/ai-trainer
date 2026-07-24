@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../backend_status/backend_status_section.dart';
 import '../configuration/app_environment.dart';
 
-/// Technická úvodní obrazovka pro ověření R0 bootstrapu (VSP §5).
+/// Technická úvodní obrazovka pro ověření R0 bootstrapu (VSP §5)
+/// rozšířená o mobile-to-backend smoke flow (VSP §10).
 ///
 /// Není to produktová feature — pouze potvrzuje, že composition root,
-/// routing, theme, lokalizace a environment boundary fungují. V R0-07
-/// bude rozšířena o technické zobrazení dostupnosti backendu.
+/// routing, theme, lokalizace, environment boundary a spojení s backendem
+/// fungují.
 class StartupScreen extends ConsumerWidget {
   const StartupScreen({super.key});
 
@@ -34,6 +36,8 @@ class StartupScreen extends ConsumerWidget {
             Text(l10n.startupScreenSubtitle),
             const SizedBox(height: 8),
             Text(l10n.startupScreenEnvironmentLabel(environment.name)),
+            const SizedBox(height: 24),
+            const BackendStatusSection(),
           ],
         ),
       ),

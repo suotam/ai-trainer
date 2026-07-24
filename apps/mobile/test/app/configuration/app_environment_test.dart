@@ -23,6 +23,44 @@ void main() {
       );
     });
 
+    test('bez definice použije Android emulator host default pro backend', () {
+      final environment = AppEnvironment.fromBuildEnvironment();
+
+      expect(environment.backendBaseUrl, Uri.parse('http://10.0.2.2:8080'));
+    });
+
+    test('parsuje validní backend base URL a normalizuje koncové lomítko', () {
+      expect(
+        AppEnvironment.parseBackendBaseUrl('http://localhost:8080/'),
+        Uri.parse('http://localhost:8080'),
+      );
+      expect(
+        AppEnvironment.parseBackendBaseUrl('https://api.example.test'),
+        Uri.parse('https://api.example.test'),
+      );
+    });
+
+    test('nevalidní backend base URL selže srozumitelnou chybou', () {
+      for (final invalid in [
+        'not a url',
+        'ftp://host',
+        'http://',
+        'http://user:pass@host:8080',
+      ]) {
+        expect(
+          () => AppEnvironment.parseBackendBaseUrl(invalid),
+          throwsA(
+            isA<ArgumentError>().having(
+              (error) => error.name,
+              'name',
+              'BACKEND_BASE_URL',
+            ),
+          ),
+          reason: invalid,
+        );
+      }
+    });
+
     test('neznámé prostředí selže srozumitelnou chybou', () {
       expect(
         () => AppEnvironment.parseType('prod'),

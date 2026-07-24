@@ -9,20 +9,34 @@ enum AppEnvironmentType { development, test, staging, production }
 /// budoucí features nesmí číst `String.fromEnvironment` přímo — závisí pouze
 /// na [appEnvironmentProvider]. Neobsahuje a nesmí obsahovat secrets.
 class AppEnvironment {
-  const AppEnvironment({required this.type});
+  const AppEnvironment({required this.type, required this.backendBaseUrl});
 
-  /// Načte prostředí z `--dart-define=APP_ENVIRONMENT=<name>`.
+  /// Načte prostředí z `--dart-define=APP_ENVIRONMENT=<name>` a backend
+  /// base URL z `--dart-define=BACKEND_BASE_URL=<url>`.
   ///
-  /// Bez definice platí bezpečný default [AppEnvironmentType.development].
+  /// Bez definice platí bezpečné development defaults:
+  /// [AppEnvironmentType.development] a `http://10.0.2.2:8080`
+  /// (host loopback z pohledu Android emulátoru; iOS simulátor a fyzická
+  /// zařízení předávají vlastní URL — viz README).
   factory AppEnvironment.fromBuildEnvironment() {
     const name = String.fromEnvironment(
       'APP_ENVIRONMENT',
       defaultValue: 'development',
     );
-    return AppEnvironment(type: parseType(name));
+    const baseUrl = String.fromEnvironment(
+      'BACKEND_BASE_URL',
+      defaultValue: 'http://10.0.2.2:8080',
+    );
+    return AppEnvironment(
+      type: parseType(name),
+      backendBaseUrl: parseBackendBaseUrl(baseUrl),
+    );
   }
 
   final AppEnvironmentType type;
+
+  /// Base URL backendu bez credentials; koncové lomítko se normalizuje.
+  final Uri backendBaseUrl;
 
   String get name => type.name;
 
@@ -38,6 +52,28 @@ class AppEnvironment {
             '${AppEnvironmentType.values.map((type) => type.name).join(', ')}.',
       ),
     );
+  }
+
+  /// Nevalidní URL je chyba konfigurace a selže srozumitelně.
+  static Uri parseBackendBaseUrl(String value) {
+    final uri = Uri.tryParse(value);
+    final valid =
+        uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty &&
+        uri.userInfo.isEmpty;
+    if (!valid) {
+      throw ArgumentError.value(
+        value,
+        'BACKEND_BASE_URL',
+        'Expected an absolute http(s) URL without credentials, '
+            'e.g. http://10.0.2.2:8080',
+      );
+    }
+    final normalizedPath = uri.path.endsWith('/')
+        ? uri.path.substring(0, uri.path.length - 1)
+        : uri.path;
+    return uri.replace(path: normalizedPath);
   }
 }
 
