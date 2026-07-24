@@ -16,6 +16,19 @@ Bootstrap obsahuje composition root (`lib/main.dart`), Riverpod composition
 obrazovku (`lib/app/startup/`). Produktové features (`lib/features/`)
 vzniknou až v R1.
 
+Lokální workout data (R1-01):
+
+- Drift/SQLite schema verze 1 podle `docs/12-data/r1-physical-data-model.md`
+  žije v `lib/core/database/` (tabulky, FK, CHECK a unique constraints,
+  partial unique index pro jednu aktivní session, indexy),
+- workout read model, mappery a deterministický verzovaný demo seed vlastní
+  `lib/features/workouts/` (domain/data/application) — Drift typy nesmí
+  opustit data vrstvu (PDR-008),
+- generovaný Drift kód (`*.g.dart`) je commitovaný; po změně tabulek spusť
+  `dart run build_runner build --delete-conflicting-outputs` (CI hlídá drift),
+- persistence testy běží nad skutečnou in-memory SQLite
+  (`test/features/workouts/`).
+
 Mobile-to-backend smoke flow (R0-07, `lib/app/backend_status/`):
 `BackendHealthClient` boundary + HTTP adapter volá `GET /api/v1/health/live`
 a `/ready` podle kanonického kontraktu v `packages/contracts`. Technický
