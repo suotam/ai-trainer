@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../application/session_providers.dart';
 import '../application/workout_detail_providers.dart';
+import '../domain/start_session_result.dart';
 import '../domain/workout_read_model.dart';
 import 'workout_duration_format.dart';
 
-/// Detail workoutu (read-only, VSP §13, screen-spec §34).
+/// Detail workoutu (VSP §13/§14, screen-spec §34).
 ///
 /// Zobrazuje stabilní snapshot: sekce, kroky a plánované série v pořadí.
-/// Neumožňuje editaci ani start session. Neplatné/neexistující ID končí
-/// bezpečným not-found stavem.
+/// Od R1-03 umožňuje pouze **start** session (žádná editace, zápis výkonu
+/// ani dokončení). Neplatné/neexistující ID končí bezpečným not-found stavem.
 class WorkoutDetailScreen extends ConsumerWidget {
   const WorkoutDetailScreen({required this.workoutId, super.key});
 
@@ -22,6 +26,12 @@ class WorkoutDetailScreen extends ConsumerWidget {
   static const Key notFoundKey = Key('workout_detail_not_found');
   static const Key errorKey = Key('workout_detail_error');
   static const Key retryKey = Key('workout_detail_retry');
+  static const Key startButtonKey = Key('workout_detail_start');
+  static const Key startProgressKey = Key('workout_detail_start_progress');
+  static const Key startErrorKey = Key('workout_detail_start_error');
+  static const Key startNotFoundKey = Key('workout_detail_start_not_found');
+  static const Key conflictKey = Key('workout_detail_conflict');
+  static const Key conflictOpenKey = Key('workout_detail_conflict_open');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,6 +66,122 @@ class WorkoutDetailScreen extends ConsumerWidget {
               )
             : _DetailContent(workout: workout),
       ),
+      bottomNavigationBar: detail.maybeWhen(
+        data: (workout) =>
+            workout == null ? null : _StartActionBar(workoutId: workoutId),
+        orElse: () => null,
+      ),
+    );
+  }
+}
+
+/// Spodní akční lišta se startem session (R1-03).
+class _StartActionBar extends ConsumerWidget {
+  const _StartActionBar({required this.workoutId});
+
+  final String workoutId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final startState = ref.watch(startSessionControllerProvider);
+
+    // Navigace po úspěšném created/resumed jako side effect (ne v build).
+    ref.listen<StartSessionUiState>(startSessionControllerProvider, (
+      previous,
+      next,
+    ) {
+      if (next is StartSessionSuccess) {
+        final result = next.result;
+        final String? sessionId = switch (result) {
+          SessionCreated(:final sessionId) => sessionId,
+          SessionResumedExisting(:final sessionId) => sessionId,
+          _ => null,
+        };
+        if (sessionId != null) {
+          ref.read(startSessionControllerProvider.notifier).reset();
+          context.push(AppRoutes.activeSessionLocation(sessionId));
+        }
+      }
+    });
+
+    final isStarting = startState is StartSessionInProgress;
+
+    final children = <Widget>[
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          key: WorkoutDetailScreen.startButtonKey,
+          onPressed: isStarting
+              ? null
+              : () => ref
+                    .read(startSessionControllerProvider.notifier)
+                    .start(workoutId),
+          child: isStarting
+              ? Row(
+                  key: WorkoutDetailScreen.startProgressKey,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(l10n.startWorkoutStarting),
+                  ],
+                )
+              : Text(l10n.startWorkoutButton),
+        ),
+      ),
+    ];
+
+    if (startState is StartSessionSuccess) {
+      final result = startState.result;
+      if (result is ConflictWithAnotherSession) {
+        children.addAll([
+          const SizedBox(height: 8),
+          Text(
+            l10n.startWorkoutConflict,
+            key: WorkoutDetailScreen.conflictKey,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          OutlinedButton(
+            key: WorkoutDetailScreen.conflictOpenKey,
+            onPressed: () {
+              ref.read(startSessionControllerProvider.notifier).reset();
+              context.push(
+                AppRoutes.activeSessionLocation(result.activeSessionId),
+              );
+            },
+            child: Text(l10n.startWorkoutConflictOpen),
+          ),
+        ]);
+      } else if (result is WorkoutNotFound) {
+        children.addAll([
+          const SizedBox(height: 8),
+          Text(
+            l10n.startWorkoutNotFound,
+            key: WorkoutDetailScreen.startNotFoundKey,
+            textAlign: TextAlign.center,
+          ),
+        ]);
+      }
+    } else if (startState is StartSessionFailure) {
+      children.addAll([
+        const SizedBox(height: 8),
+        Text(
+          l10n.startWorkoutError,
+          key: WorkoutDetailScreen.startErrorKey,
+          textAlign: TextAlign.center,
+        ),
+      ]);
+    }
+
+    return SafeArea(
+      minimum: const EdgeInsets.all(16),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 }

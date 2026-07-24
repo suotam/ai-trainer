@@ -11,6 +11,11 @@ abstract final class AppRoutes {
   static const String workoutDetailPath = '/workouts/:workoutId';
   static const String workoutIdParam = 'workoutId';
 
+  /// Aktivní workout session podle stabilního ID (R1-03).
+  static const String activeSessionName = 'activeSession';
+  static const String activeSessionPath = '/sessions/:sessionId';
+  static const String sessionIdParam = 'sessionId';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';
@@ -18,4 +23,8 @@ abstract final class AppRoutes {
   /// Sestaví cestu detailu pro daný workout ID.
   static String workoutDetailLocation(String workoutId) =>
       '/workouts/${Uri.encodeComponent(workoutId)}';
+
+  /// Sestaví cestu aktivní session pro dané session ID.
+  static String activeSessionLocation(String sessionId) =>
+      '/sessions/${Uri.encodeComponent(sessionId)}';
 }
