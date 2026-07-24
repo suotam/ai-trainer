@@ -8,5 +8,19 @@
   "backendStatusReady": "Backend je dostupný a připravený ({service} {version})",
   "backendStatusNotReady": "Backend běží, ale nepřijímá provoz",
   "backendStatusUnavailable": "Backend není dostupný",
-  "backendStatusRetry": "Zkusit znovu"
+  "backendStatusRetry": "Zkusit znovu",
+  "commonRetry": "Zkusit znovu",
+  "todayScreenTitle": "Dnes",
+  "todayLoading": "Načítám dnešní plán…",
+  "todayEmpty": "Na dnešek nemáš nic naplánováno.",
+  "todayError": "Nepodařilo se načíst dnešní plán.",
+  "workoutDurationMinutes": "{minutes} min",
+  "workoutDetailScreenTitle": "Workout",
+  "workoutDetailLoading": "Načítám workout…",
+  "workoutDetailNotFound": "Tento workout není dostupný.",
+  "workoutDetailError": "Nepodařilo se načíst tento workout.",
+  "workoutSectionOptional": "Volitelné",
+  "workoutStepSets": "{count, plural, one{{count} série} few{{count} série} other{{count} sérií}}",
+  "workoutSetPlanReps": "{reps} opakování",
+  "workoutSetPlanWeight": "{weight} kg"
 }

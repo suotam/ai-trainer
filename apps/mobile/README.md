@@ -29,10 +29,31 @@ Lokální workout data (R1-01):
 - persistence testy běží nad skutečnou in-memory SQLite
   (`test/features/workouts/`).
 
+Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
+
+- **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.
+  Technická R0 startup obrazovka (backend smoke flow) se přesunula na
+  `/startup` — už není domov, ale zůstává dostupná.
+- **Seed bootstrap**: `WorkoutBootstrap` (application use case) spustí
+  idempotentní seed z R1-01 při prvním čtení Today read modelu. Read
+  providery čekají na dokončení bootstrapu (`workoutBootstrapCompletedProvider`),
+  takže Today se nezobrazí dřív, než je seed validní. Selhání vede do error
+  stavu s explicitním Retry — žádný automatický retry loop. Widgety seed
+  nevolají přímo.
+- **Today** zobrazuje dnešní workouty z lokálního snapshotu bez sítě.
+  Stavy: loading, data (karty s názvem/typem/délkou, tap → detail), empty
+  (pravdivé „nic naplánováno", bez akcí pozdějších slices), error (bezpečná
+  zpráva + Retry).
+- **Workout detail** zobrazuje stabilní snapshot: sekce → kroky → plánované
+  série v pořadí. Neplatné/neexistující ID → bezpečný not-found stav. Bez
+  editace a bez startu session (pozdější slices). Chyby neobsahují interní
+  detaily.
+- Spuštění bez backendu: `flutter run` (bez potřeby `docker compose`/backendu).
+
 Mobile-to-backend smoke flow (R0-07, `lib/app/backend_status/`):
 `BackendHealthClient` boundary + HTTP adapter volá `GET /api/v1/health/live`
 a `/ready` podle kanonického kontraktu v `packages/contracts`. Technický
-stavový blok na úvodní obrazovce zobrazuje stavy: loading, success
+stavový blok na `/startup` obrazovce zobrazuje stavy: loading, success
 (dostupný a ready), not-ready (běží, nepřijímá provoz) a failure
 (nedostupný/timeout/nevalidní odpověď) s explicitním Retry. Chyby nikdy
 neobsahují interní detaily; žádný automatický retry loop.
@@ -45,8 +66,13 @@ lib/
 │   ├── bootstrap/        # kořenový widget aplikace
 │   ├── configuration/    # environment boundary (--dart-define, bez secrets)
 │   ├── navigation/       # GoRouter a centralizované routes
-│   ├── startup/          # technická úvodní obrazovka (R0)
+│   ├── startup/          # technická obrazovka R0 (/startup, ne domov)
 │   └── theme/            # základní theme (není design system)
+├── core/
+│   ├── database/         # Drift/SQLite schema, provider (R1-01)
+│   └── time/             # testovatelný clock a dnešní datum
+├── features/
+│   └── workouts/         # domain / data / application / presentation
 └── l10n/                 # ARB soubory; generated/ se negeneruje do Gitu
 ```
 

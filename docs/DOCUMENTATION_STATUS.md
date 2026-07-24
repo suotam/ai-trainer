@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.8  
+**Verze:** 2.9  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -89,10 +89,12 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-01 – Local Workout Seed and Read Model` je implementován: Drift/SQLite schema verze 1 přesně podle `r1-physical-data-model.md` (všech 10 tabulek, CHECK/FK/unique constraints, partial unique index jedné aktivní session, expression index pořadí kroků, `PRAGMA foreign_keys = ON`), deterministický verzovaný demo seed (`seed_version` v `local_app_state`, stabilní `demo-` ID, idempotentní, nepřepisuje uživatelsky změněné instance) a workout read model: doménové modely + mappery odmítající neznámé enum kódy, `WorkoutInstanceRepository` (today/týden/celý snapshot) a Riverpod composition. Poznámka k VSP: fyzický model záměrně nemá profile/plan tabulky — demo „plán" je sada naplánovaných demo instancí, profil v R1 persistence nemá. Ověřeno 17 novými persistence testy nad skutečnou SQLite (od prázdné DB, constraints, idempotence, snapshot bez sítě). Mobile CI hlídá drift generovaného Drift kódu.
 
+`R1-02 – Today and Workout Detail` je implementován: první produktové read-only UI nad read modelem z R1-01. Today je nyní kanonický domov (`/today`), detail je `/workouts/:workoutId`; technická R0 startup obrazovka (backend smoke flow) se přesunula na `/startup` a zůstává dostupná. Application-level `WorkoutBootstrap` use case spouští idempotentní seed při prvním čtení Today; read providery čekají na dokončení bootstrapu, takže read model se nezobrazí dřív, než je seed validní. Today má stavy loading/data/empty/error (s explicitním Retry, bez automatického loopu), detail zobrazuje stabilní snapshot (sekce → kroky → série v pořadí) a bezpečný not-found pro neplatné ID. Read-only: bez startu session, editace, zápisu, historie. Ověřeno 22 novými provider/widget/integration testy (fake repository i skutečná SQLite) a runtime na Android emulátoru bez backendu (bootstrap, Today data, detail cviků, restart bez duplikace dat). Backend beze změny.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R1-02 – Today and Workout Detail
+R1-03 – Start and Persist Session
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -234,6 +236,7 @@ R0-06 CI and Repository Gates ✅
 R0-07 Mobile-to-Backend Smoke Flow ✅
 R0 Exit Review ✅ (viz §3)
 R1-01 Local Workout Seed and Read Model ✅
+R1-02 Today and Workout Detail ✅
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -274,7 +277,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R1-02 – Today and Workout Detail
+R1-03 – Start and Persist Session
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
