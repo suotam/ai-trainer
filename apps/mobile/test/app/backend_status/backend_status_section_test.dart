@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:ai_trainer_mobile/app/backend_status/backend_health_client.dart';
 import 'package:ai_trainer_mobile/app/backend_status/backend_status_providers.dart';
 import 'package:ai_trainer_mobile/app/backend_status/backend_status_section.dart';
-import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/app/startup/startup_screen.dart';
+import 'package:ai_trainer_mobile/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,9 +29,16 @@ const readyStatus = BackendHealthStatus(
   ready: true,
 );
 
+/// Testuje R0 startup obrazovku (backend smoke flow) přímo v lehkém
+/// harness MaterialApp — nezávisle na tom, že produktovým domovem je
+/// nyní Today (R1-02).
 Widget appWith(BackendHealthClient client) => ProviderScope(
   overrides: [backendHealthClientProvider.overrideWithValue(client)],
-  child: const AiTrainerApp(),
+  child: MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const StartupScreen(),
+  ),
 );
 
 void main() {

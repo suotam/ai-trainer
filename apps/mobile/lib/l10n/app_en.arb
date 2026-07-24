@@ -45,5 +45,73 @@
   "backendStatusRetry": "Retry",
   "@backendStatusRetry": {
     "description": "Retry button of the backend smoke check."
+  },
+  "commonRetry": "Retry",
+  "@commonRetry": {
+    "description": "Generic retry action label."
+  },
+  "todayScreenTitle": "Today",
+  "@todayScreenTitle": {
+    "description": "Title of the Today screen."
+  },
+  "todayLoading": "Loading today's plan…",
+  "@todayLoading": {
+    "description": "Loading state of the Today screen."
+  },
+  "todayEmpty": "Nothing planned for today.",
+  "@todayEmpty": {
+    "description": "Empty state when there is no workout scheduled for today."
+  },
+  "todayError": "Couldn't load today's plan.",
+  "@todayError": {
+    "description": "Safe error message for the Today screen."
+  },
+  "workoutDurationMinutes": "{minutes} min",
+  "@workoutDurationMinutes": {
+    "description": "Planned workout duration in whole minutes.",
+    "placeholders": {
+      "minutes": {"type": "int", "example": "45"}
+    }
+  },
+  "workoutDetailScreenTitle": "Workout",
+  "@workoutDetailScreenTitle": {
+    "description": "Title of the workout detail screen."
+  },
+  "workoutDetailLoading": "Loading workout…",
+  "@workoutDetailLoading": {
+    "description": "Loading state of the workout detail screen."
+  },
+  "workoutDetailNotFound": "This workout is not available.",
+  "@workoutDetailNotFound": {
+    "description": "Shown when the workout id does not resolve to a stored workout."
+  },
+  "workoutDetailError": "Couldn't load this workout.",
+  "@workoutDetailError": {
+    "description": "Safe error message for the workout detail screen."
+  },
+  "workoutSectionOptional": "Optional",
+  "@workoutSectionOptional": {
+    "description": "Badge for an optional workout section."
+  },
+  "workoutStepSets": "{count, plural, one{{count} set} other{{count} sets}}",
+  "@workoutStepSets": {
+    "description": "Number of planned sets for an exercise step.",
+    "placeholders": {
+      "count": {"type": "int", "example": "3"}
+    }
+  },
+  "workoutSetPlanReps": "{reps} reps",
+  "@workoutSetPlanReps": {
+    "description": "Planned repetitions of a single set.",
+    "placeholders": {
+      "reps": {"type": "int", "example": "8"}
+    }
+  },
+  "workoutSetPlanWeight": "{weight} kg",
+  "@workoutSetPlanWeight": {
+    "description": "Planned weight of a single set in kilograms.",
+    "placeholders": {
+      "weight": {"type": "String", "example": "16"}
+    }
   }
 }
