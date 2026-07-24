@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.8  
+**Verze:** 2.9  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-22
@@ -138,10 +138,10 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` a `R1-02`. Dalším kanonickým krokem je implementace:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-03`. Dalším kanonickým krokem je implementace:
 
 ```text
-R1-03 – Start and Persist Session
+R1-04 – Record Set Performance
 ```
 
 ---
@@ -324,7 +324,7 @@ uvést pravdivou evidence summary
 # 14. Aktuální další krok
 
 ```text
-R1-03 – Start and Persist Session
+R1-04 – Record Set Performance
 ```
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
