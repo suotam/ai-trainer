@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_instance_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_read_model.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/record_performance_result.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/session_tracker.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_performance_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_session.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_session_repository.dart';
 
@@ -25,6 +29,13 @@ class FakeSeedRepository implements R1SeedRepository {
     }
     throw step;
   }
+}
+
+/// Deterministický ID generator pro testy (stabilní `gen-N`).
+class SequenceIdGenerator implements IdGenerator {
+  int _n = 0;
+  @override
+  String newId() => 'gen-${_n++}';
 }
 
 /// Seed, který nedokončí, dokud jej test explicitně nedokončí — pro
@@ -104,11 +115,12 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
     if (throwOnStart) {
       throw StateError('internal persistence failure');
     }
-    final index = startCallCount.clamp(0, _startScript.length - 1);
-    startCallCount += 1;
-    return _startScript.isEmpty
+    final result = _startScript.isEmpty
         ? SessionCreated(newSessionId)
-        : _startScript[index] as StartSessionResult;
+        : _startScript[startCallCount.clamp(0, _startScript.length - 1)]
+              as StartSessionResult;
+    startCallCount += 1;
+    return result;
   }
 
   @override
@@ -118,6 +130,91 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
   Future<WorkoutSessionSnapshot?> sessionById(String id) async =>
       _sessionsById[id];
 }
+
+/// Fake performance repository řízený skriptem výsledků a stavem trackeru.
+class FakeWorkoutPerformanceRepository implements WorkoutPerformanceRepository {
+  FakeWorkoutPerformanceRepository({
+    this.tracker,
+    List<RecordPerformanceResult>? recordScript,
+    List<RecordPerformanceResult>? completeScript,
+  }) : _recordScript = recordScript ?? const [],
+       _completeScript = completeScript ?? const [];
+
+  SessionTracker? tracker;
+  final List<RecordPerformanceResult> _recordScript;
+  final List<RecordPerformanceResult> _completeScript;
+
+  int initCallCount = 0;
+  int recordCallCount = 0;
+  int completeCallCount = 0;
+
+  @override
+  Future<void> initializePerformances({
+    required String sessionId,
+    required DateTime now,
+  }) async {
+    initCallCount += 1;
+  }
+
+  @override
+  Future<SessionTracker?> loadTracker(String sessionId) async => tracker;
+
+  @override
+  Future<RecordPerformanceResult> recordSetActuals({
+    required String setPerformanceId,
+    required int? actualRepetitions,
+    required double? actualWeightKg,
+    required DateTime now,
+  }) async {
+    final result = _recordScript.isEmpty
+        ? const PerformanceSaved()
+        : _recordScript[recordCallCount.clamp(0, _recordScript.length - 1)];
+    recordCallCount += 1;
+    return result;
+  }
+
+  @override
+  Future<RecordPerformanceResult> setSetCompletion({
+    required String setPerformanceId,
+    required bool completed,
+    required DateTime now,
+  }) async {
+    final result = _completeScript.isEmpty
+        ? const PerformanceSaved()
+        : _completeScript[completeCallCount.clamp(
+            0,
+            _completeScript.length - 1,
+          )];
+    completeCallCount += 1;
+    return result;
+  }
+}
+
+SessionTracker buildTracker({
+  String sessionId = 'ses-1',
+  List<TrackerSet>? sets,
+}) => SessionTracker(
+  sessionId: sessionId,
+  exercises: [
+    TrackerExercise(
+      stepPerformanceId: 'sp-1',
+      stepId: 'st-1',
+      title: 'Goblet squat',
+      sectionTitle: 'Main',
+      sets:
+          sets ??
+          const [
+            TrackerSet(
+              setPerformanceId: 'setp-1',
+              position: 0,
+              status: SetPerformanceStatus.planned,
+              plannedRepetitions: 8,
+              plannedWeightKg: 16,
+            ),
+          ],
+    ),
+  ],
+);
 
 WorkoutSessionSnapshot buildSessionSnapshot({
   String id = 'ses-1',

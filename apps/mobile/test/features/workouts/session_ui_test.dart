@@ -1,6 +1,7 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
 import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
+import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
@@ -28,6 +29,9 @@ void main() {
           ),
           workoutInstanceRepositoryProvider.overrideWithValue(workouts),
           workoutSessionRepositoryProvider.overrideWithValue(sessions),
+          workoutPerformanceRepositoryProvider.overrideWithValue(
+            FakeWorkoutPerformanceRepository(tracker: buildTracker()),
+          ),
         ],
         child: const AiTrainerApp(),
       ),
