@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/session_providers.dart';
 import '../application/workout_detail_providers.dart';
-import '../domain/workout_read_model.dart';
 import '../domain/workout_session.dart';
 import 'session_time_format.dart';
+import 'session_tracker_view.dart';
 
 /// Minimální read-only obrazovka aktivní session (R1-03).
 ///
@@ -85,38 +85,8 @@ class _ActiveSessionContent extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(l10n.activeSessionStartedAt(formatStartedAt(session.startedAt))),
         const SizedBox(height: 16),
-        detail.maybeWhen(
-          data: (workout) => workout == null
-              ? const SizedBox.shrink()
-              : _ReadOnlySnapshot(workout: workout),
-          orElse: () => const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-}
-
-/// Read-only přehled plánu (sekce → kroky) v aktivní session. Bez zápisu.
-class _ReadOnlySnapshot extends StatelessWidget {
-  const _ReadOnlySnapshot({required this.workout});
-
-  final WorkoutInstanceDetail workout;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final section in workout.sections) ...[
-          Text(section.title, style: theme.textTheme.titleSmall),
-          for (final step in section.steps)
-            Padding(
-              padding: const EdgeInsets.only(left: 8, top: 2),
-              child: Text(step.title, style: theme.textTheme.bodyMedium),
-            ),
-          const SizedBox(height: 12),
-        ],
+        // Tracker výkonu (R1-04) — plánované vs. skutečné hodnoty, zápis.
+        SessionTrackerView(sessionId: session.id),
       ],
     );
   }

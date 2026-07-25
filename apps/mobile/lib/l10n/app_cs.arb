@@ -33,5 +33,17 @@
   "activeSessionLabel": "Session je aktivní",
   "activeSessionStartedAt": "Zahájeno v {time}",
   "activeSessionNotFound": "Tato session není dostupná.",
-  "activeSessionError": "Nepodařilo se načíst tuto session."
+  "activeSessionError": "Nepodařilo se načíst tuto session.",
+  "trackerNoExercises": "Tento workout nemá trackovatelné cviky.",
+  "trackerSetLabel": "Série {number}",
+  "trackerPlannedSet": "Plán: {reps} opakování × {weight} kg",
+  "trackerRepsLabel": "Opakování",
+  "trackerWeightLabel": "Váha (kg)",
+  "trackerSave": "Uložit",
+  "trackerSaving": "Ukládám…",
+  "trackerSaved": "Uloženo",
+  "trackerSaveError": "Sérii se nepodařilo uložit.",
+  "trackerValidationError": "Zadej platné hodnoty.",
+  "trackerMarkDone": "Hotovo",
+  "trackerCompleted": "Dokončeno"
 }
