@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.10  
+**Verze:** 2.11  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-07-22  
+**Poslední aktualizace:** 2026-07-25  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -93,10 +93,12 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-03 – Start and Persist Session` je implementován: první write flow. Use case `StartWorkoutSession` (application, bez Flutter/backend) generuje stabilní session ID (injektovaný `IdGenerator`), používá injektovaný clock a deleguje atomický start na `DriftWorkoutSessionRepository` — jedna Drift transakce: ověření instance, kontrola globálně aktivní/pozastavené session, vytvoření session (`ACTIVE`), přepnutí instance na `IN_PROGRESS`, uložení active-session pointeru. Právě jedna aktivní session je vynucena aplikačně v transakci, s partial unique indexem z R1-01 jako poslední linií ochrany. Typované výsledky created/resumedExisting/conflictWithAnotherSession/workoutNotFound — nikdy raw persistence výjimka. Recovery přes `activeSessionProvider` po restartu (stejné ID i start time, bez sítě/pollingu). UI: start button (guard proti dvojitému tapu), active session screen (read-only), navigace, conflict/not-found/error stavy. **Schema beze změny (zůstává verze 1)** — session tabulka a indexy existovaly z R1-01; migrace nebyla potřeba. Bez zápisu výkonu/dokončení/zrušení (pozdější slices). Ověřeno 23 novými testy (persistence nad skutečnou SQLite vč. reálného reopen/recovery a partial unique indexu, application/provider, widget s reálnou navigací) a runtime na Android emulátoru bez backendu (start → active session, force-stop restart → resumed na stejnou session „Started at 22:19", on-device DB dotaz: přesně 1 aktivní session). Řízené odchylky: (1) výchozí StepPerformance/SetPerformance řádky z fyzického modelu §15.1 kroku 4 jsou odloženy do R1-04 (Record Set Performance), aby R1-03 nezaváděl tracking scaffolding „do zásoby"; (2) invariant „právě jedna aktivní session" je aplikačně globální (přísnější než per-instance PDR-005), v souladu s conflict pravidly zadání. Backend beze změny.
 
+`R1-04 – Record Set Performance` je implementován: první reálný tracker výkonu během aktivní session. Výchozí `StepPerformance`/`SetPerformance` řádky (odložené z R1-03) se inicializují idempotentně ze stabilního snapshotu v jedné Drift transakci — klíčováno na `unique(session, step)` a `unique(step_performance, position)`, takže opakovaná inicializace (i po restartu) nevytvoří duplikáty ani nepřepíše existující actual data. Write command `recordSetActuals`/`setSetCompletion` (data) ověří existenci a aktivitu session, validuje vstup, zapíše v transakci actual hodnoty + `row_version` + `updated_at` session, volitelně status setu a `completed_at` (injektovaný clock); typované výsledky saved/validationFailure/sessionNotActive/setNotFound — nikdy raw Drift výjimka do UI. Aplikační use case `RecordSetPerformance` odmítá záporné reps/váhu ještě před dotykem persistence (negativeReps/negativeWeight); DB CHECK constraint je poslední linie. **Striktní oddělení plán vs. výkon (PDR-003):** planned reps/váha zůstávají v neměnném snapshotu `local_set_plans`, actual jen v performance tabulkách; chybějící actual se nikdy auto-nezoruje. **R1-04 nedokončuje session** — zapisuje pouze výkon setu; session zůstává `ACTIVE`, `completed_at` je null, instance zůstává `IN_PROGRESS`, active-session pointer beze změny. Tracker UI na active session screen: identita workoutu/session, sekce a kroky v pořadí, planned hodnoty, actual inputy pro podporované typy, completion marker, saving/saved/validation/error stavy (bez raw DB detailu), obnovení po restartu; guard proti dvojitému paralelnímu save stejného setu. **Schema beze změny (zůstává verze 1)** — všechny performance tabulky existovaly z R1-01; migrace nebyla potřeba. Ověřeno novými testy (idempotentní inicializace, application use case, persistence nad skutečnou SQLite vč. reálného reopen/recovery a odmítnutí záporných hodnot constraintem, provider/controller vč. double-save guardu, widget) — mobile suite zelená (+113), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: zadání actuals do 2 setů, dokončení setu, force-stop + restart → resume, actual i completion obnoveny, session stále ACTIVE; on-device DB agregát: 1 aktivní / 0 completed session, 2 step- a 6 set-performance řádků bez duplikátů, přesně 2 sety s actuals a 1 completed.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R1-04 – Record Set Performance
+R1-05 – Restart and Recovery
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -240,6 +242,7 @@ R0 Exit Review ✅ (viz §3)
 R1-01 Local Workout Seed and Read Model ✅
 R1-02 Today and Workout Detail ✅
 R1-03 Start and Persist Session ✅
+R1-04 Record Set Performance ✅
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -280,7 +283,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R1-04 – Record Set Performance
+R1-05 – Restart and Recovery
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
