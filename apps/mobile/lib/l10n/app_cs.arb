@@ -22,5 +22,16 @@
   "workoutSectionOptional": "Volitelné",
   "workoutStepSets": "{count, plural, one{{count} série} few{{count} série} other{{count} sérií}}",
   "workoutSetPlanReps": "{reps} opakování",
-  "workoutSetPlanWeight": "{weight} kg"
+  "workoutSetPlanWeight": "{weight} kg",
+  "startWorkoutButton": "Spustit workout",
+  "startWorkoutStarting": "Spouštím…",
+  "startWorkoutError": "Workout se nepodařilo spustit.",
+  "startWorkoutNotFound": "Tento workout není dostupný.",
+  "startWorkoutConflict": "Už je aktivní jiný workout.",
+  "startWorkoutConflictOpen": "Otevřít aktivní workout",
+  "activeSessionScreenTitle": "Aktivní session",
+  "activeSessionLabel": "Session je aktivní",
+  "activeSessionStartedAt": "Zahájeno v {time}",
+  "activeSessionNotFound": "Tato session není dostupná.",
+  "activeSessionError": "Nepodařilo se načíst tuto session."
 }

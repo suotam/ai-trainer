@@ -29,6 +29,32 @@ Lokální workout data (R1-01):
 - persistence testy běží nad skutečnou in-memory SQLite
   (`test/features/workouts/`).
 
+Start and persist session (R1-03, první write flow, `lib/features/workouts/`):
+
+- **Start**: na detailu workoutu je tlačítko `Start workout`. Use case
+  `StartWorkoutSession` (application, bez Flutter/backend závislosti)
+  generuje stabilní session ID (injektovaný `IdGenerator`), používá
+  injektovaný clock a deleguje **atomický** start na
+  `DriftWorkoutSessionRepository`, který v jedné Drift transakci ověří
+  instanci, zkontroluje invariant a vytvoří session, přepne instanci na
+  `IN_PROGRESS` a uloží active-session pointer.
+- **Právě jedna aktivní session**: transakce kontroluje globálně
+  existující `ACTIVE`/`PAUSED` session; partial unique index
+  `idx_one_active_session_per_instance` (schema z R1-01) je poslední linií
+  ochrany. Výsledky: created / resumedExisting (stejný workout) /
+  conflictWithAnotherSession (jiný workout) / workoutNotFound — nikdy raw
+  persistence výjimka.
+- **Recovery po restartu**: `activeSessionProvider` po bootstrapu najde
+  aktivní session z lokální DB (stejné ID i start time), bez sítě a bez
+  background pollingu. Žádná druhá session nevzniká.
+- **UI stavy**: start button (idle/disabled+loading, guard proti dvojitému
+  tapu), navigace na active session screen při created/resumed, bezpečný
+  conflict stav s akcí „otevřít aktivní workout", not-found a error bez raw
+  detailů. Active session screen zobrazuje název, „Session active", start
+  timestamp a read-only snapshot.
+- Schema beze změny (zůstává verze 1) — session tabulka i indexy existují
+  z R1-01. Žádný zápis výkonu, dokončení ani zrušení session (pozdější slices).
+
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
 - **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.

@@ -113,5 +113,52 @@
     "placeholders": {
       "weight": {"type": "String", "example": "16"}
     }
+  },
+  "startWorkoutButton": "Start workout",
+  "@startWorkoutButton": {
+    "description": "Primary action on the workout detail to start a session."
+  },
+  "startWorkoutStarting": "Starting…",
+  "@startWorkoutStarting": {
+    "description": "Label while a session start is in progress."
+  },
+  "startWorkoutError": "Couldn't start the workout.",
+  "@startWorkoutError": {
+    "description": "Safe error message when starting a session fails."
+  },
+  "startWorkoutNotFound": "This workout is not available.",
+  "@startWorkoutNotFound": {
+    "description": "Shown when starting a workout that does not exist."
+  },
+  "startWorkoutConflict": "Another workout is already active.",
+  "@startWorkoutConflict": {
+    "description": "Shown when a different workout already has an active session."
+  },
+  "startWorkoutConflictOpen": "Open active workout",
+  "@startWorkoutConflictOpen": {
+    "description": "Action to open the existing active session."
+  },
+  "activeSessionScreenTitle": "Active session",
+  "@activeSessionScreenTitle": {
+    "description": "Title of the active session screen."
+  },
+  "activeSessionLabel": "Session active",
+  "@activeSessionLabel": {
+    "description": "Status line confirming the session is active."
+  },
+  "activeSessionStartedAt": "Started at {time}",
+  "@activeSessionStartedAt": {
+    "description": "Safe start timestamp of the active session.",
+    "placeholders": {
+      "time": {"type": "String", "example": "2026-07-24 18:12"}
+    }
+  },
+  "activeSessionNotFound": "This session is not available.",
+  "@activeSessionNotFound": {
+    "description": "Shown when the session id does not resolve to a stored session."
+  },
+  "activeSessionError": "Couldn't load this session.",
+  "@activeSessionError": {
+    "description": "Safe error message for the active session screen."
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/workouts/presentation/active_session_screen.dart';
 import '../../features/workouts/presentation/today_screen.dart';
 import '../../features/workouts/presentation/workout_detail_screen.dart';
 import '../startup/startup_screen.dart';
@@ -24,6 +25,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => WorkoutDetailScreen(
           // Neplatný/chybějící parametr je bezpečně řešen not-found stavem.
           workoutId: state.pathParameters[AppRoutes.workoutIdParam] ?? '',
+        ),
+      ),
+      GoRoute(
+        name: AppRoutes.activeSessionName,
+        path: AppRoutes.activeSessionPath,
+        builder: (context, state) => ActiveSessionScreen(
+          sessionId: state.pathParameters[AppRoutes.sessionIdParam] ?? '',
         ),
       ),
       GoRoute(

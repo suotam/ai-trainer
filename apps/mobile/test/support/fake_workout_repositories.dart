@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_instance_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_read_model.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_session.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_session_repository.dart';
 
 /// Skriptovaný seed pro testy bootstrapu: postupně vrací výsledky nebo
 /// vyhazuje výjimky. Počítá volání pro ověření idempotence a absence loopu.
@@ -72,6 +75,62 @@ class FakeWorkoutInstanceRepository implements WorkoutInstanceRepository {
   Future<WorkoutInstanceDetail?> workoutInstanceById(String id) async =>
       detailsById[id];
 }
+
+/// Fake session repository řízený skriptem výsledků startu a stavem aktivní
+/// session — bez Drift a bez sítě.
+class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
+  FakeWorkoutSessionRepository({
+    List<Object>? startScript,
+    this.activeSession,
+    this.throwOnStart = false,
+    Map<String, WorkoutSessionSnapshot>? sessionsById,
+  }) : _startScript = startScript ?? const [],
+       _sessionsById = sessionsById ?? const {};
+
+  /// Prvky jsou [StartSessionResult] pro postupné starty.
+  final List<Object> _startScript;
+  final Map<String, WorkoutSessionSnapshot> _sessionsById;
+  WorkoutSessionSnapshot? activeSession;
+  bool throwOnStart;
+
+  int startCallCount = 0;
+
+  @override
+  Future<StartSessionResult> startSession({
+    required String workoutInstanceId,
+    required String newSessionId,
+    required DateTime now,
+  }) async {
+    if (throwOnStart) {
+      throw StateError('internal persistence failure');
+    }
+    final index = startCallCount.clamp(0, _startScript.length - 1);
+    startCallCount += 1;
+    return _startScript.isEmpty
+        ? SessionCreated(newSessionId)
+        : _startScript[index] as StartSessionResult;
+  }
+
+  @override
+  Future<WorkoutSessionSnapshot?> findActiveSession() async => activeSession;
+
+  @override
+  Future<WorkoutSessionSnapshot?> sessionById(String id) async =>
+      _sessionsById[id];
+}
+
+WorkoutSessionSnapshot buildSessionSnapshot({
+  String id = 'ses-1',
+  String workoutInstanceId = 'wi1',
+  WorkoutSessionStatus status = WorkoutSessionStatus.active,
+  DateTime? startedAt,
+}) => WorkoutSessionSnapshot(
+  id: id,
+  workoutInstanceId: workoutInstanceId,
+  instanceRevisionNumber: 1,
+  status: status,
+  startedAt: startedAt ?? DateTime.utc(2026, 7, 20, 8),
+);
 
 WorkoutInstanceSummary buildSummary({
   String id = 'wi1',

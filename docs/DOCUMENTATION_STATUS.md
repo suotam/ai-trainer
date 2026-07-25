@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.9  
+**Verze:** 2.10  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -91,10 +91,12 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-02 – Today and Workout Detail` je implementován: první produktové read-only UI nad read modelem z R1-01. Today je nyní kanonický domov (`/today`), detail je `/workouts/:workoutId`; technická R0 startup obrazovka (backend smoke flow) se přesunula na `/startup` a zůstává dostupná. Application-level `WorkoutBootstrap` use case spouští idempotentní seed při prvním čtení Today; read providery čekají na dokončení bootstrapu, takže read model se nezobrazí dřív, než je seed validní. Today má stavy loading/data/empty/error (s explicitním Retry, bez automatického loopu), detail zobrazuje stabilní snapshot (sekce → kroky → série v pořadí) a bezpečný not-found pro neplatné ID. Read-only: bez startu session, editace, zápisu, historie. Ověřeno 22 novými provider/widget/integration testy (fake repository i skutečná SQLite) a runtime na Android emulátoru bez backendu (bootstrap, Today data, detail cviků, restart bez duplikace dat). Backend beze změny.
 
+`R1-03 – Start and Persist Session` je implementován: první write flow. Use case `StartWorkoutSession` (application, bez Flutter/backend) generuje stabilní session ID (injektovaný `IdGenerator`), používá injektovaný clock a deleguje atomický start na `DriftWorkoutSessionRepository` — jedna Drift transakce: ověření instance, kontrola globálně aktivní/pozastavené session, vytvoření session (`ACTIVE`), přepnutí instance na `IN_PROGRESS`, uložení active-session pointeru. Právě jedna aktivní session je vynucena aplikačně v transakci, s partial unique indexem z R1-01 jako poslední linií ochrany. Typované výsledky created/resumedExisting/conflictWithAnotherSession/workoutNotFound — nikdy raw persistence výjimka. Recovery přes `activeSessionProvider` po restartu (stejné ID i start time, bez sítě/pollingu). UI: start button (guard proti dvojitému tapu), active session screen (read-only), navigace, conflict/not-found/error stavy. **Schema beze změny (zůstává verze 1)** — session tabulka a indexy existovaly z R1-01; migrace nebyla potřeba. Bez zápisu výkonu/dokončení/zrušení (pozdější slices). Ověřeno 23 novými testy (persistence nad skutečnou SQLite vč. reálného reopen/recovery a partial unique indexu, application/provider, widget s reálnou navigací) a runtime na Android emulátoru bez backendu (start → active session, force-stop restart → resumed na stejnou session „Started at 22:19", on-device DB dotaz: přesně 1 aktivní session). Řízené odchylky: (1) výchozí StepPerformance/SetPerformance řádky z fyzického modelu §15.1 kroku 4 jsou odloženy do R1-04 (Record Set Performance), aby R1-03 nezaváděl tracking scaffolding „do zásoby"; (2) invariant „právě jedna aktivní session" je aplikačně globální (přísnější než per-instance PDR-005), v souladu s conflict pravidly zadání. Backend beze změny.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R1-03 – Start and Persist Session
+R1-04 – Record Set Performance
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -237,6 +239,7 @@ R0-07 Mobile-to-Backend Smoke Flow ✅
 R0 Exit Review ✅ (viz §3)
 R1-01 Local Workout Seed and Read Model ✅
 R1-02 Today and Workout Detail ✅
+R1-03 Start and Persist Session ✅
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -277,7 +280,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R1-03 – Start and Persist Session
+R1-04 – Record Set Performance
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
