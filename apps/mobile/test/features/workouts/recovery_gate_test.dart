@@ -138,6 +138,35 @@ void main() {
     expect(find.textContaining('SQL'), findsNothing);
   });
 
+  testWidgets('odmítnutá oprava pointeru → fallback, nenaviguje do trackeru', (
+    tester,
+  ) async {
+    final session = buildSessionSnapshot(id: 'ses-1', workoutInstanceId: 'wi1');
+    await tester.pumpWidget(
+      appWith(
+        sessions: FakeWorkoutSessionRepository(
+          activeSessions: [session],
+          activePointer: null, // vyžaduje opravu
+          rejectPointerRepair: true, // transakční revalidace neprojde
+          sessionsById: {'ses-1': session},
+        ),
+        performances: FakeWorkoutPerformanceRepository(
+          tracker: buildTracker(sessionId: 'ses-1'),
+        ),
+        workouts: FakeWorkoutInstanceRepository(
+          detailsById: {'wi1': buildDetail(id: 'wi1')},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(RecoveryGateScreen.fallbackKey), findsOneWidget);
+    expect(find.byKey(ActiveSessionScreen.screenKey), findsNothing);
+    expect(find.byKey(TodayScreen.screenKey), findsNothing);
+    expect(find.textContaining('Exception'), findsNothing);
+    expect(find.textContaining('SQL'), findsNothing);
+  });
+
   testWidgets(
     'neopravitelný stav → fallback; Retry po pominutí vede na Today',
     (tester) async {

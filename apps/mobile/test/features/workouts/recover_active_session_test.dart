@@ -83,6 +83,35 @@ void main() {
   });
 
   test(
+    'odmítnutá transakční oprava pointeru → inconsistent, ne AfterRepair',
+    () async {
+      final session = buildSessionSnapshot(
+        id: 'ses-1',
+        workoutInstanceId: 'wi1',
+      );
+      final sessions = FakeWorkoutSessionRepository(
+        activeSessions: [session],
+        activePointer: null, // vyžaduje opravu
+        rejectPointerRepair: true, // revalidace uvnitř transakce neprojde
+      );
+      final perf = FakeWorkoutPerformanceRepository();
+
+      final result = await useCase(sessions, perf).call();
+
+      // Oprava neproběhla → nesmí se tvrdit, že je recovery opravené.
+      expect(result, isNot(isA<ActiveSessionRecoveredAfterRepair>()));
+      expect(result, isA<InconsistentActiveSessionRecovery>());
+      expect(
+        (result as InconsistentActiveSessionRecovery).reason,
+        RecoveryInconsistencyReason.pointerRepairRejected,
+      );
+      expect(sessions.reconcileCallCount, 1);
+      // Pointer se nezměnil (žádná falešná oprava).
+      expect(sessions.activePointer, isNull);
+    },
+  );
+
+  test(
     'aktivní session s chybějící instancí → inconsistent (missingInstance)',
     () async {
       final session = buildSessionSnapshot(

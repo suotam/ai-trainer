@@ -66,11 +66,20 @@ class RecoverActiveSession {
         }
 
         // Pointer chyběl nebo ukazoval jinam — bezpečně rekonstruuj z jediné
-        // aktivní session (§19). Idempotentní a transakční.
-        await sessionRepository.reconcileActiveSessionPointer(
+        // aktivní session (§19). Idempotentní a transakční; uvnitř transakce
+        // se invariant re-ověřuje, takže oprava může být odmítnuta.
+        final repaired = await sessionRepository.reconcileActiveSessionPointer(
           sessionId: session.id,
           now: clock(),
         );
+        if (!repaired) {
+          // Revalidace neprošla — oprava neproběhla. Nesmíme tvrdit, že je
+          // recovery opravené, ani navigovat do trackeru; bezpečný fallback.
+          return InconsistentActiveSessionRecovery(
+            RecoveryInconsistencyReason.pointerRepairRejected,
+            sessionId: session.id,
+          );
+        }
         return ActiveSessionRecoveredAfterRepair(session);
       }
 

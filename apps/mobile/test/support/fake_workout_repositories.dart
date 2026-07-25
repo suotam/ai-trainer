@@ -99,6 +99,7 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
     this.activePointer,
     this.existingInstanceIds,
     this.throwOnFindActiveSessions = false,
+    this.rejectPointerRepair = false,
   }) : _startScript = startScript ?? const [],
        _sessionsById = sessionsById ?? const {},
        _explicitActiveSessions = activeSessions;
@@ -117,6 +118,10 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
   Set<String>? existingInstanceIds;
 
   bool throwOnFindActiveSessions;
+
+  /// Vynutí odmítnutí transakční opravy pointeru (revalidace uvnitř
+  /// transakce neprošla) — pointer se nezmění a metoda vrátí `false`.
+  bool rejectPointerRepair;
 
   int startCallCount = 0;
   int reconcileCallCount = 0;
@@ -177,7 +182,7 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
   }) async {
     reconcileCallCount += 1;
     final all = _activeSessionsList();
-    if (all.length != 1 || all.first.id != sessionId) {
+    if (rejectPointerRepair || all.length != 1 || all.first.id != sessionId) {
       return false;
     }
     activePointer = sessionId;

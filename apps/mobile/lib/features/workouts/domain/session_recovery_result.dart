@@ -74,4 +74,10 @@ enum RecoveryInconsistencyReason {
   /// (neexistuje nebo není v aktivním stavu) a žádnou jinou aktivní session
   /// nelze odvodit.
   orphanPointer,
+
+  /// Transakční rekonstrukce pointeru byla odmítnuta: uvnitř transakce už
+  /// neplatil invariant „právě jedna aktivní session odpovídající sessionId"
+  /// (např. souběžná změna stavu mezi čtením a opravou). Oprava neproběhla,
+  /// takže recovery nesmí být označeno za opravené ani navigovat do trackeru.
+  pointerRepairRejected,
 }
