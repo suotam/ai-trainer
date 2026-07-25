@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.11  
+**Verze:** 2.12  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -95,10 +95,12 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-04 – Record Set Performance` je implementován: první reálný tracker výkonu během aktivní session. Výchozí `StepPerformance`/`SetPerformance` řádky (odložené z R1-03) se inicializují idempotentně ze stabilního snapshotu v jedné Drift transakci — klíčováno na `unique(session, step)` a `unique(step_performance, position)`, takže opakovaná inicializace (i po restartu) nevytvoří duplikáty ani nepřepíše existující actual data. Write command `recordSetActuals`/`setSetCompletion` (data) ověří existenci a aktivitu session, validuje vstup, zapíše v transakci actual hodnoty + `row_version` + `updated_at` session, volitelně status setu a `completed_at` (injektovaný clock); typované výsledky saved/validationFailure/sessionNotActive/setNotFound — nikdy raw Drift výjimka do UI. Aplikační use case `RecordSetPerformance` odmítá záporné reps/váhu ještě před dotykem persistence (negativeReps/negativeWeight); DB CHECK constraint je poslední linie. **Striktní oddělení plán vs. výkon (PDR-003):** planned reps/váha zůstávají v neměnném snapshotu `local_set_plans`, actual jen v performance tabulkách; chybějící actual se nikdy auto-nezoruje. **R1-04 nedokončuje session** — zapisuje pouze výkon setu; session zůstává `ACTIVE`, `completed_at` je null, instance zůstává `IN_PROGRESS`, active-session pointer beze změny. Tracker UI na active session screen: identita workoutu/session, sekce a kroky v pořadí, planned hodnoty, actual inputy pro podporované typy, completion marker, saving/saved/validation/error stavy (bez raw DB detailu), obnovení po restartu; guard proti dvojitému paralelnímu save stejného setu. **Schema beze změny (zůstává verze 1)** — všechny performance tabulky existovaly z R1-01; migrace nebyla potřeba. Ověřeno novými testy (idempotentní inicializace, application use case, persistence nad skutečnou SQLite vč. reálného reopen/recovery a odmítnutí záporných hodnot constraintem, provider/controller vč. double-save guardu, widget) — mobile suite zelená (+113), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: zadání actuals do 2 setů, dokončení setu, force-stop + restart → resume, actual i completion obnoveny, session stále ACTIVE; on-device DB agregát: 1 aktivní / 0 completed session, 2 step- a 6 set-performance řádků bez duplikátů, přesně 2 sety s actuals a 1 completed.
 
+`R1-05 – Restart and Recovery` je implementován: robustní a explicitní recovery flow po restartu aplikace. Startup recovery gate (`app/startup/recovery_gate_screen.dart`) je kanonická initial route — po dokončení lokálního bootstrapu (otevření DB + idempotentní seed) spustí application use case `RecoverActiveSession` a teprve pak rozhodne o navigaci, takže se Today nikdy krátce nezobrazí před rozhodnutím. **Zdrojem pravdy o aktivní session je tabulka session (status `ACTIVE`/`PAUSED`), ne technický pointer** v `local_app_state` (`active_session_id`), který je jen cache (fyzický model §14/§19, PDR-012). Use case odvodí kanonický nebo konfliktní stav z počtu aktivních sessions, ověří snapshot vazbu (existenci instance), idempotentně doplní chybějící performance řádky (bezpečné: validní aktivní session + validní snapshot; existující actual data zůstávají) a **bezpečně rekonstruuje pointer z jediné aktivní session** v jedné transakci (§19 povolená oprava). Typované výsledky: `NoActiveSession` (→ Today), `ActiveSessionRecovered` / `ActiveSessionRecoveredAfterRepair` (→ stejný tracker se stejnými uloženými hodnotami), `MultipleActiveSessions` / `InconsistentActiveSession` (missingInstance | orphanPointer) / `UnrecoverableRecovery` (→ bezpečný fallback s Retry) — nikdy raw Drift/SQLite výjimka do UI. **Opravitelné vs. neopravitelné:** chybějící pointer při jediné validní aktivní session se bezpečně opraví; více konfliktních aktivních sessions, osiřelý pointer bez odvoditelné session a nekonzistentní snapshot vedou na explicitní bezpečný fallback bez destruktivního mazání (žádný agresivní self-healing, žádné odhadování business hodnot). **Recovery nedokončuje ani neruší session, negeneruje nové session ID, nemění start time, nevytváří druhou aktivní session a nevyžaduje backend.** Startup UI stavy: konečný loading (žádný nekonečný retry/loop), přechod na Today, automatické pokračování do trackeru, bezpečný fallback s explicitním Retry (obnoví i bootstrap). Deep link na validní session zůstává funkční; neplatný session ID končí bezpečným not-found. **Schema beze změny (zůstává verze 1)** — `local_app_state` i všechny session/performance tabulky existují z R1-01; migrace nebyla potřeba, generated kód beze změny. Ověřeno novými testy (rozhodovací matice application use case; persistence nad skutečnou SQLite vč. reálného reopen/recovery, idempotentní opravy pointeru, osiřelého pointeru, více aktivních sessions, rollbacku a zachování dat R1-01…R1-04; startup provider vč. Retry a absence paralelní opravy; widget/navigation gate vč. deep linku; end-to-end restart) — mobile suite zelená (+140), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: start → zápis actualů → dokončení setu → force-stop → normální restart → automatická recovery přímo do stejného trackeru (stejný start time, actual i completion zachovány, session ACTIVE, žádný flash Today); controlled inconsistency: smazán jen technický pointer → restart → pointer bezpečně rekonstruován (recoveredAfterRepair), žádná ztráta dat; on-device DB agregát: 1 aktivní session, pointer odpovídá session, 2 step- a 6 set-performance řádků bez duplikátů napříč restarty.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R1-05 – Restart and Recovery
+R1-06 – Complete Workout and History
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -243,6 +245,7 @@ R1-01 Local Workout Seed and Read Model ✅
 R1-02 Today and Workout Detail ✅
 R1-03 Start and Persist Session ✅
 R1-04 Record Set Performance ✅
+R1-05 Restart and Recovery ✅
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -283,7 +286,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R1-05 – Restart and Recovery
+R1-06 – Complete Workout and History
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
