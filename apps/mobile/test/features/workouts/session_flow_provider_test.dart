@@ -9,12 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_workout_repositories.dart';
 
-class SequenceIdGenerator implements IdGenerator {
-  int _n = 0;
-  @override
-  String newId() => 'gen-${_n++}';
-}
-
 void main() {
   ProviderContainer container({
     required FakeWorkoutSessionRepository sessions,

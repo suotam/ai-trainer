@@ -160,5 +160,40 @@
   "activeSessionError": "Couldn't load this session.",
   "@activeSessionError": {
     "description": "Safe error message for the active session screen."
-  }
+  },
+  "trackerNoExercises": "No trackable exercises in this workout.",
+  "@trackerNoExercises": {
+    "description": "Shown when the active session has no set-based exercises."
+  },
+  "trackerSetLabel": "Set {number}",
+  "@trackerSetLabel": {
+    "description": "Label of a single set row.",
+    "placeholders": {"number": {"type": "int", "example": "1"}}
+  },
+  "trackerPlannedSet": "Planned: {reps} reps × {weight} kg",
+  "@trackerPlannedSet": {
+    "description": "Planned values of a set (immutable snapshot).",
+    "placeholders": {
+      "reps": {"type": "String", "example": "8"},
+      "weight": {"type": "String", "example": "16"}
+    }
+  },
+  "trackerRepsLabel": "Reps",
+  "@trackerRepsLabel": {"description": "Actual repetitions input label."},
+  "trackerWeightLabel": "Weight (kg)",
+  "@trackerWeightLabel": {"description": "Actual weight input label."},
+  "trackerSave": "Save",
+  "@trackerSave": {"description": "Save actual values for a set."},
+  "trackerSaving": "Saving…",
+  "@trackerSaving": {"description": "In-progress save label."},
+  "trackerSaved": "Saved",
+  "@trackerSaved": {"description": "Confirmation that the set was saved."},
+  "trackerSaveError": "Couldn't save this set.",
+  "@trackerSaveError": {"description": "Safe error when saving a set fails."},
+  "trackerValidationError": "Enter valid values.",
+  "@trackerValidationError": {"description": "Shown for invalid input."},
+  "trackerMarkDone": "Done",
+  "@trackerMarkDone": {"description": "Toggle marking the set completed."},
+  "trackerCompleted": "Completed",
+  "@trackerCompleted": {"description": "Semantic label for a completed set."}
 }

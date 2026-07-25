@@ -51,9 +51,35 @@ Start and persist session (R1-03, první write flow, `lib/features/workouts/`):
   tapu), navigace na active session screen při created/resumed, bezpečný
   conflict stav s akcí „otevřít aktivní workout", not-found a error bez raw
   detailů. Active session screen zobrazuje název, „Session active", start
-  timestamp a read-only snapshot.
+  timestamp a tracker výkonu (viz R1-04).
 - Schema beze změny (zůstává verze 1) — session tabulka i indexy existují
   z R1-01. Žádný zápis výkonu, dokončení ani zrušení session (pozdější slices).
+
+Record set performance (R1-04, tracker výkonu, `lib/features/workouts/`):
+
+- **Inicializace performance řádků**: při otevření aktivní session se
+  idempotentně vytvoří `StepPerformance`/`SetPerformance` řádky ze stabilního
+  snapshotu (odloženo z R1-03). Jedna Drift transakce, klíčováno na
+  `unique(session, step)` a `unique(step_performance, position)` — opakovaná
+  inicializace (i po restartu) nevytvoří duplikáty ani nepřepíše actual data.
+- **Zápis výkonu**: `RecordSetPerformance` (application) validuje vstup
+  (záporné reps/váha odmítnuty ještě před persistencí) a deleguje na
+  `DriftWorkoutPerformanceRepository`, který v transakci ověří existenci a
+  aktivitu session, zapíše actual hodnoty, `row_version`, `updated_at` session
+  a — u dokončení — status setu a `completed_at` (injektovaný clock). Typované
+  výsledky saved / validationFailure / sessionNotActive / setNotFound — nikdy
+  raw Drift výjimka do UI. Zápis je uživatelsky řízený (Save / Done), bez
+  agresivního per-keystroke autosave a bez background sync.
+- **Plán vs. výkon (PDR-003)**: planned reps/váha zůstávají v neměnném
+  snapshotu `local_set_plans`; actual jen v performance tabulkách. Změna actual
+  nikdy nepřepíše planned; chybějící actual se auto-nezoruje.
+- **R1-04 nedokončuje session**: zapisuje pouze výkon setu — session zůstává
+  `ACTIVE`, `completed_at` je null, instance zůstává `IN_PROGRESS`.
+- **Tracker UI a recovery**: active session screen renderuje sekce a kroky
+  v pořadí, planned hodnoty, actual inputy, completion marker a saving/saved/
+  validation/error stavy (bez raw DB detailu). Actual i completion se obnoví
+  po restartu; guard proti dvojitému paralelnímu save stejného setu.
+- Schema beze změny (zůstává verze 1) — performance tabulky existují z R1-01.
 
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
