@@ -4,16 +4,24 @@ import 'package:go_router/go_router.dart';
 import '../../features/workouts/presentation/active_session_screen.dart';
 import '../../features/workouts/presentation/today_screen.dart';
 import '../../features/workouts/presentation/workout_detail_screen.dart';
+import '../startup/recovery_gate_screen.dart';
 import '../startup/startup_screen.dart';
 import 'app_routes.dart';
 
 /// Routing shell aplikace (ADR-003). Route guard nesmí nahrazovat
-/// doménovou autorizaci. Today je od R1-02 kanonický domov; technická
-/// R0 startup obrazovka zůstává dostupná na `/startup`.
+/// doménovou autorizaci. Kanonická initial route je startup recovery gate
+/// (R1-05), který po restartu rozhodne mezi Today a obnovenou session.
+/// Today zůstává produktový domov; technická R0 startup obrazovka je na
+/// `/startup`.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppRoutes.todayPath,
+    initialLocation: AppRoutes.startupGatePath,
     routes: [
+      GoRoute(
+        name: AppRoutes.startupGateName,
+        path: AppRoutes.startupGatePath,
+        builder: (context, state) => const RecoveryGateScreen(),
+      ),
       GoRoute(
         name: AppRoutes.todayName,
         path: AppRoutes.todayPath,

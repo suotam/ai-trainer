@@ -2,6 +2,11 @@
 ///
 /// Features nesmí používat literální path řetězce mimo tento soubor.
 abstract final class AppRoutes {
+  /// Startup recovery gate (R1-05) — kanonická initial route. Rozhodne mezi
+  /// Today, obnovenou aktivní session a bezpečným fallbackem po restartu.
+  static const String startupGateName = 'startupGate';
+  static const String startupGatePath = '/';
+
   /// Produktový domov aplikace (R1-02).
   static const String todayName = 'today';
   static const String todayPath = '/today';
