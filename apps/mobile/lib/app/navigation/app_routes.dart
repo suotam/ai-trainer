@@ -21,6 +21,14 @@ abstract final class AppRoutes {
   static const String activeSessionPath = '/sessions/:sessionId';
   static const String sessionIdParam = 'sessionId';
 
+  /// Lokální historie dokončených workoutů (R1-06).
+  static const String historyName = 'history';
+  static const String historyPath = '/history';
+
+  /// Read-only detail dokončeného workoutu podle ID dokončené session (R1-06).
+  static const String completedWorkoutName = 'completedWorkout';
+  static const String completedWorkoutPath = '/history/:sessionId';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';
@@ -32,4 +40,8 @@ abstract final class AppRoutes {
   /// Sestaví cestu aktivní session pro dané session ID.
   static String activeSessionLocation(String sessionId) =>
       '/sessions/${Uri.encodeComponent(sessionId)}';
+
+  /// Sestaví cestu detailu dokončeného workoutu pro dané session ID.
+  static String completedWorkoutLocation(String sessionId) =>
+      '/history/${Uri.encodeComponent(sessionId)}';
 }

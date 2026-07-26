@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.12  
+**Verze:** 2.13  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-07-25  
+**Poslední aktualizace:** 2026-07-26  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -97,10 +97,12 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-05 – Restart and Recovery` je implementován: robustní a explicitní recovery flow po restartu aplikace. Startup recovery gate (`app/startup/recovery_gate_screen.dart`) je kanonická initial route — po dokončení lokálního bootstrapu (otevření DB + idempotentní seed) spustí application use case `RecoverActiveSession` a teprve pak rozhodne o navigaci, takže se Today nikdy krátce nezobrazí před rozhodnutím. **Zdrojem pravdy o aktivní session je tabulka session (status `ACTIVE`/`PAUSED`), ne technický pointer** v `local_app_state` (`active_session_id`), který je jen cache (fyzický model §14/§19, PDR-012). Use case odvodí kanonický nebo konfliktní stav z počtu aktivních sessions, ověří snapshot vazbu (existenci instance), idempotentně doplní chybějící performance řádky (bezpečné: validní aktivní session + validní snapshot; existující actual data zůstávají) a **bezpečně rekonstruuje pointer z jediné aktivní session** v jedné transakci (§19 povolená oprava). Typované výsledky: `NoActiveSession` (→ Today), `ActiveSessionRecovered` / `ActiveSessionRecoveredAfterRepair` (→ stejný tracker se stejnými uloženými hodnotami), `MultipleActiveSessions` / `InconsistentActiveSession` (missingInstance | orphanPointer) / `UnrecoverableRecovery` (→ bezpečný fallback s Retry) — nikdy raw Drift/SQLite výjimka do UI. **Opravitelné vs. neopravitelné:** chybějící pointer při jediné validní aktivní session se bezpečně opraví; více konfliktních aktivních sessions, osiřelý pointer bez odvoditelné session a nekonzistentní snapshot vedou na explicitní bezpečný fallback bez destruktivního mazání (žádný agresivní self-healing, žádné odhadování business hodnot). **Recovery nedokončuje ani neruší session, negeneruje nové session ID, nemění start time, nevytváří druhou aktivní session a nevyžaduje backend.** Startup UI stavy: konečný loading (žádný nekonečný retry/loop), přechod na Today, automatické pokračování do trackeru, bezpečný fallback s explicitním Retry (obnoví i bootstrap). Deep link na validní session zůstává funkční; neplatný session ID končí bezpečným not-found. **Schema beze změny (zůstává verze 1)** — `local_app_state` i všechny session/performance tabulky existují z R1-01; migrace nebyla potřeba, generated kód beze změny. Ověřeno novými testy (rozhodovací matice application use case; persistence nad skutečnou SQLite vč. reálného reopen/recovery, idempotentní opravy pointeru, osiřelého pointeru, více aktivních sessions, rollbacku a zachování dat R1-01…R1-04; startup provider vč. Retry a absence paralelní opravy; widget/navigation gate vč. deep linku; end-to-end restart) — mobile suite zelená (+140), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: start → zápis actualů → dokončení setu → force-stop → normální restart → automatická recovery přímo do stejného trackeru (stejný start time, actual i completion zachovány, session ACTIVE, žádný flash Today); controlled inconsistency: smazán jen technický pointer → restart → pointer bezpečně rekonstruován (recoveredAfterRepair), žádná ztráta dat; on-device DB agregát: 1 aktivní session, pointer odpovídá session, 2 step- a 6 set-performance řádků bez duplikátů napříč restarty.
 
+`R1-06 – Complete Workout and History` je implementován: uzavření prvního kompletního workout flow. Application use case `CompleteWorkout` (bez Flutter/Drift/backend, injektovaný clock) deleguje na `DriftWorkoutCompletionRepository`, který provede **jednu atomickou transakci podle fyzického modelu §15.3**: validace stavu session, dopočet dokončení kroků z completion stavu setů, přepnutí session na `COMPLETED` + `completed_at`, přepnutí instance na `COMPLETED`/`PARTIALLY_COMPLETED` + `completed_at`, vytvoření `ActivitySummary` a vyčištění technického active-session pointeru (jen pokud ukazuje na tuto session). **Idempotence (PDR-007):** už dokončená session → `alreadyCompleted` no-op (původní `completed_at`, žádný duplicitní summary — vynuceno i DB unikátem `local_activity_summaries.workout_session_id`); selhání kroku vrátí celou transakci (rollback bez částečného stavu). **Completion nevyžaduje dokončení všech setů** (workout-model §39.2/§39.3): `COMPLETED` = vědomé uzavření, `PARTIALLY_COMPLETED` = jen část kroků dokončena. Planned snapshot i performance data se nikdy nemažou ani nepřepisují. Typované výsledky completed/alreadyCompleted/sessionNotFound/sessionNotCompletable/instanceNotFound/inconsistentState — nikdy raw Drift výjimka do UI (raw selhání zachytí controller → bezpečný error). **Historie** je read model rekonstruovatelný z `local_activity_summaries` (DAR-006): `WorkoutHistoryRepository` vrací dokončené workouty deterministicky (nejnovější první), read-only completed detail reusuje tracker read model (planned vs. actual, completion, bez inputů/akcí — jasně odlišený od aktivního trackeru; chybějící actual jako „–", ne nula). **Recovery po dokončení:** pointer je vyčištěn, takže R1-05 recovery vrací `NoActiveSession` a aplikace jde na Today — dokončený tracker se znovu neotevře a session se nereaktivuje. UI: `Complete workout` tlačítko s potvrzovacím dialogem (pravdivě uvádí počet dokončených setů; dialog data nemění, zápis až po potvrzení), ochrana proti dvojitému tapu, po úspěchu navigace do historie + invalidace active/recovery/Today/history providerů (bez restartu). History akce z Today. **Schema beze změny (zůstává verze 1)** — `local_activity_summaries`, session/instance `completed_at`/status existují z R1-01; migrace nebyla potřeba, generated kód beze změny. Ověřeno novými testy (application use case; persistence nad skutečnou SQLite: §15.3 efekty, instance COMPLETED vs PARTIALLY_COMPLETED, idempotence bez duplicit, rollback, recovery→NoActiveSession, history dotaz; provider/controller vč. double-tap guardu a history providerů; widget: Complete + confirm cancel/confirm, navigace, read-only detail; end-to-end §11.2 seed→start→zápis→restart→recovery→dokončení→historie) — mobile suite zelená (+167), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: zápis actualu + dokončení setu → Complete → potvrzovací dialog („1 z 6 sérií") → odchod do historie; on-device DB: session COMPLETED + completed_at, instance PARTIALLY_COMPLETED + completed_at, pointer vyčištěn, 1 session, 1 summary, 6 performance řádků zachováno, actual reps=12; po force-stop + restartu aplikace jde na Today (ne tracker), read-only detail ukazuje stejné actual hodnoty. **R1-06 není poslední R1 slice** (následují R1-07, R1-08), proto se R1 Exit Review neprovádí a R1 se neuzavírá.
+
 Dalším kanonickým krokem není další obecný dokument, ale implementace:
 
 ```text
-R1-06 – Complete Workout and History
+R1-07 – Feedback, States and Accessibility
 ```
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
@@ -246,6 +248,7 @@ R1-02 Today and Workout Detail ✅
 R1-03 Start and Persist Session ✅
 R1-04 Record Set Performance ✅
 R1-05 Restart and Recovery ✅
+R1-06 Complete Workout and History ✅
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -286,7 +289,7 @@ ID se nesmí recyklovat.
 # 10. Další kanonický krok
 
 ```text
-R1-06 – Complete Workout and History
+R1-07 – Feedback, States and Accessibility
 ```
 
 Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

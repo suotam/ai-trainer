@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/workouts/presentation/active_session_screen.dart';
+import '../../features/workouts/presentation/completed_workout_detail_screen.dart';
+import '../../features/workouts/presentation/history_screen.dart';
 import '../../features/workouts/presentation/today_screen.dart';
 import '../../features/workouts/presentation/workout_detail_screen.dart';
 import '../startup/recovery_gate_screen.dart';
@@ -39,6 +41,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.activeSessionName,
         path: AppRoutes.activeSessionPath,
         builder: (context, state) => ActiveSessionScreen(
+          sessionId: state.pathParameters[AppRoutes.sessionIdParam] ?? '',
+        ),
+      ),
+      GoRoute(
+        name: AppRoutes.historyName,
+        path: AppRoutes.historyPath,
+        builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.completedWorkoutName,
+        path: AppRoutes.completedWorkoutPath,
+        builder: (context, state) => CompletedWorkoutDetailScreen(
           sessionId: state.pathParameters[AppRoutes.sessionIdParam] ?? '',
         ),
       ),

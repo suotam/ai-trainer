@@ -22,6 +22,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key errorKey = Key('today_error');
   static const Key retryKey = Key('today_retry');
   static const Key listKey = Key('today_workout_list');
+  static const Key historyActionKey = Key('today_history_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -32,7 +33,17 @@ class TodayScreen extends ConsumerWidget {
 
     return Scaffold(
       key: screenKey,
-      appBar: AppBar(title: Text(l10n.todayScreenTitle)),
+      appBar: AppBar(
+        title: Text(l10n.todayScreenTitle),
+        actions: [
+          IconButton(
+            key: historyActionKey,
+            icon: const Icon(Icons.history),
+            tooltip: l10n.historyOpenTooltip,
+            onPressed: () => context.push(AppRoutes.historyPath),
+          ),
+        ],
+      ),
       body: today.when(
         loading: () =>
             _Loading(message: l10n.todayLoading, keyValue: loadingKey),
