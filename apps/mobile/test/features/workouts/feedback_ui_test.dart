@@ -4,14 +4,13 @@ import 'package:ai_trainer_mobile/features/workouts/application/session_provider
 import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/workout_completion_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
-import 'package:ai_trainer_mobile/features/workouts/domain/complete_workout_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/session_tracker.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_feedback.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/active_session_screen.dart';
-import 'package:ai_trainer_mobile/features/workouts/presentation/feedback_confirm_dialog.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/completed_workout_detail_screen.dart';
+import 'package:ai_trainer_mobile/features/workouts/presentation/feedback_confirm_dialog.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/history_screen.dart';
-import 'package:ai_trainer_mobile/features/workouts/presentation/session_tracker_view.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/today_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +25,6 @@ void main() {
   Widget appWith({
     required FakeWorkoutCompletionRepository completion,
     FakeWorkoutHistoryRepository? history,
-    FakeWorkoutPerformanceRepository? performance,
   }) => ProviderScope(
     overrides: [
       r1SeedRepositoryProvider.overrideWithValue(
@@ -41,23 +39,21 @@ void main() {
         ),
       ),
       workoutPerformanceRepositoryProvider.overrideWithValue(
-        performance ??
-            FakeWorkoutPerformanceRepository(
-              tracker: buildTracker(
-                sessionId: 'ses-1',
-                sets: const [
-                  TrackerSet(
-                    setPerformanceId: 'setp-1',
-                    position: 0,
-                    status: SetPerformanceStatus.completed,
-                    plannedRepetitions: 8,
-                    plannedWeightKg: 16,
-                    actualRepetitions: 9,
-                    actualWeightKg: 17.5,
-                  ),
-                ],
+        FakeWorkoutPerformanceRepository(
+          tracker: buildTracker(
+            sessionId: 'ses-1',
+            sets: const [
+              TrackerSet(
+                setPerformanceId: 'setp-1',
+                position: 0,
+                status: SetPerformanceStatus.completed,
+                plannedRepetitions: 8,
+                plannedWeightKg: 16,
+                actualRepetitions: 9,
               ),
-            ),
+            ],
+          ),
+        ),
       ),
       workoutCompletionRepositoryProvider.overrideWithValue(completion),
       workoutHistoryRepositoryProvider.overrideWithValue(
@@ -74,16 +70,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('active tracker zobrazí Complete workout', (tester) async {
-    await tester.pumpWidget(
-      appWith(completion: FakeWorkoutCompletionRepository()),
-    );
-    await openSession(tester);
-
-    expect(find.byKey(ActiveSessionScreen.completeButtonKey), findsOneWidget);
-  });
-
-  testWidgets('Complete → confirm dialog; Cancel nezapíše', (tester) async {
+  testWidgets('Complete otevře feedback dialog; Cancel nezapíše', (
+    tester,
+  ) async {
     final completion = FakeWorkoutCompletionRepository();
     await tester.pumpWidget(appWith(completion: completion));
     await openSession(tester);
@@ -94,19 +83,14 @@ void main() {
 
     await tester.tap(find.byKey(FeedbackConfirmDialog.cancelKey));
     await tester.pumpAndSettle();
-
-    // Dialog zavřen, žádný zápis, stále na session.
-    expect(find.byKey(FeedbackConfirmDialog.dialogKey), findsNothing);
     expect(completion.completeCallCount, 0);
     expect(find.byKey(ActiveSessionScreen.screenKey), findsOneWidget);
   });
 
-  testWidgets('Complete → confirm → dokončí a naviguje do historie', (
+  testWidgets('feedback (náročnost + pocit) se předá do completion', (
     tester,
   ) async {
-    final completion = FakeWorkoutCompletionRepository(
-      script: const [WorkoutCompleted('sum-1')],
-    );
+    final completion = FakeWorkoutCompletionRepository();
     await tester.pumpWidget(
       appWith(
         completion: completion,
@@ -119,51 +103,93 @@ void main() {
 
     await tester.tap(find.byKey(ActiveSessionScreen.completeButtonKey));
     await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(FeedbackConfirmDialog.effortChipKey(7)));
+    await tester.tap(find.byKey(FeedbackConfirmDialog.feelingChipKey('GOOD')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(FeedbackConfirmDialog.confirmKey));
     await tester.pumpAndSettle();
 
     expect(completion.completeCallCount, 1);
+    final fb = completion.lastFeedback;
+    expect(fb, isNotNull);
+    expect(fb!.overallEffort, 7.0);
+    expect(fb.feeling, WorkoutFeeling.good);
+    // Navigace do historie.
     expect(find.byKey(HistoryScreen.screenKey), findsOneWidget);
-    expect(find.byKey(HistoryScreen.listKey), findsOneWidget);
   });
 
-  testWidgets('completion chyba → bezpečný error, žádná navigace', (
+  testWidgets('přeskočený feedback → completion s null feedbackem', (
     tester,
   ) async {
-    final completion = FakeWorkoutCompletionRepository(
-      script: const [CompletionInconsistentState()],
+    final completion = FakeWorkoutCompletionRepository();
+    await tester.pumpWidget(
+      appWith(
+        completion: completion,
+        history: FakeWorkoutHistoryRepository(
+          entries: [buildHistoryEntry(workoutSessionId: 'ses-1')],
+        ),
+      ),
     );
-    await tester.pumpWidget(appWith(completion: completion));
     await openSession(tester);
 
     await tester.tap(find.byKey(ActiveSessionScreen.completeButtonKey));
     await tester.pumpAndSettle();
+    // Nic nevybráno → potvrdit.
     await tester.tap(find.byKey(FeedbackConfirmDialog.confirmKey));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(ActiveSessionScreen.completeErrorKey), findsOneWidget);
-    expect(find.byKey(ActiveSessionScreen.screenKey), findsOneWidget);
-    expect(find.byKey(HistoryScreen.screenKey), findsNothing);
-    expect(find.textContaining('Exception'), findsNothing);
-    expect(find.textContaining('SQL'), findsNothing);
+    expect(completion.completeCallCount, 1);
+    expect(completion.lastFeedback, isNull); // prázdný feedback se přeskočí
   });
 
-  testWidgets('History empty stav', (tester) async {
+  testWidgets('pain flag zobrazí konzervativní bezpečné upozornění', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      appWith(completion: FakeWorkoutCompletionRepository()),
+    );
+    await openSession(tester);
+
+    await tester.tap(find.byKey(ActiveSessionScreen.completeButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byKey(FeedbackConfirmDialog.painSwitchKey));
+    await tester.tap(find.byKey(FeedbackConfirmDialog.painSwitchKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(FeedbackConfirmDialog.painWarningKey), findsOneWidget);
+  });
+
+  testWidgets('completed detail zobrazí uložený feedback (reload)', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       appWith(
         completion: FakeWorkoutCompletionRepository(),
-        history: FakeWorkoutHistoryRepository(entries: const []),
+        history: FakeWorkoutHistoryRepository(
+          entries: [buildHistoryEntry(workoutSessionId: 'ses-1')],
+          feedback: const WorkoutFeedbackSnapshot(
+            overallEffort: 8,
+            feeling: WorkoutFeeling.tired,
+            painReported: true,
+          ),
+        ),
       ),
     );
     await tester.pumpAndSettle();
     final context = tester.element(find.byKey(TodayScreen.screenKey));
-    GoRouter.of(context).go(AppRoutes.historyPath);
+    GoRouter.of(context).go(AppRoutes.completedWorkoutLocation('ses-1'));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(HistoryScreen.emptyKey), findsOneWidget);
+    expect(
+      find.byKey(CompletedWorkoutDetailScreen.feedbackSectionKey),
+      findsOneWidget,
+    );
+    expect(find.textContaining('8/10'), findsOneWidget);
   });
 
-  testWidgets('History nav z Today → data → read-only completed detail', (
+  testWidgets('completed detail bez feedbacku zobrazí bezpečnou informaci', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -175,28 +201,52 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
-    // Vstup do historie z Today.
-    await tester.tap(find.byKey(TodayScreen.historyActionKey));
-    await tester.pumpAndSettle();
-    expect(find.byKey(HistoryScreen.listKey), findsOneWidget);
-
-    // Otevři dokončený detail.
-    await tester.tap(find.byKey(HistoryScreen.entryKey('ses-1')));
+    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    GoRouter.of(context).go(AppRoutes.completedWorkoutLocation('ses-1'));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(CompletedWorkoutDetailScreen.contentKey), findsOneWidget);
     expect(
-      find.byKey(CompletedWorkoutDetailScreen.completedLabelKey),
+      find.byKey(CompletedWorkoutDetailScreen.feedbackNoneKey),
       findsOneWidget,
     );
-    // Read-only: žádné aktivní tracker akce ani Complete button.
-    expect(find.byKey(ActiveSessionScreen.completeButtonKey), findsNothing);
-    expect(
-      find.byKey(SessionTrackerView.saveButtonKey('setp-1')),
-      findsNothing,
+  });
+
+  testWidgets('hlavní ovládací prvky mají accessibility význam', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      appWith(completion: FakeWorkoutCompletionRepository()),
     );
-    // Uložená actual hodnota se zobrazí.
-    expect(find.textContaining('9'), findsWidgets);
+    await openSession(tester);
+
+    // Complete workout tlačítko má čitelný sémantický label.
+    expect(find.bySemanticsLabel(RegExp('Complete workout')), findsOneWidget);
+
+    // Feedback dialog: náročnost má sémantickou hodnotu.
+    await tester.tap(find.byKey(ActiveSessionScreen.completeButtonKey));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(RegExp('Effort 7 of 10')), findsOneWidget);
+    handle.dispose();
+  });
+
+  testWidgets('feedback dialog přežije zvětšení textu (text scaling)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      appWith(completion: FakeWorkoutCompletionRepository()),
+    );
+    await openSession(tester);
+
+    await tester.tap(find.byKey(ActiveSessionScreen.completeButtonKey));
+    await tester.pumpAndSettle();
+
+    // Zvětšený text nesmí shodit build ani skrýt akce.
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(FeedbackConfirmDialog.confirmKey), findsOneWidget);
   });
 }

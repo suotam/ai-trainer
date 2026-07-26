@@ -10,6 +10,7 @@ import '../application/workout_completion_providers.dart';
 import '../application/workout_detail_providers.dart';
 import '../domain/session_tracker.dart';
 import '../domain/workout_session.dart';
+import 'feedback_confirm_dialog.dart';
 import 'session_time_format.dart';
 import 'session_tracker_view.dart';
 
@@ -33,9 +34,6 @@ class ActiveSessionScreen extends ConsumerWidget {
   static const Key completeButtonKey = Key('active_session_complete');
   static const Key completingKey = Key('active_session_completing');
   static const Key completeErrorKey = Key('active_session_complete_error');
-  static const Key completeDialogKey = Key('active_session_complete_dialog');
-  static const Key completeConfirmKey = Key('active_session_complete_confirm');
-  static const Key completeCancelKey = Key('active_session_complete_cancel');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,39 +154,23 @@ class _CompleteWorkoutSection extends ConsumerWidget {
   }
 
   Future<void> _onComplete(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
     final tracker = ref.read(sessionTrackerProvider(sessionId)).value;
     final counts = _setCounts(tracker);
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        key: ActiveSessionScreen.completeDialogKey,
-        title: Text(l10n.completeWorkoutDialogTitle),
-        content: Text(
-          l10n.completeWorkoutDialogMessage(counts.completed, counts.total),
-        ),
-        actions: [
-          TextButton(
-            key: ActiveSessionScreen.completeCancelKey,
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          FilledButton(
-            key: ActiveSessionScreen.completeConfirmKey,
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.completeWorkoutConfirm),
-          ),
-        ],
-      ),
+    // Bezpečný potvrzovací dialog s volitelným feedbackem (R1-07). Dialog
+    // sám data nemění; při zrušení vrací null a nic se nezapíše.
+    final feedback = await FeedbackConfirmDialog.show(
+      context,
+      completedSets: counts.completed,
+      totalSets: counts.total,
     );
-
-    if (confirmed ?? false) {
-      // Zápis až po potvrzení; dialog sám data nemění.
-      await ref
-          .read(workoutCompletionControllerProvider.notifier)
-          .complete(sessionId);
+    if (feedback == null) {
+      return;
     }
+    // Zápis až po potvrzení; prázdný feedback se přeskočí (neukládá se).
+    await ref
+        .read(workoutCompletionControllerProvider.notifier)
+        .complete(sessionId, feedback: feedback.hasContent ? feedback : null);
   }
 
   static ({int completed, int total}) _setCounts(SessionTracker? tracker) {

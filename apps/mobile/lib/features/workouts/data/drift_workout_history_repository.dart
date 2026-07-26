@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../domain/workout_feedback.dart';
 import '../domain/workout_history.dart';
 import '../domain/workout_history_repository.dart';
 
@@ -33,6 +34,22 @@ class DriftWorkoutHistoryRepository implements WorkoutHistoryRepository {
       _db.localActivitySummaries,
     )..where((t) => t.workoutSessionId.equals(sessionId))).getSingleOrNull();
     return row == null ? null : _mapEntry(row);
+  }
+
+  @override
+  Future<WorkoutFeedbackSnapshot?> feedbackBySessionId(String sessionId) async {
+    final row = await (_db.select(
+      _db.localWorkoutFeedback,
+    )..where((t) => t.workoutSessionId.equals(sessionId))).getSingleOrNull();
+    if (row == null) {
+      return null;
+    }
+    return WorkoutFeedbackSnapshot(
+      overallEffort: row.overallEffort,
+      feeling: WorkoutFeeling.fromCode(row.feeling),
+      painReported: row.painReported,
+      notes: row.notes,
+    );
   }
 
   WorkoutHistoryEntry _mapEntry(LocalActivitySummaryRow row) =>

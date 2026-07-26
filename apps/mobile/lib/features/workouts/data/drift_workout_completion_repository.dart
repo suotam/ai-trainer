@@ -4,6 +4,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/ids/id_generator.dart';
 import '../domain/complete_workout_result.dart';
 import '../domain/workout_completion_repository.dart';
+import '../domain/workout_feedback.dart';
 
 /// Drift implementace dokončení workoutu (fyzický model §15.3, PDR-006/007).
 ///
@@ -24,6 +25,7 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
   Future<CompleteWorkoutResult> completeWorkout({
     required String sessionId,
     required DateTime now,
+    WorkoutFeedbackInput? feedback,
   }) {
     return _db.transaction(() async {
       // 1. Validovat podporovaný stav session.
@@ -59,6 +61,25 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
       // 2. Dopočítat dokončení kroků z completion stavu setů.
       final stepCounts = await _finalizeSteps(sessionId, nowMillis);
 
+      // 3. Uložit volitelný feedback (feedback lze přeskočit; prázdný se
+      //    neukládá). Jedna zpětná vazba na session (§12 unique).
+      if (feedback != null && feedback.hasContent) {
+        await _db
+            .into(_db.localWorkoutFeedback)
+            .insert(
+              LocalWorkoutFeedbackCompanion.insert(
+                id: _idGenerator.newId(),
+                workoutSessionId: sessionId,
+                overallEffort: Value(feedback.overallEffort),
+                feeling: Value(feedback.feeling?.code),
+                painReported: feedback.painReported,
+                notes: Value(feedback.notes),
+                createdAt: nowMillis,
+                updatedAt: nowMillis,
+              ),
+            );
+      }
+
       // 4. Nastavit session COMPLETED + completed_at.
       await (_db.update(
         _db.localWorkoutSessions,
@@ -87,7 +108,7 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
         ),
       );
 
-      // 6. Vytvořit ActivitySummary (feedback je R1-07 → overall_effort null).
+      // 6. Vytvořit ActivitySummary s feedback snapshotem overall_effort (§13).
       final summaryId = _idGenerator.newId();
       await _db
           .into(_db.localActivitySummaries)
@@ -103,6 +124,7 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
               activeDurationSeconds: session.elapsedActiveSeconds,
               completedStepCount: stepCounts.completed,
               totalStepCount: stepCounts.total,
+              overallEffort: Value(feedback?.overallEffort),
               createdAt: nowMillis,
             ),
           );

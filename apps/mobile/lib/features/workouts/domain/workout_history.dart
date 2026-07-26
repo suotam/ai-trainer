@@ -1,4 +1,5 @@
 import 'session_tracker.dart';
+import 'workout_feedback.dart';
 
 /// Read model lokální historie dokončených workoutů (VSP §17, fyzický
 /// model §13/§21). Odvozeno z `local_activity_summaries` a performance dat;
@@ -31,11 +32,17 @@ class WorkoutHistoryEntry {
 }
 
 /// Read-only detail dokončeného workoutu: historická metadata + neměnný
-/// tracker read model (planned vs. actual, completion stavy) v read-only
-/// režimu. Presentation jasně odliší aktivní a dokončený stav.
+/// tracker read model (planned vs. actual, completion stavy) + volitelný
+/// uložený feedback, vše v read-only režimu. Presentation jasně odliší
+/// aktivní a dokončený stav.
 class CompletedWorkoutDetail {
-  const CompletedWorkoutDetail({required this.entry, required this.tracker});
+  const CompletedWorkoutDetail({
+    required this.entry,
+    required this.tracker,
+    this.feedback,
+  });
 
   final WorkoutHistoryEntry entry;
   final SessionTracker tracker;
+  final WorkoutFeedbackSnapshot? feedback;
 }

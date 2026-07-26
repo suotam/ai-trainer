@@ -7,6 +7,7 @@ import '../data/drift_workout_completion_repository.dart';
 import '../data/drift_workout_history_repository.dart';
 import '../domain/complete_workout_result.dart';
 import '../domain/workout_completion_repository.dart';
+import '../domain/workout_feedback.dart';
 import '../domain/workout_history.dart';
 import '../domain/workout_history_repository.dart';
 import 'complete_workout.dart';
@@ -60,13 +61,19 @@ final completedWorkoutDetailProvider =
       if (entry == null) {
         return null;
       }
+      final historyRepository = ref.watch(workoutHistoryRepositoryProvider);
       final tracker = await ref
           .watch(workoutPerformanceRepositoryProvider)
           .loadTracker(sessionId);
       if (tracker == null) {
         return null;
       }
-      return CompletedWorkoutDetail(entry: entry, tracker: tracker);
+      final feedback = await historyRepository.feedbackBySessionId(sessionId);
+      return CompletedWorkoutDetail(
+        entry: entry,
+        tracker: tracker,
+        feedback: feedback,
+      );
     }, retry: (retryCount, error) => null);
 
 /// UI stav dokončování workoutu.
@@ -103,7 +110,10 @@ class WorkoutCompletionController extends Notifier<WorkoutCompletionState> {
   @override
   WorkoutCompletionState build() => const CompletionIdle();
 
-  Future<void> complete(String sessionId) async {
+  Future<void> complete(
+    String sessionId, {
+    WorkoutFeedbackInput? feedback,
+  }) async {
     if (_inFlight) {
       return;
     }
@@ -112,7 +122,7 @@ class WorkoutCompletionController extends Notifier<WorkoutCompletionState> {
     try {
       final result = await ref
           .read(completeWorkoutProvider)
-          .call(sessionId: sessionId);
+          .call(sessionId: sessionId, feedback: feedback);
       switch (result) {
         case WorkoutCompleted():
           _invalidateAfterCompletion(sessionId);

@@ -4,6 +4,7 @@ import 'package:ai_trainer_mobile/features/workouts/application/workout_completi
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/complete_workout_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_feedback.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -88,6 +89,23 @@ void main() {
         c.read(workoutCompletionControllerProvider),
         isA<CompletionError>(),
       );
+    });
+
+    test('feedback se předá do completion repository', () async {
+      final repo = FakeWorkoutCompletionRepository();
+      final c = container(completion: repo);
+      await c
+          .read(workoutCompletionControllerProvider.notifier)
+          .complete(
+            'ses-1',
+            feedback: const WorkoutFeedbackInput(
+              overallEffort: 6,
+              feeling: WorkoutFeeling.okay,
+            ),
+          );
+      expect(repo.lastFeedback, isNotNull);
+      expect(repo.lastFeedback!.overallEffort, 6.0);
+      expect(repo.lastFeedback!.feeling, WorkoutFeeling.okay);
     });
 
     test('dvojitý trigger spustí jeden completion write', () async {
