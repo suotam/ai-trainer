@@ -95,16 +95,37 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
     this.activeSession,
     this.throwOnStart = false,
     Map<String, WorkoutSessionSnapshot>? sessionsById,
+    List<WorkoutSessionSnapshot>? activeSessions,
+    this.activePointer,
+    this.existingInstanceIds,
+    this.throwOnFindActiveSessions = false,
+    this.rejectPointerRepair = false,
   }) : _startScript = startScript ?? const [],
-       _sessionsById = sessionsById ?? const {};
+       _sessionsById = sessionsById ?? const {},
+       _explicitActiveSessions = activeSessions;
 
   /// Prvky jsou [StartSessionResult] pro postupné starty.
   final List<Object> _startScript;
   final Map<String, WorkoutSessionSnapshot> _sessionsById;
+  final List<WorkoutSessionSnapshot>? _explicitActiveSessions;
   WorkoutSessionSnapshot? activeSession;
   bool throwOnStart;
 
+  /// Technický active-session pointer (recovery testy).
+  String? activePointer;
+
+  /// Když je `null`, existují všechny instance; jinak jen tyto ID.
+  Set<String>? existingInstanceIds;
+
+  bool throwOnFindActiveSessions;
+
+  /// Vynutí odmítnutí transakční opravy pointeru (revalidace uvnitř
+  /// transakce neprošla) — pointer se nezmění a metoda vrátí `false`.
+  bool rejectPointerRepair;
+
   int startCallCount = 0;
+  int reconcileCallCount = 0;
+  int pointerReadCount = 0;
 
   @override
   Future<StartSessionResult> startSession({
@@ -124,11 +145,53 @@ class FakeWorkoutSessionRepository implements WorkoutSessionRepository {
   }
 
   @override
-  Future<WorkoutSessionSnapshot?> findActiveSession() async => activeSession;
+  Future<WorkoutSessionSnapshot?> findActiveSession() async {
+    final all = _activeSessionsList();
+    return all.isEmpty ? null : all.first;
+  }
 
   @override
   Future<WorkoutSessionSnapshot?> sessionById(String id) async =>
       _sessionsById[id];
+
+  List<WorkoutSessionSnapshot> _activeSessionsList() {
+    if (_explicitActiveSessions != null) {
+      return _explicitActiveSessions;
+    }
+    return activeSession == null ? const [] : [activeSession!];
+  }
+
+  @override
+  Future<List<WorkoutSessionSnapshot>> findActiveSessions() async {
+    if (throwOnFindActiveSessions) {
+      throw StateError('internal persistence failure');
+    }
+    return _activeSessionsList();
+  }
+
+  @override
+  Future<String?> readActiveSessionPointer() async {
+    pointerReadCount += 1;
+    return activePointer;
+  }
+
+  @override
+  Future<bool> reconcileActiveSessionPointer({
+    required String sessionId,
+    required DateTime now,
+  }) async {
+    reconcileCallCount += 1;
+    final all = _activeSessionsList();
+    if (rejectPointerRepair || all.length != 1 || all.first.id != sessionId) {
+      return false;
+    }
+    activePointer = sessionId;
+    return true;
+  }
+
+  @override
+  Future<bool> workoutInstanceExists(String instanceId) async =>
+      existingInstanceIds == null || existingInstanceIds!.contains(instanceId);
 }
 
 /// Fake performance repository řízený skriptem výsledků a stavem trackeru.

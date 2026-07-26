@@ -81,6 +81,38 @@ Record set performance (R1-04, tracker výkonu, `lib/features/workouts/`):
   po restartu; guard proti dvojitému paralelnímu save stejného setu.
 - Schema beze změny (zůstává verze 1) — performance tabulky existují z R1-01.
 
+Restart and recovery (R1-05, startup recovery flow, `lib/`):
+
+- **Recovery entry point**: startup recovery gate
+  (`app/startup/recovery_gate_screen.dart`) je kanonická initial route (`/`).
+  Po dokončení bootstrapu (otevření DB + idempotentní seed) spustí application
+  use case `RecoverActiveSession` a teprve pak rozhodne o navigaci — Today se
+  nikdy krátce nezobrazí před rozhodnutím.
+- **Zdroj pravdy je session tabulka, ne pointer**: aktivní session se odvozuje
+  z `local_workout_sessions` (status `ACTIVE`/`PAUSED`). Technický pointer
+  `active_session_id` v `local_app_state` je jen cache (fyzický model §14/§19).
+- **Ověření a bezpečná oprava**: use case ověří počet aktivních sessions a
+  snapshot vazbu (existenci instance), idempotentně doplní chybějící
+  performance řádky (existující actual data zůstávají) a **bezpečně
+  rekonstruuje pointer z jediné aktivní session** v jedné transakci (§19).
+- **Typované výsledky**: `NoActiveSession` (→ Today),
+  `ActiveSessionRecovered` / `ActiveSessionRecoveredAfterRepair` (→ stejný
+  tracker se stejnými uloženými hodnotami), `MultipleActiveSessions` /
+  `InconsistentActiveSession` (missingInstance | orphanPointer) /
+  `UnrecoverableRecovery` (→ bezpečný fallback s Retry). Nikdy raw
+  Drift/SQLite výjimka do UI.
+- **Opravitelné vs. neopravitelné**: chybějící pointer při jediné validní
+  aktivní session se opraví; více konfliktních sessions, osiřelý pointer a
+  nekonzistentní snapshot vedou na explicitní bezpečný fallback **bez
+  destruktivního mazání** — žádný agresivní self-healing, žádné odhadování
+  business hodnot.
+- **Recovery nedokončuje ani neruší session**, negeneruje nové session ID,
+  nemění start time, nevytváří druhou aktivní session a nevyžaduje backend.
+- **Startup UI**: konečný loading (žádný nekonečný retry/loop), přechod na
+  Today nebo do trackeru, bezpečný fallback s Retry (obnoví i bootstrap).
+  Deep link na validní session zůstává funkční; neplatné ID → not-found.
+- Schema beze změny (zůstává verze 1) — pointer i tabulky existují z R1-01.
+
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
 - **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.

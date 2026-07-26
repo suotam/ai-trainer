@@ -1,4 +1,7 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/app/startup/recovery_gate_screen.dart';
+import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
+import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/today_screen.dart';
@@ -10,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/fake_workout_repositories.dart';
 
 void main() {
+  // Startup recovery gate (R1-05) je initial route. Bez aktivní session
+  // recovery vyhodnotí NoActiveSession a přejde na Today.
   Widget appWith({
     required R1SeedRepository seed,
     required FakeWorkoutInstanceRepository repository,
@@ -17,25 +22,35 @@ void main() {
     overrides: [
       r1SeedRepositoryProvider.overrideWithValue(seed),
       workoutInstanceRepositoryProvider.overrideWithValue(repository),
+      workoutSessionRepositoryProvider.overrideWithValue(
+        FakeWorkoutSessionRepository(),
+      ),
+      workoutPerformanceRepositoryProvider.overrideWithValue(
+        FakeWorkoutPerformanceRepository(),
+      ),
     ],
     child: const AiTrainerApp(),
   );
 
   FakeSeedRepository okSeed() => FakeSeedRepository([SeedResult.applied]);
 
-  testWidgets('loading stav se stabilním klíčem, UI nezamrzá', (tester) async {
+  testWidgets('startup recovery loading stav, UI nezamrzá', (tester) async {
     final hangingSeed = HangingSeedRepository();
     await tester.pumpWidget(
       appWith(seed: hangingSeed, repository: FakeWorkoutInstanceRepository()),
     );
     await tester.pump();
 
-    expect(find.byKey(TodayScreen.loadingKey), findsOneWidget);
+    // Startup recovery gate (R1-05) je initial route; dokud bootstrap běží,
+    // zobrazuje konečný recovery loading, nikoli krátce Today.
+    expect(find.byKey(RecoveryGateScreen.loadingKey), findsOneWidget);
+    expect(find.byKey(TodayScreen.screenKey), findsNothing);
 
-    // Dokončit seed, aby test neskončil s pending future.
+    // Dokončit seed → recovery vyhodnotí NoActiveSession → Today.
     hangingSeed.complete();
     await tester.pumpAndSettle();
-    expect(find.byKey(TodayScreen.loadingKey), findsNothing);
+    expect(find.byKey(RecoveryGateScreen.loadingKey), findsNothing);
+    expect(find.byKey(TodayScreen.emptyKey), findsOneWidget);
   });
 
   testWidgets('data stav zobrazí dnešní workout jako kartu', (tester) async {
@@ -70,25 +85,29 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('error stav s bezpečnou zprávou a retry, bez raw výjimky', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      appWith(
-        seed: FakeSeedRepository([StateError('internal seed failure')]),
-        repository: FakeWorkoutInstanceRepository(),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'bootstrap selhání vede na bezpečný gate fallback, bez raw výjimky',
+    (tester) async {
+      await tester.pumpWidget(
+        appWith(
+          seed: FakeSeedRepository([StateError('internal seed failure')]),
+          repository: FakeWorkoutInstanceRepository(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(TodayScreen.errorKey), findsOneWidget);
-    expect(find.byKey(TodayScreen.retryKey), findsOneWidget);
-    expect(find.textContaining('internal seed failure'), findsNothing);
-    expect(find.textContaining('StateError'), findsNothing);
-    expect(find.textContaining('Exception'), findsNothing);
-  });
+      // Selhání otevření/seedu DB zachytí startup recovery gate (R1-05),
+      // ne Today — bezpečná zpráva + Retry, žádný raw detail.
+      expect(find.byKey(RecoveryGateScreen.fallbackKey), findsOneWidget);
+      expect(find.byKey(RecoveryGateScreen.retryButtonKey), findsOneWidget);
+      expect(find.byKey(TodayScreen.screenKey), findsNothing);
+      expect(find.textContaining('internal seed failure'), findsNothing);
+      expect(find.textContaining('StateError'), findsNothing);
+      expect(find.textContaining('Exception'), findsNothing);
+    },
+  );
 
-  testWidgets('retry po error znovu spustí flow a zobrazí data', (
+  testWidgets('Retry po bootstrap selhání znovu spustí flow a zobrazí Today', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -98,11 +117,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byKey(TodayScreen.errorKey), findsOneWidget);
+    expect(find.byKey(RecoveryGateScreen.fallbackKey), findsOneWidget);
 
-    await tester.tap(find.byKey(TodayScreen.retryKey));
+    await tester.tap(find.byKey(RecoveryGateScreen.retryButtonKey));
     await tester.pumpAndSettle();
 
+    // Recovery vyhodnotí NoActiveSession → Today s daty.
     expect(find.byKey(TodayScreen.listKey), findsOneWidget);
   });
 

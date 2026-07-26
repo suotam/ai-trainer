@@ -45,5 +45,8 @@
   "trackerSaveError": "Sérii se nepodařilo uložit.",
   "trackerValidationError": "Zadej platné hodnoty.",
   "trackerMarkDone": "Hotovo",
-  "trackerCompleted": "Dokončeno"
+  "trackerCompleted": "Dokončeno",
+  "recoveryLoading": "Obnovuji tvůj workout…",
+  "recoveryFallbackMessage": "Workout se nepodařilo bezpečně obnovit. Uložená data zůstala nedotčená. Zkus to prosím znovu.",
+  "recoveryRetry": "Zkusit znovu"
 }

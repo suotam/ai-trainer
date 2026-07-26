@@ -195,5 +195,11 @@
   "trackerMarkDone": "Done",
   "@trackerMarkDone": {"description": "Toggle marking the set completed."},
   "trackerCompleted": "Completed",
-  "@trackerCompleted": {"description": "Semantic label for a completed set."}
+  "@trackerCompleted": {"description": "Semantic label for a completed set."},
+  "recoveryLoading": "Restoring your workout…",
+  "@recoveryLoading": {"description": "Startup recovery loading label."},
+  "recoveryFallbackMessage": "We couldn't safely restore your workout. Your saved data is untouched. Please try again.",
+  "@recoveryFallbackMessage": {"description": "Safe recovery fallback message; no raw error detail."},
+  "recoveryRetry": "Try again",
+  "@recoveryRetry": {"description": "Explicit retry action on the recovery fallback."}
 }

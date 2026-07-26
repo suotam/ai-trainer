@@ -112,4 +112,57 @@ class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
     )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row == null ? null : mapSessionSnapshot(row);
   }
+
+  @override
+  Future<List<WorkoutSessionSnapshot>> findActiveSessions() async {
+    final rows =
+        await (_db.select(_db.localWorkoutSessions)
+              ..where((t) => t.status.isIn(const ['ACTIVE', 'PAUSED']))
+              ..orderBy([(t) => OrderingTerm.asc(t.startedAt)]))
+            .get();
+    return rows.map(mapSessionSnapshot).toList(growable: false);
+  }
+
+  @override
+  Future<String?> readActiveSessionPointer() async {
+    final row = await (_db.select(
+      _db.localAppState,
+    )..where((t) => t.key.equals(activeSessionKey))).getSingleOrNull();
+    return row?.value;
+  }
+
+  @override
+  Future<bool> reconcileActiveSessionPointer({
+    required String sessionId,
+    required DateTime now,
+  }) {
+    return _db.transaction(() async {
+      // Re-derivace zdroje pravdy uvnitř transakce: pointer smí ukazovat jen
+      // na jedinou aktuálně aktivní/pozastavenou session (fyzický model §19).
+      final active = await (_db.select(
+        _db.localWorkoutSessions,
+      )..where((t) => t.status.isIn(const ['ACTIVE', 'PAUSED']))).get();
+      if (active.length != 1 || active.first.id != sessionId) {
+        return false;
+      }
+      await _db
+          .into(_db.localAppState)
+          .insertOnConflictUpdate(
+            LocalAppStateCompanion.insert(
+              key: activeSessionKey,
+              value: sessionId,
+              updatedAt: now.toUtc().millisecondsSinceEpoch,
+            ),
+          );
+      return true;
+    });
+  }
+
+  @override
+  Future<bool> workoutInstanceExists(String instanceId) async {
+    final row = await (_db.select(
+      _db.localWorkoutInstances,
+    )..where((t) => t.id.equals(instanceId))).getSingleOrNull();
+    return row != null;
+  }
 }
