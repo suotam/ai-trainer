@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/session_providers.dart';
+import '../application/session_tracker_providers.dart';
+import '../application/workout_completion_providers.dart';
 import '../application/workout_detail_providers.dart';
+import '../domain/session_tracker.dart';
 import '../domain/workout_session.dart';
 import 'session_time_format.dart';
 import 'session_tracker_view.dart';
@@ -25,6 +30,12 @@ class ActiveSessionScreen extends ConsumerWidget {
   static const Key notFoundKey = Key('active_session_not_found');
   static const Key errorKey = Key('active_session_error');
   static const Key activeLabelKey = Key('active_session_active_label');
+  static const Key completeButtonKey = Key('active_session_complete');
+  static const Key completingKey = Key('active_session_completing');
+  static const Key completeErrorKey = Key('active_session_complete_error');
+  static const Key completeDialogKey = Key('active_session_complete_dialog');
+  static const Key completeConfirmKey = Key('active_session_complete_confirm');
+  static const Key completeCancelKey = Key('active_session_complete_cancel');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -87,8 +98,111 @@ class _ActiveSessionContent extends ConsumerWidget {
         const SizedBox(height: 16),
         // Tracker výkonu (R1-04) — plánované vs. skutečné hodnoty, zápis.
         SessionTrackerView(sessionId: session.id),
+        const SizedBox(height: 24),
+        // Dokončení workoutu (R1-06).
+        _CompleteWorkoutSection(sessionId: session.id),
       ],
     );
+  }
+}
+
+/// Dokončení aktivní session (R1-06): potvrzovací dialog, ochrana proti
+/// dvojitému tapu, navigace do historie po úspěchu a bezpečný error stav.
+class _CompleteWorkoutSection extends ConsumerWidget {
+  const _CompleteWorkoutSection({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final completion = ref.watch(workoutCompletionControllerProvider);
+    final isCompleting = completion is CompletionInProgress;
+
+    // Po úspěšném dokončení odejdi z active trackeru do historie.
+    ref.listen<WorkoutCompletionState>(workoutCompletionControllerProvider, (
+      previous,
+      next,
+    ) {
+      if (next is CompletionDone) {
+        ref.read(workoutCompletionControllerProvider.notifier).reset();
+        context.go(AppRoutes.historyPath);
+      }
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton(
+          key: ActiveSessionScreen.completeButtonKey,
+          onPressed: isCompleting ? null : () => _onComplete(context, ref),
+          child: isCompleting
+              ? Text(
+                  l10n.completeWorkoutCompleting,
+                  key: ActiveSessionScreen.completingKey,
+                )
+              : Text(l10n.completeWorkoutButton),
+        ),
+        if (completion is CompletionError)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l10n.completeWorkoutError,
+              key: ActiveSessionScreen.completeErrorKey,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _onComplete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final tracker = ref.read(sessionTrackerProvider(sessionId)).value;
+    final counts = _setCounts(tracker);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        key: ActiveSessionScreen.completeDialogKey,
+        title: Text(l10n.completeWorkoutDialogTitle),
+        content: Text(
+          l10n.completeWorkoutDialogMessage(counts.completed, counts.total),
+        ),
+        actions: [
+          TextButton(
+            key: ActiveSessionScreen.completeCancelKey,
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            key: ActiveSessionScreen.completeConfirmKey,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.completeWorkoutConfirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed ?? false) {
+      // Zápis až po potvrzení; dialog sám data nemění.
+      await ref
+          .read(workoutCompletionControllerProvider.notifier)
+          .complete(sessionId);
+    }
+  }
+
+  static ({int completed, int total}) _setCounts(SessionTracker? tracker) {
+    var completed = 0;
+    var total = 0;
+    for (final exercise in tracker?.exercises ?? const <TrackerExercise>[]) {
+      for (final set in exercise.sets) {
+        total += 1;
+        if (set.isCompleted) {
+          completed += 1;
+        }
+      }
+    }
+    return (completed: completed, total: total);
   }
 }
 
