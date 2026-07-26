@@ -5,8 +5,12 @@ import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.da
 import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_instance_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_read_model.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/complete_workout_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/record_performance_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/session_tracker.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_completion_repository.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_history.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_history_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_performance_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_session.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_session_repository.dart';
@@ -252,6 +256,75 @@ class FakeWorkoutPerformanceRepository implements WorkoutPerformanceRepository {
     return result;
   }
 }
+
+/// Fake completion repository řízený skriptem výsledků — bez Drift/sítě.
+class FakeWorkoutCompletionRepository implements WorkoutCompletionRepository {
+  FakeWorkoutCompletionRepository({List<CompleteWorkoutResult>? script})
+    : _script = script ?? const [];
+
+  final List<CompleteWorkoutResult> _script;
+
+  int completeCallCount = 0;
+  DateTime? lastNow;
+  String? lastSessionId;
+
+  @override
+  Future<CompleteWorkoutResult> completeWorkout({
+    required String sessionId,
+    required DateTime now,
+  }) async {
+    lastNow = now;
+    lastSessionId = sessionId;
+    final result = _script.isEmpty
+        ? const WorkoutCompleted('sum-1')
+        : _script[completeCallCount.clamp(0, _script.length - 1)];
+    completeCallCount += 1;
+    return result;
+  }
+}
+
+/// Fake history repository řízený stavem — bez Drift/sítě.
+class FakeWorkoutHistoryRepository implements WorkoutHistoryRepository {
+  FakeWorkoutHistoryRepository({List<WorkoutHistoryEntry>? entries})
+    : entries = entries ?? const [];
+
+  List<WorkoutHistoryEntry> entries;
+
+  @override
+  Future<List<WorkoutHistoryEntry>> completedWorkouts() async => entries;
+
+  @override
+  Future<WorkoutHistoryEntry?> completedWorkoutBySessionId(
+    String sessionId,
+  ) async {
+    for (final e in entries) {
+      if (e.workoutSessionId == sessionId) {
+        return e;
+      }
+    }
+    return null;
+  }
+}
+
+WorkoutHistoryEntry buildHistoryEntry({
+  String activitySummaryId = 'sum-1',
+  String workoutSessionId = 'ses-1',
+  String workoutInstanceId = 'wi1',
+  String title = 'Full Body Strength (Demo)',
+  String workoutType = 'STRENGTH',
+  int completedStepCount = 2,
+  int totalStepCount = 2,
+}) => WorkoutHistoryEntry(
+  activitySummaryId: activitySummaryId,
+  workoutSessionId: workoutSessionId,
+  workoutInstanceId: workoutInstanceId,
+  title: title,
+  workoutType: workoutType,
+  startedAt: DateTime.utc(2026, 7, 20, 8),
+  completedAt: DateTime.utc(2026, 7, 20, 9),
+  completedStepCount: completedStepCount,
+  totalStepCount: totalStepCount,
+);
 
 SessionTracker buildTracker({
   String sessionId = 'ses-1',
