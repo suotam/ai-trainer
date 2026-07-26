@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/workout_completion_providers.dart';
 import '../domain/session_tracker.dart';
+import '../domain/workout_feedback.dart';
 import '../domain/workout_history.dart';
 import 'session_time_format.dart';
 
@@ -21,6 +22,8 @@ class CompletedWorkoutDetailScreen extends ConsumerWidget {
   static const Key errorKey = Key('completed_workout_error');
   static const Key contentKey = Key('completed_workout_content');
   static const Key completedLabelKey = Key('completed_workout_label');
+  static const Key feedbackSectionKey = Key('completed_workout_feedback');
+  static const Key feedbackNoneKey = Key('completed_workout_feedback_none');
 
   static Key setRowKey(String id) => Key('completed_set_$id');
 
@@ -90,11 +93,75 @@ class _CompletedContent extends StatelessWidget {
         Text(l10n.completedWorkoutStartedAt(formatStartedAt(entry.startedAt))),
         Text(l10n.historyCompletedAt(formatStartedAt(entry.completedAt))),
         const SizedBox(height: 16),
+        _FeedbackSection(feedback: detail.feedback),
+        const SizedBox(height: 16),
         for (final exercise in detail.tracker.exercises)
           _ExerciseBlock(exercise: exercise),
       ],
     );
   }
+}
+
+/// Read-only zobrazení uloženého feedbacku (reload). Když uživatel feedback
+/// přeskočil, zobrazí bezpečnou informaci místo prázdna.
+class _FeedbackSection extends StatelessWidget {
+  const _FeedbackSection({required this.feedback});
+
+  final WorkoutFeedbackSnapshot? feedback;
+
+  String _feelingLabel(AppLocalizations l10n, WorkoutFeeling feeling) =>
+      switch (feeling) {
+        WorkoutFeeling.great => l10n.feelingGreat,
+        WorkoutFeeling.good => l10n.feelingGood,
+        WorkoutFeeling.okay => l10n.feelingOkay,
+        WorkoutFeeling.tired => l10n.feelingTired,
+        WorkoutFeeling.rough => l10n.feelingRough,
+      };
+
+  static String _effort(double value) =>
+      value == value.roundToDouble() ? value.toStringAsFixed(0) : '$value';
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final data = feedback;
+
+    if (data == null || !_hasContent(data)) {
+      return Text(
+        l10n.completedFeedbackNone,
+        key: CompletedWorkoutDetailScreen.feedbackNoneKey,
+        style: theme.textTheme.bodyMedium,
+      );
+    }
+
+    return Column(
+      key: CompletedWorkoutDetailScreen.feedbackSectionKey,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.completedFeedbackTitle, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 4),
+        if (data.overallEffort != null)
+          Text(l10n.completedFeedbackEffort(_effort(data.overallEffort!))),
+        if (data.feeling != null)
+          Text(
+            l10n.completedFeedbackFeeling(_feelingLabel(l10n, data.feeling!)),
+          ),
+        if (data.painReported) Text(l10n.completedFeedbackPain),
+        if (data.notes != null && data.notes!.trim().isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(data.notes!),
+          ),
+      ],
+    );
+  }
+
+  static bool _hasContent(WorkoutFeedbackSnapshot f) =>
+      f.overallEffort != null ||
+      f.feeling != null ||
+      f.painReported ||
+      (f.notes != null && f.notes!.trim().isNotEmpty);
 }
 
 class _ExerciseBlock extends StatelessWidget {
