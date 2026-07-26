@@ -170,6 +170,21 @@ Feedback, states and accessibility (R1-07, `lib/features/workouts/`):
   bezpečný stav, ne navigace). Základní lokalizační struktura (EN/CS).
 - Schema beze změny (zůstává verze 1) — feedback tabulka z R1-01.
 
+Critical end-to-end evidence (R1-08, `test/features/workouts/`):
+
+- **Automatizovaný důkaz hlavní hodnoty R1** — `r1_critical_path_e2e_test.dart`
+  prokazuje celý povinný scénář (test-strategy §11.2) v jednom deterministickém
+  Flutter testu nad **skutečnou lokální SQLite** (skutečné Drift repozitáře,
+  bootstrap, recovery i completion; overridnuty jen DB, clock a ID).
+- **Scénář**: seed → Today → otevření workoutu → start session → zápis výkonu →
+  „ukončení a znovuspuštění" (odmontování app vrstvy + znovupostavení nad stejnou
+  persistence) → recovery aktivní session → dokončení → workout v historii,
+  vše bez backendu a sítě.
+- **Determinismus**: fixní clock + verzovaný seed + stabilní ID + bounded pumpy
+  místo `pumpAndSettle` (fokusovaný TextField má blikající kurzor = nekonečná
+  animace). Součást existující mobile CI gate (`flutter test`).
+- Žádná nová business funkcionalita ani schema změna — pouze end-to-end důkaz.
+
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
 - **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.

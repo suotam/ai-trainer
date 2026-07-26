@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.13  
+**Verze:** 2.14  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-26
@@ -138,10 +138,10 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-07`. Dalším kanonickým krokem je implementace:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je připraven k uzavření po mergnutí PR R1-08. Dalším kanonickým krokem je fáze R2:
 
 ```text
-R1-08 – Critical End-to-End Evidence
+R2-01 (první R2 slice — kontrakt vznikne před implementací)
 ```
 
 ---
@@ -323,8 +323,11 @@ uvést pravdivou evidence summary
 
 # 14. Aktuální další krok
 
+Celé R1 (`R1-01` až `R1-08`) je implementované a R1 Exit Review je proveden;
+Release 1 se uzavírá po mergnutí PR R1-08. Další kanonický krok je fáze R2:
+
 ```text
-R1-08 – Critical End-to-End Evidence
+R2-01 (první R2 slice — kontrakt vznikne před implementací)
 ```
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
