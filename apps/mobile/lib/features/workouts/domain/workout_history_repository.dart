@@ -1,3 +1,4 @@
+import 'workout_feedback.dart';
 import 'workout_history.dart';
 
 /// History read boundary (fyzický model §16/§21). Implementace patří do
@@ -10,4 +11,8 @@ abstract interface class WorkoutHistoryRepository {
 
   /// Historický záznam podle ID dokončené session, nebo `null`.
   Future<WorkoutHistoryEntry?> completedWorkoutBySessionId(String sessionId);
+
+  /// Uložený feedback session (reload do read-only detailu), nebo `null`,
+  /// pokud uživatel feedback přeskočil.
+  Future<WorkoutFeedbackSnapshot?> feedbackBySessionId(String sessionId);
 }

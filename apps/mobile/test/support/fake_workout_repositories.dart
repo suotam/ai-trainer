@@ -7,6 +7,7 @@ import 'package:ai_trainer_mobile/features/workouts/domain/workout_instance_repo
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_read_model.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/complete_workout_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/record_performance_result.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_feedback.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/session_tracker.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_completion_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/workout_history.dart';
@@ -267,14 +268,17 @@ class FakeWorkoutCompletionRepository implements WorkoutCompletionRepository {
   int completeCallCount = 0;
   DateTime? lastNow;
   String? lastSessionId;
+  WorkoutFeedbackInput? lastFeedback;
 
   @override
   Future<CompleteWorkoutResult> completeWorkout({
     required String sessionId,
     required DateTime now,
+    WorkoutFeedbackInput? feedback,
   }) async {
     lastNow = now;
     lastSessionId = sessionId;
+    lastFeedback = feedback;
     final result = _script.isEmpty
         ? const WorkoutCompleted('sum-1')
         : _script[completeCallCount.clamp(0, _script.length - 1)];
@@ -285,10 +289,13 @@ class FakeWorkoutCompletionRepository implements WorkoutCompletionRepository {
 
 /// Fake history repository řízený stavem — bez Drift/sítě.
 class FakeWorkoutHistoryRepository implements WorkoutHistoryRepository {
-  FakeWorkoutHistoryRepository({List<WorkoutHistoryEntry>? entries})
-    : entries = entries ?? const [];
+  FakeWorkoutHistoryRepository({
+    List<WorkoutHistoryEntry>? entries,
+    this.feedback,
+  }) : entries = entries ?? const [];
 
   List<WorkoutHistoryEntry> entries;
+  WorkoutFeedbackSnapshot? feedback;
 
   @override
   Future<List<WorkoutHistoryEntry>> completedWorkouts() async => entries;
@@ -304,6 +311,11 @@ class FakeWorkoutHistoryRepository implements WorkoutHistoryRepository {
     }
     return null;
   }
+
+  @override
+  Future<WorkoutFeedbackSnapshot?> feedbackBySessionId(
+    String sessionId,
+  ) async => feedback;
 }
 
 WorkoutHistoryEntry buildHistoryEntry({
