@@ -113,6 +113,39 @@ Restart and recovery (R1-05, startup recovery flow, `lib/`):
   Deep link na validní session zůstává funkční; neplatné ID → not-found.
 - Schema beze změny (zůstává verze 1) — pointer i tabulky existují z R1-01.
 
+Complete workout and history (R1-06, `lib/features/workouts/`):
+
+- **Completion command**: `CompleteWorkout` (application, injektovaný clock)
+  deleguje na `DriftWorkoutCompletionRepository`, který v **jedné atomické
+  transakci** (fyzický model §15.3) validuje stav session, dopočítá dokončení
+  kroků z completion stavu setů, přepne session na `COMPLETED` + `completed_at`,
+  instanci na `COMPLETED`/`PARTIALLY_COMPLETED` + `completed_at`, vytvoří
+  `ActivitySummary` a vyčistí active-session pointer (jen ukazuje-li sem).
+  Selhání kroku vrátí celou transakci (rollback).
+- **Idempotence (PDR-007)**: už dokončená session → `alreadyCompleted` no-op —
+  původní `completed_at`, žádný duplicitní summary (i DB unikát na
+  `workout_session_id`). Typované výsledky completed / alreadyCompleted /
+  sessionNotFound / sessionNotCompletable / instanceNotFound / inconsistentState;
+  raw výjimka nikdy do UI.
+- **Nevyžaduje dokončení všech setů**: `COMPLETED` = vědomé uzavření,
+  `PARTIALLY_COMPLETED` = jen část kroků dokončena. Planned snapshot i
+  performance data se nemažou ani nepřepisují.
+- **Recovery po dokončení**: pointer je vyčištěn → R1-05 recovery vrátí
+  `NoActiveSession` a aplikace jde na Today; dokončený tracker se znovu
+  neotevře, session se nereaktivuje.
+- **History** je read model z `local_activity_summaries` (rekonstruovatelný,
+  DAR-006): `WorkoutHistoryRepository` vrací dokončené workouty nejnovější
+  první. History screen (loading/empty/data/error), akce z Today.
+- **Read-only completed detail** reusuje tracker read model (planned vs. actual,
+  completion) bez inputů/akcí — jasně odlišený od aktivního trackeru; chybějící
+  actual jako „–" (ne nula).
+- **UI dokončení**: `Complete workout` tlačítko s potvrzovacím dialogem
+  (pravdivě uvádí počet dokončených setů; dialog data nemění, zápis až po
+  potvrzení), ochrana proti dvojitému tapu, po úspěchu navigace do historie +
+  invalidace active/recovery/Today/history providerů (bez restartu), bezpečný
+  error bez raw detailu.
+- Schema beze změny (zůstává verze 1) — summary a completion pole z R1-01.
+
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
 - **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.
