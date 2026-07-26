@@ -146,6 +146,30 @@ Complete workout and history (R1-06, `lib/features/workouts/`):
   error bez raw detailu.
 - Schema beze změny (zůstává verze 1) — summary a completion pole z R1-01.
 
+Feedback, states and accessibility (R1-07, `lib/features/workouts/`):
+
+- **Feedback** (subjektivní náročnost RPE 0–10, pocit, flag bolesti, volitelná
+  poznámka) se zachytává v **bezpečném potvrzovacím dialogu dokončení**
+  (`feedback_confirm_dialog.dart`) a ukládá **v existující atomické completion
+  transakci** (§15.3 krok 3): rozšířeny `WorkoutCompletionRepository` a use case
+  `CompleteWorkout` o volitelný `WorkoutFeedbackInput`; feedback řádek do
+  `local_workout_feedback` + snapshot `overall_effort` do `ActivitySummary`.
+  Žádný nový use case/repository/transakce.
+- **Volitelný / skippable** (workout-model §40.3): prázdný feedback se neukládá;
+  zrušení dialogu nic nezapíše. Feeling používá stabilní kódy
+  `GREAT/GOOD/OKAY/TIRED/ROUGH`.
+- **Reload**: feedback je znovu načitelný v read-only completed detailu
+  (`feedbackBySessionId` → `CompletedWorkoutDetail.feedback`); přeskočený
+  feedback zobrazí bezpečnou informaci.
+- **Bolest** je v R1 jen flag s konzervativním bezpečným upozorněním — žádná
+  diagnostika ani AI.
+- **Accessibility**: hlavní ovládací prvky mají sémantické labely (Complete
+  workout, náročnost „Effort N of 10"); dialog přežije zvětšení textu bez pádu;
+  ovládání bez psaní (chips/switch).
+- **States**: běžná chyba se neprezentuje jako úspěch (completion error je
+  bezpečný stav, ne navigace). Základní lokalizační struktura (EN/CS).
+- Schema beze změny (zůstává verze 1) — feedback tabulka z R1-01.
+
 Today a workout detail (R1-02, read-only, `lib/features/workouts/`):
 
 - **Domov aplikace je Today** (`/today`); detail je `/workouts/:workoutId`.
