@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.14  
+**Verze:** 2.15  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-07-26
+**Poslední aktualizace:** 2026-07-27
 
 ---
 
@@ -105,13 +105,15 @@ docs/12-data/r1-physical-data-model.md
 docs/13-delivery/repository-strategy.md
 docs/13-delivery/definition-of-ready-and-done.md
 docs/13-delivery/r0-r1-vertical-slice-plan.md
+docs/13-delivery/r2-vertical-slice-plan.md
 docs/14-quality/test-strategy.md
 docs/15-coding-agent/coding-agent-guide.md
 ```
 
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
-- `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace a `VSP-001` až `VSP-015`.
+- `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. R2 je zatím jen naplánované — žádný slice není `READY` a implementace nezačala.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -138,10 +140,11 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je připraven k uzavření po mergnutí PR R1-08. Dalším kanonickým krokem je fáze R2:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`, ale **žádný R2 slice není `READY`** — čekají na blokující detailní kontrakty a implementace R2 nezačala. Dalším kanonickým krokem je vytvořit blokující kontrakty pro `R2-01`:
 
 ```text
-R2-01 (první R2 slice — kontrakt vznikne před implementací)
+C1 – Mobile schema migration contract  (docs/12-data/r2-mobile-schema-migration.md)
+C2 – Local ownership & outbox contract (docs/12-data/r2-local-sync-metadata-contract.md)
 ```
 
 ---
@@ -323,11 +326,16 @@ uvést pravdivou evidence summary
 
 # 14. Aktuální další krok
 
-Celé R1 (`R1-01` až `R1-08`) je implementované a R1 Exit Review je proveden;
-Release 1 se uzavírá po mergnutí PR R1-08. Další kanonický krok je fáze R2:
+Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Release 1
+uzavřen. R2 vertical-slice plán existuje (`docs/13-delivery/r2-vertical-slice-plan.md`),
+ale žádný R2 slice není `READY`. Další kanonický dokumentační krok je vytvořit blokující
+kontrakty pro `R2-01`:
 
 ```text
-R2-01 (první R2 slice — kontrakt vznikne před implementací)
+C1 – Mobile schema migration contract  (docs/12-data/r2-mobile-schema-migration.md)
+C2 – Local ownership & outbox contract (docs/12-data/r2-local-sync-metadata-contract.md)
 ```
+
+Teprve po jejich vzniku a Ready kontrole lze zahájit implementaci `R2-01`.
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
