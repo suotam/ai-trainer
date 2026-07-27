@@ -138,7 +138,7 @@ Tento plán **nevytváří** detailní kontrakty. Pouze určuje vlastníka, kano
 | C11 | Idempotency contract | Domain (sync-and-offline-model) + Backend | součást C10 nebo `docs/12-data/r2-idempotency-contract.md` | R2-05 | ano | idempotency key, IdempotencyRecord, `ALREADY_APPLIED`, rozdílný payload se stejným klíčem |
 | C12 | Conflict/rejection contract | Domain (sync-and-offline-model) | součást C10 nebo `docs/07-backend/r2-conflict-rejection-contract.md` | R2-06 | ano | SyncConflict, ConflictResolution, rejection stav, „ne synchronizováno" |
 | C13 | Token/session revocation contract | Security + Backend | součást C3/C7 | R2-06 | ano | revokace session/refresh, chování klienta po revokaci |
-| C14 | Audit-event contract (auth + sync kritické události) | Domain (domain-events) + Security | `docs/11-security/r2-audit-event-contract.md` | R2-02 (auth) / R2-05 (sync) | ano pro pokryté události, non-blocking scaffolding | seznam auditovaných událostí, bez citlivého payloadu |
+| C14 | Audit-event contract (auth + sync kritické události) | Domain (domain-events) + Security | `docs/11-security/r2-audit-event-contract.md` | auth část před R2-02, sync část před R2-05 | ano — blocking pro konkrétní auth/sync události produkované daným slicem (auth část blokuje R2-02, sync část blokuje R2-05); obecné budoucí audit scaffolding mimo tyto události není blocking | seznam auditovaných událostí daného slice, bez citlivého payloadu |
 | C15 | Local-to-account migration contract (předpřihlašovací data) | Data Architecture + Domain | `docs/12-data/r2-local-to-account-migration-contract.md` | R2-07 | ano | anonymous→account attach, duplicitní ochrana, stabilita lokálních ID, seed vs user data |
 
 Přesná finální jména a případné sloučení kontraktů určí owning tým při jejich autorizaci; toto je návrh, ne závazný název souboru.
@@ -183,7 +183,7 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Blocking kontrakty:** C1 (mobile schema migration), C2 (local ownership & outbox).
 
-**Ready:** `NOT_READY` dokud neexistují C1 a C2.
+**Ready:** `NOT_READY`, dokud neexistují C1 a C2. (První R2 slice — nezávisí na dokončení jiného R2 slice.)
 
 **Acceptance / evidence gate:** migrační test z reálného v1 stavu prokáže zachování dat a aktivní session; outbox položka přežije restart; R1 offline kritický tok beze změny; drift-check generovaného kódu čistý.
 
@@ -195,9 +195,9 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Non-goals:** mobilní UI, profil, device, sync, konkrétní provider bez ADR.
 
-**Blocking kontrakty:** C3, C4, C5, C6 (account/auth část), C14 (auth události).
+**Blocking kontrakty:** C3, C4, C5, C6 (account/auth část), C14 (auth část — události produkované tímto slicem).
 
-**Ready:** `NOT_READY` dokud neexistují C3–C6.
+**Ready:** `NOT_READY`, dokud neexistují C3, C4, C5, C6 a auth část C14. (Backend-only baseline — nezávisí na dokončení jiného R2 slice.)
 
 **Acceptance / evidence gate:** Testcontainers PostgreSQL testy; API contract testy proti OpenAPI; security-negative testy (default deny, neplatné credentials, rate limit); žádné secrets/tokeny v logu; auth události auditovány bez citlivého payloadu.
 
@@ -209,9 +209,9 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Non-goals:** sync, profil, device registration, konflikt.
 
-**Blocking kontrakty:** C7 (token/session storage), C4 (auth API z R2-02).
+**Blocking kontrakty:** C7 (token/session storage); C4 (auth API) je garantováno dokončeným R2-02.
 
-**Ready:** `NOT_READY` dokud neexistuje C7.
+**Ready:** `NOT_READY`, dokud není R2-02 Done (garantuje C4) a neexistuje C7.
 
 **Acceptance / evidence gate:** widget/integration testy login/logout; test, že citlivý materiál není v Drift/SQLite; restart-with-session test; R1 offline flow beze změny; security-negative (logout skutečně zneplatní lokální session).
 
@@ -223,9 +223,9 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Non-goals:** více profilů, role, pokročilá správa zařízení, sync dat.
 
-**Blocking kontrakty:** C9 (device registration), C8 (authorization/ownership), C6 (rozšíření server data modelu o profil/device).
+**Blocking kontrakty:** C9 (device registration), C8 (authorization/ownership), C6 (rozšíření server data modelu o profil/device). Základ C6 je garantován dokončeným R2-02.
 
-**Ready:** `NOT_READY` dokud neexistují C8, C9 (a rozšíření C6).
+**Ready:** `NOT_READY`, dokud není R2-03 Done a neexistují C8, C9 a rozšíření C6 o profil/device.
 
 **Acceptance / evidence gate:** Testcontainers testy profilu/zařízení; ownership negativní testy (cizí účet nesmí číst/měnit); API contract testy; audit registrace.
 
@@ -237,9 +237,9 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Non-goals:** pull sync nad rámec nutného potvrzení, konflikt resolution UX, migrace předpřihlašovacích dat, background framework.
 
-**Blocking kontrakty:** C10 (sync protocol), C11 (idempotency), C8 (ownership), C6 (server data model pro synced entity), C14 (sync události).
+**Blocking kontrakty:** C10 (sync protocol), C11 (idempotency), C6 (rozšíření server data modelu o synced entity), C14 (sync část — události produkované tímto slicem). C8 (ownership) je garantováno dokončeným R2-04.
 
-**Ready:** `NOT_READY` dokud neexistují C10, C11 a rozšíření C6/C8.
+**Ready:** `NOT_READY`, dokud není R2-04 Done (garantuje C8 a základ C6) a neexistují C10, C11, rozšíření C6 pro synced entity a sync část C14.
 
 **Acceptance / evidence gate:** idempotency/replay testy (druhý push → `ALREADY_APPLIED`, žádná duplicita); ownership negativní testy; offline-create → later-replay test; restart uprostřed pending syncu; odmítnutá operace není označena jako synchronizovaná; potvrzeno až po commitu (`data-architecture DAR`, `SAR-011`).
 
@@ -253,7 +253,7 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Blocking kontrakty:** C12 (conflict/rejection), C13 (revocation).
 
-**Ready:** `NOT_READY` dokud neexistují C12 a C13.
+**Ready:** `NOT_READY`, dokud není R2-05 Done a neexistují C12 a C13.
 
 **Acceptance / evidence gate:** conflict/rejection testy (explicitní stav, ne skrytý success); revocation test (revokovaná session ztratí přístup, lokální potvrzená data zůstanou); security-negative (revokovaný refresh nelze použít).
 
@@ -265,9 +265,9 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Non-goals:** merge více účtů, ProfileMergeRequest, cross-account transfer.
 
-**Blocking kontrakty:** C15 (local-to-account migration), návazně C11 (idempotency).
+**Blocking kontrakty:** C15 (local-to-account migration). C11 (idempotency) není samostatný blocking kontrakt R2-07 — je garantováno dokončeným R2-05.
 
-**Ready:** `NOT_READY` dokud neexistuje C15.
+**Ready:** `NOT_READY`, dokud není R2-05 Done (garantuje C11) a neexistuje C15.
 
 **Acceptance / evidence gate:** migrační/persistence testy (předpřihlašovací data se připojí bez duplicit, ID stabilní); idempotentní opakování attach; logout bez ztráty lokálních dat; seed data se nesynchronizují jako uživatelská, pokud to kontrakt zakazuje.
 
@@ -281,7 +281,7 @@ Formát: Výsledek / Scope / Non-goals / Blocking kontrakty / Ready / Acceptance
 
 **Blocking kontrakty:** žádné nové — konzumuje výstupy R2-01…R2-07.
 
-**Ready:** `NOT_READY` dokud nejsou R2-01…R2-07 hotové a jejich kontrakty existují.
+**Ready:** `NOT_READY`, dokud nejsou R2-01…R2-07 Done (a tedy i jejich kontrakty existují).
 
 **Acceptance / evidence gate:** deterministický E2E test na podporovaném runtime; failure artefakty pro diagnostiku; flaky výsledek není zelený důkaz; R2 Exit Review kritéria splněna.
 
