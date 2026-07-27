@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.14  
+**Verze:** 2.15  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -101,11 +101,24 @@ R0 je uzavřeno. Kontrola podle VSP §11 a DoD §9 na merge commitu R0-06 a PR R
 
 `R1-07 – Feedback, States and Accessibility` je implementován: hlavní R1 flow má základní uživatelskou dokončenost a neskrývá failure stavy. **Feedback** (subjektivní náročnost RPE 0–10, pocit, flag bolesti, volitelná poznámka) se zachytává v **bezpečném potvrzovacím dialogu dokončení** (screen-spec §3.9/§40) a ukládá **v existující atomické completion transakci** (§15.3 krok 3 — žádný nový use case/transakce): rozšířeny `WorkoutCompletionRepository.completeWorkout` a use case `CompleteWorkout` o volitelný `WorkoutFeedbackInput`; feedback řádek do `local_workout_feedback` a snapshot `overall_effort` do `ActivitySummary` (§13). Feedback je **volitelný/skippable** (workout-model §40.3): prázdný se neukládá, dialog vrací `null` při zrušení (žádný zápis). **Idempotence:** už dokončená session → feedback se nemění (jedna zpětná vazba na session, DB unique). Feeling používá stabilní kódy `GREAT/GOOD/OKAY/TIRED/ROUGH` (fyzický model §12 vyžaduje „stabilní kód pocitu", množinu nedefinuje — tato je kanonická pro R1). Feedback je **znovu načitelný** v read-only completed detailu (`WorkoutHistoryRepository.feedbackBySessionId` → `CompletedWorkoutDetail.feedback`); přeskočený feedback zobrazí bezpečnou informaci. **Bolest** je v R1 jen flag s konzervativním bezpečným upozorněním (§12 řádek 329) — žádná diagnostika ani AI. **Accessibility** (screen-spec §70): hlavní ovládací prvky mají čitelné sémantické labely (Complete workout, náročnost s hodnotou „Effort N of 10"), dialog přežije zvětšení textu (text scaling) bez pádu a bez skrytí akcí, ovládání bez psaní (chips/switch). **States**: loading/empty/error/recovery zůstávají explicitní (běžná chyba se neprezentuje jako úspěch — completion error je bezpečný stav, ne navigace). **Základní lokalizační struktura** rozšířena o feedback řetězce (EN/CS). **Schema beze změny (zůstává verze 1)** — `local_workout_feedback` i `overall_effort` existují z R1-01; migrace nebyla potřeba, generated kód beze změny. Ověřeno novými testy (feedback persistence nad skutečnou SQLite: uložení v transakci, snapshot, reload, idempotence, skip; provider: controller předává feedback; widget: feedback dialog capture/cancel/skip, pain upozornění, completed detail reload; accessibility: sémantické labely + text scaling) — mobile suite zelená (+181), backend beze změny (36/36). Runtime na Android emulátoru bez backendu: dokončení workoutu s feedbackem (náročnost 7, pocit Good) → History → read-only detail „Effort: 7/10, Feeling: Good"; on-device DB: 1 feedback řádek (effort 7.0, feeling GOOD, pain 0) + summary snapshot 7.0; po force-stop + restartu feedback stále načitelný v detailu. **R1-07 není poslední R1 slice** (následuje R1-08), proto se R1 Exit Review neprovádí a R1 se neuzavírá.
 
-Dalším kanonickým krokem není další obecný dokument, ale implementace:
+`R1-08 – Critical End-to-End Evidence` je implementován: existuje **automatizovaný důkaz hlavní hodnoty R1**. Nový test `apps/mobile/test/features/workouts/r1_critical_path_e2e_test.dart` prokazuje celý povinný scénář (VSP §19, test-strategy §11.2) v jednom deterministickém Flutter testu nad **skutečnou lokální SQLite persistence** (skutečné Drift repozitáře, bootstrap, recovery i completion; overridnuty jen technické hranice — DB, clock, ID). Scénář: 1. start s lokálními demo daty → Today, 2. otevření dnešního workoutu, 3. zahájení session, 4. zápis výkonu (Save), 5. „ukončení a znovuspuštění" (kompletní odmontování app vrstvy a její znovupostavení nad stejnou persistence — obnovená app čte výhradně z DB), 6. recovery aktivní session se stejným uloženým výkonem, 7. dokončení (feedback přeskočen), 8. workout v historii (+ přežití dalšího restartu), 9. bez backendu a sítě. Test je deterministický (fixní clock + verzovaný seed + stabilní ID + bounded pumpy místo `pumpAndSettle`, protože fokusovaný TextField má blikající kurzor = nekonečná animace). Žádná nová business funkcionalita, obrazovka, repository, use case ani schema změna — R1-08 jen přidává end-to-end důkaz. Ověřeno: mobile suite zelená (+182), backend beze změny (36/36). Runtime na Android emulátoru **v airplane mode** (offline, bez backendu): celý tok seed → today → start → zápis → force-stop restart → recovery → dokončení → historie proběhl offline; po dalším restartu historie obsahuje dokončený workout a recovery vede na Today; on-device DB: 1 completed session, 0 aktivních, 1 summary, pointer vyčištěn.
 
-```text
-R1-08 – Critical End-to-End Evidence
-```
+## R1 Exit Review
+
+R1-08 je poslední R1 slice, proto je proveden R1 Exit Review (VSP §20). R1 je dokončen — všechna kritéria splněna:
+
+- **hlavní flow funguje v airplane mode** — runtime E2E proveden v airplane mode (offline) od startu po historii; RSR-004 dodrženo.
+- **aktivní session přežije restart** — R1-05 recovery + runtime restart evidence; automatizováno (QTR-008) v `session_recovery_persistence_test.dart` a v R1-08 e2e testu.
+- **potvrzený výkon se neztrácí** — R1-04 persistence + R1-08 e2e (Save → restart → recovered '10').
+- **completion je atomická a idempotentní** — R1-06 `DriftWorkoutCompletionRepository` (§15.3, jedna transakce, DB unique + alreadyCompleted); ověřeno (QTR-009) v `workout_completion_persistence_test.dart`.
+- **historie obsahuje dokončený workout** — R1-06 history read model; ověřeno v persistence + e2e testu i runtime (přežití restartu).
+- **běžné failure stavy jsou explicitní** — typované výsledky start/record/recovery/completion, bezpečné error/fallback stavy bez raw detailu (R1-03…R1-07), completion error se neprezentuje jako úspěch.
+- **critical-path testy, migration tests a CI gates jsou zelené** — mobile +182, backend 36/36; schema zůstalo verze 1 přes celé R1, takže žádná destruktivní migrace nevznikla (drift-check čistý); poslední push-na-main CI běhy (repository, mobile, backend) zelené — viz PR/CI evidence R1-08.
+- **nevznikla závislost na účtu, sync, AI ani externím provideru** — celé R1 běží lokálně bez backendu (RER-013).
+
+**Řízené výjimky přecházející do R2:** `active_duration_seconds` v ActivitySummary je v R1 vždy 0 (aktivní čas se neinkrementuje — feature R2); feedback `feeling` má stabilní kódy zvolené v R1 (docs množinu nedefinuje) — případná kanonizace v R2; samostatná editace feedbacku/výkonu mimo completion flow je mimo R1; sync/backend workout API/AI jsou R2+. Žádná z výjimek neblokuje R1 exit criteria.
+
+**Release 1 je připraven k uzavření po mergnutí PR R1-08.** Dalším kanonickým krokem je fáze R2 (první R2 slice — kontrakt vznikne před implementací).
 
 Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
 
@@ -252,6 +265,7 @@ R1-04 Record Set Performance ✅
 R1-05 Restart and Recovery ✅
 R1-06 Complete Workout and History ✅
 R1-07 Feedback, States and Accessibility ✅
+R1-08 Critical End-to-End Evidence ✅ (R1 Exit Review proveden)
 R1-01 až R1-08 podle vertical-slice planu
 ```
 
@@ -291,8 +305,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
+Celé R1 (`R1-01` až `R1-08`) je implementované a R1 Exit Review je proveden (viz §3). Release 1 se uzavírá po mergnutí PR R1-08. Další kanonický krok je fáze R2:
+
 ```text
-R1-08 – Critical End-to-End Evidence
+R2-01 (první R2 slice — kontrakt vznikne před implementací)
 ```
 
-Před jeho implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Před implementací prvního R2 slice je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře, vytvořit chybějící R2 kontrakt a provést Ready kontrolu podle `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
