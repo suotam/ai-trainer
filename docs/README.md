@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.15  
+**Verze:** 2.16  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-27
@@ -97,7 +97,10 @@ docs/10-integrations/integration-architecture.md
 docs/11-security/security-architecture.md
 docs/12-data/data-architecture.md
 docs/12-data/r1-physical-data-model.md
+docs/12-data/r2-mobile-schema-migration.md
 ```
+
+- `r2-mobile-schema-migration.md` (**C1**, vlastník Data Architecture) vlastní evoluci mobilního Drift/SQLite schématu v R2: schema versioning, migration rules, migration invarianty `MSM-001` až `MSM-015`, kontraktní R2 strukturální přírůstky (owner reference, sync-state, verze entity, outbox) a evidence. Contract-only, bez SQL/Drift. Blokuje `R2-01` (spolu s C2).
 
 ## 3.5 Delivery, quality and coding agent
 
@@ -140,10 +143,9 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`, ale **žádný R2 slice není `READY`** — čekají na blokující detailní kontrakty a implementace R2 nezačala. Dalším kanonickým krokem je vytvořit blokující kontrakty pro `R2-01`:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`, ale **žádný R2 slice není `READY`** — čekají na blokující detailní kontrakty a implementace R2 nezačala. **C1** (`docs/12-data/r2-mobile-schema-migration.md`) je vytvořen; zbývajícím blokujícím kontraktem pro `R2-01` je C2. Dalším kanonickým krokem je vytvořit:
 
 ```text
-C1 – Mobile schema migration contract  (docs/12-data/r2-mobile-schema-migration.md)
 C2 – Local ownership & outbox contract (docs/12-data/r2-local-sync-metadata-contract.md)
 ```
 
@@ -328,14 +330,14 @@ uvést pravdivou evidence summary
 
 Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Release 1
 uzavřen. R2 vertical-slice plán existuje (`docs/13-delivery/r2-vertical-slice-plan.md`),
-ale žádný R2 slice není `READY`. Další kanonický dokumentační krok je vytvořit blokující
-kontrakty pro `R2-01`:
+ale žádný R2 slice není `READY`. **C1** (`docs/12-data/r2-mobile-schema-migration.md`) je
+vytvořen. Zbývajícím blokujícím kontraktem pro `R2-01` je C2 — další kanonický
+dokumentační krok je vytvořit:
 
 ```text
-C1 – Mobile schema migration contract  (docs/12-data/r2-mobile-schema-migration.md)
 C2 – Local ownership & outbox contract (docs/12-data/r2-local-sync-metadata-contract.md)
 ```
 
-Teprve po jejich vzniku a Ready kontrole lze zahájit implementaci `R2-01`.
+Teprve po vzniku C1 i C2 a Ready kontrole lze zahájit implementaci `R2-01`.
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
