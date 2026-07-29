@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.17  
+**Verze:** 2.18  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-29
@@ -97,10 +97,12 @@ docs/10-integrations/integration-architecture.md
 docs/11-security/security-architecture.md
 docs/12-data/data-architecture.md
 docs/12-data/r1-physical-data-model.md
+docs/07-backend/r2-identity-session-contract.md
 docs/12-data/r2-mobile-schema-migration.md
 docs/12-data/r2-local-sync-metadata-contract.md
 ```
 
+- `r2-identity-session-contract.md` (**C3**, vlastník Domain / identity-and-profile-model + Backend) vlastní R2 identity & session model: anonymous/authenticated/account/device identitu, session lifecycle (access/refresh), identity transitions (anonymous → account atd.), ownership interakci s C2, security boundaries a invarianty `ISC-001` až `ISC-015`. Contract-only, bez API/DB/JWT. Blokuje `R2-02` (spolu s C4/C5/C6/C14).
 - `r2-mobile-schema-migration.md` (**C1**, vlastník Data Architecture) vlastní evoluci mobilního Drift/SQLite schématu v R2: schema versioning, migration rules, migration invarianty `MSM-001` až `MSM-015`, kontraktní R2 strukturální přírůstky (owner reference, sync-state, verze entity, outbox) a evidence. Contract-only, bez SQL/Drift. Blokuje `R2-01` (spolu s C2).
 - `r2-local-sync-metadata-contract.md` (**C2**, vlastník Domain / sync-and-offline-model) vlastní **význam a lifecycle** lokálních ownership a sync metadat v R2: ownership model (local/anonymous vs account), sync metadata význam, pending-operation/outbox lifecycle, entity lifecycle stavy a invarianty `LSM-001` až `LSM-015`. Contract-only, bez SQL/Drift/API. Blokuje `R2-01` (spolu s C1).
 
@@ -145,10 +147,9 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. Oba blokující kontrakty `R2-01` — **C1** (`docs/12-data/r2-mobile-schema-migration.md`) a **C2** (`docs/12-data/r2-local-sync-metadata-contract.md`) — jsou hotové, takže **`R2-01` je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem jsou blokující kontrakty pro `R2-02`:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. Oba blokující kontrakty `R2-01` — **C1** (`docs/12-data/r2-mobile-schema-migration.md`) a **C2** (`docs/12-data/r2-local-sync-metadata-contract.md`) — jsou hotové, takže **`R2-01` je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3** (`docs/07-backend/r2-identity-session-contract.md`) je hotové. Dalším kanonickým krokem je zbývající blokující kontrakt `R2-02`:
 
 ```text
-C3 – Identity & session contract   (docs/07-backend/r2-identity-session-contract.md)
 C4 – Authentication API contract   (docs/07-backend/r2-auth-api-contract.md)
 ```
 
@@ -333,13 +334,12 @@ uvést pravdivou evidence summary
 
 Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Release 1
 uzavřen. R2 vertical-slice plán existuje (`docs/13-delivery/r2-vertical-slice-plan.md`).
-Oba blokující kontrakty `R2-01` — **C1** (`docs/12-data/r2-mobile-schema-migration.md`) a
-**C2** (`docs/12-data/r2-local-sync-metadata-contract.md`) — jsou hotové, takže **`R2-01`
-je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. Další kanonický
-dokumentační krok jsou blokující kontrakty pro `R2-02`:
+Blokující kontrakty `R2-01` (**C1**, **C2**) jsou hotové, takže **`R2-01` je `READY`
+(neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3**
+(`docs/07-backend/r2-identity-session-contract.md`) je hotové. Další kanonický
+dokumentační krok je zbývající blokující kontrakt `R2-02`:
 
 ```text
-C3 – Identity & session contract   (docs/07-backend/r2-identity-session-contract.md)
 C4 – Authentication API contract   (docs/07-backend/r2-auth-api-contract.md)
 ```
 
