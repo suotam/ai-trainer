@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.17  
+**Verze:** 2.18  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-07-27  
+**Poslední aktualizace:** 2026-07-29  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -122,9 +122,9 @@ R1-08 je poslední R1 slice, proto je proveden R1 Exit Review (VSP §20). R1 je 
 
 **R2 – Account and Sync je naplánované, ale implementace nezačala.** Existuje kanonický R2 vertical-slice plán `docs/13-delivery/r2-vertical-slice-plan.md` (vlastní pořadí R2, blocking contract map, evidence gates, R2 Exit Review a pravidla `R2P-001` až `R2P-015`). Definovaný R2 backlog: `R2-01` Local Ownership and Sync Metadata Foundation, `R2-02` Backend Account and Authentication Baseline, `R2-03` Mobile Auth and Secure Session Storage, `R2-04` AthleteProfile and Device Registration, `R2-05` Ownership Authorization and First Sync (push), `R2-06` Conflict, Rejection and Session Revocation, `R2-07` Local-to-Account Data Migration, `R2-08` R2 Critical End-to-End Evidence and Exit Review.
 
-**Žádný R2 slice není `READY`** — všechny čekají na své blokující detailní kontrakty (viz `r2-vertical-slice-plan.md §7.1`). **Vytvořené R2 kontrakty:** C1 – Mobile schema migration contract (`docs/12-data/r2-mobile-schema-migration.md`, vlastník Data Architecture, pravidla `MSM-001` až `MSM-015`; contract-only). **Stále chybějící blokující kontrakty:** local ownership & outbox (C2), identity & session (C3), authentication API (C4), auth provider ADR (C5), server data model (C6), token/session storage (C7), authorization/ownership (C8), device registration (C9), sync protocol (C10), idempotency (C11), conflict/rejection (C12), revocation (C13), audit-event (C14), local-to-account migration (C15). `R2-01` má oba blocking kontrakty C1 a C2; C1 existuje, C2 dosud ne, proto `R2-01` zůstává `NOT_READY`. Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
+**`R2-01` je `READY` (neimplementováno); `R2-02` až `R2-08` zůstávají `NOT_READY`.** **Vytvořené R2 kontrakty:** C1 – Mobile schema migration contract (`docs/12-data/r2-mobile-schema-migration.md`, vlastník Data Architecture, pravidla `MSM-001` až `MSM-015`; contract-only) a C2 – Local ownership & outbox/pending-operation contract (`docs/12-data/r2-local-sync-metadata-contract.md`, vlastník Domain / sync-and-offline-model, pravidla `LSM-001` až `LSM-015`; contract-only). `R2-01` má dle `r2-vertical-slice-plan.md §9.1` právě dva blocking kontrakty C1 a C2; oba jsou hotové, proto je `R2-01` `READY`. **Stále chybějící blokující kontrakty (pro pozdější R2 slices):** identity & session (C3), authentication API (C4), auth provider ADR (C5), server data model (C6), token/session storage (C7), authorization/ownership (C8), device registration (C9), sync protocol (C10), idempotency (C11), conflict/rejection (C12), revocation (C13), audit-event (C14), local-to-account migration (C15). Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
 
-**Přesný další kanonický dokumentační krok:** C1 (`docs/12-data/r2-mobile-schema-migration.md`) je vytvořen; zbývá vytvořit **C2 – Local ownership & outbox/pending-operation contract** (`docs/12-data/r2-local-sync-metadata-contract.md`). Teprve po C1 i C2 lze `R2-01` označit za `READY` a zahájit implementaci.
+**Přesný další kanonický dokumentační krok:** C1 i C2 jsou vytvořené a `R2-01` je `READY`. Dalšími blokujícími kontrakty (pro `R2-02` dle `r2-vertical-slice-plan.md §9.2`) jsou **C3 – Identity & session contract** (`docs/07-backend/r2-identity-session-contract.md`) a **C4 – Authentication API contract** (`docs/07-backend/r2-auth-api-contract.md`). Implementace `R2-01` smí začít až po samostatném pokynu.
 
 ---
 
@@ -309,10 +309,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review je proveden (viz §3) a Release 1 je uzavřen. Existuje R2 vertical-slice plán, ale žádný R2 slice není `READY`. C1 je vytvořen; zbývajícím blokujícím kontraktem pro `R2-01` je C2 — další kanonický dokumentační krok je vytvořit:
+Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review je proveden (viz §3) a Release 1 je uzavřen. Existuje R2 vertical-slice plán. C1 i C2 jsou vytvořené, takže **`R2-01` je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. Další kanonický dokumentační krok jsou blokující kontrakty pro `R2-02`:
 
 ```text
-C2 – Local ownership & outbox contract (docs/12-data/r2-local-sync-metadata-contract.md)
+C3 – Identity & session contract   (docs/07-backend/r2-identity-session-contract.md)
+C4 – Authentication API contract   (docs/07-backend/r2-auth-api-contract.md)
 ```
 
-Před vytvořením těchto kontraktů a implementací prvního R2 slice je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r2-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Implementace `R2-01` smí začít až po samostatném pokynu; před ní je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r2-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
