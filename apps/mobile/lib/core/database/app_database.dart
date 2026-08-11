@@ -21,13 +21,17 @@ part 'app_database.g.dart';
     LocalWorkoutFeedback,
     LocalActivitySummaries,
     LocalAppState,
+    LocalOutbox,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
+  /// Schema version 2 (R2-01): lokální ownership + sync metadata + outbox.
+  /// Migrace `v1 → v2` je aditivní a nedestruktivní — zachovává všechna R1
+  /// data i aktivní session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -59,6 +63,34 @@ class AppDatabase extends _$AppDatabase {
         'ON local_workout_sessions (workout_instance_id) '
         "WHERE status IN ('ACTIVE', 'PAUSED')",
       );
+      // R2-01: ID lokálního vlastníka (C2 §4). Idempotentní.
+      await _ensureLocalOwner();
+    },
+    onUpgrade: (m, from, to) async {
+      // Migrace v1 → v2 (R2-01, C1 §7/§10). Aditivní a nedestruktivní:
+      // přidá owner/sync sloupce s bezpečným defaultem (SQLite backfilluje
+      // existující řádky na local/anonymous owner a LOCAL_ONLY — MSM-014),
+      // vytvoří outbox tabulku a zaznamená ID vlastníka. Žádná R1 data ani
+      // aktivní session se neztrácí (MSM-005).
+      if (from < 2) {
+        await m.addColumn(localWorkoutInstances, localWorkoutInstances.ownerId);
+        await m.addColumn(
+          localWorkoutInstances,
+          localWorkoutInstances.syncState,
+        );
+        await m.addColumn(localWorkoutSessions, localWorkoutSessions.ownerId);
+        await m.addColumn(localWorkoutSessions, localWorkoutSessions.syncState);
+        await m.addColumn(
+          localActivitySummaries,
+          localActivitySummaries.ownerId,
+        );
+        await m.addColumn(
+          localActivitySummaries,
+          localActivitySummaries.syncState,
+        );
+        await m.createTable(localOutbox);
+        await _ensureLocalOwner();
+      }
     },
     beforeOpen: (details) async {
       // Foreign keys jsou v SQLite per-connection a musí být aktivní vždy
@@ -66,4 +98,13 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  /// Zaznamená stabilní ID lokálního/anonymního vlastníka do `local_app_state`
+  /// (R2-01, C2 §4). Idempotentní — `INSERT OR IGNORE` na primární klíč.
+  Future<void> _ensureLocalOwner() async {
+    await customStatement(
+      'INSERT OR IGNORE INTO local_app_state (key, value, updated_at) '
+      "VALUES ('$localOwnerStateKey', '$localAnonymousOwnerId', 0)",
+    );
+  }
 }

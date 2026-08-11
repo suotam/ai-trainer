@@ -9,6 +9,22 @@ library;
 
 import 'package:drift/drift.dart';
 
+/// Stabilní lokální/anonymní vlastník dat vzniklých před přihlášením
+/// (R2-01, C2 §4.3, LSM-002). Konstantní hodnota — na jednom zařízení
+/// existuje právě jeden anonymní vlastník; připojení k účtu vlastní C15.
+const String localAnonymousOwnerId = 'local-anonymous';
+
+/// Výchozí lokální sync stav (C2 §5, `SyncState`, MSM-014).
+const String syncStateLocalOnly = 'LOCAL_ONLY';
+
+/// Povolené hodnoty lokálního sync stavu na vlastnitelných entitách
+/// (C2 §5, `sync-and-offline-model §11`).
+const String syncStateCheck =
+    "CHECK (sync_state IN ('LOCAL_ONLY','DIRTY','QUEUED','SYNCED','CONFLICT','BLOCKED'))";
+
+/// Klíč v `local_app_state` nesoucí ID lokálního vlastníka (C2 §4).
+const String localOwnerStateKey = 'local_owner_id';
+
 @DataClassName('LocalWorkoutInstanceRow')
 class LocalWorkoutInstances extends Table {
   @override
@@ -33,6 +49,14 @@ class LocalWorkoutInstances extends Table {
   IntColumn get updatedAt => integer()();
   IntColumn get rowVersion => integer()();
 
+  // R2-01 lokální ownership a sync metadata (C1 §7, C2 §4/§5). Výchozí
+  // hodnoty drží R1 zápisy beze změny; migrace v1→v2 backfilluje existující
+  // řádky na local/anonymous owner a LOCAL_ONLY (MSM-014, LSM-002/005).
+  TextColumn get ownerId =>
+      text().withDefault(const Constant(localAnonymousOwnerId))();
+  TextColumn get syncState =>
+      text().withDefault(const Constant(syncStateLocalOnly))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 
@@ -43,6 +67,7 @@ class LocalWorkoutInstances extends Table {
     'CHECK (revision_number >= 1)',
     'CHECK (row_version >= 1)',
     "CHECK (completed_at IS NULL OR status IN ('COMPLETED', 'PARTIALLY_COMPLETED'))",
+    syncStateCheck,
   ];
 }
 
@@ -192,6 +217,12 @@ class LocalWorkoutSessions extends Table {
   IntColumn get updatedAt => integer()();
   IntColumn get rowVersion => integer()();
 
+  // R2-01 lokální ownership a sync metadata (C1 §7, C2 §4/§5).
+  TextColumn get ownerId =>
+      text().withDefault(const Constant(localAnonymousOwnerId))();
+  TextColumn get syncState =>
+      text().withDefault(const Constant(syncStateLocalOnly))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 
@@ -202,6 +233,7 @@ class LocalWorkoutSessions extends Table {
     'CHECK (elapsed_active_seconds >= 0)',
     'CHECK (row_version >= 1)',
     "CHECK (status != 'COMPLETED' OR completed_at IS NOT NULL)",
+    syncStateCheck,
   ];
 }
 
@@ -340,6 +372,12 @@ class LocalActivitySummaries extends Table {
   RealColumn get overallEffort => real().nullable()();
   IntColumn get createdAt => integer()();
 
+  // R2-01 lokální ownership a sync metadata (C1 §7, C2 §4/§5).
+  TextColumn get ownerId =>
+      text().withDefault(const Constant(localAnonymousOwnerId))();
+  TextColumn get syncState =>
+      text().withDefault(const Constant(syncStateLocalOnly))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 
@@ -348,6 +386,41 @@ class LocalActivitySummaries extends Table {
     'CHECK (active_duration_seconds >= 0)',
     'CHECK (completed_step_count >= 0)',
     'CHECK (total_step_count >= 0)',
+    syncStateCheck,
+  ];
+}
+
+/// Restart-safe outbox / pending-operation fronta (R2-01, C2 §6/§7).
+///
+/// Neměnný lokální záznam záměru změny čekající na pozdější synchronizaci
+/// (odpovídá `LocalChangeLog`/`OfflineCommand`, `sync-and-offline-model
+/// §12/§13`). R2-01 zavádí pouze úložiště a scaffolding — **žádné odesílání**;
+/// transport vlastní pozdější sync protocol (C10). `idempotency_key` je
+/// stabilní (LSM-008); `sequence` drží deterministické pořadí (LSM-012).
+@DataClassName('LocalOutboxRow')
+class LocalOutbox extends Table {
+  @override
+  String get tableName => 'local_outbox';
+
+  TextColumn get id => text()();
+  TextColumn get ownerId =>
+      text().withDefault(const Constant(localAnonymousOwnerId))();
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  TextColumn get operationType => text()();
+  TextColumn get idempotencyKey => text().unique()();
+  IntColumn get sequence => integer()();
+  TextColumn get status => text().withDefault(const Constant('PENDING'))();
+  IntColumn get createdAt => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+    "CHECK (operation_type IN ('CREATE','UPDATE','DELETE'))",
+    "CHECK (status IN ('PENDING','QUEUED','SYNCED','CONFLICT','BLOCKED'))",
+    'CHECK (sequence >= 0)',
   ];
 }
 

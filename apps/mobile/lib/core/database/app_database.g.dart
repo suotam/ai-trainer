@@ -200,6 +200,30 @@ class $LocalWorkoutInstancesTable extends LocalWorkoutInstances
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -220,6 +244,8 @@ class $LocalWorkoutInstancesTable extends LocalWorkoutInstances
     createdAt,
     updatedAt,
     rowVersion,
+    ownerId,
+    syncState,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -388,6 +414,18 @@ class $LocalWorkoutInstancesTable extends LocalWorkoutInstances
     } else if (isInserting) {
       context.missing(_rowVersionMeta);
     }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
     return context;
   }
 
@@ -472,6 +510,14 @@ class $LocalWorkoutInstancesTable extends LocalWorkoutInstances
         DriftSqlType.int,
         data['${effectivePrefix}row_version'],
       )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
     );
   }
 
@@ -501,6 +547,8 @@ class LocalWorkoutInstanceRow extends DataClass
   final int createdAt;
   final int updatedAt;
   final int rowVersion;
+  final String ownerId;
+  final String syncState;
   const LocalWorkoutInstanceRow({
     required this.id,
     required this.title,
@@ -520,6 +568,8 @@ class LocalWorkoutInstanceRow extends DataClass
     required this.createdAt,
     required this.updatedAt,
     required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -558,6 +608,8 @@ class LocalWorkoutInstanceRow extends DataClass
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
     map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
     return map;
   }
 
@@ -597,6 +649,8 @@ class LocalWorkoutInstanceRow extends DataClass
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
     );
   }
 
@@ -628,6 +682,8 @@ class LocalWorkoutInstanceRow extends DataClass
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
       rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
     );
   }
   @override
@@ -652,6 +708,8 @@ class LocalWorkoutInstanceRow extends DataClass
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
       'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
     };
   }
 
@@ -674,6 +732,8 @@ class LocalWorkoutInstanceRow extends DataClass
     int? createdAt,
     int? updatedAt,
     int? rowVersion,
+    String? ownerId,
+    String? syncState,
   }) => LocalWorkoutInstanceRow(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -701,6 +761,8 @@ class LocalWorkoutInstanceRow extends DataClass
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
   );
   LocalWorkoutInstanceRow copyWithCompanion(
     LocalWorkoutInstancesCompanion data,
@@ -748,6 +810,8 @@ class LocalWorkoutInstanceRow extends DataClass
       rowVersion: data.rowVersion.present
           ? data.rowVersion.value
           : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
     );
   }
 
@@ -771,7 +835,9 @@ class LocalWorkoutInstanceRow extends DataClass
           ..write('completedAt: $completedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('rowVersion: $rowVersion')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
           ..write(')'))
         .toString();
   }
@@ -796,6 +862,8 @@ class LocalWorkoutInstanceRow extends DataClass
     createdAt,
     updatedAt,
     rowVersion,
+    ownerId,
+    syncState,
   );
   @override
   bool operator ==(Object other) =>
@@ -818,7 +886,9 @@ class LocalWorkoutInstanceRow extends DataClass
           other.completedAt == this.completedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.rowVersion == this.rowVersion);
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
 }
 
 class LocalWorkoutInstancesCompanion
@@ -841,6 +911,8 @@ class LocalWorkoutInstancesCompanion
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
   final Value<int> rowid;
   const LocalWorkoutInstancesCompanion({
     this.id = const Value.absent(),
@@ -861,6 +933,8 @@ class LocalWorkoutInstancesCompanion
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalWorkoutInstancesCompanion.insert({
@@ -882,6 +956,8 @@ class LocalWorkoutInstancesCompanion
     required int createdAt,
     required int updatedAt,
     required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -912,6 +988,8 @@ class LocalWorkoutInstancesCompanion
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -935,6 +1013,8 @@ class LocalWorkoutInstancesCompanion
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -958,6 +1038,8 @@ class LocalWorkoutInstancesCompanion
     Value<int>? createdAt,
     Value<int>? updatedAt,
     Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
     Value<int>? rowid,
   }) {
     return LocalWorkoutInstancesCompanion(
@@ -980,6 +1062,8 @@ class LocalWorkoutInstancesCompanion
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1043,6 +1127,12 @@ class LocalWorkoutInstancesCompanion
     if (rowVersion.present) {
       map['row_version'] = Variable<int>(rowVersion.value);
     }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1070,6 +1160,8 @@ class LocalWorkoutInstancesCompanion
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3669,6 +3761,30 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3685,6 +3801,8 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     createdAt,
     updatedAt,
     rowVersion,
+    ownerId,
+    syncState,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3815,6 +3933,18 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     } else if (isInserting) {
       context.missing(_rowVersionMeta);
     }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
     return context;
   }
 
@@ -3880,6 +4010,14 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
         DriftSqlType.int,
         data['${effectivePrefix}row_version'],
       )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
     );
   }
 
@@ -3905,6 +4043,8 @@ class LocalWorkoutSessionRow extends DataClass
   final int createdAt;
   final int updatedAt;
   final int rowVersion;
+  final String ownerId;
+  final String syncState;
   const LocalWorkoutSessionRow({
     required this.id,
     required this.workoutInstanceId,
@@ -3920,6 +4060,8 @@ class LocalWorkoutSessionRow extends DataClass
     required this.createdAt,
     required this.updatedAt,
     required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3948,6 +4090,8 @@ class LocalWorkoutSessionRow extends DataClass
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
     map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
     return map;
   }
 
@@ -3977,6 +4121,8 @@ class LocalWorkoutSessionRow extends DataClass
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
     );
   }
 
@@ -4004,6 +4150,8 @@ class LocalWorkoutSessionRow extends DataClass
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
       rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
     );
   }
   @override
@@ -4024,6 +4172,8 @@ class LocalWorkoutSessionRow extends DataClass
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
       'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
     };
   }
 
@@ -4042,6 +4192,8 @@ class LocalWorkoutSessionRow extends DataClass
     int? createdAt,
     int? updatedAt,
     int? rowVersion,
+    String? ownerId,
+    String? syncState,
   }) => LocalWorkoutSessionRow(
     id: id ?? this.id,
     workoutInstanceId: workoutInstanceId ?? this.workoutInstanceId,
@@ -4060,6 +4212,8 @@ class LocalWorkoutSessionRow extends DataClass
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
   );
   LocalWorkoutSessionRow copyWithCompanion(LocalWorkoutSessionsCompanion data) {
     return LocalWorkoutSessionRow(
@@ -4091,6 +4245,8 @@ class LocalWorkoutSessionRow extends DataClass
       rowVersion: data.rowVersion.present
           ? data.rowVersion.value
           : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
     );
   }
 
@@ -4110,7 +4266,9 @@ class LocalWorkoutSessionRow extends DataClass
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('rowVersion: $rowVersion')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
           ..write(')'))
         .toString();
   }
@@ -4131,6 +4289,8 @@ class LocalWorkoutSessionRow extends DataClass
     createdAt,
     updatedAt,
     rowVersion,
+    ownerId,
+    syncState,
   );
   @override
   bool operator ==(Object other) =>
@@ -4149,7 +4309,9 @@ class LocalWorkoutSessionRow extends DataClass
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.rowVersion == this.rowVersion);
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
 }
 
 class LocalWorkoutSessionsCompanion
@@ -4168,6 +4330,8 @@ class LocalWorkoutSessionsCompanion
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
   final Value<int> rowid;
   const LocalWorkoutSessionsCompanion({
     this.id = const Value.absent(),
@@ -4184,6 +4348,8 @@ class LocalWorkoutSessionsCompanion
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalWorkoutSessionsCompanion.insert({
@@ -4201,6 +4367,8 @@ class LocalWorkoutSessionsCompanion
     required int createdAt,
     required int updatedAt,
     required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        workoutInstanceId = Value(workoutInstanceId),
@@ -4226,6 +4394,8 @@ class LocalWorkoutSessionsCompanion
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4245,6 +4415,8 @@ class LocalWorkoutSessionsCompanion
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4264,6 +4436,8 @@ class LocalWorkoutSessionsCompanion
     Value<int>? createdAt,
     Value<int>? updatedAt,
     Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
     Value<int>? rowid,
   }) {
     return LocalWorkoutSessionsCompanion(
@@ -4282,6 +4456,8 @@ class LocalWorkoutSessionsCompanion
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4333,6 +4509,12 @@ class LocalWorkoutSessionsCompanion
     if (rowVersion.present) {
       map['row_version'] = Variable<int>(rowVersion.value);
     }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4356,6 +4538,8 @@ class LocalWorkoutSessionsCompanion
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6738,6 +6922,30 @@ class $LocalActivitySummariesTable extends LocalActivitySummaries
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -6752,6 +6960,8 @@ class $LocalActivitySummariesTable extends LocalActivitySummaries
     totalStepCount,
     overallEffort,
     createdAt,
+    ownerId,
+    syncState,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6883,6 +7093,18 @@ class $LocalActivitySummariesTable extends LocalActivitySummaries
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
     return context;
   }
 
@@ -6943,6 +7165,14 @@ class $LocalActivitySummariesTable extends LocalActivitySummaries
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
       )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
     );
   }
 
@@ -6966,6 +7196,8 @@ class LocalActivitySummaryRow extends DataClass
   final int totalStepCount;
   final double? overallEffort;
   final int createdAt;
+  final String ownerId;
+  final String syncState;
   const LocalActivitySummaryRow({
     required this.id,
     required this.workoutInstanceId,
@@ -6979,6 +7211,8 @@ class LocalActivitySummaryRow extends DataClass
     required this.totalStepCount,
     this.overallEffort,
     required this.createdAt,
+    required this.ownerId,
+    required this.syncState,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6997,6 +7231,8 @@ class LocalActivitySummaryRow extends DataClass
       map['overall_effort'] = Variable<double>(overallEffort);
     }
     map['created_at'] = Variable<int>(createdAt);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
     return map;
   }
 
@@ -7016,6 +7252,8 @@ class LocalActivitySummaryRow extends DataClass
           ? const Value.absent()
           : Value(overallEffort),
       createdAt: Value(createdAt),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
     );
   }
 
@@ -7039,6 +7277,8 @@ class LocalActivitySummaryRow extends DataClass
       totalStepCount: serializer.fromJson<int>(json['totalStepCount']),
       overallEffort: serializer.fromJson<double?>(json['overallEffort']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
     );
   }
   @override
@@ -7057,6 +7297,8 @@ class LocalActivitySummaryRow extends DataClass
       'totalStepCount': serializer.toJson<int>(totalStepCount),
       'overallEffort': serializer.toJson<double?>(overallEffort),
       'createdAt': serializer.toJson<int>(createdAt),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
     };
   }
 
@@ -7073,6 +7315,8 @@ class LocalActivitySummaryRow extends DataClass
     int? totalStepCount,
     Value<double?> overallEffort = const Value.absent(),
     int? createdAt,
+    String? ownerId,
+    String? syncState,
   }) => LocalActivitySummaryRow(
     id: id ?? this.id,
     workoutInstanceId: workoutInstanceId ?? this.workoutInstanceId,
@@ -7088,6 +7332,8 @@ class LocalActivitySummaryRow extends DataClass
         ? overallEffort.value
         : this.overallEffort,
     createdAt: createdAt ?? this.createdAt,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
   );
   LocalActivitySummaryRow copyWithCompanion(
     LocalActivitySummariesCompanion data,
@@ -7123,6 +7369,8 @@ class LocalActivitySummaryRow extends DataClass
           ? data.overallEffort.value
           : this.overallEffort,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
     );
   }
 
@@ -7140,7 +7388,9 @@ class LocalActivitySummaryRow extends DataClass
           ..write('completedStepCount: $completedStepCount, ')
           ..write('totalStepCount: $totalStepCount, ')
           ..write('overallEffort: $overallEffort, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
           ..write(')'))
         .toString();
   }
@@ -7159,6 +7409,8 @@ class LocalActivitySummaryRow extends DataClass
     totalStepCount,
     overallEffort,
     createdAt,
+    ownerId,
+    syncState,
   );
   @override
   bool operator ==(Object other) =>
@@ -7175,7 +7427,9 @@ class LocalActivitySummaryRow extends DataClass
           other.completedStepCount == this.completedStepCount &&
           other.totalStepCount == this.totalStepCount &&
           other.overallEffort == this.overallEffort &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
 }
 
 class LocalActivitySummariesCompanion
@@ -7192,6 +7446,8 @@ class LocalActivitySummariesCompanion
   final Value<int> totalStepCount;
   final Value<double?> overallEffort;
   final Value<int> createdAt;
+  final Value<String> ownerId;
+  final Value<String> syncState;
   final Value<int> rowid;
   const LocalActivitySummariesCompanion({
     this.id = const Value.absent(),
@@ -7206,6 +7462,8 @@ class LocalActivitySummariesCompanion
     this.totalStepCount = const Value.absent(),
     this.overallEffort = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalActivitySummariesCompanion.insert({
@@ -7221,6 +7479,8 @@ class LocalActivitySummariesCompanion
     required int totalStepCount,
     this.overallEffort = const Value.absent(),
     required int createdAt,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        workoutInstanceId = Value(workoutInstanceId),
@@ -7246,6 +7506,8 @@ class LocalActivitySummariesCompanion
     Expression<int>? totalStepCount,
     Expression<double>? overallEffort,
     Expression<int>? createdAt,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7263,6 +7525,8 @@ class LocalActivitySummariesCompanion
       if (totalStepCount != null) 'total_step_count': totalStepCount,
       if (overallEffort != null) 'overall_effort': overallEffort,
       if (createdAt != null) 'created_at': createdAt,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7280,6 +7544,8 @@ class LocalActivitySummariesCompanion
     Value<int>? totalStepCount,
     Value<double?>? overallEffort,
     Value<int>? createdAt,
+    Value<String>? ownerId,
+    Value<String>? syncState,
     Value<int>? rowid,
   }) {
     return LocalActivitySummariesCompanion(
@@ -7296,6 +7562,8 @@ class LocalActivitySummariesCompanion
       totalStepCount: totalStepCount ?? this.totalStepCount,
       overallEffort: overallEffort ?? this.overallEffort,
       createdAt: createdAt ?? this.createdAt,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7341,6 +7609,12 @@ class LocalActivitySummariesCompanion
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7362,6 +7636,8 @@ class LocalActivitySummariesCompanion
           ..write('totalStepCount: $totalStepCount, ')
           ..write('overallEffort: $overallEffort, ')
           ..write('createdAt: $createdAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7631,6 +7907,573 @@ class LocalAppStateCompanion extends UpdateCompanion<LocalAppStateRow> {
   }
 }
 
+class $LocalOutboxTable extends LocalOutbox
+    with TableInfo<$LocalOutboxTable, LocalOutboxRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalOutboxTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _operationTypeMeta = const VerificationMeta(
+    'operationType',
+  );
+  @override
+  late final GeneratedColumn<String> operationType = GeneratedColumn<String>(
+    'operation_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _sequenceMeta = const VerificationMeta(
+    'sequence',
+  );
+  @override
+  late final GeneratedColumn<int> sequence = GeneratedColumn<int>(
+    'sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('PENDING'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerId,
+    entityType,
+    entityId,
+    operationType,
+    idempotencyKey,
+    sequence,
+    status,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_outbox';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalOutboxRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('operation_type')) {
+      context.handle(
+        _operationTypeMeta,
+        operationType.isAcceptableOrUnknown(
+          data['operation_type']!,
+          _operationTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationTypeMeta);
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyKeyMeta);
+    }
+    if (data.containsKey('sequence')) {
+      context.handle(
+        _sequenceMeta,
+        sequence.isAcceptableOrUnknown(data['sequence']!, _sequenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sequenceMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalOutboxRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalOutboxRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      operationType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_type'],
+      )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      )!,
+      sequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sequence'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalOutboxTable createAlias(String alias) {
+    return $LocalOutboxTable(attachedDatabase, alias);
+  }
+}
+
+class LocalOutboxRow extends DataClass implements Insertable<LocalOutboxRow> {
+  final String id;
+  final String ownerId;
+  final String entityType;
+  final String entityId;
+  final String operationType;
+  final String idempotencyKey;
+  final int sequence;
+  final String status;
+  final int createdAt;
+  const LocalOutboxRow({
+    required this.id,
+    required this.ownerId,
+    required this.entityType,
+    required this.entityId,
+    required this.operationType,
+    required this.idempotencyKey,
+    required this.sequence,
+    required this.status,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['operation_type'] = Variable<String>(operationType);
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
+    map['sequence'] = Variable<int>(sequence);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  LocalOutboxCompanion toCompanion(bool nullToAbsent) {
+    return LocalOutboxCompanion(
+      id: Value(id),
+      ownerId: Value(ownerId),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      operationType: Value(operationType),
+      idempotencyKey: Value(idempotencyKey),
+      sequence: Value(sequence),
+      status: Value(status),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalOutboxRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalOutboxRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      operationType: serializer.fromJson<String>(json['operationType']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
+      sequence: serializer.fromJson<int>(json['sequence']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'operationType': serializer.toJson<String>(operationType),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
+      'sequence': serializer.toJson<int>(sequence),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  LocalOutboxRow copyWith({
+    String? id,
+    String? ownerId,
+    String? entityType,
+    String? entityId,
+    String? operationType,
+    String? idempotencyKey,
+    int? sequence,
+    String? status,
+    int? createdAt,
+  }) => LocalOutboxRow(
+    id: id ?? this.id,
+    ownerId: ownerId ?? this.ownerId,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    operationType: operationType ?? this.operationType,
+    idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+    sequence: sequence ?? this.sequence,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  LocalOutboxRow copyWithCompanion(LocalOutboxCompanion data) {
+    return LocalOutboxRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      operationType: data.operationType.present
+          ? data.operationType.value
+          : this.operationType,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      sequence: data.sequence.present ? data.sequence.value : this.sequence,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalOutboxRow(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('operationType: $operationType, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('sequence: $sequence, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerId,
+    entityType,
+    entityId,
+    operationType,
+    idempotencyKey,
+    sequence,
+    status,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalOutboxRow &&
+          other.id == this.id &&
+          other.ownerId == this.ownerId &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.operationType == this.operationType &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.sequence == this.sequence &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalOutboxCompanion extends UpdateCompanion<LocalOutboxRow> {
+  final Value<String> id;
+  final Value<String> ownerId;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<String> operationType;
+  final Value<String> idempotencyKey;
+  final Value<int> sequence;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const LocalOutboxCompanion({
+    this.id = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.operationType = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.sequence = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalOutboxCompanion.insert({
+    required String id,
+    this.ownerId = const Value.absent(),
+    required String entityType,
+    required String entityId,
+    required String operationType,
+    required String idempotencyKey,
+    required int sequence,
+    this.status = const Value.absent(),
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       operationType = Value(operationType),
+       idempotencyKey = Value(idempotencyKey),
+       sequence = Value(sequence),
+       createdAt = Value(createdAt);
+  static Insertable<LocalOutboxRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerId,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<String>? operationType,
+    Expression<String>? idempotencyKey,
+    Expression<int>? sequence,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (operationType != null) 'operation_type': operationType,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (sequence != null) 'sequence': sequence,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalOutboxCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerId,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<String>? operationType,
+    Value<String>? idempotencyKey,
+    Value<int>? sequence,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return LocalOutboxCompanion(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      operationType: operationType ?? this.operationType,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      sequence: sequence ?? this.sequence,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (operationType.present) {
+      map['operation_type'] = Variable<String>(operationType.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (sequence.present) {
+      map['sequence'] = Variable<int>(sequence.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalOutboxCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('operationType: $operationType, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('sequence: $sequence, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7652,6 +8495,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalActivitySummariesTable localActivitySummaries =
       $LocalActivitySummariesTable(this);
   late final $LocalAppStateTable localAppState = $LocalAppStateTable(this);
+  late final $LocalOutboxTable localOutbox = $LocalOutboxTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7667,6 +8511,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localWorkoutFeedback,
     localActivitySummaries,
     localAppState,
+    localOutbox,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7735,6 +8580,8 @@ typedef $$LocalWorkoutInstancesTableCreateCompanionBuilder =
       required int createdAt,
       required int updatedAt,
       required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 typedef $$LocalWorkoutInstancesTableUpdateCompanionBuilder =
@@ -7757,6 +8604,8 @@ typedef $$LocalWorkoutInstancesTableUpdateCompanionBuilder =
       Value<int> createdAt,
       Value<int> updatedAt,
       Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 
@@ -7963,6 +8812,16 @@ class $$LocalWorkoutInstancesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> localWorkoutSectionsRefs(
     Expression<bool> Function($$LocalWorkoutSectionsTableFilterComposer f) f,
   ) {
@@ -8138,6 +8997,16 @@ class $$LocalWorkoutInstancesTableOrderingComposer
     column: $table.rowVersion,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalWorkoutInstancesTableAnnotationComposer
@@ -8226,6 +9095,12 @@ class $$LocalWorkoutInstancesTableAnnotationComposer
     column: $table.rowVersion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
 
   Expression<T> localWorkoutSectionsRefs<T extends Object>(
     Expression<T> Function($$LocalWorkoutSectionsTableAnnotationComposer a) f,
@@ -8367,6 +9242,8 @@ class $$LocalWorkoutInstancesTableTableManager
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
                 Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalWorkoutInstancesCompanion(
                 id: id,
@@ -8387,6 +9264,8 @@ class $$LocalWorkoutInstancesTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8409,6 +9288,8 @@ class $$LocalWorkoutInstancesTableTableManager
                 required int createdAt,
                 required int updatedAt,
                 required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalWorkoutInstancesCompanion.insert(
                 id: id,
@@ -8429,6 +9310,8 @@ class $$LocalWorkoutInstancesTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -10568,6 +11451,8 @@ typedef $$LocalWorkoutSessionsTableCreateCompanionBuilder =
       required int createdAt,
       required int updatedAt,
       required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 typedef $$LocalWorkoutSessionsTableUpdateCompanionBuilder =
@@ -10586,6 +11471,8 @@ typedef $$LocalWorkoutSessionsTableUpdateCompanionBuilder =
       Value<int> createdAt,
       Value<int> updatedAt,
       Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 
@@ -10787,6 +11674,16 @@ class $$LocalWorkoutSessionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$LocalWorkoutInstancesTableFilterComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableFilterComposer composer =
         $composerBuilder(
@@ -10963,6 +11860,16 @@ class $$LocalWorkoutSessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LocalWorkoutInstancesTableOrderingComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableOrderingComposer composer =
         $composerBuilder(
@@ -11047,6 +11954,12 @@ class $$LocalWorkoutSessionsTableAnnotationComposer
     column: $table.rowVersion,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
 
   $$LocalWorkoutInstancesTableAnnotationComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableAnnotationComposer composer =
@@ -11206,6 +12119,8 @@ class $$LocalWorkoutSessionsTableTableManager
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
                 Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalWorkoutSessionsCompanion(
                 id: id,
@@ -11222,6 +12137,8 @@ class $$LocalWorkoutSessionsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -11240,6 +12157,8 @@ class $$LocalWorkoutSessionsTableTableManager
                 required int createdAt,
                 required int updatedAt,
                 required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalWorkoutSessionsCompanion.insert(
                 id: id,
@@ -11256,6 +12175,8 @@ class $$LocalWorkoutSessionsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -13155,6 +14076,8 @@ typedef $$LocalActivitySummariesTableCreateCompanionBuilder =
       required int totalStepCount,
       Value<double?> overallEffort,
       required int createdAt,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 typedef $$LocalActivitySummariesTableUpdateCompanionBuilder =
@@ -13171,6 +14094,8 @@ typedef $$LocalActivitySummariesTableUpdateCompanionBuilder =
       Value<int> totalStepCount,
       Value<double?> overallEffort,
       Value<int> createdAt,
+      Value<String> ownerId,
+      Value<String> syncState,
       Value<int> rowid,
     });
 
@@ -13287,6 +14212,16 @@ class $$LocalActivitySummariesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$LocalWorkoutInstancesTableFilterComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableFilterComposer composer =
         $composerBuilder(
@@ -13394,6 +14329,16 @@ class $$LocalActivitySummariesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LocalWorkoutInstancesTableOrderingComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableOrderingComposer composer =
         $composerBuilder(
@@ -13495,6 +14440,12 @@ class $$LocalActivitySummariesTableAnnotationComposer
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
 
   $$LocalWorkoutInstancesTableAnnotationComposer get workoutInstanceId {
     final $$LocalWorkoutInstancesTableAnnotationComposer composer =
@@ -13599,6 +14550,8 @@ class $$LocalActivitySummariesTableTableManager
                 Value<int> totalStepCount = const Value.absent(),
                 Value<double?> overallEffort = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalActivitySummariesCompanion(
                 id: id,
@@ -13613,6 +14566,8 @@ class $$LocalActivitySummariesTableTableManager
                 totalStepCount: totalStepCount,
                 overallEffort: overallEffort,
                 createdAt: createdAt,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -13629,6 +14584,8 @@ class $$LocalActivitySummariesTableTableManager
                 required int totalStepCount,
                 Value<double?> overallEffort = const Value.absent(),
                 required int createdAt,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalActivitySummariesCompanion.insert(
                 id: id,
@@ -13643,6 +14600,8 @@ class $$LocalActivitySummariesTableTableManager
                 totalStepCount: totalStepCount,
                 overallEffort: overallEffort,
                 createdAt: createdAt,
+                ownerId: ownerId,
+                syncState: syncState,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -13896,6 +14855,288 @@ typedef $$LocalAppStateTableProcessedTableManager =
       LocalAppStateRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalOutboxTableCreateCompanionBuilder =
+    LocalOutboxCompanion Function({
+      required String id,
+      Value<String> ownerId,
+      required String entityType,
+      required String entityId,
+      required String operationType,
+      required String idempotencyKey,
+      required int sequence,
+      Value<String> status,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$LocalOutboxTableUpdateCompanionBuilder =
+    LocalOutboxCompanion Function({
+      Value<String> id,
+      Value<String> ownerId,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<String> operationType,
+      Value<String> idempotencyKey,
+      Value<int> sequence,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+class $$LocalOutboxTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalOutboxTable> {
+  $$LocalOutboxTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get operationType => $composableBuilder(
+    column: $table.operationType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalOutboxTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalOutboxTable> {
+  $$LocalOutboxTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get operationType => $composableBuilder(
+    column: $table.operationType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalOutboxTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalOutboxTable> {
+  $$LocalOutboxTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get operationType => $composableBuilder(
+    column: $table.operationType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sequence =>
+      $composableBuilder(column: $table.sequence, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$LocalOutboxTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalOutboxTable,
+          LocalOutboxRow,
+          $$LocalOutboxTableFilterComposer,
+          $$LocalOutboxTableOrderingComposer,
+          $$LocalOutboxTableAnnotationComposer,
+          $$LocalOutboxTableCreateCompanionBuilder,
+          $$LocalOutboxTableUpdateCompanionBuilder,
+          (
+            LocalOutboxRow,
+            BaseReferences<_$AppDatabase, $LocalOutboxTable, LocalOutboxRow>,
+          ),
+          LocalOutboxRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalOutboxTableTableManager(_$AppDatabase db, $LocalOutboxTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalOutboxTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalOutboxTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalOutboxTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> operationType = const Value.absent(),
+                Value<String> idempotencyKey = const Value.absent(),
+                Value<int> sequence = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalOutboxCompanion(
+                id: id,
+                ownerId: ownerId,
+                entityType: entityType,
+                entityId: entityId,
+                operationType: operationType,
+                idempotencyKey: idempotencyKey,
+                sequence: sequence,
+                status: status,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String> ownerId = const Value.absent(),
+                required String entityType,
+                required String entityId,
+                required String operationType,
+                required String idempotencyKey,
+                required int sequence,
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalOutboxCompanion.insert(
+                id: id,
+                ownerId: ownerId,
+                entityType: entityType,
+                entityId: entityId,
+                operationType: operationType,
+                idempotencyKey: idempotencyKey,
+                sequence: sequence,
+                status: status,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalOutboxTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalOutboxTable,
+      LocalOutboxRow,
+      $$LocalOutboxTableFilterComposer,
+      $$LocalOutboxTableOrderingComposer,
+      $$LocalOutboxTableAnnotationComposer,
+      $$LocalOutboxTableCreateCompanionBuilder,
+      $$LocalOutboxTableUpdateCompanionBuilder,
+      (
+        LocalOutboxRow,
+        BaseReferences<_$AppDatabase, $LocalOutboxTable, LocalOutboxRow>,
+      ),
+      LocalOutboxRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13923,4 +15164,6 @@ class $AppDatabaseManager {
       );
   $$LocalAppStateTableTableManager get localAppState =>
       $$LocalAppStateTableTableManager(_db, _db.localAppState);
+  $$LocalOutboxTableTableManager get localOutbox =>
+      $$LocalOutboxTableTableManager(_db, _db.localOutbox);
 }
