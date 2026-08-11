@@ -214,6 +214,22 @@ stavový blok na `/startup` obrazovce zobrazuje stavy: loading, success
 (nedostupný/timeout/nevalidní odpověď) s explicitním Retry. Chyby nikdy
 neobsahují interní detaily; žádný automatický retry loop.
 
+Local ownership and sync metadata foundation (R2-01, `lib/features/sync/`):
+
+- **Schema verze 2** s nedestruktivní migrací `v1 → v2` (C1 `MSM-*`): zachová
+  všechna R1 data i aktivní session; na vlastnitelných aggregate roots
+  (`local_workout_instances`, `local_workout_sessions`,
+  `local_activity_summaries`) přibyly `owner_id` a `sync_state` s bezpečným
+  defaultem (backfill `local-anonymous` / `LOCAL_ONLY`, `MSM-014`).
+- **Restart-safe outbox** `local_outbox` (`LocalChangeLog`/`OfflineCommand`,
+  C2 §6/§7) se stabilním idempotency key a deterministickým `sequence`;
+  `LocalSyncMetadataRepository` poskytuje `localOwnerId`, idempotentní
+  `enqueue` (LSM-008/009) a `pendingOperations` (LSM-012).
+- **Bez sítě a bez odesílání** (non-goal R2-01) — pouze foundation +
+  scaffolding; transport a replay vlastní pozdější sync protocol (C10/C11).
+- R1 offline kritický tok zůstává beze změny; drift generovaný kód je
+  commitnutý (drift-check čistý).
+
 ## Struktura
 
 ```text
@@ -222,13 +238,15 @@ lib/
 │   ├── bootstrap/        # kořenový widget aplikace
 │   ├── configuration/    # environment boundary (--dart-define, bez secrets)
 │   ├── navigation/       # GoRouter a centralizované routes
-│   ├── startup/          # technická obrazovka R0 (/startup, ne domov)
+│   ├── startup/          # startup recovery gate (R1-05) + technická R0 obrazovka
 │   └── theme/            # základní theme (není design system)
 ├── core/
-│   ├── database/         # Drift/SQLite schema, provider (R1-01)
+│   ├── database/         # Drift/SQLite schema v2 (R1-01 + R2-01 owner/sync/outbox)
+│   ├── ids/              # IdGenerator boundary
 │   └── time/             # testovatelný clock a dnešní datum
 ├── features/
-│   └── workouts/         # domain / data / application / presentation
+│   ├── workouts/         # domain / data / application / presentation (R1)
+│   └── sync/             # lokální ownership & outbox foundation (R2-01)
 └── l10n/                 # ARB soubory; generated/ se negeneruje do Gitu
 ```
 
