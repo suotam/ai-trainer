@@ -4,10 +4,10 @@
 **Stav:** Draft  
 **Soubor:** `docs/05-architecture/initial-architecture-decisions.md`  
 **Vlastník:** Architecture  
-**Poslední aktualizace:** 2026-07-22  
-**Navazuje na:** `docs/02-product/release-scope.md`, `docs/07-backend/backend-architecture.md`, `docs/08-mobile/mobile-architecture.md`, `docs/12-data/data-architecture.md`, `docs/13-delivery/repository-strategy.md`  
+**Poslední aktualizace:** 2026-07-29  
+**Navazuje na:** `docs/02-product/release-scope.md`, `docs/07-backend/backend-architecture.md`, `docs/08-mobile/mobile-architecture.md`, `docs/12-data/data-architecture.md`, `docs/13-delivery/repository-strategy.md`, `docs/07-backend/r2-identity-session-contract.md`, `docs/07-backend/r2-auth-api-contract.md`  
 **Navazující dokumenty:** physical data model R1, minimal API contract, test strategy, Definition of Ready and Done, vertical-slice implementation plan a coding-agent guide  
-**Vlastněné pojmy nebo kontrakty:** počáteční technologická rozhodnutí pro R0 a R1, jejich stav, důvody, důsledky a pravidla `ADR-001` až `ADR-010`
+**Vlastněné pojmy nebo kontrakty:** počáteční technologická rozhodnutí pro R0 a R1 a navazující R2 architektonické rozhodnutí (ADR-011, C5 auth provider strategy), jejich stav, důvody, důsledky a pravidla `ADR-001` až `ADR-011`
 
 ---
 
@@ -365,7 +365,133 @@ Při tvorbě test strategy lze nástroje zpřesnit, ale nesmí se oslabit požad
 
 ---
 
-# 12. Záměrně odložená rozhodnutí
+# 12. ADR-011 – R2 authentication provider strategy (C5)
+
+**Stav:** ACCEPTED (strategie); konkrétní externí federated provider je dílčí **DEFERRED** rozhodnutí (viz Rozhodnutí)
+
+Tento ADR je kontrakt **C5** dle `docs/13-delivery/r2-vertical-slice-plan.md §7.1`. Je to rozhodovací ADR (ne průzkum). Neimplementuje provider SDK, Spring Security, OAuth callback, JWT parser, secrets, env proměnné, Docker služby, mobilní login flow ani migrace.
+
+## Kontext
+
+`R2 – Account and Sync` potřebuje autentizaci. `§12` dříve odkládal „identity provider" a „token a session mechanismus"; R2 to nyní vyžaduje rozhodnout. Požadavky přicházejí z:
+
+- **C3 (identity & session):** server-authoritative identita/session, anonymous → account přechod, krátká access + rotující refresh, revokovatelnost, oddělení `Identity`/`AuthenticationIdentity`/`UserAccount` (`ISC-*`, `INV-010`).
+- **C4 (auth API):** backend zveřejňuje register/login/refresh/logout/session-context, provider-neutral, kanonický error envelope, bez account enumeration (`AAC-*`).
+- **security-architecture:** server je autorita (`SAR-002`), nedůvěryhodný klient (`SAR-003`), secrets mimo klienta (`SAR-006`), revokovatelné session (`SAR-007`), bezpečné logování (`SAR-012`).
+- **offline-first (R1 invariant):** kritický lokální tok musí fungovat bez sítě; anonymní použití zůstává.
+
+Rozsah MVP je malý; dokumentace neuvádí rozpočet, počty uživatelů ani cloud platformu — tento ADR proto nedělá neověřené předpoklady o nich a rozhoduje na úrovni **strategie**, ne konkrétního produktu.
+
+## Rozhodovací kritéria
+
+- kompatibilita s C3/C4 (server-authoritative session, provider-neutral),
+- bezpečnost (revokace, secret ownership, žádná enumeration),
+- podpora anonymous → account bez duplicit (`INV-013`),
+- offline-first hranice (žádná závislost R1 toku na provideru),
+- backend i mobile integrace,
+- vendor lock-in a možnost exitu,
+- provozní složitost a lokální development/CI bez produkčního provideru,
+- testovatelnost.
+
+## Zvažované varianty
+
+- **A – First-party backend session authority + provider-neutral `AuthenticationIdentity` adapter:** backend validuje credential, vydává a vlastní aplikační session (access/refresh) i revokaci; externí providery (pokud přibudou) jsou za adaptérem. R2 baseline používá first-party credential (např. e-mail+heslo nebo schválenou minimální baseline) za stejným adaptérem.
+- **B – Self-hosted identity provider** (kategorie samostatného IdP): plná federace, ale přidává provozní komponentu a závislost už v MVP.
+- **C – Managed identity provider** (kategorie hostované IdP služby): rychlý start, ale vendor dependency a rozhodnutí o produktu/nákladech, která zatím nejsou k dispozici.
+- **D – Přímé provider tokeny jako aplikační identita** (backend důvěřuje provider tokenu přímo, bez vlastní app session).
+
+## Rozhodovací matice
+
+| Kritérium | A first-party + adapter | B self-hosted IdP | C managed IdP | D přímé provider tokeny |
+|---|---|---|---|---|
+| Kompatibilita s C3/C4 | strong fit | acceptable | acceptable | disqualifying |
+| Server-authoritative session + revokace | strong fit | acceptable | acceptable | disqualifying |
+| Anonymous → account bez duplicit | strong fit | acceptable | acceptable | weak fit |
+| Offline-first hranice | strong fit | acceptable | acceptable | weak fit |
+| Vendor lock-in / exit | strong fit | acceptable | weak fit | weak fit |
+| Provozní složitost / lokální dev + CI | strong fit | weak fit | acceptable | acceptable |
+| Odklad konkrétní volby bez blokace R2 | strong fit | weak fit | weak fit | disqualifying |
+
+## Rozhodnutí
+
+Zvolena **varianta A**: **backend je first-party autorita aplikační session; externí autentizace je za provider-neutral `AuthenticationIdentity` adaptérem; R2 baseline používá first-party credential za tímto adaptérem.**
+
+- **Proč A:** jediná varianta se strong fit vůči C3/C4 a bezpečnosti; nezavádí provozní/vendor závislost do MVP; umožňuje přidat externí providery později bez změny identity/session modelu ani auth API.
+- **Proč ne B/C:** přijatelné dlouhodobě, ale zavádějí provozní komponentu, resp. vendor dependency a produkt/náklad rozhodnutí, která dokumentace zatím neposkytuje; lze je přidat jako adaptér později.
+- **Proč ne D:** diskvalifikováno — porušuje server-authoritative session, vlastnictví revokace a offline session model (C3/C4/security).
+- **Dílčí DEFERRED rozhodnutí:** konkrétní **externí federated provider** (např. Apple/Google/… kategorie) se **nevybírá nyní**; volba je odložena do doby, kdy vzniknou produktové požadavky. R2 baseline funguje bez něj.
+- **Konečnost:** strategie (A) je konečné R2 rozhodnutí; dílčí volba externího providera je časově omezené DEFERRED. ADR se znovu otevře při volbě externího providera nebo pokud C6/C7 prokážou zásadní překážku.
+
+Rozhodnutí neodporuje C3 ani C4.
+
+## Integrační hranice
+
+- **Provider (adaptér):** ověří externí přihlašovací identitu a vrátí stabilní provider subject; nikdy neurčuje interní doménovou identitu.
+- **Backend:** validuje credential, mapuje `AuthenticationIdentity` na interní `Identity`/`UserAccount`, vydává a vlastní aplikační session, ownership a revokaci (C3/C6/C8).
+- **Mobilní klient:** spouští auth flow a bezpečně ukládá vydaný session materiál (storage vlastní C7); neurčuje identitu.
+- **Vlastní DB aplikace:** autoritativní account/session/identity (C6).
+- **Externí vs interní ID:** provider subject je externí identifikátor; **externí provider identifier nesmí bez výslovného existujícího rozhodnutí automaticky nahradit interní doménovou identitu** (`UserAccount` ID) — ověřeno vůči `identity-and-profile-model §5/§6` a C3 (`ISC-001/004`).
+
+## Session a token hranice
+
+- Credentials **vydává a obnovuje backend** (aplikační access/refresh session); **validuje** je backend; **revokaci vlastní** backend (C3/C13).
+- Backend **nepřijímá provider-issued token přímo jako aplikační session** — případný provider token se směňuje za aplikační session (varianta D odmítnuta).
+- Vztah provider session ↔ aplikační session: provider ověří přihlášení; aplikační session je samostatná, serverem vlastněná a revokovatelná.
+- Konkrétní HTTP tvar vlastní C4; konkrétní token format je součást implementace za adaptérem; mobilní storage vlastní C7.
+
+## Anonymous-to-account důsledek
+
+Strategie A přirozeně podporuje existující anonymní/lokální identitu (C3 §4.1): registrace/přihlášení naváže externí nebo first-party `AuthenticationIdentity` na interní účet, přičemž unikátnost provider+subject (`INV-011`) a idempotency key (C4 `AAC-005`) brání duplicitnímu účtu. **Algoritmus zachování lokálních dat nepřebírá tento ADR — vlastní jej C15**; C2 vlastní lokální ownership/outbox.
+
+## Bezpečnostní důsledky
+
+- **Trust boundary:** server je autorita; klient a provider jsou nedůvěryhodní vstupem (`SAR-002/003`).
+- **Secret ownership:** provider a session secrets patří serveru/secure storage, nikdy do klientské SQLite ani logu (`SAR-006/012`, C7).
+- **Token validation:** provider/credential ověřuje backend; klíč discovery/rotace providera je konceptuálně na straně adaptéru.
+- **Account enumeration:** auth chyby jsou generické (C4 `AAC-008`).
+- **Compromised credential / revokace:** revokovaná session neautorizuje (C3 `ISC-007`, C13).
+- **Provider outage / dependency risk:** first-party baseline snižuje závislost; adaptér izoluje výpadek providera.
+- Detailní threat model vlastní `security-architecture`, ne tento ADR.
+
+## Provozní důsledky
+
+- **Lokální dev / test / CI:** first-party baseline za adaptérem je testovatelná bez produkčního providera (adapter contract + fake).
+- **Staging/production:** případný externí provider se konfiguruje mimo kód a mimo repozitář (secrets manager je odložen, `§` deferred).
+- **Availability / failure modes:** výpadek externího providera nesmí shodit R1 offline tok; first-party baseline zůstává.
+- **Backup/export identity dat, monitoring, incident response:** vlastní data zůstávají v aplikační DB (C6); export/observability dle příslušných dokumentů.
+
+## Testovací důsledky
+
+Implementační slices (R2-02+) musí ověřit: provider **adapter contract**, úspěšné/neúspěšné přihlášení, registraci, refresh, revokaci, duplicate identity, anonymous upgrade, provider outage, neplatnou provider odpověď, expiraci/clock skew (je-li relevantní) a **lokální testování bez produkčního providera**.
+
+## Migrace a exit strategy
+
+- Vendor lock-in omezuje **provider-neutral adaptér**: identity/session model ani auth API nezávisí na konkrétním providerovi.
+- Provider identities se mapují přes stabilní provider subject na interní `Identity`.
+- Exportovatelná musí zůstat autoritativní account/session/identity data (C6).
+- Migrace na jiného providera = nový adaptér + přemapování `AuthenticationIdentity`; aktivní aplikační session zůstávají serverové a revokovatelné.
+
+## Důsledky
+
+- **Positive:** silná shoda s C3/C4/security; žádná vendor závislost v MVP; pozdější přidání providera bez změny modelu; testovatelné lokálně.
+- **Negative:** first-party credential znamená, že backend nese odpovědnost za credential handling baseline (za adaptérem).
+- **Accepted trade-off:** konkrétní externí federated provider je odložen; R2 baseline je first-party.
+
+## Navazující kontrakty
+
+- **C6 (server data model):** account/auth/identity/session tabulky odrážející tuto strategii.
+- **C7 (token/session storage):** mobilní bezpečné uložení session materiálu.
+- **C13 (token/session revocation):** revokační flow.
+- **C14 (audit-event):** auditované auth události.
+Tento ADR tyto kontrakty **nevytváří**.
+
+## Přehodnocení
+
+Znovu otevřít při volbě konkrétního externího providera, při produktovém požadavku na federaci, nebo pokud C6/C7 prokážou zásadní překážku strategie A.
+
+---
+
+# 13. Záměrně odložená rozhodnutí
 
 Před R0 a R1 se nevybírá:
 
@@ -383,9 +509,11 @@ Před R0 a R1 se nevybírá:
 
 Tyto volby nesmí být zavedeny do kódu pouze „do zásoby“.
 
+**Aktualizace pro R2:** `ADR-011` (§12, C5) rozhoduje **strategii** identity provideru a token/session mechanismu pro R2 (first-party backend session authority + provider-neutral adaptér). Konkrétní **externí federated provider** i produkční **secrets manager** zůstávají odložené dle výše uvedeného seznamu.
+
 ---
 
-# 13. Implementační baseline R0
+# 14. Implementační baseline R0
 
 R0 vytvoří minimálně:
 
@@ -403,7 +531,7 @@ R0 nevytváří business tabulky ani umělé abstrakce pro R2 až R5.
 
 ---
 
-# 14. Implementační baseline R1
+# 15. Implementační baseline R1
 
 R1 používá:
 
@@ -422,7 +550,7 @@ R1 používá:
 
 ---
 
-# 15. Závazná pravidla
+# 16. Závazná pravidla
 
 ## ADR-001
 
@@ -464,9 +592,13 @@ R0 CI MUSÍ používat GitHub Actions a ověřit mobile i backend build a test.
 
 R1 MUSÍ mít automatizovaný restart/recovery test hlavního lokálního workout flow.
 
+## ADR-011
+
+R2 autentizace MUSÍ používat backend jako first-party autoritu aplikační session za provider-neutral `AuthenticationIdentity` adaptérem; konkrétní externí federated provider je odložen a NESMÍ být zaveden do kódu bez samostatného rozhodnutí. Externí provider identifier NESMÍ automaticky nahradit interní doménovou identitu.
+
 ---
 
-# 16. Připravenost a další krok
+# 17. Připravenost a další krok
 
 Po přijetí tohoto balíku jsou hlavní technologie pro R0 a R1 rozhodnuté.
 
