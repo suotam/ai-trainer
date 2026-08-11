@@ -77,9 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 1', () async {
+  test('databaze vznikne od prazdneho stavu se schema verzi 2', () async {
+    // R2-01 zvýšil schema na verzi 2 (owner/sync metadata + outbox).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 1);
+    expect(version.data.values.first, 2);
 
     final tables = await db
         .customSelect(
@@ -90,6 +91,7 @@ void main() {
     expect(tables.map((r) => r.data['name']), [
       'local_activity_summaries',
       'local_app_state',
+      'local_outbox',
       'local_set_performances',
       'local_set_plans',
       'local_step_performances',
