@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.19  
+**Verze:** 2.20  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-07-29
@@ -103,6 +103,7 @@ docs/12-data/r2-mobile-schema-migration.md
 docs/12-data/r2-local-sync-metadata-contract.md
 ```
 
+- `initial-architecture-decisions.md` obsahuje mimo `ADR-001` až `ADR-010` (R0/R1) také **`ADR-011` – R2 authentication provider strategy** (**C5**, vlastník Architecture): rozhoduje strategii auth provideru pro R2 (first-party backend session authority + provider-neutral `AuthenticationIdentity` adaptér; konkrétní externí federated provider odložen). Blokuje `R2-02` (spolu s C3/C4/C6/C14).
 - `r2-identity-session-contract.md` (**C3**, vlastník Domain / identity-and-profile-model + Backend) vlastní R2 identity & session model: anonymous/authenticated/account/device identitu, session lifecycle (access/refresh), identity transitions (anonymous → account atd.), ownership interakci s C2, security boundaries a invarianty `ISC-001` až `ISC-015`. Contract-only, bez API/DB/JWT. Blokuje `R2-02` (spolu s C4/C5/C6/C14).
 - `r2-auth-api-contract.md` (**C4**, vlastník Backend Architecture) vlastní veřejné R2 autentizační API: operace register/login/refresh/logout/session-context, request/response význam, credential transport, auth error semantics nad kanonickým error envelope (`APR`), API-level idempotency/retry hranice a invarianty `AAC-001` až `AAC-015`. Contract-only, bez controllerů/DTO/OpenAPI souboru/JWT/OAuth; provider-neutral. Blokuje `R2-02` (spolu s C3/C5/C6/C14).
 - `r2-mobile-schema-migration.md` (**C1**, vlastník Data Architecture) vlastní evoluci mobilního Drift/SQLite schématu v R2: schema versioning, migration rules, migration invarianty `MSM-001` až `MSM-015`, kontraktní R2 strukturální přírůstky (owner reference, sync-state, verze entity, outbox) a evidence. Contract-only, bez SQL/Drift. Blokuje `R2-01` (spolu s C2).
@@ -149,10 +150,10 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. Oba blokující kontrakty `R2-01` — **C1** (`docs/12-data/r2-mobile-schema-migration.md`) a **C2** (`docs/12-data/r2-local-sync-metadata-contract.md`) — jsou hotové, takže **`R2-01` je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3** i **C4** (`docs/07-backend/r2-auth-api-contract.md`) jsou hotové; `R2-02` má blokující kontrakty C3, C4, C5, C6 a auth část C14 — hotové jsou C3 a C4. Dalším kanonickým krokem je zbývající blokující kontrakt `R2-02`:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. Oba blokující kontrakty `R2-01` — **C1** (`docs/12-data/r2-mobile-schema-migration.md`) a **C2** (`docs/12-data/r2-local-sync-metadata-contract.md`) — jsou hotové, takže **`R2-01` je `READY` (neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3**, **C4** a **C5** jsou hotové (C5 = **ADR-011** v `docs/05-architecture/initial-architecture-decisions.md`); `R2-02` má blokující kontrakty C3, C4, C5, C6 a auth část C14 — hotové jsou C3, C4 a C5. Dalším kanonickým krokem je zbývající blokující kontrakt `R2-02`:
 
 ```text
-C5 – Auth provider ADR   (docs/05-architecture/… ADR záznam)
+C6 – Server account and sync data model   (docs/12-data/r2-server-data-model.md)
 ```
 
 ---
@@ -337,13 +338,13 @@ uvést pravdivou evidence summary
 Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Release 1
 uzavřen. R2 vertical-slice plán existuje (`docs/13-delivery/r2-vertical-slice-plan.md`).
 Blokující kontrakty `R2-01` (**C1**, **C2**) jsou hotové, takže **`R2-01` je `READY`
-(neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3** i **C4**
-(`docs/07-backend/r2-auth-api-contract.md`) jsou hotové; z blokujících kontraktů
-`R2-02` (C3, C4, C5, C6, auth část C14) zbývají C5, C6 a auth část C14. Další
-kanonický dokumentační krok:
+(neimplementováno)**; `R2-02` až `R2-08` zůstávají `NOT_READY`. **C3**, **C4** a **C5**
+(C5 = **ADR-011** v `docs/05-architecture/initial-architecture-decisions.md`) jsou
+hotové; z blokujících kontraktů `R2-02` (C3, C4, C5, C6, auth část C14) zbývají C6 a
+auth část C14. Další kanonický dokumentační krok:
 
 ```text
-C5 – Auth provider ADR   (docs/05-architecture/… ADR záznam)
+C6 – Server account and sync data model   (docs/12-data/r2-server-data-model.md)
 ```
 
 Implementace `R2-01` smí začít až po samostatném pokynu; tento krok pouze označuje `R2-01`
