@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.21  
+**Verze:** 2.22  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -122,9 +122,9 @@ R1-08 je poslední R1 slice, proto je proveden R1 Exit Review (VSP §20). R1 je 
 
 **R2 – Account and Sync je naplánované, ale implementace nezačala.** Existuje kanonický R2 vertical-slice plán `docs/13-delivery/r2-vertical-slice-plan.md` (vlastní pořadí R2, blocking contract map, evidence gates, R2 Exit Review a pravidla `R2P-001` až `R2P-015`). Definovaný R2 backlog: `R2-01` Local Ownership and Sync Metadata Foundation, `R2-02` Backend Account and Authentication Baseline, `R2-03` Mobile Auth and Secure Session Storage, `R2-04` AthleteProfile and Device Registration, `R2-05` Ownership Authorization and First Sync (push), `R2-06` Conflict, Rejection and Session Revocation, `R2-07` Local-to-Account Data Migration, `R2-08` R2 Critical End-to-End Evidence and Exit Review.
 
-**`R2-01` je `READY` (neimplementováno); `R2-02` až `R2-08` zůstávají `NOT_READY`.** **Vytvořené R2 kontrakty:** C1 – Mobile schema migration contract (`docs/12-data/r2-mobile-schema-migration.md`, vlastník Data Architecture, `MSM-001` až `MSM-015`; contract-only), C2 – Local ownership & outbox/pending-operation contract (`docs/12-data/r2-local-sync-metadata-contract.md`, vlastník Domain / sync-and-offline-model, `LSM-001` až `LSM-015`; contract-only) C3 – Identity & session contract (`docs/07-backend/r2-identity-session-contract.md`, vlastník Domain / identity-and-profile-model + Backend, `ISC-001` až `ISC-015`; contract-only) C4 – Authentication API contract (`docs/07-backend/r2-auth-api-contract.md`, vlastník Backend Architecture, `AAC-001` až `AAC-015`; contract-only) a C5 – Auth provider ADR (**`ADR-011`** v `docs/05-architecture/initial-architecture-decisions.md`, vlastník Architecture; rozhodovací ADR, žádný produkční kód). `R2-01` má dle `r2-vertical-slice-plan.md §9.1` právě dva blocking kontrakty C1 a C2; oba jsou hotové, proto je `R2-01` `READY`. **`R2-02` zůstává `NOT_READY`** — má blocking kontrakty C3, C4, C5, C6 a auth část C14; hotové jsou C3, C4 a C5, chybí C6 a auth část C14. **Stále chybějící blokující kontrakty (pro pozdější R2 slices):** server data model (C6), token/session storage (C7), authorization/ownership (C8), device registration (C9), sync protocol (C10), idempotency (C11), conflict/rejection (C12), revocation (C13), audit-event (C14), local-to-account migration (C15). Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
+**`R2-01` je `READY` (neimplementováno); `R2-02` až `R2-08` zůstávají `NOT_READY`.** **Vytvořené R2 kontrakty:** C1 – Mobile schema migration contract (`docs/12-data/r2-mobile-schema-migration.md`, vlastník Data Architecture, `MSM-001` až `MSM-015`; contract-only), C2 – Local ownership & outbox/pending-operation contract (`docs/12-data/r2-local-sync-metadata-contract.md`, vlastník Domain / sync-and-offline-model, `LSM-001` až `LSM-015`; contract-only) C3 – Identity & session contract (`docs/07-backend/r2-identity-session-contract.md`, vlastník Domain / identity-and-profile-model + Backend, `ISC-001` až `ISC-015`; contract-only) C4 – Authentication API contract (`docs/07-backend/r2-auth-api-contract.md`, vlastník Backend Architecture, `AAC-001` až `AAC-015`; contract-only) C5 – Auth provider ADR (**`ADR-011`** v `docs/05-architecture/initial-architecture-decisions.md`, vlastník Architecture; rozhodovací ADR) a C6 – Server data model contract (`docs/12-data/r2-server-data-model.md`, vlastník Data Architecture, `SDM-001` až `SDM-015`; contract-only). `R2-01` má dle `r2-vertical-slice-plan.md §9.1` právě dva blocking kontrakty C1 a C2; oba jsou hotové, proto je `R2-01` `READY`. **`R2-02` zůstává `NOT_READY`** — má blocking kontrakty C3, C4, C5, C6 a auth část C14; hotové jsou C3, C4, C5 a C6, zbývá už jen **auth část C14**. **Stále chybějící blokující kontrakty (pro pozdější R2 slices):** token/session storage (C7), authorization/ownership (C8), device registration (C9), sync protocol (C10), idempotency (C11), conflict/rejection (C12), revocation (C13), audit-event (C14), local-to-account migration (C15). Kontrakty pro R2 až R5 vzniknou nejpozději před slicem, který je skutečně používá.
 
-**Přesný další kanonický dokumentační krok:** C1–C5 jsou vytvořené (C5 = `ADR-011`); `R2-01` je `READY`, `R2-02` zůstává `NOT_READY`. Z blokujících kontraktů `R2-02` (C3, C4, C5, C6, auth část C14) zbývá **C6 – Server account and sync data model** (`docs/12-data/r2-server-data-model.md` dle `r2-vertical-slice-plan.md §7.1`), následně auth část C14. Implementace `R2-01` smí začít až po samostatném pokynu.
+**Přesný další kanonický dokumentační krok:** C1–C6 jsou vytvořené (C5 = `ADR-011`, C6 = server data model); `R2-01` je `READY`, `R2-02` zůstává `NOT_READY`. Z blokujících kontraktů `R2-02` (C3, C4, C5, C6, auth část C14) zbývá už jen **auth část C14 – Audit-event contract** (`docs/11-security/r2-audit-event-contract.md` dle `r2-vertical-slice-plan.md §7.1`); poté je `R2-02` `READY`. Implementace `R2-01` smí začít až po samostatném pokynu.
 
 ---
 
@@ -309,10 +309,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review je proveden (viz §3) a Release 1 je uzavřen. Existuje R2 vertical-slice plán. C1–C5 jsou vytvořené (C5 = `ADR-011`). `R2-01` je `READY` (neimplementováno); `R2-02` až `R2-08` zůstávají `NOT_READY`. Z blokujících kontraktů `R2-02` (C3, C4, C5, C6, auth část C14) zbývají C6 a auth část C14. Další kanonický dokumentační krok:
+Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review je proveden (viz §3) a Release 1 je uzavřen. Existuje R2 vertical-slice plán. C1–C6 jsou vytvořené (C5 = `ADR-011`, C6 = server data model). `R2-01` je `READY` (neimplementováno); `R2-02` až `R2-08` zůstávají `NOT_READY`. Z blokujících kontraktů `R2-02` (C3, C4, C5, C6, auth část C14) zbývá už jen auth část C14. Další kanonický dokumentační krok:
 
 ```text
-C6 – Server account and sync data model   (docs/12-data/r2-server-data-model.md)
+C14 (auth část) – Audit-event contract   (docs/11-security/r2-audit-event-contract.md)
 ```
 
 Implementace `R2-01` smí začít až po samostatném pokynu; před ní je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r2-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
