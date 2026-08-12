@@ -6,6 +6,7 @@ import org.slf4j.MDC
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpMediaTypeNotAcceptableException
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
@@ -48,9 +49,20 @@ class ApiErrorHandler(
     fun handleUnsupportedMediaType(exception: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponseDto> =
         envelope(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", "The request media type is not supported.")
 
-    @ExceptionHandler(ServletRequestBindingException::class)
-    fun handleInvalidRequest(exception: ServletRequestBindingException): ResponseEntity<ErrorResponseDto> =
+    @ExceptionHandler(ServletRequestBindingException::class, HttpMessageNotReadableException::class)
+    fun handleInvalidRequest(exception: Exception): ResponseEntity<ErrorResponseDto> =
         envelope(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "The request is invalid.")
+
+    @ExceptionHandler(ApiException::class)
+    fun handleApiException(exception: ApiException): ResponseEntity<ErrorResponseDto> {
+        val response = envelope(exception.status, exception.code, exception.message)
+        val retryAfterSeconds = exception.retryAfterSeconds ?: return response
+        return ResponseEntity
+            .status(exception.status)
+            .cacheControl(CacheControl.noStore())
+            .header("Retry-After", retryAfterSeconds.toString())
+            .body(response.body)
+    }
 
     @ExceptionHandler(Exception::class)
     fun handleUnexpected(exception: Exception): ResponseEntity<ErrorResponseDto> {

@@ -28,6 +28,10 @@ dependencies {
     // Boot 4 modularizace: Flyway autokonfiguraci poskytuje samostatný modul.
     implementation("org.springframework.boot:spring-boot-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
+    // R2-02: adaptivní hash hesla (BCrypt) bez plného Spring Security —
+    // auth baseline je first-party session authority (ADR-011), chráněné
+    // hranice ověřuje AccessSessionAuthenticator.
+    implementation("org.springframework.security:spring-security-crypto")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     // TestRestTemplate autokonfigurace vyžaduje restclient modul (Boot 4 modularizace).
