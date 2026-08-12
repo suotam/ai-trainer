@@ -141,6 +141,25 @@ class JdbcAuthSessionRepository(
             .update()
     }
 
+    override fun bindDeviceInstallation(
+        sessionId: UUID,
+        accountId: UUID,
+        installationId: UUID,
+    ) {
+        jdbc
+            .sql(
+                """
+                UPDATE auth_session
+                SET device_installation_id = :installationId,
+                    row_version = row_version + 1
+                WHERE id = :sessionId AND account_id = :accountId
+                """.trimIndent(),
+            ).param("installationId", installationId)
+            .param("sessionId", sessionId)
+            .param("accountId", accountId)
+            .update()
+    }
+
     private fun insertRefreshCredential(
         credential: RefreshCredential,
         now: Instant,
