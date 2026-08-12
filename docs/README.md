@@ -132,7 +132,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` i `R2-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); blokující kontrakt `R2-03` (**C7**) existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až `R2-08` zůstávají `NOT_READY`.
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-04` až `R2-08` zůstávají `NOT_READY` (R2-04 čeká na kontrakty C8, C9 a rozšíření C6).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -159,7 +159,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata) i `R2-02` (backend account/auth baseline) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). Kontrakt **C7 – Token/session storage** existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až `R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty). Dalším kanonickým krokem je **implementace `R2-03`** (mobilní produkční kód — samostatné rozhodnutí), případně příprava kontraktů:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata), `R2-02` (backend account/auth baseline) i `R2-03` (mobile auth + secure session storage) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). `R2-04` až `R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty). Dalším kanonickým krokem je příprava kontraktů:
 
 ```text
 C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
@@ -349,10 +349,10 @@ Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Rel
 uzavřen. Z R2 jsou implementovány **`R2-01` (lokální ownership/sync metadata)** a
 **`R2-02` (backend account/auth baseline — auth endpointy, PostgreSQL/Flyway V2, session
 issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md` §3.
-Kontrakt **C7 – Token/session storage** (`docs/11-security/r2-token-session-storage-contract.md`,
-`TSS-001` až `TSS-015`) existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až
-`R2-08` zůstávají `NOT_READY`. Další kanonický krok je **implementace `R2-03 – Mobile Auth
-and Secure Session Storage`**, případně příprava kontraktů:
+**`R2-03 – Mobile Auth and Secure Session Storage` je implementován** (secure storage
+boundary dle C7/`TSS-001` až `TSS-015`, login/logout/registrace dle C4, restart recovery,
+no-secret-in-DB evidence); `R2-04` až `R2-08` zůstávají `NOT_READY`. Další kanonický krok
+je příprava kontraktů:
 
 ```text
 C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
