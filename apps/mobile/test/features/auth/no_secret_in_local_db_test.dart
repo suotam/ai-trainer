@@ -16,64 +16,67 @@ import '../../support/fake_auth_boundaries.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('lokální SQLite soubor neobsahuje heslo ani tokeny po auth flow', () async {
-    final directory = await Directory.systemTemp.createTemp(
-      'aitrainer_no_secret_test',
-    );
-    addTearDown(() => directory.delete(recursive: true));
-    final databaseFile = File('${directory.path}/app.sqlite');
-
-    final database = AppDatabase(NativeDatabase(databaseFile));
-    final storage = InMemorySecureSessionStorage();
-    final api = FakeAuthApiClient();
-    final container = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(database),
-        secureSessionStorageProvider.overrideWithValue(storage),
-        authApiClientProvider.overrideWithValue(api),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    // Reálný lokální stav: idempotentní R1 seed nad skutečnou SQLite.
-    await container.read(workoutBootstrapCompletedProvider.future);
-
-    // Auth flow: registrace + přihlášení + ověření session.
-    await container.read(authSessionManagerProvider.future);
-    final manager = container.read(authSessionManagerProvider.notifier);
-    const password = 'super-secret-password-42';
-    await manager.registerAccount(
-      email: 'nosecret@example.com',
-      password: password,
-    );
-    await manager.verifySession();
-
-    final stored = storage.stored;
-    expect(stored, isNotNull, reason: 'sanity: session materiál existuje');
-
-    // WAL checkpoint, aby byl celý obsah v hlavním souboru, a zavření DB.
-    await database.customStatement('PRAGMA wal_checkpoint(TRUNCATE)');
-    await database.close();
-
-    final bytes = await databaseFile.readAsBytes();
-    final content = String.fromCharCodes(bytes);
-
-    final secrets = <String, String>{
-      'password': password,
-      'access token': stored!.accessToken,
-      'refresh token': stored.refreshToken,
-    };
-    secrets.forEach((label, secret) {
-      expect(
-        content.contains(secret),
-        isFalse,
-        reason: 'SQLite soubor nesmí obsahovat $label (TSS-002/003)',
+  test(
+    'lokální SQLite soubor neobsahuje heslo ani tokeny po auth flow',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'aitrainer_no_secret_test',
       );
-    });
+      addTearDown(() => directory.delete(recursive: true));
+      final databaseFile = File('${directory.path}/app.sqlite');
 
-    // Sanity: soubor není prázdný a obsahuje R1 seed data — kontrola výše
-    // tedy skenuje skutečný obsah, ne prázdný soubor.
-    expect(bytes.length, greaterThan(0));
-    expect(content.contains('demo-'), isTrue);
-  });
+      final database = AppDatabase(NativeDatabase(databaseFile));
+      final storage = InMemorySecureSessionStorage();
+      final api = FakeAuthApiClient();
+      final container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(database),
+          secureSessionStorageProvider.overrideWithValue(storage),
+          authApiClientProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Reálný lokální stav: idempotentní R1 seed nad skutečnou SQLite.
+      await container.read(workoutBootstrapCompletedProvider.future);
+
+      // Auth flow: registrace + přihlášení + ověření session.
+      await container.read(authSessionManagerProvider.future);
+      final manager = container.read(authSessionManagerProvider.notifier);
+      const password = 'super-secret-password-42';
+      await manager.registerAccount(
+        email: 'nosecret@example.com',
+        password: password,
+      );
+      await manager.verifySession();
+
+      final stored = storage.stored;
+      expect(stored, isNotNull, reason: 'sanity: session materiál existuje');
+
+      // WAL checkpoint, aby byl celý obsah v hlavním souboru, a zavření DB.
+      await database.customStatement('PRAGMA wal_checkpoint(TRUNCATE)');
+      await database.close();
+
+      final bytes = await databaseFile.readAsBytes();
+      final content = String.fromCharCodes(bytes);
+
+      final secrets = <String, String>{
+        'password': password,
+        'access token': stored!.accessToken,
+        'refresh token': stored.refreshToken,
+      };
+      secrets.forEach((label, secret) {
+        expect(
+          content.contains(secret),
+          isFalse,
+          reason: 'SQLite soubor nesmí obsahovat $label (TSS-002/003)',
+        );
+      });
+
+      // Sanity: soubor není prázdný a obsahuje R1 seed data — kontrola výše
+      // tedy skenuje skutečný obsah, ne prázdný soubor.
+      expect(bytes.length, greaterThan(0));
+      expect(content.contains('demo-'), isTrue);
+    },
+  );
 }

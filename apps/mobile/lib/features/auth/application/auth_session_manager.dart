@@ -243,35 +243,35 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
         refreshExpiresAt: stored.refreshExpiresAt,
       );
 
-  AuthFlowFailure _flowFailure(AuthApiFailure failure) => switch (failure
-      .kind) {
-    AuthApiFailureKind.invalidCredentials => const AuthFlowFailure(
-      AuthFlowFailureReason.invalidCredentials,
-    ),
-    AuthApiFailureKind.duplicateLoginIdentity => const AuthFlowFailure(
-      AuthFlowFailureReason.duplicateIdentity,
-    ),
-    AuthApiFailureKind.accountDisabled ||
-    AuthApiFailureKind.accountDeleted => const AuthFlowFailure(
-      AuthFlowFailureReason.accountUnavailable,
-    ),
-    AuthApiFailureKind.rateLimited => AuthFlowFailure(
-      AuthFlowFailureReason.rateLimited,
-      retryAfter: failure.retryAfter,
-    ),
-    AuthApiFailureKind.network => const AuthFlowFailure(
-      AuthFlowFailureReason.network,
-    ),
-    AuthApiFailureKind.invalidRequest => const AuthFlowFailure(
-      AuthFlowFailureReason.invalidInput,
-    ),
-    AuthApiFailureKind.accessSessionExpired ||
-    AuthApiFailureKind.invalidRefresh ||
-    AuthApiFailureKind.sessionRevoked ||
-    AuthApiFailureKind.server => const AuthFlowFailure(
-      AuthFlowFailureReason.server,
-    ),
-  };
+  AuthFlowFailure _flowFailure(AuthApiFailure failure) =>
+      switch (failure.kind) {
+        AuthApiFailureKind.invalidCredentials => const AuthFlowFailure(
+          AuthFlowFailureReason.invalidCredentials,
+        ),
+        AuthApiFailureKind.duplicateLoginIdentity => const AuthFlowFailure(
+          AuthFlowFailureReason.duplicateIdentity,
+        ),
+        AuthApiFailureKind.accountDisabled ||
+        AuthApiFailureKind.accountDeleted => const AuthFlowFailure(
+          AuthFlowFailureReason.accountUnavailable,
+        ),
+        AuthApiFailureKind.rateLimited => AuthFlowFailure(
+          AuthFlowFailureReason.rateLimited,
+          retryAfter: failure.retryAfter,
+        ),
+        AuthApiFailureKind.network => const AuthFlowFailure(
+          AuthFlowFailureReason.network,
+        ),
+        AuthApiFailureKind.invalidRequest => const AuthFlowFailure(
+          AuthFlowFailureReason.invalidInput,
+        ),
+        AuthApiFailureKind.accessSessionExpired ||
+        AuthApiFailureKind.invalidRefresh ||
+        AuthApiFailureKind.sessionRevoked ||
+        AuthApiFailureKind.server => const AuthFlowFailure(
+          AuthFlowFailureReason.server,
+        ),
+      };
 
   static String _normalizeEmail(String raw) => raw.trim().toLowerCase();
 }

@@ -33,15 +33,18 @@ ProviderContainer createAuthContainer({
 
 void main() {
   group('restore po startu (C7 §6)', () {
-    test('bez uloženého materiálu je stav anonymní — validní výsledek', () async {
-      final storage = InMemorySecureSessionStorage();
-      final api = FakeAuthApiClient();
-      final container = createAuthContainer(storage: storage, api: api);
+    test(
+      'bez uloženého materiálu je stav anonymní — validní výsledek',
+      () async {
+        final storage = InMemorySecureSessionStorage();
+        final api = FakeAuthApiClient();
+        final container = createAuthContainer(storage: storage, api: api);
 
-      final state = await container.read(authSessionManagerProvider.future);
+        final state = await container.read(authSessionManagerProvider.future);
 
-      expect(state, isA<AnonymousAuthState>());
-    });
+        expect(state, isA<AnonymousAuthState>());
+      },
+    );
 
     test('uložená session se obnoví bez sítě (offline restart)', () async {
       final storage = InMemorySecureSessionStorage();
@@ -58,10 +61,7 @@ void main() {
       final state = await second.read(authSessionManagerProvider.future);
 
       expect(state, isA<AuthenticatedAuthState>());
-      expect(
-        (state as AuthenticatedAuthState).accountId,
-        equals('account-1'),
-      );
+      expect((state as AuthenticatedAuthState).accountId, equals('account-1'));
     });
 
     test(
@@ -102,31 +102,37 @@ void main() {
       );
     });
 
-    test('špatné heslo je typované generické selhání; stav zůstává anonymní', () async {
-      final storage = InMemorySecureSessionStorage();
-      final api = FakeAuthApiClient();
-      final container = createAuthContainer(storage: storage, api: api);
-      await container.read(authSessionManagerProvider.future);
-      await container
-          .read(authSessionManagerProvider.notifier)
-          .registerAccount(email: 'user@example.com', password: 'password-123');
-      await container.read(authSessionManagerProvider.notifier).signOut();
+    test(
+      'špatné heslo je typované generické selhání; stav zůstává anonymní',
+      () async {
+        final storage = InMemorySecureSessionStorage();
+        final api = FakeAuthApiClient();
+        final container = createAuthContainer(storage: storage, api: api);
+        await container.read(authSessionManagerProvider.future);
+        await container
+            .read(authSessionManagerProvider.notifier)
+            .registerAccount(
+              email: 'user@example.com',
+              password: 'password-123',
+            );
+        await container.read(authSessionManagerProvider.notifier).signOut();
 
-      final result = await container
-          .read(authSessionManagerProvider.notifier)
-          .signIn(email: 'user@example.com', password: 'wrong-password');
+        final result = await container
+            .read(authSessionManagerProvider.notifier)
+            .signIn(email: 'user@example.com', password: 'wrong-password');
 
-      expect(result, isA<AuthFlowFailure>());
-      expect(
-        (result as AuthFlowFailure).reason,
-        AuthFlowFailureReason.invalidCredentials,
-      );
-      expect(storage.stored, isNull);
-      expect(
-        container.read(authSessionManagerProvider).value,
-        isA<AnonymousAuthState>(),
-      );
-    });
+        expect(result, isA<AuthFlowFailure>());
+        expect(
+          (result as AuthFlowFailure).reason,
+          AuthFlowFailureReason.invalidCredentials,
+        );
+        expect(storage.stored, isNull);
+        expect(
+          container.read(authSessionManagerProvider).value,
+          isA<AnonymousAuthState>(),
+        );
+      },
+    );
 
     test('retry registrace po výpadku sítě opakuje stejný idempotency key '
         '(AAC-005) a nevytvoří druhý účet', () async {
@@ -308,26 +314,32 @@ void main() {
       );
     });
 
-    test('nedostupný server zachová lokální stav (offline session §7.3)', () async {
-      final storage = InMemorySecureSessionStorage();
-      final api = FakeAuthApiClient();
-      final container = createAuthContainer(storage: storage, api: api);
-      await container.read(authSessionManagerProvider.future);
-      await container
-          .read(authSessionManagerProvider.notifier)
-          .registerAccount(email: 'user@example.com', password: 'password-123');
+    test(
+      'nedostupný server zachová lokální stav (offline session §7.3)',
+      () async {
+        final storage = InMemorySecureSessionStorage();
+        final api = FakeAuthApiClient();
+        final container = createAuthContainer(storage: storage, api: api);
+        await container.read(authSessionManagerProvider.future);
+        await container
+            .read(authSessionManagerProvider.notifier)
+            .registerAccount(
+              email: 'user@example.com',
+              password: 'password-123',
+            );
 
-      api.offline = true;
-      final verification = await container
-          .read(authSessionManagerProvider.notifier)
-          .verifySession();
+        api.offline = true;
+        final verification = await container
+            .read(authSessionManagerProvider.notifier)
+            .verifySession();
 
-      expect(verification, SessionVerification.offlineUnverified);
-      expect(storage.stored, isNotNull);
-      expect(
-        container.read(authSessionManagerProvider).value,
-        isA<AuthenticatedAuthState>(),
-      );
-    });
+        expect(verification, SessionVerification.offlineUnverified);
+        expect(storage.stored, isNotNull);
+        expect(
+          container.read(authSessionManagerProvider).value,
+          isA<AuthenticatedAuthState>(),
+        );
+      },
+    );
   });
 }
