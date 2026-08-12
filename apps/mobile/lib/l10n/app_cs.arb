@@ -110,5 +110,13 @@
   "accountVerifyActive": "Session je aktivní.",
   "accountVerifyRefreshed": "Session byla obnovena.",
   "accountVerifyRevoked": "Tvoje session byla zneplatněna, proto jsi byl/a odhlášen/a. Lokální data zůstala nedotčená.",
-  "accountVerifyOffline": "Server není dostupný — session se nepodařilo ověřit. Lokální data zůstávají k dispozici."
+  "accountVerifyOffline": "Server není dostupný — session se nepodařilo ověřit. Lokální data zůstávají k dispozici.",
+  "profileSectionTitle": "Sportovní profil",
+  "profileEmpty": "Zatím nemáš profil.",
+  "profileDisplayNameLabel": "Zobrazované jméno",
+  "profileCreateButton": "Vytvořit profil",
+  "profileLabel": "Profil: {displayName}",
+  "profileLoadError": "Profil se nepodařilo načíst.",
+  "profileCreateError": "Profil se nepodařilo vytvořit.",
+  "profileCreateInvalid": "Zadej zobrazované jméno."
 }

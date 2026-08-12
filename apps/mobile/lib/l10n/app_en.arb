@@ -325,5 +325,21 @@
   "accountVerifyRevoked": "Your session was revoked, so you were signed out. Local data is untouched.",
   "@accountVerifyRevoked": {"description": "Session revoked server-side; safe sign-out without data loss (TSS-010)."},
   "accountVerifyOffline": "Server not reachable - session not verified. Local data remains available.",
-  "@accountVerifyOffline": {"description": "Offline verification outcome (security 7.3)."}
+  "@accountVerifyOffline": {"description": "Offline verification outcome (security 7.3)."},
+  "profileSectionTitle": "Athlete profile",
+  "@profileSectionTitle": {"description": "Heading of the profile section (R2-04)."},
+  "profileEmpty": "You don't have a profile yet.",
+  "@profileEmpty": {"description": "Shown when the signed-in account has no profile."},
+  "profileDisplayNameLabel": "Display name",
+  "@profileDisplayNameLabel": {"description": "Profile display name field label."},
+  "profileCreateButton": "Create profile",
+  "@profileCreateButton": {"description": "Create profile action."},
+  "profileLabel": "Profile: {displayName}",
+  "@profileLabel": {"description": "Existing profile line.", "placeholders": {"displayName": {"type": "String"}}},
+  "profileLoadError": "Profile could not be loaded.",
+  "@profileLoadError": {"description": "Safe profile load error without internal details."},
+  "profileCreateError": "Profile could not be created.",
+  "@profileCreateError": {"description": "Safe profile create error without internal details."},
+  "profileCreateInvalid": "Enter a display name.",
+  "@profileCreateInvalid": {"description": "Client-side validation of the profile form."}
 }
