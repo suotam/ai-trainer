@@ -18,6 +18,16 @@ tags:
       R2 autentizační operace podle docs/07-backend/r2-auth-api-contract.md
       (C4). Server je autorita identity a session (AAC-004); citlivé
       credentials nikdy v URL ani v logu (AAC-009).
+  - name: Profile
+    description: >
+      R2 baseline AthleteProfile (C6 §8.1). Ownership vynucuje server
+      (AOC-002/004); cizí a neexistující profil jsou nerozlišitelné 404
+      (AOC-007).
+  - name: Device
+    description: >
+      R2 registrace zařízení (C9): idempotentní upsert client-generated
+      installation ID, kolekce filtrovaná principalem (AOC-008),
+      minimalizovaná metadata (DRC-011).
 paths:
   /api/v1/health/live:
     get:
@@ -297,6 +307,210 @@ paths:
           $ref: "#/components/responses/AuthRateLimited"
         "500":
           $ref: "#/components/responses/AuthInternalError"
+  /api/v1/profiles:
+    post:
+      tags: [Profile]
+      operationId: createProfile
+      summary: Vytvoření R2 baseline AthleteProfile
+      description: >
+        Vytvoří SELF profil vlastněný principalem (AOC-005) s client-generated
+        profileId, který server zachovává (SDM-005). Retry se stejným
+        profileId je idempotentní (200); druhý SELF profil na účet je
+        odmítnut (PROFILE_ALREADY_EXISTS).
+      security:
+        - accessSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProfileRequest"
+      responses:
+        "201":
+          description: Profil vytvořen.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "200":
+          description: Idempotentní retry — profil se stejným ID už patří principalu.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "409":
+          description: "Účet už má profil (code: PROFILE_ALREADY_EXISTS)."
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/profiles/current:
+    get:
+      tags: [Profile]
+      operationId: getCurrentProfile
+      summary: SELF profil principala
+      security:
+        - accessSession: []
+      responses:
+        "200":
+          description: SELF profil principala.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "404":
+          $ref: "#/components/responses/OwnedResourceNotFound"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/profiles/{profileId}:
+    get:
+      tags: [Profile]
+      operationId: getProfileById
+      summary: Profil podle ID s ownership vynucením
+      description: >
+        Cizí a neexistující profil jsou navenek nerozlišitelné — obojí 404
+        (AOC-007, anti-IDOR).
+      security:
+        - accessSession: []
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Vlastní profil.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "404":
+          $ref: "#/components/responses/OwnedResourceNotFound"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/devices/{installationId}:
+    put:
+      tags: [Device]
+      operationId: registerDevice
+      summary: Idempotentní registrace instalace zařízení
+      description: >
+        Upsert podle přirozeného klíče (principal, installationId) — DRC-006;
+        opakovaná registrace aktualizuje metadata a nevytvoří duplikát.
+        Registrace aditivně naváže aktuální auth session na instalaci
+        (C9 §6). Installation ID je client-generated a server jej zachovává
+        (DRC-001).
+      security:
+        - accessSession: []
+      parameters:
+        - name: installationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceRequest"
+      responses:
+        "201":
+          description: Instalace registrována poprvé.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceResponse"
+        "200":
+          description: Idempotentní re-registrace — metadata aktualizována.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "409":
+          description: "Instalace je revokovaná (code: DEVICE_REVOKED)."
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/devices:
+    get:
+      tags: [Device]
+      operationId: listDevices
+      summary: Zařízení principala
+      description: Kolekce je implicitně filtrovaná principalem (AOC-008).
+      security:
+        - accessSession: []
+      responses:
+        "200":
+          description: Registrovaná zařízení principala.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceListResponse"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
 components:
   securitySchemes:
     accessSession:
@@ -357,6 +571,17 @@ components:
             $ref: "#/components/schemas/ErrorResponse"
     AuthInternalError:
       description: Neočekávaná interní chyba.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    OwnedResourceNotFound:
+      description: >
+        Zdroj neexistuje nebo nepatří principalu — navenek nerozlišitelné
+        (code: RESOURCE_NOT_FOUND, AOC-007).
       headers:
         X-Request-Id:
           $ref: "#/components/headers/XRequestId"
@@ -522,6 +747,124 @@ components:
         accessExpiresAt:
           type: string
           format: date-time
+    CreateProfileRequest:
+      type: object
+      required: [profileId, displayName]
+      additionalProperties: false
+      properties:
+        profileId:
+          type: string
+          format: uuid
+          description: Client-generated stabilní ID profilu (SDM-005).
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        primarySport:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{0,39}$"
+          description: Stabilní kód primárního sportu.
+        experienceLevel:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{0,39}$"
+          description: Stabilní kód úrovně zkušenosti.
+        units:
+          type: string
+          enum: [METRIC, IMPERIAL]
+        timezone:
+          type: string
+          maxLength: 60
+        locale:
+          type: string
+          maxLength: 20
+    ProfileResponse:
+      type: object
+      required: [profileId, accountId, profileType, status, displayName, createdAt, updatedAt]
+      additionalProperties: false
+      properties:
+        profileId:
+          type: string
+        accountId:
+          type: string
+        profileType:
+          type: string
+          enum: [SELF]
+        status:
+          type: string
+          enum: [ACTIVE]
+        displayName:
+          type: string
+        primarySport:
+          type: string
+          nullable: true
+        experienceLevel:
+          type: string
+          nullable: true
+        units:
+          type: string
+          nullable: true
+        timezone:
+          type: string
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RegisterDeviceRequest:
+      type: object
+      required: [platform, appVersion, localSchemaVersion]
+      additionalProperties: false
+      properties:
+        platform:
+          type: string
+          enum: [IOS, ANDROID]
+          description: R2 baseline platformy (C9 §8); další append-only.
+        appVersion:
+          type: string
+          minLength: 1
+          maxLength: 60
+        localSchemaVersion:
+          type: string
+          minLength: 1
+          maxLength: 60
+          description: Verze lokálního datového schématu pro sync kompatibilitu (C10).
+    DeviceResponse:
+      type: object
+      required: [installationId, platform, appVersion, localSchemaVersion, status, createdAt, lastSeenAt]
+      additionalProperties: false
+      properties:
+        installationId:
+          type: string
+        platform:
+          type: string
+          enum: [IOS, ANDROID]
+        appVersion:
+          type: string
+        localSchemaVersion:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, REVOKED]
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+    DeviceListResponse:
+      type: object
+      required: [devices]
+      additionalProperties: false
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeviceResponse"
     ErrorResponse:
       type: object
       required: [code, message, requestId, timestamp]
