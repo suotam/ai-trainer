@@ -1,6 +1,6 @@
 # AI Trainer – R2 Audit-Event Contract (C14)
 
-**Verze:** 0.1
+**Verze:** 0.2 (sync část §7 dokončena pro R2-05)
 **Stav:** Draft
 **Soubor:** `docs/11-security/r2-audit-event-contract.md`
 **Vlastník:** Domain (domain-events) + Security
@@ -102,17 +102,23 @@ Každá událost má outcome a bezpečný target; **žádné heslo/token/PII v p
 
 ---
 
-# 7. Sync audit events (R2-05, forward)
+# 7. Sync audit events (R2-05)
 
-Auditované sync/ownership události (blokující až `R2-05`, produkované sync protokolem C10):
+Auditované sync/ownership události (blokující pro `R2-05`), se stabilními názvy dle `domain-events §12.2` (PascalCase, minulý čas):
 
-- **sync operation applied** (potvrzená operace),
-- **sync operation rejected** (odmítnutá — ne „synchronizováno"),
-- **sync conflict detected** (explicitní konfliktní stav),
-- **ownership violation / authorization denied** (default deny; enforcement C8),
-- **idempotent replay** (`ALREADY_APPLIED`; detail C11).
+| Událost | Kdy vzniká | Outcome |
+|---|---|---|
+| **`SyncOperationApplied`** | push operace commitnuta (C10 §7 `SUCCESS`) | SUCCESS |
+| **`SyncOperationRejected`** | odmítnutá operace — validace/dependency (ne „synchronizováno", C10 §7) | REJECTED |
+| **`SyncConflictDetected`** | `VERSION_CONFLICT` (C10 §10) — explicitní konfliktní stav | CONFLICT |
+| **`AuthorizationDenied`** | ownership violation / default deny (C8 §10; per-item `PERMISSION_DENIED` i mimo sync) | REJECTED |
+| **`IdempotentReplayReturned`** | `ALREADY_APPLIED` (C11 §6) — replay, ne druhý „applied" | SUCCESS |
 
-C14 tyto události **vymezuje**; jejich přesné spuštění vlastní C10/C11/C12/C8. Auth část (§6) je pro `R2-02` kompletní; sync část je forward-scoped a doplní se před `R2-05`.
+- `AuthorizationDenied` je zavedena už implementací R2-04 (profil/device ownership) se shodným tvarem — sync ji přebírá beze změny názvu (policy decision `OWNERSHIP_MISMATCH`/`DEFAULT_DENY`).
+- Target je technická reference (`entityType:entityId`, batch/installation ID); **žádný doménový payload** (§8).
+- Přesné spuštění vlastní C10/C11/C8; C12 (R2-06) doplní resolution události vlastním rozšířením.
+
+Auth část (§6) je pro `R2-02` kompletní; sync část (tato tabulka) je pro `R2-05` kompletní.
 
 ---
 
@@ -187,11 +193,9 @@ R2-02 (auth) a R2-05 (sync) musí doložit: generování definovaných událost�
 
 # 14. Ready condition
 
-C14 je **Done** (v rozsahu potřebném pro odblokování), právě když definuje: tvar audit záznamu (§5), **kompletní seznam auth událostí pro R2-02** (§6), forward-scoped sync události (§7), pravidla bez citlivého payloadu (§8), ochranu auditu (§9), invarianty `AEC-001…AEC-015` (§10), hranice (§11), testing/evidence (§12–§13); je zapsán v doc mapě; a neobsahuje produkční kód. Tyto podmínky jsou splněny → **auth část C14 je Done**; sync část zůstává forward-scoped (doplní se před R2-05).
+C14 je **Done** (v rozsahu potřebném pro odblokování), právě když definuje: tvar audit záznamu (§5), **kompletní seznam auth událostí pro R2-02** (§6), **kompletní seznam sync událostí pro R2-05** (§7), pravidla bez citlivého payloadu (§8), ochranu auditu (§9), invarianty `AEC-001…AEC-015` (§10), hranice (§11), testing/evidence (§12–§13); je zapsán v doc mapě; a neobsahuje produkční kód. Tyto podmínky jsou splněny → **auth část i sync část C14 jsou Done** (auth část odblokovala R2-02; sync část odblokovává R2-05 spolu s C10/C11/C6 §8.4).
 
-**Dopad na R2-02:** blokující kontrakty `R2-02` jsou C3, C4, C5, C6 a auth část C14 — **všechny hotové → `R2-02` je `READY` (neimplementováno).** `R2-01` zůstává `READY`. `R2-03`…`R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty).
-
-**Další kanonický krok:** buď **implementace R2-01/R2-02** (samostatné rozhodnutí — jde o produkční kód), nebo příprava kontraktu **C7 – Token/session storage** (`docs/11-security/r2-token-session-storage-contract.md`) pro R2-03.
+**Poznámka k historii:** auth část byla dokončena ve verzi 0.1 (odblokovala `R2-02`); verze 0.2 doplňuje závaznou sync tabulku §7 pro `R2-05`. Resolution události konfliktů doplní C12 před `R2-06` vlastním append-only rozšířením.
 
 ---
 
