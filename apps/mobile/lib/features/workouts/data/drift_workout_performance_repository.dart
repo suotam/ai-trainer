@@ -300,6 +300,13 @@ class DriftWorkoutPerformanceRepository
         rowVersion: Value(session.rowVersion + 1),
       ),
     );
+    // R2-05: zapsaný výkon mění stav session — dříve synchronizovaná
+    // session je znovu DIRTY (state-based push, C10 §5.3).
+    await _db.customStatement(
+      "UPDATE local_workout_sessions SET sync_state = 'DIRTY' "
+      "WHERE id = ? AND sync_state = 'SYNCED'",
+      [sessionId],
+    );
   }
 
   bool _isActive(String status) => status == 'ACTIVE' || status == 'PAUSED';

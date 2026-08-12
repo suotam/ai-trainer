@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/workout_tables.dart';
 import '../domain/start_session_result.dart';
 import '../domain/workout_session.dart';
 import '../domain/workout_session_repository.dart';
@@ -75,6 +76,24 @@ class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
           updatedAt: Value(nowMillis),
           rowVersion: Value(instance.rowVersion + 1),
         ),
+      );
+
+      // R2-05: start je uživatelská akce — session i instance vlastní
+      // aktuální lokální vlastník (po přihlášení účet, C2 §4) a jsou
+      // připraveny k push (state-based, C10 §5.3). Anonymní hodnota je
+      // no-op vůči defaultům.
+      await _db.customStatement(
+        'UPDATE local_workout_sessions SET owner_id = '
+        "COALESCE((SELECT value FROM local_app_state WHERE key = '$localOwnerStateKey'), '$localAnonymousOwnerId') "
+        'WHERE id = ?',
+        [newSessionId],
+      );
+      await _db.customStatement(
+        'UPDATE local_workout_instances SET owner_id = '
+        "COALESCE((SELECT value FROM local_app_state WHERE key = '$localOwnerStateKey'), '$localAnonymousOwnerId'), "
+        "sync_state = CASE WHEN sync_state = 'SYNCED' THEN 'DIRTY' ELSE sync_state END "
+        'WHERE id = ?',
+        [workoutInstanceId],
       );
 
       await _db

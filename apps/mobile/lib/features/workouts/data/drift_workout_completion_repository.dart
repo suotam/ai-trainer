@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/workout_tables.dart';
 import '../../../core/ids/id_generator.dart';
 import '../domain/complete_workout_result.dart';
 import '../domain/workout_completion_repository.dart';
@@ -134,6 +135,26 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
             (t) => t.key.equals(_activeSessionKey) & t.value.equals(sessionId),
           ))
           .go();
+
+      // R2-05: summary vlastní aktuální lokální vlastník (C2 §4) a dokončení
+      // mění stav session/instance — dříve synchronizované jsou znovu DIRTY
+      // (state-based push, C10 §5.3). Anonymní hodnota je no-op vůči defaultům.
+      await _db.customStatement(
+        'UPDATE local_activity_summaries SET owner_id = '
+        "COALESCE((SELECT value FROM local_app_state WHERE key = '$localOwnerStateKey'), '$localAnonymousOwnerId') "
+        'WHERE id = ?',
+        [summaryId],
+      );
+      await _db.customStatement(
+        "UPDATE local_workout_sessions SET sync_state = 'DIRTY' "
+        "WHERE id = ? AND sync_state = 'SYNCED'",
+        [sessionId],
+      );
+      await _db.customStatement(
+        "UPDATE local_workout_instances SET sync_state = 'DIRTY' "
+        "WHERE id = ? AND sync_state = 'SYNCED'",
+        [instance.id],
+      );
 
       return WorkoutCompleted(summaryId);
     });

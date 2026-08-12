@@ -341,5 +341,17 @@
   "profileCreateError": "Profile could not be created.",
   "@profileCreateError": {"description": "Safe profile create error without internal details."},
   "profileCreateInvalid": "Enter a display name.",
-  "@profileCreateInvalid": {"description": "Client-side validation of the profile form."}
+  "@profileCreateInvalid": {"description": "Client-side validation of the profile form."},
+  "accountSyncButton": "Sync now",
+  "@accountSyncButton": {"description": "Explicit push sync action (R2-05); no background loop."},
+  "syncResultSummary": "Synced {synced} - conflicts {conflicts} - rejected {rejected} - pending {pending}",
+  "@syncResultSummary": {
+    "description": "Honest per-run sync counts; rejected items are never presented as synced (SPC-006).",
+    "placeholders": {
+      "conflicts": {"type": "int"},
+      "pending": {"type": "int"},
+      "rejected": {"type": "int"},
+      "synced": {"type": "int"}
+    }
+  }
 }

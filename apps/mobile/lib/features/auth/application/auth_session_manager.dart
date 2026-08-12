@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../sync/application/local_sync_providers.dart';
 import '../domain/auth_api_client.dart';
 import '../domain/auth_results.dart';
 import '../domain/auth_session_state.dart';
@@ -127,12 +128,21 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
     }
     await _clearQuietly();
     state = const AsyncData(AnonymousAuthState());
+    await _bindAnonymousQuietly();
     if (accessToken != null) {
       try {
         await _api.logout(accessToken);
       } on AuthApiFailure {
         // Best-effort — serverová revokace se dokoná při konektivitě (C13).
       }
+    }
+  }
+
+  Future<void> _bindAnonymousQuietly() async {
+    try {
+      await ref.read(localOwnerBindingProvider).bindAnonymous();
+    } catch (_) {
+      // Fail-safe: vazba vlastníka nesmí shodit odhlášení.
     }
   }
 
@@ -210,6 +220,7 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
   Future<SessionVerification> _signOutRevoked() async {
     await _clearQuietly();
     state = const AsyncData(AnonymousAuthState());
+    await _bindAnonymousQuietly();
     return SessionVerification.signedOutRevoked;
   }
 
@@ -224,6 +235,14 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
     );
     await _storage.write(stored);
     state = AsyncData(_stateOf(stored));
+    // Data vytvořená po přihlášení vlastní účet (R2-05, C2 §4 ↔ C3 §7);
+    // vlastnictví existujících dat se nemění (attach vlastní C15).
+    try {
+      await ref.read(localOwnerBindingProvider).bindAccount(granted.accountId);
+    } catch (_) {
+      // Selhání vazby nesmí shodit přihlášení; nová data zůstanou anonymní
+      // a připojí je C15/R2-07.
+    }
   }
 
   Future<void> _clearQuietly() async {
