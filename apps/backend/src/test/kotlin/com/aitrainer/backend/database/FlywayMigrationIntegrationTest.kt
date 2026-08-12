@@ -39,11 +39,11 @@ class FlywayMigrationIntegrationTest {
     }
 
     @Test
-    fun `schema history obsahuje uspesne migrace V1 a V2`() {
+    fun `schema history obsahuje uspesne migrace V1 az V3`() {
         val applied = flyway.info().applied().map { it.version.version }
-        assertEquals(listOf("1", "2"), applied)
+        assertEquals(listOf("1", "2", "3"), applied)
         val current = assertNotNull(flyway.info().current())
-        assertEquals("2", current.version.version)
+        assertEquals("3", current.version.version)
         assertTrue(current.state.isApplied)
         assertTrue(flyway.info().pending().isEmpty())
     }

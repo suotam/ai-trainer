@@ -41,7 +41,7 @@ class OpenApiContractValidationTest {
     }
 
     @Test
-    fun `kontrakt obsahuje health a R2 auth endpointy`() {
+    fun `kontrakt obsahuje health, R2 auth, profile a device endpointy`() {
         assertEquals(
             setOf(
                 "/api/v1/health/live",
@@ -51,9 +51,60 @@ class OpenApiContractValidationTest {
                 "/api/v1/auth/sessions/refresh",
                 "/api/v1/auth/sessions/current",
                 "/api/v1/auth/session",
+                "/api/v1/profiles",
+                "/api/v1/profiles/current",
+                "/api/v1/profiles/{profileId}",
+                "/api/v1/devices",
+                "/api/v1/devices/{installationId}",
             ),
             openApi.paths.keys,
         )
+    }
+
+    @Test
+    fun `profile a device operace deklaruji kanonicke operationId a status codes`() {
+        val createProfile = assertNotNull(openApi.paths["/api/v1/profiles"]?.post)
+        assertEquals("createProfile", createProfile.operationId)
+        assertEquals(setOf("200", "201", "400", "401", "409", "500"), createProfile.responses.keys)
+
+        val currentProfile = assertNotNull(openApi.paths["/api/v1/profiles/current"]?.get)
+        assertEquals("getCurrentProfile", currentProfile.operationId)
+        assertEquals(setOf("200", "401", "404", "500"), currentProfile.responses.keys)
+
+        val profileById = assertNotNull(openApi.paths["/api/v1/profiles/{profileId}"]?.get)
+        assertEquals("getProfileById", profileById.operationId)
+        assertEquals(setOf("200", "401", "404", "500"), profileById.responses.keys)
+
+        val registerDevice = assertNotNull(openApi.paths["/api/v1/devices/{installationId}"]?.put)
+        assertEquals("registerDevice", registerDevice.operationId)
+        assertEquals(setOf("200", "201", "400", "401", "409", "500"), registerDevice.responses.keys)
+
+        val listDevices = assertNotNull(openApi.paths["/api/v1/devices"]?.get)
+        assertEquals("listDevices", listDevices.operationId)
+        assertEquals(setOf("200", "401", "500"), listDevices.responses.keys)
+    }
+
+    @Test
+    fun `profile a device schemata deklaruji povinna pole`() {
+        val schemas = assertNotNull(openApi.components.schemas)
+
+        assertEquals(
+            setOf("profileId", "displayName"),
+            assertNotNull(schemas["CreateProfileRequest"]).required.toSet(),
+        )
+        assertEquals(
+            setOf("profileId", "accountId", "profileType", "status", "displayName", "createdAt", "updatedAt"),
+            assertNotNull(schemas["ProfileResponse"]).required.toSet(),
+        )
+        assertEquals(
+            setOf("platform", "appVersion", "localSchemaVersion"),
+            assertNotNull(schemas["RegisterDeviceRequest"]).required.toSet(),
+        )
+        assertEquals(
+            setOf("installationId", "platform", "appVersion", "localSchemaVersion", "status", "createdAt", "lastSeenAt"),
+            assertNotNull(schemas["DeviceResponse"]).required.toSet(),
+        )
+        assertEquals(setOf("devices"), assertNotNull(schemas["DeviceListResponse"]).required.toSet())
     }
 
     @Test
