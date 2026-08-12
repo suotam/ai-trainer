@@ -56,6 +56,9 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.34.0
   build_runner: ^2.15.1
+  # Přímý raw přístup k SQLite v migračním testu (postavení reálného v1 stavu
+  # mimo Drift migrace). Verze sladěná s tranzitivní závislostí driftu.
+  sqlite3: ^3.5.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
