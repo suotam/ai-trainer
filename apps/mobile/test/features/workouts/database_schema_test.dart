@@ -1,10 +1,10 @@
-import 'package:ai_trainer_mobile/core/database/app_database.dart';
+﻿import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Integration testy schématu nad skutečnou SQLite (test-strategy §7.1,
-/// evidence gate R1-01): databáze od prázdného stavu, aktivní foreign keys
+/// Integration testy schĂ©matu nad skuteÄŤnou SQLite (test-strategy Â§7.1,
+/// evidence gate R1-01): databĂˇze od prĂˇzdnĂ©ho stavu, aktivnĂ­ foreign keys
 /// a unique constraints.
 void main() {
   late AppDatabase db;
@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 2', () async {
-    // R2-01 zvýšil schema na verzi 2 (owner/sync metadata + outbox).
+  test('databaze vznikne od prazdneho stavu se schema verzi 3', () async {
+    // R2-01 zvĂ˝Ĺˇil schema na verzi 2 (owner/sync metadata + outbox).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 2);
+    expect(version.data.values.first, 3);
 
     final tables = await db
         .customSelect(
@@ -95,6 +95,7 @@ void main() {
       'local_set_performances',
       'local_set_plans',
       'local_step_performances',
+      'local_synced_versions',
       'local_workout_feedback',
       'local_workout_instances',
       'local_workout_sections',
@@ -215,7 +216,7 @@ void main() {
       throwsA(isA<SqliteException>()),
     );
 
-    // Dokončená session naopak další aktivní nesmí blokovat.
+    // DokonÄŤenĂˇ session naopak dalĹˇĂ­ aktivnĂ­ nesmĂ­ blokovat.
     await (db.update(
       db.localWorkoutSessions,
     )..where((t) => t.id.equals('ses1'))).write(

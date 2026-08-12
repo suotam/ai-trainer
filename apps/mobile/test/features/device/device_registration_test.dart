@@ -1,4 +1,4 @@
-import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+﻿import 'package:ai_trainer_mobile/core/database/database_provider.dart';
 import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
 import 'package:ai_trainer_mobile/core/time/clock.dart';
 import 'package:ai_trainer_mobile/features/auth/application/auth_providers.dart';
@@ -34,7 +34,7 @@ void main() {
 
       final created = await first.ensureInstallationId();
       final reread = await first.ensureInstallationId();
-      // „Restart“: nová instance nad stejnou lokální DB.
+      // â€žRestartâ€ś: novĂˇ instance nad stejnou lokĂˇlnĂ­ DB.
       final second = DriftInstallationIdentityRepository(
         database,
         _FixedIdGenerator(['installation-b']),
@@ -60,7 +60,7 @@ void main() {
     });
   });
 
-  group('registrace zarizeni po prihlaseni (C9 §5)', () {
+  group('registrace zarizeni po prihlaseni (C9 Â§5)', () {
     test(
       'prihlaseny stav registruje zarizeni s minimalizovanymi metadaty',
       () async {
@@ -90,7 +90,7 @@ void main() {
         final registration = deviceApi.registrations.single;
         expect(registration.installationId, equals('installation-42'));
         expect(registration.platform, equals('ANDROID'));
-        expect(registration.localSchemaVersion, equals('2'));
+        expect(registration.localSchemaVersion, equals('3'));
         expect(registration.accessToken, equals(storage.stored!.accessToken));
       },
     );
@@ -174,7 +174,7 @@ void main() {
 
       final metadata = container.read(deviceMetadataProvider);
 
-      expect(metadata.localSchemaVersion, equals('2'));
+      expect(metadata.localSchemaVersion, equals('3'));
       expect(metadata.appVersion, isNotEmpty);
     });
   });

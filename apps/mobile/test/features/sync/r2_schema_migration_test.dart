@@ -1,18 +1,18 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
-/// R2-01 migrace `v1 → v2` od **reálného v1 stavu** (C1 `MSM-002/005`,
-/// evidence gate R2-01). Postaví skutečnou v1 databázi přesným DDL ze
-/// `sqlite_master` (viz `docs/12-data/r1-physical-data-model.md`), naplní ji
-/// R1 daty vč. aktivní session a potvrzeného výkonu, pak ji otevře přes
-/// `AppDatabase` (schemaVersion 2 → onUpgrade) a ověří, že se nic neztratilo,
-/// nová owner/sync metadata jsou backfillnutá a outbox existuje.
+/// R2-01 migrace `v1 â†’ v2` od **reĂˇlnĂ©ho v1 stavu** (C1 `MSM-002/005`,
+/// evidence gate R2-01). PostavĂ­ skuteÄŤnou v1 databĂˇzi pĹ™esnĂ˝m DDL ze
+/// `sqlite_master` (viz `docs/12-data/r1-physical-data-model.md`), naplnĂ­ ji
+/// R1 daty vÄŤ. aktivnĂ­ session a potvrzenĂ©ho vĂ˝konu, pak ji otevĹ™e pĹ™es
+/// `AppDatabase` (schemaVersion 2 â†’ onUpgrade) a ovÄ›Ĺ™Ă­, Ĺľe se nic neztratilo,
+/// novĂˇ owner/sync metadata jsou backfillnutĂˇ a outbox existuje.
 void main() {
-  // Přesné v1 CREATE statementy (schema version 1).
+  // PĹ™esnĂ© v1 CREATE statementy (schema version 1).
   const v1Tables = [
     'CREATE TABLE "local_workout_instances" ("id" TEXT NOT NULL, "title" TEXT NOT NULL, "description" TEXT NULL, "purpose" TEXT NULL, "workout_type" TEXT NOT NULL, "scheduled_local_date" TEXT NOT NULL, "scheduled_start_at" INTEGER NULL, "time_zone_id" TEXT NULL, "planned_duration_seconds" INTEGER NULL, "status" TEXT NOT NULL, "source_type" TEXT NOT NULL, "source_reference" TEXT NULL, "revision_number" INTEGER NOT NULL, "started_session_id" TEXT NULL, "completed_at" INTEGER NULL, "created_at" INTEGER NOT NULL, "updated_at" INTEGER NOT NULL, "row_version" INTEGER NOT NULL, PRIMARY KEY ("id"), CHECK (revision_number >= 1), CHECK (row_version >= 1))',
     'CREATE TABLE "local_workout_sections" ("id" TEXT NOT NULL, "workout_instance_id" TEXT NOT NULL REFERENCES local_workout_instances (id) ON DELETE CASCADE, "position" INTEGER NOT NULL, "title" TEXT NOT NULL, "section_type" TEXT NOT NULL, "purpose" TEXT NULL, "priority" TEXT NOT NULL, "is_optional" INTEGER NOT NULL CHECK ("is_optional" IN (0, 1)), "planned_duration_seconds" INTEGER NULL, "created_at" INTEGER NOT NULL, "updated_at" INTEGER NOT NULL, PRIMARY KEY ("id"), UNIQUE ("workout_instance_id", "position"))',
@@ -27,8 +27,8 @@ void main() {
   ];
 
   void seedV1(String path) {
-    // Reálný v1 stav přes raw sqlite3 (mimo Drift migrace): v1 DDL,
-    // user_version=1 a R1 data v pořadí závislostí.
+    // ReĂˇlnĂ˝ v1 stav pĹ™es raw sqlite3 (mimo Drift migrace): v1 DDL,
+    // user_version=1 a R1 data v poĹ™adĂ­ zĂˇvislostĂ­.
     final raw = sqlite.sqlite3.open(path);
     for (final ddl in v1Tables) {
       raw.execute(ddl);
@@ -50,7 +50,7 @@ void main() {
       ..execute(
         "INSERT INTO local_set_plans (id,workout_step_id,position,planned_repetitions) VALUES ('sp1','st1',0,8)",
       )
-      // Aktivní session + potvrzený výkon.
+      // AktivnĂ­ session + potvrzenĂ˝ vĂ˝kon.
       ..execute(
         "INSERT INTO local_workout_sessions (id,workout_instance_id,instance_revision_number,status,started_at,elapsed_active_seconds,created_at,updated_at,row_version) "
         "VALUES ('ses1','wi1',1,'ACTIVE',1000,0,1,1,1)",
@@ -67,7 +67,7 @@ void main() {
         "INSERT INTO local_workout_feedback (id,workout_session_id,pain_reported,created_at,updated_at) "
         "VALUES ('fb1','ses1',0,1,1)",
       )
-      // Dokončená session + activity summary (pro migraci summaries tabulky).
+      // DokonÄŤenĂˇ session + activity summary (pro migraci summaries tabulky).
       ..execute(
         "INSERT INTO local_workout_sessions (id,workout_instance_id,instance_revision_number,status,started_at,completed_at,elapsed_active_seconds,created_at,updated_at,row_version) "
         "VALUES ('ses0','wi1',1,'COMPLETED',10,20,0,1,1,1)",
@@ -83,28 +83,28 @@ void main() {
   }
 
   test(
-    'v1 → v2 zachová všechna R1 data, aktivní session a backfillne metadata',
+    'v1 â†’ v2 zachovĂˇ vĹˇechna R1 data, aktivnĂ­ session a backfillne metadata',
     () async {
       final dir = await Directory.systemTemp.createTemp('r2_01_migration');
       final path = '${dir.path}/mig.sqlite';
       addTearDown(() => dir.delete(recursive: true));
 
-      // 1. Postav reálný v1 stav.
+      // 1. Postav reĂˇlnĂ˝ v1 stav.
       seedV1(path);
 
-      // 2. Otevři přes AppDatabase v2 → spustí onUpgrade(1→2).
+      // 2. OtevĹ™i pĹ™es AppDatabase v2 â†’ spustĂ­ onUpgrade(1â†’2).
       final db = AppDatabase(NativeDatabase(File(path)));
       addTearDown(db.close);
-      await db.customSelect('SELECT 1').get(); // vynutí otevření + migraci
+      await db.customSelect('SELECT 1').get(); // vynutĂ­ otevĹ™enĂ­ + migraci
 
       // Schema version je 2.
       final ver = await db
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 2);
+      expect(ver, 3);
 
-      // 3. Zachování dat — počty beze změny.
+      // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>
           (await db
                       .customSelect('SELECT COUNT(*) AS c FROM $table')
@@ -118,7 +118,7 @@ void main() {
       expect(await count('local_workout_feedback'), 1);
       expect(await count('local_activity_summaries'), 1);
 
-      // Aktivní session je nedotčená.
+      // AktivnĂ­ session je nedotÄŤenĂˇ.
       final active = await db
           .customSelect(
             "SELECT id, status, started_at FROM local_workout_sessions WHERE status='ACTIVE'",
@@ -127,7 +127,7 @@ void main() {
       expect(active.data['id'], 'ses1');
       expect(active.data['started_at'], 1000);
 
-      // Potvrzený výkon zachován.
+      // PotvrzenĂ˝ vĂ˝kon zachovĂˇn.
       final perf = await db
           .customSelect(
             "SELECT actual_repetitions FROM local_set_performances WHERE id='setp1'",
@@ -135,7 +135,7 @@ void main() {
           .getSingle();
       expect(perf.data['actual_repetitions'], 9);
 
-      // 4. Nová owner/sync metadata backfillnutá na default.
+      // 4. NovĂˇ owner/sync metadata backfillnutĂˇ na default.
       for (final t in [
         'local_workout_instances',
         'local_workout_sessions',
@@ -151,7 +151,7 @@ void main() {
         }
       }
 
-      // 5. Outbox tabulka existuje a je prázdná; ID vlastníka je zaznamenáno.
+      // 5. Outbox tabulka existuje a je prĂˇzdnĂˇ; ID vlastnĂ­ka je zaznamenĂˇno.
       expect(await count('local_outbox'), 0);
       final owner = await db
           .customSelect(
@@ -159,7 +159,7 @@ void main() {
           )
           .getSingle();
       expect(owner.data['value'], 'local-anonymous');
-      // Seed version z v1 zůstal.
+      // Seed version z v1 zĹŻstal.
       final seed = await db
           .customSelect(
             "SELECT value FROM local_app_state WHERE key='seed_version'",
@@ -167,7 +167,7 @@ void main() {
           .getSingle();
       expect(seed.data['value'], '1');
 
-      // 6. FK integrita čistá po migraci (MSM-008).
+      // 6. FK integrita ÄŤistĂˇ po migraci (MSM-008).
       final violations = await db
           .customSelect('PRAGMA foreign_key_check')
           .get();

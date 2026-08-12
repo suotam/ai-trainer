@@ -2,6 +2,7 @@ import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
 import 'package:ai_trainer_mobile/features/auth/application/auth_providers.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/auth_results.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/auth_session_state.dart';
+import 'package:ai_trainer_mobile/features/sync/application/local_sync_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,6 +18,7 @@ class _SequentialIdGenerator implements IdGenerator {
 ProviderContainer createAuthContainer({
   required InMemorySecureSessionStorage storage,
   required FakeAuthApiClient api,
+  FakeLocalOwnerBinding? ownerBinding,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -24,6 +26,9 @@ ProviderContainer createAuthContainer({
       authApiClientProvider.overrideWithValue(api),
       authIdempotencyKeyGeneratorProvider.overrideWithValue(
         _SequentialIdGenerator(),
+      ),
+      localOwnerBindingProvider.overrideWithValue(
+        ownerBinding ?? FakeLocalOwnerBinding(),
       ),
     ],
   );
@@ -231,6 +236,30 @@ void main() {
         isA<AnonymousAuthState>(),
       );
       expect(api.sessionRevoked(sessionId), isTrue);
+    });
+
+    test('přihlášení váže lokálního vlastníka na účet a odhlášení zpět na '
+        'anonymní (R2-05, C2 §4)', () async {
+      final storage = InMemorySecureSessionStorage();
+      final api = FakeAuthApiClient();
+      final ownerBinding = FakeLocalOwnerBinding();
+      final container = createAuthContainer(
+        storage: storage,
+        api: api,
+        ownerBinding: ownerBinding,
+      );
+      await container.read(authSessionManagerProvider.future);
+
+      await container
+          .read(authSessionManagerProvider.notifier)
+          .registerAccount(
+            email: 'owner@example.com',
+            password: 'password-123',
+          );
+      expect(ownerBinding.currentOwner, equals('account-1'));
+
+      await container.read(authSessionManagerProvider.notifier).signOut();
+      expect(ownerBinding.currentOwner, equals('local-anonymous'));
     });
 
     test('logout zneplatní lokální session i offline — bez závislosti na '

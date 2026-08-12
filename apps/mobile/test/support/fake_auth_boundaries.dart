@@ -1,6 +1,22 @@
 import 'package:ai_trainer_mobile/features/auth/domain/auth_api_client.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/secure_session_storage.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
+import 'package:ai_trainer_mobile/features/sync/domain/local_owner_binding.dart';
+
+/// In-memory vazba lokálního vlastníka (R2-05) pro testy bez DB.
+class FakeLocalOwnerBinding implements LocalOwnerBinding {
+  String currentOwner = 'local-anonymous';
+
+  @override
+  Future<void> bindAccount(String accountId) async {
+    currentOwner = accountId;
+  }
+
+  @override
+  Future<void> bindAnonymous() async {
+    currentOwner = 'local-anonymous';
+  }
+}
 
 /// In-memory secure storage fake (TSS-005 — testy neběží proti reálnému
 /// Keychain/Keystore). Instance přežívá mezi ProviderContainery, takže
