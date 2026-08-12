@@ -13,6 +13,11 @@ servers:
 tags:
   - name: Health
     description: Technické liveness a readiness endpointy (bez autentizace).
+  - name: Auth
+    description: >
+      R2 autentizační operace podle docs/07-backend/r2-auth-api-contract.md
+      (C4). Server je autorita identity a session (AAC-004); citlivé
+      credentials nikdy v URL ani v logu (AAC-009).
 paths:
   /api/v1/health/live:
     get:
@@ -86,7 +91,279 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/auth/registrations:
+    post:
+      tags: [Auth]
+      operationId: registerAccount
+      summary: Registrace účtu (anonymous → account upgrade boundary)
+      description: >
+        Vytvoří účet z first-party credential (ADR-011 baseline) a vydá
+        aplikační access/refresh session. Vyžaduje Idempotency-Key
+        (AAC-005) — opakování se stejným klíčem a stejným payloadem
+        nevytvoří druhý účet a vrátí účet existující. Operace potvrzuje
+        pouze identity binding; přenos lokálních dat vlastní C15 (AAC-015).
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+      responses:
+        "201":
+          description: Účet vytvořen (nebo idempotentně potvrzen) a session vydána.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "409":
+          description: "Kolize přihlašovací identity (code: DUPLICATE_LOGIN_IDENTITY)."
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/auth/sessions:
+    post:
+      tags: [Auth]
+      operationId: loginWithPassword
+      summary: Přihlášení a vydání access/refresh session
+      description: >
+        Ověří first-party credential a vydá novou aplikační session.
+        Chyba přihlášení je generická INVALID_CREDENTIALS bez account
+        enumeration (AAC-008).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Session vydána.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          description: "Neplatné přihlašovací údaje (code: INVALID_CREDENTIALS)."
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: >
+            Účet nedovoluje přihlášení (code: ACCOUNT_DISABLED nebo
+            ACCOUNT_DELETED), bez odhalení detailu.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/auth/sessions/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshAuthSession
+      summary: Obnova access session rotující refresh credential
+      description: >
+        Vydá novou access credential a rotuje refresh credential (AAC-006).
+        Replay již rotované/revokované refresh credential je detekován a
+        odmítnut (INVALID_REFRESH / SESSION_REVOKED); detekovaný replay
+        revokuje celou session. Refresh credential se přenáší výhradně
+        v request body — nikdy v URL (AAC-009, AAC-010).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: Access session obnovena, refresh credential rotována.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          description: >
+            Neplatná/expirovaná/rotovaná refresh credential (code:
+            INVALID_REFRESH) nebo revokovaná session (code: SESSION_REVOKED).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "Účet nedovoluje obnovu (code: ACCOUNT_DISABLED / ACCOUNT_DELETED)."
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/auth/sessions/current:
+    delete:
+      tags: [Auth]
+      operationId: logoutCurrentSession
+      summary: Odhlášení — ukončení aktuální session
+      description: >
+        Revokuje session příslušnou k předložené access credential.
+        Opakovaný logout na již ukončené session je idempotentní no-op.
+      security:
+        - accessSession: []
+      responses:
+        "204":
+          description: Session ukončena (nebo již byla ukončena — no-op).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
+  /api/v1/auth/session:
+    get:
+      tags: [Auth]
+      operationId: getSessionContext
+      summary: Serverem autoritativní session context (current principal)
+      description: >
+        Vrátí principal a stav session odvozený serverem z ověřené access
+        credential (AAC-004). Bezpečná read operace bez side effects.
+      security:
+        - accessSession: []
+      responses:
+        "200":
+          description: Aktivní session context.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionContextResponse"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
 components:
+  securitySchemes:
+    accessSession:
+      type: http
+      scheme: bearer
+      description: >
+        Krátce žijící aplikační access credential v Authorization headeru;
+        nikdy v URL (AAC-009). Vydává a validuje ji výhradně backend
+        (ADR-011).
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >
+        Klientem generovaný stabilní idempotency key account-creating
+        operace (AAC-005). Opakování se stejným klíčem a payloadem
+        nevytvoří druhý účet.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+        pattern: "^[A-Za-z0-9._-]{8,128}$"
+  responses:
+    AuthBadRequest:
+      description: "Neplatný request (code: INVALID_REQUEST)."
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    AuthUnauthorized:
+      description: >
+        Chybějící/expirovaná access credential (code: ACCESS_SESSION_EXPIRED)
+        nebo revokovaná session (code: SESSION_REVOKED).
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    AuthRateLimited:
+      description: "Abuse protection (code: RATE_LIMITED); respektovat Retry-After."
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+        Retry-After:
+          description: Doporučený počet sekund před dalším pokusem.
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    AuthInternalError:
+      description: Neočekávaná interní chyba.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   headers:
     XRequestId:
       description: >
@@ -158,6 +435,93 @@ components:
     CheckStatus:
       type: string
       enum: [UP, DOWN]
+    RegistrationRequest:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 320
+          description: First-party přihlašovací identifikátor (EMAIL_PASSWORD baseline).
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 200
+          description: Nikdy se neloguje ani neukládá jako plaintext (AAC-009).
+    LoginRequest:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        password:
+          type: string
+          format: password
+          maxLength: 200
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      additionalProperties: false
+      properties:
+        refreshToken:
+          type: string
+          format: password
+          maxLength: 512
+          description: >
+            Refresh credential; přenáší se výhradně v tomto body (AAC-010),
+            nikdy v URL ani v logu.
+    AuthSessionResponse:
+      type: object
+      required: [accountId, sessionId, accessToken, accessExpiresAt, refreshToken, refreshExpiresAt]
+      additionalProperties: false
+      properties:
+        accountId:
+          type: string
+          description: Server-assigned identifikátor účtu (SDM-005 server-only entita).
+        sessionId:
+          type: string
+          description: Server-assigned identifikátor aplikační auth session.
+        accessToken:
+          type: string
+          format: password
+          description: Krátce žijící access credential (AAC-006).
+        accessExpiresAt:
+          type: string
+          format: date-time
+          description: UTC expirace access credential.
+        refreshToken:
+          type: string
+          format: password
+          description: Rotující refresh credential (AAC-006, AAC-010).
+        refreshExpiresAt:
+          type: string
+          format: date-time
+          description: UTC absolutní expirace refresh session.
+    SessionContextResponse:
+      type: object
+      required: [accountId, sessionId, accountType, accountStatus, accessExpiresAt]
+      additionalProperties: false
+      properties:
+        accountId:
+          type: string
+        sessionId:
+          type: string
+        accountType:
+          type: string
+          enum: [ANONYMOUS, STANDARD]
+          description: R2 baseline typy účtu (C6 §7.1).
+        accountStatus:
+          type: string
+          enum: [ACTIVE, ONBOARDING, LIMITED, SUSPENDED, LOCKED, DELETION_PENDING, DELETED]
+        accessExpiresAt:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       required: [code, message, requestId, timestamp]
