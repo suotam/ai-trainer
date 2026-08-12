@@ -436,3 +436,21 @@ class LocalAppState extends Table {
   @override
   Set<Column<Object>> get primaryKey => {key};
 }
+
+/// R2-05: poslední známá serverová verze synchronizované entity (C10 §10).
+/// Klient ji ukládá výhradně z potvrzené odpovědi serveru (SPC-005) a
+/// používá jako `expectedServerVersion` dalšího push (optimistic
+/// concurrency). Ne-secret technická metadata.
+@DataClassName('LocalSyncedVersionRow')
+class LocalSyncedVersions extends Table {
+  @override
+  String get tableName => 'local_synced_versions';
+
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  IntColumn get serverVersion => integer()();
+  IntColumn get updatedAt => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {entityType, entityId};
+}

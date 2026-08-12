@@ -56,9 +56,32 @@ class OpenApiContractValidationTest {
                 "/api/v1/profiles/{profileId}",
                 "/api/v1/devices",
                 "/api/v1/devices/{installationId}",
+                "/api/v1/sync/push",
             ),
             openApi.paths.keys,
         )
+    }
+
+    @Test
+    fun `sync push operace deklaruje kanonicke operationId, status codes a schemata`() {
+        val push = assertNotNull(openApi.paths["/api/v1/sync/push"]?.post)
+        assertEquals("pushSyncOperations", push.operationId)
+        assertEquals(setOf("200", "400", "401", "500"), push.responses.keys)
+
+        val schemas = assertNotNull(openApi.components.schemas)
+        assertEquals(
+            setOf("installationId", "operations"),
+            assertNotNull(schemas["SyncPushRequest"]).required.toSet(),
+        )
+        assertEquals(
+            setOf("operationId", "idempotencyKey", "sequence", "operationType", "entityType", "entityId", "payload"),
+            assertNotNull(schemas["SyncOperation"]).required.toSet(),
+        )
+        assertEquals(
+            setOf("operationId", "result"),
+            assertNotNull(schemas["SyncItemOutcome"]).required.toSet(),
+        )
+        assertEquals(setOf("results"), assertNotNull(schemas["SyncPushResponse"]).required.toSet())
     }
 
     @Test

@@ -7,12 +7,59 @@ import 'package:ai_trainer_mobile/features/device/domain/device_api_client.dart'
 import 'package:ai_trainer_mobile/features/device/domain/installation_identity_repository.dart';
 import 'package:ai_trainer_mobile/features/profile/application/profile_providers.dart';
 import 'package:ai_trainer_mobile/features/profile/domain/profile_api_client.dart';
+import 'package:ai_trainer_mobile/features/sync/application/local_sync_providers.dart';
+import 'package:ai_trainer_mobile/features/sync/domain/sync_push_models.dart';
 import 'package:ai_trainer_mobile/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_auth_boundaries.dart';
+
+/// Fake push sync API se sémantikou R2-05 backendu: CREATE úspěch s verzí 1,
+/// UPDATE inkrement; scriptovatelné odmítnutí per entita.
+class FakeSyncApiClient implements SyncApiClient {
+  bool offline = false;
+
+  /// entityId → výsledek (`VERSION_CONFLICT`, `PERMISSION_DENIED`, …).
+  final Map<String, String> scriptedResults = {};
+  final Map<String, int> serverVersions = {};
+  final List<List<SyncPushOperation>> pushedBatches = [];
+
+  @override
+  Future<List<SyncItemOutcome>> push({
+    required String accessToken,
+    required String installationId,
+    required List<SyncPushOperation> operations,
+  }) async {
+    if (offline) {
+      throw const AuthApiFailure(AuthApiFailureKind.network);
+    }
+    pushedBatches.add(operations);
+    return [
+      for (final op in operations)
+        () {
+          final scripted = scriptedResults[op.entityId];
+          if (scripted != null) {
+            return SyncItemOutcome(
+              operationId: op.operationId,
+              result: scripted,
+              serverVersion: scripted == 'VERSION_CONFLICT'
+                  ? serverVersions[op.entityId]
+                  : null,
+            );
+          }
+          final next = (serverVersions[op.entityId] ?? 0) + 1;
+          serverVersions[op.entityId] = next;
+          return SyncItemOutcome(
+            operationId: op.operationId,
+            result: next == 1 ? 'SUCCESS' : 'SUCCESS',
+            serverVersion: next,
+          );
+        }(),
+    ];
+  }
+}
 
 /// Deterministická identita instalace pro testy (bez lokální DB).
 class FakeInstallationIdentity implements InstallationIdentityRepository {
@@ -111,6 +158,8 @@ ProviderContainer createR2AuthContainer({
   FakeInstallationIdentity? installationIdentity,
   FakeDeviceApiClient? deviceApi,
   FakeProfileApiClient? profileApi,
+  FakeSyncApiClient? syncApi,
+  FakeLocalOwnerBinding? ownerBinding,
   IdGenerator? idGenerator,
   IdGenerator? authIdempotencyKeys,
 }) {
@@ -128,11 +177,15 @@ ProviderContainer createR2AuthContainer({
         const DeviceMetadata(
           platform: 'ANDROID',
           appVersion: '1.0.0+1',
-          localSchemaVersion: '2',
+          localSchemaVersion: '3',
         ),
       ),
       profileApiClientProvider.overrideWithValue(
         profileApi ?? FakeProfileApiClient(),
+      ),
+      syncApiClientProvider.overrideWithValue(syncApi ?? FakeSyncApiClient()),
+      localOwnerBindingProvider.overrideWithValue(
+        ownerBinding ?? FakeLocalOwnerBinding(),
       ),
       if (idGenerator != null)
         idGeneratorProvider.overrideWithValue(idGenerator),
@@ -153,6 +206,7 @@ Widget r2AccountApp({
   FakeInstallationIdentity? installationIdentity,
   FakeDeviceApiClient? deviceApi,
   FakeProfileApiClient? profileApi,
+  FakeSyncApiClient? syncApi,
 }) => ProviderScope(
   overrides: [
     secureSessionStorageProvider.overrideWithValue(storage),
@@ -167,12 +221,14 @@ Widget r2AccountApp({
       const DeviceMetadata(
         platform: 'ANDROID',
         appVersion: '1.0.0+1',
-        localSchemaVersion: '2',
+        localSchemaVersion: '3',
       ),
     ),
     profileApiClientProvider.overrideWithValue(
       profileApi ?? FakeProfileApiClient(),
     ),
+    syncApiClientProvider.overrideWithValue(syncApi ?? FakeSyncApiClient()),
+    localOwnerBindingProvider.overrideWithValue(FakeLocalOwnerBinding()),
   ],
   child: const MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,

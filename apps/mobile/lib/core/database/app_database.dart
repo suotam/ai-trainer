@@ -22,16 +22,18 @@ part 'app_database.g.dart';
     LocalActivitySummaries,
     LocalAppState,
     LocalOutbox,
+    LocalSyncedVersions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 2 (R2-01): lokální ownership + sync metadata + outbox.
-  /// Migrace `v1 → v2` je aditivní a nedestruktivní — zachovává všechna R1
-  /// data i aktivní session (C1 `MSM-005`, PDR-009).
+  /// Schema version 3 (R2-05): tabulka serverových verzí synced entit
+  /// (C10 §10). Migrace `v2 → v3` je aditivní (jen nová tabulka) a
+  /// nedestruktivní; dřívější `v1 → v2` (R2-01) zachovává všechna R1 data
+  /// i aktivní session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +92,11 @@ class AppDatabase extends _$AppDatabase {
         );
         await m.createTable(localOutbox);
         await _ensureLocalOwner();
+      }
+      // Migrace v2 → v3 (R2-05, C10 §10): jen nová tabulka serverových
+      // verzí — aditivní, žádná existující data se nemění.
+      if (from < 3) {
+        await m.createTable(localSyncedVersions);
       }
     },
     beforeOpen: (details) async {

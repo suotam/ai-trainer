@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../device/application/device_registrar.dart';
 import '../../profile/presentation/profile_section.dart';
+import '../../sync/application/local_sync_providers.dart';
+import '../../sync/domain/sync_push_models.dart';
 import '../application/auth_providers.dart';
 import '../domain/auth_results.dart';
 import '../domain/auth_session_state.dart';
@@ -27,6 +29,8 @@ class AccountScreen extends ConsumerStatefulWidget {
   static const Key signOutButtonKey = Key('account_sign_out_button');
   static const Key verifyButtonKey = Key('account_verify_button');
   static const Key verificationStatusKey = Key('account_verification_status');
+  static const Key syncButtonKey = Key('account_sync_button');
+  static const Key syncResultKey = Key('account_sync_result');
 
   @override
   ConsumerState<AccountScreen> createState() => _AccountScreenState();
@@ -39,6 +43,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   bool _submitting = false;
   AuthFlowFailure? _failure;
   SessionVerification? _verification;
+  SyncRunResult? _syncResult;
 
   @override
   void dispose() {
@@ -117,6 +122,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     setState(() {
       _submitting = false;
       _verification = verification;
+    });
+  }
+
+  Future<void> _syncNow() async {
+    if (_submitting) {
+      return;
+    }
+    setState(() => _submitting = true);
+    // Explicitní uživatelská akce — žádný background loop (SPC-015).
+    final result = await ref.read(syncEngineProvider).pushPending();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _submitting = false;
+      _syncResult = result;
     });
   }
 
@@ -224,6 +245,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   Widget _buildSignedIn(AppLocalizations l10n, AuthenticatedAuthState state) {
     final verification = _verification;
+    final syncResult = _syncResult;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -251,6 +273,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
             const SizedBox(height: 16),
           ],
+          if (syncResult != null) ...[
+            Text(
+              _syncMessage(l10n, syncResult),
+              key: AccountScreen.syncResultKey,
+            ),
+            const SizedBox(height: 16),
+          ],
+          OutlinedButton(
+            key: AccountScreen.syncButtonKey,
+            onPressed: _submitting ? null : _syncNow,
+            child: Text(l10n.accountSyncButton),
+          ),
+          const SizedBox(height: 8),
           OutlinedButton(
             key: AccountScreen.verifyButtonKey,
             onPressed: _submitting ? null : _verify,
@@ -279,6 +314,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         AuthFlowFailureReason.rateLimited => l10n.authErrorRateLimited,
         AuthFlowFailureReason.network => l10n.authErrorNetwork,
         AuthFlowFailureReason.server => l10n.authErrorServer,
+      };
+
+  String _syncMessage(AppLocalizations l10n, SyncRunResult result) =>
+      switch (result) {
+        SyncSkippedAnonymous() => l10n.authErrorServer,
+        SyncRunFailed() => l10n.authErrorNetwork,
+        SyncRunCompleted(
+          :final synced,
+          :final conflicts,
+          :final rejected,
+          :final pending,
+        ) =>
+          l10n.syncResultSummary(conflicts, pending, rejected, synced),
       };
 
   String _verificationMessage(

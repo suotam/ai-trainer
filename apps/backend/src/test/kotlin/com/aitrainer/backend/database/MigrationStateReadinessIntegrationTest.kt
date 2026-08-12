@@ -47,6 +47,12 @@ class MigrationStateReadinessIntegrationTest {
         // migrace v Order(2) běžela od prázdného schématu.
         jdbc.execute("DELETE FROM flyway_schema_history")
         listOf(
+            "synced_activity_summary",
+            "synced_workout_feedback",
+            "synced_set_performance",
+            "synced_step_performance",
+            "synced_workout_session",
+            "synced_workout_instance",
             "audit_event",
             "auth_refresh_credential",
             "auth_session",
