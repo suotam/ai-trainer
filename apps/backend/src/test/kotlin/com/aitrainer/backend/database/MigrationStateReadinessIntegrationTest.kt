@@ -50,6 +50,8 @@ class MigrationStateReadinessIntegrationTest {
             "audit_event",
             "auth_refresh_credential",
             "auth_session",
+            "device_installation",
+            "athlete_profile",
             "idempotency_record",
             "authentication_identity",
             "account",

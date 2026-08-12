@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../device/application/device_registrar.dart';
+import '../../profile/presentation/profile_section.dart';
 import '../application/auth_providers.dart';
 import '../domain/auth_results.dart';
 import '../domain/auth_session_state.dart';
@@ -76,6 +80,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _verification = null;
       }
     });
+    if (result is AuthFlowSuccess) {
+      // Registrace zařízení po přihlášení (C9 §5, DRC-004/015): best-effort,
+      // bez retry loopu — selhání nebrání použití aplikace, další pokus
+      // proběhne při příštím přihlášení.
+      unawaited(ref.read(deviceRegistrarProvider).registerThisDevice());
+    }
   }
 
   Future<void> _signOut() async {
@@ -231,6 +241,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           Text(l10n.accountIdLabel(state.accountId)),
           const SizedBox(height: 8),
           Text(l10n.accountLocalDataNote),
+          const SizedBox(height: 24),
+          const ProfileSection(),
           const SizedBox(height: 24),
           if (verification != null) ...[
             Text(

@@ -82,6 +82,16 @@ interface AuthSessionRepository {
         sessionId: UUID,
         now: Instant,
     )
+
+    /**
+     * Aditivní vazba session → registrovaná instalace (C6 §8.3, C9 §6).
+     * Vazba je bezpečnostní signál, nikdy autorizační důkaz (DRC-009).
+     */
+    fun bindDeviceInstallation(
+        sessionId: UUID,
+        accountId: UUID,
+        installationId: UUID,
+    )
 }
 
 /** Hash hesla; nikdy plaintext (SDM-010). `dummyHash` slouží timing-safe loginu. */

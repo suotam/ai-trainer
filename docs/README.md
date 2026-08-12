@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.24  
+**Verze:** 2.25  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-12
@@ -138,7 +138,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); blokující kontrakty `R2-04` (**C8, C9, rozšíření C6 §8.1–§8.3**) existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají `NOT_READY`.
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-04` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-05` až `R2-08` zůstávají `NOT_READY` (R2-05 čeká na C10, C11, rozšíření C6 o synced entity a sync část C14).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -165,7 +165,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata), `R2-02` (backend account/auth baseline) i `R2-03` (mobile auth + secure session storage) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). Kontrakty **C8**, **C9** a rozšíření **C6 §8.1–§8.3** existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je **implementace `R2-04 – AthleteProfile and Device Registration`** (produkční kód — samostatné rozhodnutí).
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata), `R2-02` (backend account/auth baseline), `R2-03` (mobile auth + secure session storage) i `R2-04` (AthleteProfile + registrace zařízení s ownership enforcementem) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). `R2-05` až `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je příprava kontraktů **C10 – Sync protocol** a **C11 – Idempotency** (+ rozšíření C6 o synced entity a sync část C14) pro `R2-05`.
 
 ---
 
@@ -350,17 +350,16 @@ Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Rel
 uzavřen. Z R2 jsou implementovány **`R2-01` (lokální ownership/sync metadata)** a
 **`R2-02` (backend account/auth baseline — auth endpointy, PostgreSQL/Flyway V2, session
 issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md` §3.
-**`R2-03 – Mobile Auth and Secure Session Storage` je implementován** (secure storage
-boundary dle C7/`TSS-001` až `TSS-015`, login/logout/registrace dle C4, restart recovery,
-no-secret-in-DB evidence). Kontrakty **C8 – Authorization/ownership** (`AOC-001` až
-`AOC-015`), **C9 – Device registration** (`DRC-001` až `DRC-015`) i **append-only
-rozšíření C6 §8.1–§8.3** (athlete_profile, device_installation, vazba session→zařízení)
-existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají
-`NOT_READY`. Další kanonický krok:
+**`R2-04 – AthleteProfile and Device Registration` je implementován** (Flyway V3 dle
+C6 §8.1–§8.3, profil a registrace zařízení s ownership enforcementem dle C8/C9 —
+cizí zdroj = 404 nerozlišitelný od neexistence, idempotentní registrace instalace,
+vazba session→zařízení, installation ID + profil UI na mobilu); `R2-05` až `R2-08`
+zůstávají `NOT_READY`. Další kanonický krok:
 
 ```text
-R2-04 – AthleteProfile and Device Registration  (implementace, dle C6 §8/C8/C9)
-poté: C10 – Sync protocol a C11 – Idempotency  [pro R2-05]
+C10 – Sync protocol  a  C11 – Idempotency   [pro R2-05]
++ rozšíření C6 o synced entity a sync část C14
+poté: implementace R2-05 – Ownership Authorization and First Sync (push)
 ```
 
 Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
