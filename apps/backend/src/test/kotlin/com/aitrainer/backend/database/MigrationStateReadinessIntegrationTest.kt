@@ -42,9 +42,20 @@ class MigrationStateReadinessIntegrationTest {
     @Test
     @Order(1)
     fun `nevalidni migration stav vraci readiness 503 s bezpecnym envelope`() {
-        // Řízené rozbití pouze v izolovaném test containeru.
+        // Řízené rozbití pouze v izolovaném test containeru. Dropují se
+        // všechny migracemi vytvořené tabulky (V1 i V2), aby recovery
+        // migrace v Order(2) běžela od prázdného schématu.
         jdbc.execute("DELETE FROM flyway_schema_history")
-        jdbc.execute("DROP TABLE IF EXISTS schema_baseline")
+        listOf(
+            "audit_event",
+            "auth_refresh_credential",
+            "auth_session",
+            "idempotency_record",
+            "authentication_identity",
+            "account",
+            "identity",
+            "schema_baseline",
+        ).forEach { table -> jdbc.execute("DROP TABLE IF EXISTS $table CASCADE") }
 
         val response = restTemplate.getForEntity("/api/v1/health/ready", String::class.java)
 
