@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.22  
+**Verze:** 2.23  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-07-29
+**Poslední aktualizace:** 2026-08-12
 
 ---
 
@@ -100,10 +100,13 @@ docs/12-data/r1-physical-data-model.md
 docs/07-backend/r2-identity-session-contract.md
 docs/07-backend/r2-auth-api-contract.md
 docs/11-security/r2-audit-event-contract.md
+docs/11-security/r2-token-session-storage-contract.md
 docs/12-data/r2-mobile-schema-migration.md
 docs/12-data/r2-local-sync-metadata-contract.md
 docs/12-data/r2-server-data-model.md
 ```
+
+- `r2-token-session-storage-contract.md` (**C7**, vlastník Security + Mobile) vlastní mobilní uložení session materiálu: klasifikaci (heslo se neukládá nikdy; refresh výhradně platformní secure storage; access in-memory/secure storage; **nikdy Drift/SQLite, preferences, log, backup**), secure storage boundary (`MAR-015`), restart/logout/revocation chování (logout čistí materiál, ne lokální data; revokace není obnovitelná ze storage) a invarianty `TSS-001` až `TSS-015`. Contract-only, bez plugin volby a UI flow. Blokuje `R2-03`.
 
 - `r2-audit-event-contract.md` (**C14**, vlastník Domain / domain-events + Security) vlastní seznam auditovaných auth a sync kritických událostí R2, tvar audit záznamu (principal/action/target/outcome/čas/correlation/policy) a pravidla bez citlivého payloadu; invarianty `AEC-001` až `AEC-015`. Contract-only. **Auth část** blokuje `R2-02`, sync část blokuje `R2-05`.
 
@@ -129,7 +132,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` i `R2-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-03` je `NOT_READY`, dokud nevznikne kontrakt C7; `R2-04` až `R2-08` zůstávají `NOT_READY`.
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` i `R2-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); blokující kontrakt `R2-03` (**C7**) existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až `R2-08` zůstávají `NOT_READY`.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -156,10 +159,11 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata) i `R2-02` (backend account/auth baseline) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). `R2-03` až `R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty). Dalším kanonickým krokem je příprava kontraktu:
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata) i `R2-02` (backend account/auth baseline) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). Kontrakt **C7 – Token/session storage** existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až `R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty). Dalším kanonickým krokem je **implementace `R2-03`** (mobilní produkční kód — samostatné rozhodnutí), případně příprava kontraktů:
 
 ```text
-C7 – Token/session storage   (docs/11-security/r2-token-session-storage-contract.md)  [pro R2-03]
+C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
+C9 – Device registration      (docs/07-backend/r2-device-registration-contract.md)       [pro R2-04]
 ```
 
 ---
@@ -345,13 +349,17 @@ Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Rel
 uzavřen. Z R2 jsou implementovány **`R2-01` (lokální ownership/sync metadata)** a
 **`R2-02` (backend account/auth baseline — auth endpointy, PostgreSQL/Flyway V2, session
 issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md` §3.
-`R2-03` až `R2-08` zůstávají `NOT_READY`. Další kanonický krok je příprava kontraktu:
+Kontrakt **C7 – Token/session storage** (`docs/11-security/r2-token-session-storage-contract.md`,
+`TSS-001` až `TSS-015`) existuje → **`R2-03` je `READY` (neimplementováno)**; `R2-04` až
+`R2-08` zůstávají `NOT_READY`. Další kanonický krok je **implementace `R2-03 – Mobile Auth
+and Secure Session Storage`**, případně příprava kontraktů:
 
 ```text
-C7 – Token/session storage   (docs/11-security/r2-token-session-storage-contract.md)  [pro R2-03]
+C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
+C9 – Device registration      (docs/07-backend/r2-device-registration-contract.md)       [pro R2-04]
 ```
 
-Implementace R2 smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
+Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
 slices za `READY` a nezahajuje implementaci.
 
 Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
