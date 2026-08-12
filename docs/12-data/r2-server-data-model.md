@@ -1,6 +1,6 @@
 # AI Trainer – R2 Server Data Model Contract (C6)
 
-**Verze:** 0.2 (append-only rozšíření §8.1–§8.3 o profil/device pro R2-04)
+**Verze:** 0.3 (append-only rozšíření §8.4–§8.5 o synced entity a idempotency pro R2-05)
 **Stav:** Draft
 **Soubor:** `docs/12-data/r2-server-data-model.md`
 **Vlastník:** Data Architecture
@@ -188,6 +188,28 @@ Dle C9 (registrace) a `sync-and-offline-model §5`:
 - Append-only migrace doplní na `auth_session` **nullable FK `device_installation_id`** referencující `device_installation` — realizace DeviceSession vazby (C9 §6) bez samostatné tabulky (`R2P-012`).
 - Baseline sloupec `device_ref` (text, R2-02) zůstává nevyužit a **nepřepisuje se** (append-only, `SDM-002`); kanonická vazba je FK sloupec. Jeho případné odstranění je samostatná pozdější migrace mimo R2.
 - Session bez vazby (vydaná před registrací zařízení) zůstává validní — vazba je aditivní (C9 §6).
+
+## 8.4 Synced entity (R2-05, kontraktně)
+
+Serverová reprezentace podporovaných R1 dat (C10 §5.2). Pro každou entitu platí společný vzor (§5, §6, §9):
+
+- **client-generated `id`** jako PK (server zachovává, `SDM-005`; unikátnost brání duplicitě po expiraci idempotency záznamu, `SDM-006`),
+- `account_id` (FK, ownership §6; enforcement C8),
+- **`server_version`** — monotónní verze entity pro optimistic concurrency (C10 §10); inkrementuje se při každé commitnuté změně,
+- `source_installation_id` (nullable technická reference zařízení, C9 — evidence, ne autorizace),
+- doménové sloupce dle R1 fyzického modelu dané entity (významy vlastní `r1-physical-data-model.md`; server je ukládá bez reinterpretace),
+- `created_at`, `updated_at`; **bez tombstone v R2-05** (delete je mimo C10 P0; tombstone sloupce přibudou append-only s delete kontraktem).
+
+Tabulky R2-05: `synced_workout_instance`, `synced_workout_session`, `synced_step_performance`, `synced_set_performance`, `synced_workout_feedback`, `synced_activity_summary`. Vztahy nesou FK podle R1 hierarchie (instance → session → performance; feedback/summary → session) s ownership konzistencí (child i root patří témuž `account_id` — CHECK/FK kombinace). **Append-only sémantika trvá** (`DAR-003`): performance/feedback/summary se nemažou ani destruktivně nepřepisují; `UPDATE` smí měnit jen vlastní řádek v mezích C10 §5.3.
+
+## 8.5 Rozšíření `idempotency_record` (R2-05, kontraktně)
+
+Baseline (§7.5) se pro obecný replay protokol (C11 §5) rozšiřuje append-only o:
+
+- `final_status` (per-item výsledek C10 §7),
+- `result_reference` (technická reference výsledku — entity ID + server_version; bez citlivého payloadu),
+- `expires_at` (retence C11 §7),
+- unikátnost se zpřesňuje na **pár (account, idempotency key)** (C11 §4 scope per účet; baseline PK jen na klíči zůstává validní pro existující data — migrace nullable→constraint až po backfillu, `SDM-011`).
 
 ---
 
