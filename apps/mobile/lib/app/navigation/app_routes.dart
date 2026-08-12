@@ -29,6 +29,11 @@ abstract final class AppRoutes {
   static const String completedWorkoutName = 'completedWorkout';
   static const String completedWorkoutPath = '/history/:sessionId';
 
+  /// Account — přihlášení/odhlášení (R2-03). Volitelný vstup; R1 offline
+  /// tok na něm nezávisí (R2P-004).
+  static const String accountName = 'account';
+  static const String accountPath = '/account';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';
