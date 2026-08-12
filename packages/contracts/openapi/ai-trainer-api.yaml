@@ -28,6 +28,11 @@ tags:
       R2 registrace zařízení (C9): idempotentní upsert client-generated
       installation ID, kolekce filtrovaná principalem (AOC-008),
       minimalizovaná metadata (DRC-011).
+  - name: Sync
+    description: >
+      R2-05 push synchronizace (C10): ORDERED_OPERATIONS batch podle
+      sequence, per-item výsledky, potvrzení po serverovém commitu
+      (SPC-005), idempotentní replay (C11).
 paths:
   /api/v1/health/live:
     get:
@@ -511,6 +516,43 @@ paths:
           $ref: "#/components/responses/AuthUnauthorized"
         "500":
           $ref: "#/components/responses/AuthInternalError"
+  /api/v1/sync/push:
+    post:
+      tags: [Sync]
+      operationId: pushSyncOperations
+      summary: Push batch lokálních operací (R2-05, C10)
+      description: >
+        Aplikuje operace jednoho zařízení v pořadí sequence (SPC-003);
+        ownership, validace, verze i idempotence se vyhodnocují per položka
+        (SPC-004) — selhání položky nezastaví batch a HTTP 200 nepotvrzuje
+        odmítnuté položky. Klient smí označit operaci za synchronizovanou
+        výhradně na základě SUCCESS/ALREADY_APPLIED (SPC-005).
+      security:
+        - accessSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncPushRequest"
+      responses:
+        "200":
+          description: Per-item výsledky batch (i s odmítnutými položkami).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncPushResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
 components:
   securitySchemes:
     accessSession:
@@ -865,6 +907,83 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DeviceResponse"
+    SyncOperation:
+      type: object
+      required: [operationId, idempotencyKey, sequence, operationType, entityType, entityId, payload]
+      additionalProperties: false
+      properties:
+        operationId:
+          type: string
+          description: Client-generated ID operace (outbox položka, C2).
+        idempotencyKey:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: Stabilní klíč operace (LSM-008, C11).
+        sequence:
+          type: integer
+          format: int64
+          description: Deterministické pořadí per zařízení (LSM-012, SPC-003).
+        operationType:
+          type: string
+          enum: [CREATE_ENTITY, UPDATE_ENTITY]
+          description: R2-05 podmnožina SyncOperationType (C10 §5.1).
+        entityType:
+          type: string
+          enum: [WORKOUT_INSTANCE, WORKOUT_SESSION, STEP_PERFORMANCE, SET_PERFORMANCE, WORKOUT_FEEDBACK, ACTIVITY_SUMMARY]
+        entityId:
+          type: string
+          format: uuid
+          description: Client-generated ID entity — server jej zachovává (SDM-005).
+        payload:
+          type: object
+          additionalProperties: true
+          description: Plný aktuální stav entity (state-based push, C10 §5.3); server jej v P0 nereinterpretuje.
+        expectedServerVersion:
+          type: integer
+          format: int64
+          nullable: true
+          description: Verze, nad kterou klient operoval; null pro CREATE (C10 §10).
+    SyncPushRequest:
+      type: object
+      required: [installationId, operations]
+      additionalProperties: false
+      properties:
+        installationId:
+          type: string
+          format: uuid
+          description: Registrovaná instalace (C9); technická reference, ne autorizace (DRC-009).
+        operations:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/SyncOperation"
+    SyncItemOutcome:
+      type: object
+      required: [operationId, result]
+      additionalProperties: false
+      properties:
+        operationId:
+          type: string
+        result:
+          type: string
+          enum: [SUCCESS, ALREADY_APPLIED, VERSION_CONFLICT, VALIDATION_FAILED, PERMISSION_DENIED, DEPENDENCY_FAILED]
+          description: R2-05 podmnožina SyncResult (C10 §7).
+        serverVersion:
+          type: integer
+          format: int64
+          nullable: true
+          description: Autoritativní verze po SUCCESS/ALREADY_APPLIED; u VERSION_CONFLICT aktuální serverová verze.
+    SyncPushResponse:
+      type: object
+      required: [results]
+      additionalProperties: false
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncItemOutcome"
     ErrorResponse:
       type: object
       required: [code, message, requestId, timestamp]
