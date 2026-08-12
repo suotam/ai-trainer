@@ -41,9 +41,17 @@ class OpenApiContractValidationTest {
     }
 
     @Test
-    fun `kontrakt obsahuje pouze oba health endpointy`() {
+    fun `kontrakt obsahuje health a R2 auth endpointy`() {
         assertEquals(
-            setOf("/api/v1/health/live", "/api/v1/health/ready"),
+            setOf(
+                "/api/v1/health/live",
+                "/api/v1/health/ready",
+                "/api/v1/auth/registrations",
+                "/api/v1/auth/sessions",
+                "/api/v1/auth/sessions/refresh",
+                "/api/v1/auth/sessions/current",
+                "/api/v1/auth/session",
+            ),
             openApi.paths.keys,
         )
     }
@@ -74,6 +82,54 @@ class OpenApiContractValidationTest {
 
         val error = assertNotNull(schemas["ErrorResponse"])
         assertEquals(setOf("code", "message", "requestId", "timestamp"), error.required.toSet())
+    }
+
+    @Test
+    fun `auth operace deklaruji kanonicke operationId a status codes podle C4`() {
+        val register = assertNotNull(openApi.paths["/api/v1/auth/registrations"]?.post)
+        assertEquals("registerAccount", register.operationId)
+        assertEquals(setOf("201", "400", "409", "429", "500"), register.responses.keys)
+        assertTrue(
+            register.parameters.orEmpty().any { it.name == "Idempotency-Key" && it.required },
+            "Registrace musí vyžadovat Idempotency-Key (AAC-005)",
+        )
+
+        val login = assertNotNull(openApi.paths["/api/v1/auth/sessions"]?.post)
+        assertEquals("loginWithPassword", login.operationId)
+        assertEquals(setOf("200", "400", "401", "403", "429", "500"), login.responses.keys)
+
+        val refresh = assertNotNull(openApi.paths["/api/v1/auth/sessions/refresh"]?.post)
+        assertEquals("refreshAuthSession", refresh.operationId)
+        assertEquals(setOf("200", "400", "401", "403", "429", "500"), refresh.responses.keys)
+
+        val logout = assertNotNull(openApi.paths["/api/v1/auth/sessions/current"]?.delete)
+        assertEquals("logoutCurrentSession", logout.operationId)
+        assertEquals(setOf("204", "401", "429", "500"), logout.responses.keys)
+
+        val sessionContext = assertNotNull(openApi.paths["/api/v1/auth/session"]?.get)
+        assertEquals("getSessionContext", sessionContext.operationId)
+        assertEquals(setOf("200", "401", "429", "500"), sessionContext.responses.keys)
+    }
+
+    @Test
+    fun `auth schemata deklaruji povinna pole a session tokeny`() {
+        val schemas = assertNotNull(openApi.components.schemas)
+
+        val session = assertNotNull(schemas["AuthSessionResponse"])
+        assertEquals(
+            setOf("accountId", "sessionId", "accessToken", "accessExpiresAt", "refreshToken", "refreshExpiresAt"),
+            session.required.toSet(),
+        )
+
+        val context = assertNotNull(schemas["SessionContextResponse"])
+        assertEquals(
+            setOf("accountId", "sessionId", "accountType", "accountStatus", "accessExpiresAt"),
+            context.required.toSet(),
+        )
+
+        assertEquals(setOf("email", "password"), assertNotNull(schemas["RegistrationRequest"]).required.toSet())
+        assertEquals(setOf("email", "password"), assertNotNull(schemas["LoginRequest"]).required.toSet())
+        assertEquals(setOf("refreshToken"), assertNotNull(schemas["RefreshRequest"]).required.toSet())
     }
 
     @Test

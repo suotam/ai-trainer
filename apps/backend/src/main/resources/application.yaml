@@ -27,6 +27,15 @@ aitrainer:
   service:
     name: ai-trainer-backend
     version: ${AITRAINER_SERVICE_VERSION:0.0.1-dev}
+  auth:
+    # Krátce žijící access session + delší revokovatelná refresh session
+    # (C3 §5, ISC-006). Hodnoty jsou development defaults, přepsatelné env.
+    access-ttl: ${AITRAINER_AUTH_ACCESS_TTL:PT15M}
+    refresh-ttl: ${AITRAINER_AUTH_REFRESH_TTL:P30D}
+    rate-limit:
+      # Abuse protection baseline veřejných auth endpointů (SAR-013).
+      limit: ${AITRAINER_AUTH_RATE_LIMIT:20}
+      window: ${AITRAINER_AUTH_RATE_WINDOW:PT1M}
 
 logging:
   pattern:
