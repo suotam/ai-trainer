@@ -1,10 +1,10 @@
 # AI Trainer – R2 Server Data Model Contract (C6)
 
-**Verze:** 0.1
+**Verze:** 0.2 (append-only rozšíření §8.1–§8.3 o profil/device pro R2-04)
 **Stav:** Draft
 **Soubor:** `docs/12-data/r2-server-data-model.md`
 **Vlastník:** Data Architecture
-**Poslední aktualizace:** 2026-07-29
+**Poslední aktualizace:** 2026-08-12
 **Kontraktní ID:** C6 (dle `docs/13-delivery/r2-vertical-slice-plan.md §7.1`)
 **Navazuje na:** `docs/12-data/data-architecture.md`, `docs/07-backend/r2-identity-session-contract.md` (C3), `docs/07-backend/r2-auth-api-contract.md` (C4), `docs/05-architecture/initial-architecture-decisions.md` (ADR-006, ADR-011/C5), `docs/12-data/r2-local-sync-metadata-contract.md` (C2), `docs/06-domain/identity-and-profile-model.md`, `docs/06-domain/domain-invariants.md`, `docs/11-security/security-architecture.md`, `docs/13-delivery/repository-strategy.md`, `docs/14-quality/test-strategy.md`, `docs/13-delivery/definition-of-ready-and-done.md`
 **Navazující dokumenty:** PostgreSQL/Flyway migrace (implementace R2-02+), C7 token/session storage, C8 authorization/ownership, C9 device registration, C10 sync protocol, C11 idempotency, C14 audit-event, C15 local-to-account migration
@@ -149,10 +149,45 @@ Popsáno **významem sloupců a constraintů**, bez DDL. Baseline pokrývá acco
 
 Rozšíření probíhá **append-only migracemi** v rámci tohoto kontraktu:
 
-- **R2-04 (profil/device):** `athlete_profile` (R2 baseline: odkaz na account, sport/zkušenost minimum — plný profil je R3), `device` / `device_session` (registrace zařízení, vazba na account, odhlášení zařízení — sémantiku registrace vlastní **C9**).
-- **R2-05 (synchronizované entity):** serverová reprezentace synchronizovaných workout dat (instance/session/performance/feedback/activity summary) s **client-generated ID** (§5), `account_id` ownership (§6) a sync metadaty (§9). Doménový význam vlastní R1 model; C6 drží serverové úložiště a ownership.
+- **R2-04 (profil/device):** detailní kontraktní sloupce jsou definovány v §8.1–§8.3 (doplněno před R2-04; sémantiku registrace vlastní **C9**, vynucení ownership **C8**).
+- **R2-05 (synchronizované entity):** serverová reprezentace synchronizovaných workout dat (instance/session/performance/feedback/activity summary) s **client-generated ID** (§5), `account_id` ownership (§6) a sync metadaty (§9). Doménový význam vlastní R1 model; C6 drží serverové úložiště a ownership. Detailní sloupce se doplní append-only před R2-05.
 
-C6 tyto entity **vymezuje kontraktně**; jejich detailní sloupce se doplní append-only před příslušným slicem, nikdy přepsáním baseline.
+C6 tyto entity **vymezuje kontraktně**; jejich detailní sloupce se doplňují append-only před příslušným slicem, nikdy přepsáním baseline.
+
+## 8.1 `athlete_profile` (R2-04, kontraktně)
+
+R2 baseline profilu (`identity-and-profile-model §9`; plný profil je R3):
+
+- **client-generated `id`** (§5 — profil je vlastnitelná entita vytvářená klientem; server ID zachovává, `SDM-005`),
+- `account_id` (FK, ownership §6),
+- `profile_type` (R2 baseline pouze `SELF` — `§9.4`; CHECK připraven na append-only rozšíření),
+- stav profilu (dle `§9.2` „stav"; baseline `ACTIVE`),
+- zobrazované jméno (bezpečné minimum),
+- sport/zkušenost minimum (primární sport, úroveň zkušenosti — stabilní kódy),
+- volitelné bezpečné minimum: jednotky, časové pásmo, lokalizace,
+- `created_at`, `updated_at`, `row_version`.
+
+**Constraints:** právě jeden `SELF` profil na účet v R2 (partial unique na `account_id` where `profile_type = 'SELF'` — INV: jeden hlavní profil, `identity-and-profile-model §9.4`); FK na account; CHECK na typ/stav. Citlivé zdravotní údaje, omezení a AI preference do R2 baseline **nepatří** (R3+; data classification).
+
+## 8.2 `device_installation` (R2-04, kontraktně)
+
+Dle C9 (registrace) a `sync-and-offline-model §5`:
+
+- **client-generated installation `id`** (§5 politika; C9 `DRC-001` — server nepřečíslovává),
+- `account_id` (FK, ownership §6 — vazba vzniká registrací, C9 §5),
+- platforma (CHECK: R2 baseline `IOS`/`ANDROID`; další append-only),
+- verze aplikace, verze lokálního datového schématu,
+- stav (CHECK: R2 baseline `ACTIVE`/`REVOKED`; další stavy append-only, C9 §9),
+- `created_at`, `last_seen_at`, `last_sync_at` (nullable do R2-05),
+- `row_version`.
+
+**Constraints:** unikátní pár (account, installation id) — jeden fyzický přístroj s více účty vede na oddělené registrace (C9 §5); **žádné fingerprinting sloupce** (C9 §8, `security §9`). Push token reference až s notifikačním slicem.
+
+## 8.3 Vazba `auth_session` → `device_installation` (R2-04, kontraktně)
+
+- Append-only migrace doplní na `auth_session` **nullable FK `device_installation_id`** referencující `device_installation` — realizace DeviceSession vazby (C9 §6) bez samostatné tabulky (`R2P-012`).
+- Baseline sloupec `device_ref` (text, R2-02) zůstává nevyužit a **nepřepisuje se** (append-only, `SDM-002`); kanonická vazba je FK sloupec. Jeho případné odstranění je samostatná pozdější migrace mimo R2.
+- Session bez vazby (vydaná před registrací zařízení) zůstává validní — vazba je aditivní (C9 §6).
 
 ---
 

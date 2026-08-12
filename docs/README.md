@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.23  
+**Verze:** 2.24  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-12
@@ -99,18 +99,24 @@ docs/12-data/data-architecture.md
 docs/12-data/r1-physical-data-model.md
 docs/07-backend/r2-identity-session-contract.md
 docs/07-backend/r2-auth-api-contract.md
+docs/07-backend/r2-device-registration-contract.md
 docs/11-security/r2-audit-event-contract.md
 docs/11-security/r2-token-session-storage-contract.md
+docs/11-security/r2-authorization-ownership-contract.md
 docs/12-data/r2-mobile-schema-migration.md
 docs/12-data/r2-local-sync-metadata-contract.md
 docs/12-data/r2-server-data-model.md
 ```
 
+- `r2-authorization-ownership-contract.md` (**C8**, vlastník Security + Backend Architecture) vlastní serverové vynucení autorizace a ownership v R2: principal výhradně z ověřené access session, ownership check na každé chráněné hranici, R2 capability baseline (`profile.read/write`, `device.manage`, `sync.push`), default deny, anti-IDOR pravidla (cizí zdroj = 404, nerozlišitelný od neexistence), audit odmítnutí a invarianty `AOC-001` až `AOC-015`. Contract-only, bez policy engine a rolí. Blokuje `R2-04` a `R2-05`.
+
+- `r2-device-registration-contract.md` (**C9**, vlastník Backend + Domain / sync-and-offline-model) vlastní R2 registraci zařízení: client-generated installation ID (stabilní, nefingerprintové, ne-secret), idempotentní registraci po přihlášení (upsert per account+installation), vazbu auth session → zařízení (DeviceSession bez samostatné tabulky), odhlášení bez ztráty identity a dat, minimalizaci metadat a invarianty `DRC-001` až `DRC-015`. Contract-only. Blokuje `R2-04`.
+
 - `r2-token-session-storage-contract.md` (**C7**, vlastník Security + Mobile) vlastní mobilní uložení session materiálu: klasifikaci (heslo se neukládá nikdy; refresh výhradně platformní secure storage; access in-memory/secure storage; **nikdy Drift/SQLite, preferences, log, backup**), secure storage boundary (`MAR-015`), restart/logout/revocation chování (logout čistí materiál, ne lokální data; revokace není obnovitelná ze storage) a invarianty `TSS-001` až `TSS-015`. Contract-only, bez plugin volby a UI flow. Blokuje `R2-03`.
 
 - `r2-audit-event-contract.md` (**C14**, vlastník Domain / domain-events + Security) vlastní seznam auditovaných auth a sync kritických událostí R2, tvar audit záznamu (principal/action/target/outcome/čas/correlation/policy) a pravidla bez citlivého payloadu; invarianty `AEC-001` až `AEC-015`. Contract-only. **Auth část** blokuje `R2-02`, sync část blokuje `R2-05`.
 
-- `r2-server-data-model.md` (**C6**, vlastník Data Architecture) vlastní serverový (PostgreSQL) datový model R2: baseline tabulky account/auth/session, ownership sloupce, **server-vs-client ID** politiku (client-generated ID se zachovává), Flyway append-only migrační pravidla, rozšíření pro profil/device (R2-04) a synced entity (R2-05) a invarianty `SDM-001` až `SDM-015`. Contract-only, bez DDL/Flyway/ORM. Blokuje `R2-02` (spolu s C3/C4/C5/C14 auth).
+- `r2-server-data-model.md` (**C6**, vlastník Data Architecture) vlastní serverový (PostgreSQL) datový model R2: baseline tabulky account/auth/session, ownership sloupce, **server-vs-client ID** politiku (client-generated ID se zachovává), Flyway append-only migrační pravidla, **rozšíření §8.1–§8.3 o `athlete_profile`, `device_installation` a vazbu session→zařízení (pro R2-04)**, forward rozsah pro synced entity (R2-05) a invarianty `SDM-001` až `SDM-015`. Contract-only, bez DDL/Flyway/ORM. Blokuje `R2-02` (spolu s C3/C4/C5/C14 auth); rozšíření blokuje `R2-04`.
 
 - `initial-architecture-decisions.md` obsahuje mimo `ADR-001` až `ADR-010` (R0/R1) také **`ADR-011` – R2 authentication provider strategy** (**C5**, vlastník Architecture): rozhoduje strategii auth provideru pro R2 (first-party backend session authority + provider-neutral `AuthenticationIdentity` adaptér; konkrétní externí federated provider odložen). Blokuje `R2-02` (spolu s C3/C4/C6/C14).
 - `r2-identity-session-contract.md` (**C3**, vlastník Domain / identity-and-profile-model + Backend) vlastní R2 identity & session model: anonymous/authenticated/account/device identitu, session lifecycle (access/refresh), identity transitions (anonymous → account atd.), ownership interakci s C2, security boundaries a invarianty `ISC-001` až `ISC-015`. Contract-only, bez API/DB/JWT. Blokuje `R2-02` (spolu s C4/C5/C6/C14).
@@ -132,7 +138,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-04` až `R2-08` zůstávají `NOT_READY` (R2-04 čeká na kontrakty C8, C9 a rozšíření C6).
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); blokující kontrakty `R2-04` (**C8, C9, rozšíření C6 §8.1–§8.3**) existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají `NOT_READY`.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -159,12 +165,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata), `R2-02` (backend account/auth baseline) i `R2-03` (mobile auth + secure session storage) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). `R2-04` až `R2-08` zůstávají `NOT_READY` (čekají na dokončení předchozích slices a své kontrakty). Dalším kanonickým krokem je příprava kontraktů:
-
-```text
-C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
-C9 – Device registration      (docs/07-backend/r2-device-registration-contract.md)       [pro R2-04]
-```
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` (lokální ownership/sync metadata), `R2-02` (backend account/auth baseline) i `R2-03` (mobile auth + secure session storage) jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3). Kontrakty **C8**, **C9** a rozšíření **C6 §8.1–§8.3** existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je **implementace `R2-04 – AthleteProfile and Device Registration`** (produkční kód — samostatné rozhodnutí).
 
 ---
 
@@ -351,12 +352,15 @@ uzavřen. Z R2 jsou implementovány **`R2-01` (lokální ownership/sync metadata
 issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md` §3.
 **`R2-03 – Mobile Auth and Secure Session Storage` je implementován** (secure storage
 boundary dle C7/`TSS-001` až `TSS-015`, login/logout/registrace dle C4, restart recovery,
-no-secret-in-DB evidence); `R2-04` až `R2-08` zůstávají `NOT_READY`. Další kanonický krok
-je příprava kontraktů:
+no-secret-in-DB evidence). Kontrakty **C8 – Authorization/ownership** (`AOC-001` až
+`AOC-015`), **C9 – Device registration** (`DRC-001` až `DRC-015`) i **append-only
+rozšíření C6 §8.1–§8.3** (athlete_profile, device_installation, vazba session→zařízení)
+existují → **`R2-04` je `READY` (neimplementováno)**; `R2-05` až `R2-08` zůstávají
+`NOT_READY`. Další kanonický krok:
 
 ```text
-C8 – Authorization/ownership  (docs/11-security/r2-authorization-ownership-contract.md)  [pro R2-04/05]
-C9 – Device registration      (docs/07-backend/r2-device-registration-contract.md)       [pro R2-04]
+R2-04 – AthleteProfile and Device Registration  (implementace, dle C6 §8/C8/C9)
+poté: C10 – Sync protocol a C11 – Idempotency  [pro R2-05]
 ```
 
 Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
