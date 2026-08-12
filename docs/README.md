@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.27  
+**Verze:** 2.28  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-12
@@ -101,7 +101,9 @@ docs/07-backend/r2-identity-session-contract.md
 docs/07-backend/r2-auth-api-contract.md
 docs/07-backend/r2-device-registration-contract.md
 docs/07-backend/r2-sync-protocol-contract.md
+docs/07-backend/r2-conflict-rejection-contract.md
 docs/11-security/r2-audit-event-contract.md
+docs/11-security/r2-revocation-contract.md
 docs/11-security/r2-token-session-storage-contract.md
 docs/11-security/r2-authorization-ownership-contract.md
 docs/12-data/r2-mobile-schema-migration.md
@@ -113,6 +115,10 @@ docs/12-data/r2-server-data-model.md
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
 - `r2-idempotency-contract.md` (**C11**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2 replay protokol: IdempotencyRecord (klíč+účet, requestHash bez secrets, výsledková reference, expirace), `ALREADY_APPLIED` bez vedlejších efektů, „stejný klíč, jiný payload = chyba", atomicitu záznamu s efektem, souběh a invarianty `IDC-001` až `IDC-015`. Jednotný protokol pro registraci účtu (R2-02) i sync (R2-05). Contract-only. Blokuje `R2-05`.
+
+- `r2-conflict-rejection-contract.md` (**C12**, vlastník Domain / sync-and-offline-model) vlastní R2 řešení konfliktů a odmítnutí: klasifikaci (VERSION_CONFLICT = USER_REVIEW, rejection = BLOCKED), **baseline resolution jen jako explicitní uživatelské rozhodnutí** — `USE_LOCAL` (potvrzený re-push s verzí z konfliktu, nový idempotency key) nebo `CANCEL_LOCAL_CHANGE` (ruší odeslání, nikdy lokální data; rozdíl vůči serveru zůstává přiznaný jako LOCAL_ONLY), bezpečné UI bez technických diffů, audit `SyncConflictResolved` a invarianty `CRC-001` až `CRC-015`. Žádné automatické merge. Contract-only. Blokuje `R2-06`.
+
+- `r2-revocation-contract.md` (**C13**, vlastník Security + Backend) vlastní R2 revokační operace: globální revoke-all sessions účtu a revokaci instalace (zneplatní i vázané session; revokovaná instalace nepushuje ani se tiše nereaktivuje), idempotenci, jednotnou klientskou reakci (smazat materiál, signed-out, zachovat lokální data i outbox, nepřerušit aktivní workout), audit per session/instalace a invarianty `RVC-001` až `RVC-015`. Contract-only. Blokuje `R2-06`.
 
 - `r2-authorization-ownership-contract.md` (**C8**, vlastník Security + Backend Architecture) vlastní serverové vynucení autorizace a ownership v R2: principal výhradně z ověřené access session, ownership check na každé chráněné hranici, R2 capability baseline (`profile.read/write`, `device.manage`, `sync.push`), default deny, anti-IDOR pravidla (cizí zdroj = 404, nerozlišitelný od neexistence), audit odmítnutí a invarianty `AOC-001` až `AOC-015`. Contract-only, bez policy engine a rolí. Blokuje `R2-04` a `R2-05`.
 
@@ -144,7 +150,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-05` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-06` až `R2-08` zůstávají `NOT_READY` (R2-06 čeká na kontrakty C12 a C13).
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-05` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); blokující kontrakty `R2-06` (**C12, C13**) existují → **`R2-06` je `READY` (neimplementováno)**; `R2-07` a `R2-08` zůstávají `NOT_READY` (R2-07 čeká na C15).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -171,7 +177,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` až `R2-05` jsou implementovány** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, **první push sync s ownership autorizací, idempotencí a potvrzením po commitu**); viz `DOCUMENTATION_STATUS.md` §3. `R2-06` až `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je příprava kontraktů **C12 – Conflict/rejection** a **C13 – Revocation** pro `R2-06`.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` až `R2-05` jsou implementovány** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, **první push sync s ownership autorizací, idempotencí a potvrzením po commitu**); viz `DOCUMENTATION_STATUS.md` §3. Kontrakty **C12** a **C13** existují → **`R2-06` je `READY` (neimplementováno)**; `R2-07` a `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je **implementace `R2-06`** (produkční kód — samostatné rozhodnutí), případně příprava **C15** pro `R2-07`.
 
 ---
 
@@ -359,12 +365,14 @@ issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md`
 **`R2-05 – Ownership Authorization and First Sync (push)` je implementován**
 (Flyway V4 dle C6 §8.4–§8.5, push endpoint dle C10 s per-item ownership/idempotencí/
 verzemi a auditem dle C14 §7; mobilní SyncEngine se state-based replayem outboxu,
-stabilními idempotency keys a potvrzením výhradně po serverovém commitu);
-`R2-06` až `R2-08` zůstávají `NOT_READY`. Další kanonický krok:
+stabilními idempotency keys a potvrzením výhradně po serverovém commitu).
+Kontrakty **C12 – Conflict/rejection** (`CRC-001` až `CRC-015`) a **C13 – Revocation**
+(`RVC-001` až `RVC-015`) existují → **`R2-06` je `READY` (neimplementováno)**;
+`R2-07` a `R2-08` zůstávají `NOT_READY`. Další kanonický krok:
 
 ```text
-C12 – Conflict/rejection  a  C13 – Revocation   [pro R2-06]
-poté: implementace R2-06 – Conflict, Rejection and Session Revocation
+R2-06 – Conflict, Rejection and Session Revocation  (implementace, dle C12/C13)
+poté: C15 – Local-to-account migration  [pro R2-07]
 ```
 
 Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
