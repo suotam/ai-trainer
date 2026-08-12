@@ -24,4 +24,11 @@ interface DeviceInstallationRepository {
         localSchemaVersion: String,
         lastSeenAt: Instant,
     )
+
+    /** Zaznamená úspěšný sync batch zařízení (C6 §8.2 `last_sync_at`). */
+    fun touchLastSync(
+        accountId: UUID,
+        installationId: UUID,
+        lastSyncAt: Instant,
+    )
 }

@@ -81,6 +81,24 @@ class JdbcDeviceInstallationRepository(
             .update()
     }
 
+    override fun touchLastSync(
+        accountId: UUID,
+        installationId: UUID,
+        lastSyncAt: Instant,
+    ) {
+        jdbc
+            .sql(
+                """
+                UPDATE device_installation
+                SET last_sync_at = :lastSyncAt, last_seen_at = :lastSyncAt
+                WHERE account_id = :accountId AND installation_id = :installationId
+                """.trimIndent(),
+            ).param("lastSyncAt", Timestamp.from(lastSyncAt))
+            .param("accountId", accountId)
+            .param("installationId", installationId)
+            .update()
+    }
+
     private fun map(rs: ResultSet): DeviceInstallation =
         DeviceInstallation(
             accountId = UUID.fromString(rs.getString("account_id")),
