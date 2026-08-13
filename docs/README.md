@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.31  
+**Verze:** 2.32  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-13
@@ -153,7 +153,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-07` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); **`R2-08` je `READY` (neimplementováno, poslední R2 slice)**.
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -180,7 +180,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` až `R2-07` jsou implementovány** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach); viz `DOCUMENTATION_STATUS.md` §3. **Kontraktní mapa R2 (C1–C15) je kompletní** → **`R2-08` je `READY` (neimplementováno, poslední R2 slice)**. Dalším kanonickým krokem je **implementace `R2-08`** (E2E evidence + R2 Exit Review).
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Dalším kanonickým krokem je **plánování Release 3** (po samostatném pokynu).
 
 ---
 
@@ -362,19 +362,16 @@ uvést pravdivou evidence summary
 # 14. Aktuální další krok
 
 Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Release 1
-uzavřen. Z R2 jsou implementovány **`R2-01` až `R2-07`** (lokální ownership/sync
-metadata, backend account/auth baseline, mobilní auth + secure storage, profil a
-registrace zařízení, ownership authorization + první push sync, conflict/rejection
-resolution + revokace, local-to-account attach dle C15); viz
-`DOCUMENTATION_STATUS.md` §3. **Kontraktní mapa R2 (C1–C15) je kompletní** →
-**`R2-08` je `READY` (neimplementováno, poslední R2 slice)**.
+uzavřen. **Celé R2 (`R2-01` až `R2-08`) je implementované, R2 Exit Review proveden
+a Release 2 uzavřen** — viz `DOCUMENTATION_STATUS.md` §3. Jediný otevřený dluh R2 je
+řízená výjimka: runtime ověření na Android emulátoru (na vývojovém stroji chybí
+Android SDK); přesný postup doplnění je popsán v R2 Exit Review.
 Další kanonický krok:
 
 ```text
-R2-08 – R2 Critical End-to-End Evidence and Exit Review  (implementace)
+Plánování Release 3  (release scope → vertical-slice plán → blocking kontrakty)
 ```
 
-Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
-slices za `READY` a nezahajuje implementaci.
+Plánování ani implementace R3 nezačíná bez samostatného pokynu.
 
-Před implementací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
+Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
