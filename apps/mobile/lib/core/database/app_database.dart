@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'tables/availability_tables.dart';
+import 'tables/calendar_tables.dart';
 import 'tables/goals_tables.dart';
 import 'tables/plan_tables.dart';
 import 'tables/sports_tables.dart';
@@ -34,21 +35,21 @@ part 'app_database.g.dart';
     LocalEquipmentItems,
     LocalConstraints,
     LocalTrainingPlans,
+    LocalCalendarChanges,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 8 (R3-04, C16 §4): tabulka ručního plánu
-  /// `local_training_plans` — aditivní, born ownable and syncable
-  /// (R3M-004); ruční workouty jsou existující `local_workout_instances`
-  /// (MPC-001). Verze 7 (R3-03) přidala dostupnost/vybavení/omezení,
-  /// verze 6 (R3-02) cíle, verze 5 (R3-01) sportovní profil, verze 4
-  /// (R2-06) conflict/rejection rozhodnutí, verze 3 (R2-05) serverové
-  /// verze synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data
-  /// i aktivní session (C1 `MSM-005`, PDR-009).
+  /// Schema version 9 (R3-05, C16 §4): append-only evidence kalendářních
+  /// změn `local_calendar_changes` (CAL-003). Verze 8 (R3-04) přidala
+  /// ruční plán, verze 7 (R3-03) dostupnost/vybavení/omezení, verze 6
+  /// (R3-02) cíle, verze 5 (R3-01) sportovní profil, verze 4 (R2-06)
+  /// conflict/rejection rozhodnutí, verze 3 (R2-05) serverové verze
+  /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
+  /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -141,6 +142,11 @@ class AppDatabase extends _$AppDatabase {
       // aditivní, prázdná (R3M-008), žádná existující data se nemění.
       if (from < 8) {
         await m.createTable(localTrainingPlans);
+      }
+      // Migrace v8 → v9 (R3-05, C16 §5): jen append-only evidence
+      // kalendářních změn — aditivní, prázdná (R3M-008).
+      if (from < 9) {
+        await m.createTable(localCalendarChanges);
       }
     },
     beforeOpen: (details) async {

@@ -585,5 +585,19 @@
   "planWorkoutSubtitle": "{date} · {type} · {count} exercises",
   "@planWorkoutSubtitle": {"description": "Planned workout list subtitle.", "placeholders": {"date": {"type": "String"}, "type": {"type": "String"}, "count": {"type": "int"}}},
   "manualWorkoutTypeLabel": "{type, select, STRENGTH{Strength} ENDURANCE{Endurance} MOBILITY{Mobility} TECHNIQUE{Technique} GENERAL{General} other{{type}}}",
-  "@manualWorkoutTypeLabel": {"description": "Localized manual workout type label by stable code.", "placeholders": {"type": {"type": "String"}}}
+  "@manualWorkoutTypeLabel": {"description": "Localized manual workout type label by stable code.", "placeholders": {"type": {"type": "String"}}},
+  "planActionMove": "Move",
+  "@planActionMove": {"description": "Move planned workout action (C21)."},
+  "planActionCancel": "Cancel workout",
+  "@planActionCancel": {"description": "Cancel planned workout action (state change, never deletion)."},
+  "planActionReplace": "Replace",
+  "@planActionReplace": {"description": "Replace planned workout action (cancel + new workout)."},
+  "planMoveDateField": "New date (YYYY-MM-DD)",
+  "@planMoveDateField": {"description": "Target date field of the move sheet."},
+  "planMoveConfirm": "Move workout",
+  "@planMoveConfirm": {"description": "Confirm move action."},
+  "planCancelledLabel": "Cancelled",
+  "@planCancelledLabel": {"description": "Cancelled workout status label."},
+  "planErrorNotAllowed": "This workout can no longer be changed.",
+  "@planErrorNotAllowed": {"description": "CAL-002 guard error (started/completed/cancelled workout)."}
 }

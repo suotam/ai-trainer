@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 8', () async {
-    // R3-04 zvýšil schema na verzi 8 (ruční plán, C16 §4).
+  test('databaze vznikne od prazdneho stavu se schema verzi 9', () async {
+    // R3-05 zvýšil schema na verzi 9 (evidence kalendářních změn, C16 §4).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 8);
+    expect(version.data.values.first, 9);
 
     final tables = await db
         .customSelect(
@@ -92,6 +92,7 @@ void main() {
       'local_activity_summaries',
       'local_app_state',
       'local_availability_rules',
+      'local_calendar_changes',
       'local_constraints',
       'local_equipment_items',
       'local_goals',

@@ -236,5 +236,12 @@
   "planErrorConflict": "Aktivní plán už máš.",
   "planErrorValidation": "Zkontroluj zadané údaje a zkus to znovu.",
   "planWorkoutSubtitle": "{date} · {type} · {count} cviků",
-  "manualWorkoutTypeLabel": "{type, select, STRENGTH{Síla} ENDURANCE{Vytrvalost} MOBILITY{Mobilita} TECHNIQUE{Technika} GENERAL{Obecný} other{{type}}}"
+  "manualWorkoutTypeLabel": "{type, select, STRENGTH{Síla} ENDURANCE{Vytrvalost} MOBILITY{Mobilita} TECHNIQUE{Technika} GENERAL{Obecný} other{{type}}}",
+  "planActionMove": "Přesunout",
+  "planActionCancel": "Zrušit workout",
+  "planActionReplace": "Nahradit",
+  "planMoveDateField": "Nové datum (RRRR-MM-DD)",
+  "planMoveConfirm": "Přesunout workout",
+  "planCancelledLabel": "Zrušeno",
+  "planErrorNotAllowed": "Tento workout už nelze měnit."
 }

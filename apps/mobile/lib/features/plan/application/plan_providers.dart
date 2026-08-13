@@ -4,7 +4,9 @@ import '../../../core/database/database_provider.dart';
 import '../../../core/ids/id_generator.dart';
 import '../../../core/time/clock.dart';
 import '../../workouts/application/today_providers.dart';
+import '../data/drift_calendar_operations_repository.dart';
 import '../data/drift_training_plan_repository.dart';
+import '../domain/calendar_operations.dart';
 import '../domain/training_plan.dart';
 import '../domain/training_plan_repository.dart';
 
@@ -28,6 +30,13 @@ final planWorkoutsProvider =
       retry: (retryCount, error) => null,
     );
 
+/// Kalendářní operace (R3-05, C21).
+final calendarOperationsRepositoryProvider =
+    Provider<CalendarOperationsRepository>(
+      (ref) =>
+          DriftCalendarOperationsRepository(ref.watch(appDatabaseProvider)),
+    );
+
 /// UI stav zápisu plánu.
 sealed class PlanSaveState {
   const PlanSaveState();
@@ -48,6 +57,12 @@ class PlanSaved extends PlanSaveState {
 class PlanFailure extends PlanSaveState {
   const PlanFailure(this.result);
   final PlanWriteResult result;
+}
+
+/// Typovaná chyba kalendářní operace (CAL-007).
+class PlanCalendarFailure extends PlanSaveState {
+  const PlanCalendarFailure(this.result);
+  final CalendarOpResult result;
 }
 
 /// Controller zápisů plánu: double-submit guard, typované chyby, po
@@ -86,6 +101,66 @@ class PlanController extends Notifier<PlanSaveState> {
           now: ref.read(clockProvider)(),
         ),
   );
+
+  Future<void> moveWorkout(String instanceId, String targetLocalDate) =>
+      _runCalendar(
+        () => ref
+            .read(calendarOperationsRepositoryProvider)
+            .moveWorkout(
+              instanceId,
+              targetLocalDate,
+              changeId: ref.read(idGeneratorProvider).newId(),
+              now: ref.read(clockProvider)(),
+            ),
+      );
+
+  Future<void> cancelWorkout(String instanceId) => _runCalendar(
+    () => ref
+        .read(calendarOperationsRepositoryProvider)
+        .cancelWorkout(
+          instanceId,
+          changeId: ref.read(idGeneratorProvider).newId(),
+          now: ref.read(clockProvider)(),
+        ),
+  );
+
+  Future<void> replaceWorkout(String instanceId, PlannedWorkoutInput input) =>
+      _runCalendar(
+        () => ref
+            .read(calendarOperationsRepositoryProvider)
+            .replaceWorkout(
+              instanceId,
+              input,
+              newId: ref.read(idGeneratorProvider).newId,
+              now: ref.read(clockProvider)(),
+            ),
+      );
+
+  Future<void> _runCalendar(Future<CalendarOpResult> Function() action) async {
+    if (_inFlight) {
+      return;
+    }
+    _inFlight = true;
+    state = const PlanSaving();
+    try {
+      final result = await action();
+      switch (result) {
+        case CalendarOpSaved():
+          ref
+            ..invalidate(trainingPlansProvider)
+            ..invalidate(planWorkoutsProvider)
+            ..invalidate(todayWorkoutsProvider);
+          state = const PlanSaved();
+        default:
+          state = PlanCalendarFailure(result);
+      }
+    } catch (_) {
+      // Raw persistence výjimka se nepropaguje do UI.
+      state = const PlanCalendarFailure(CalendarOpValidationFailed());
+    } finally {
+      _inFlight = false;
+    }
+  }
 
   Future<void> _run(Future<PlanWriteResult> Function() action) async {
     if (_inFlight) {

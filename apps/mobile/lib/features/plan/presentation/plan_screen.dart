@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/time/clock.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/plan_providers.dart';
+import '../domain/calendar_operations.dart';
 import '../domain/training_plan.dart';
 
 /// Ruční tréninkový plán (R3-04, C20): vytvoření plánu (nejvýše jeden
@@ -63,6 +64,15 @@ class PlanScreen extends ConsumerWidget {
               key: errorBannerKey,
               content: Text(switch (saveState.result) {
                 PlanWriteActiveConflict() => l10n.planErrorConflict,
+                _ => l10n.planErrorValidation,
+              }),
+              actions: [const SizedBox.shrink()],
+            ),
+          if (saveState is PlanCalendarFailure)
+            MaterialBanner(
+              key: errorBannerKey,
+              content: Text(switch (saveState.result) {
+                CalendarOpNotAllowed() => l10n.planErrorNotAllowed,
                 _ => l10n.planErrorValidation,
               }),
               actions: [const SizedBox.shrink()],
@@ -158,18 +168,7 @@ class _PlanWorkoutsList extends ConsumerWidget {
             )
           : ListView(
               children: [
-                for (final workout in items)
-                  ListTile(
-                    key: Key('plan_workout_${workout.instanceId}'),
-                    title: Text(workout.title),
-                    subtitle: Text(
-                      l10n.planWorkoutSubtitle(
-                        workout.scheduledLocalDate,
-                        l10n.manualWorkoutTypeLabel(workout.workoutType),
-                        workout.exerciseCount,
-                      ),
-                    ),
-                  ),
+                for (final workout in items) _PlanWorkoutTile(workout: workout),
                 const SizedBox(height: 88),
               ],
             ),
@@ -177,12 +176,152 @@ class _PlanWorkoutsList extends ConsumerWidget {
   }
 }
 
+class _PlanWorkoutTile extends ConsumerWidget {
+  const _PlanWorkoutTile({required this.workout});
+
+  final PlannedWorkoutSummary workout;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final controller = ref.read(planControllerProvider.notifier);
+    final cancelled = workout.status == 'CANCELLED';
+    final subtitleParts = [
+      l10n.planWorkoutSubtitle(
+        workout.scheduledLocalDate,
+        l10n.manualWorkoutTypeLabel(workout.workoutType),
+        workout.exerciseCount,
+      ),
+      if (cancelled) l10n.planCancelledLabel,
+    ];
+    // Operace jen na budoucích/nezapočatých READY instancích (CAL-002/008);
+    // guardy vynucuje repository, UI menu jen nenabízí u zjevných stavů.
+    final operable = workout.status == 'READY';
+    return ListTile(
+      key: Key('plan_workout_${workout.instanceId}'),
+      title: Text(workout.title),
+      subtitle: Text(subtitleParts.join(' · ')),
+      enabled: !cancelled,
+      trailing: !operable
+          ? null
+          : PopupMenuButton<String>(
+              key: Key('plan_workout_menu_${workout.instanceId}'),
+              onSelected: (action) {
+                switch (action) {
+                  case 'move':
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) => _MoveSheet(
+                        instanceId: workout.instanceId,
+                        currentDate: workout.scheduledLocalDate,
+                      ),
+                    );
+                  case 'cancel':
+                    controller.cancelWorkout(workout.instanceId);
+                  case 'replace':
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (_) =>
+                          _WorkoutForm(replaceInstanceId: workout.instanceId),
+                    );
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'move', child: Text(l10n.planActionMove)),
+                PopupMenuItem(
+                  value: 'cancel',
+                  child: Text(l10n.planActionCancel),
+                ),
+                PopupMenuItem(
+                  value: 'replace',
+                  child: Text(l10n.planActionReplace),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// Sheet přesunu workoutu (C21 §4.1).
+class _MoveSheet extends ConsumerStatefulWidget {
+  const _MoveSheet({required this.instanceId, required this.currentDate});
+
+  final String instanceId;
+  final String currentDate;
+
+  @override
+  ConsumerState<_MoveSheet> createState() => _MoveSheetState();
+}
+
+class _MoveSheetState extends ConsumerState<_MoveSheet> {
+  late final TextEditingController _date;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = TextEditingController(text: widget.currentDate);
+  }
+
+  @override
+  void dispose() {
+    _date.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const Key('move_sheet_date'),
+            controller: _date,
+            decoration: InputDecoration(labelText: l10n.planMoveDateField),
+          ),
+          const SizedBox(height: 16),
+          FilledButton(
+            key: const Key('move_sheet_confirm'),
+            onPressed: _save,
+            child: Text(l10n.planMoveConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    await ref
+        .read(planControllerProvider.notifier)
+        .moveWorkout(widget.instanceId, _date.text.trim());
+    if (mounted && ref.read(planControllerProvider) is PlanSaved) {
+      Navigator.of(context).pop();
+    }
+  }
+}
+
 /// Formulář ručního workoutu (C20 §5.1) — title, typ, datum, délka a
 /// dynamický seznam cviků (série × opakování × volitelná váha).
+/// V replace režimu (C21 §4.3) nahrazuje existující workout.
 class _WorkoutForm extends ConsumerStatefulWidget {
-  const _WorkoutForm({required this.planId});
+  const _WorkoutForm({this.planId, this.replaceInstanceId})
+    : assert(
+        (planId != null) != (replaceInstanceId != null),
+        'Právě jeden režim: add do plánu XOR replace instance.',
+      );
 
-  final String planId;
+  final String? planId;
+  final String? replaceInstanceId;
 
   @override
   ConsumerState<_WorkoutForm> createState() => _WorkoutFormState();
@@ -369,9 +508,12 @@ class _WorkoutFormState extends ConsumerState<_WorkoutForm> {
           ),
       ],
     );
-    await ref
-        .read(planControllerProvider.notifier)
-        .addWorkout(widget.planId, input);
+    final controller = ref.read(planControllerProvider.notifier);
+    if (widget.replaceInstanceId != null) {
+      await controller.replaceWorkout(widget.replaceInstanceId!, input);
+    } else {
+      await controller.addWorkout(widget.planId!, input);
+    }
     if (mounted && ref.read(planControllerProvider) is PlanSaved) {
       Navigator.of(context).pop();
     }
