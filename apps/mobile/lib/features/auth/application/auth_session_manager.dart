@@ -271,13 +271,22 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
     );
     await _storage.write(stored);
     state = AsyncData(_stateOf(stored));
-    // Data vytvořená po přihlášení vlastní účet (R2-05, C2 §4 ↔ C3 §7);
-    // vlastnictví existujících dat se nemění (attach vlastní C15).
+    // Data vytvořená po přihlášení vlastní účet (R2-05, C2 §4 ↔ C3 §7).
     try {
       await ref.read(localOwnerBindingProvider).bindAccount(granted.accountId);
     } catch (_) {
       // Selhání vazby nesmí shodit přihlášení; nová data zůstanou anonymní
-      // a připojí je C15/R2-07.
+      // a připojí je attach při dalším přihlášení.
+    }
+    // R2-07 (C15 §6): idempotentní attach předpřihlašovacích anonymních
+    // dat k účtu — lokální, bez sítě, fail-safe (LAM-011); nepřipojená
+    // data připojí další běh.
+    try {
+      await ref
+          .read(localAccountAttachProvider)
+          .attachAnonymousData(granted.accountId);
+    } catch (_) {
+      // Fail-safe: selhání attach nesmí shodit přihlášení (LAM-011).
     }
   }
 
