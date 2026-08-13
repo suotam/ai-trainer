@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.40  
+**Verze:** 2.41  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -173,7 +173,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 `R3-02 – Goals and Priorities` je implementován (blocking kontrakt **C18 – Goals and priorities** vznikl v témže cyklu: `docs/06-domain/r3-goals-contract.md`, `GLC-001..015` — P0 podmnožina sports-and-goals-model §18–§22: cíl jako strukturovaná deklarace, ne povinná metrika; priorita bez enforcementu; žádná hierarchie/konflikty/milníky/metriky). **Mobilní Drift schema verze 6** (C16 §4 — aditivní migrace v5→v6 vytváří prázdnou tabulku `local_goals`; migrační řetěz od reálného v1 ověřen testem). **`Goal` aggregate root dle C18** — born ownable and syncable (R3M-004); povinný jen neprázdný title (GLC-003, unknown ≠ zero); stabilní kódy typů (8 dle modelu §19), priorit (`PRIMARY/MAINTENANCE/DEFERRED`), horizontů (5, default `OPEN_ENDED`) a stavů (`ACTIVE/PAUSED/COMPLETED/ABANDONED`) vynucené CHECK constrainty; volitelný deklarativní termín (bez automatické expirace, GLC-014) a poznámka. **Lifecycle s guardy v transakci** (GLC-004/006): `ACTIVE↔PAUSED`, oba → `COMPLETED`/`ABANDONED`; terminální stavy jsou konečné a terminální cíl je immutable záznam — typované výsledky `GoalSaved/ValidationFailed/NotFound/InvalidTransition`; žádné mazání (GLC-005). **Vazba na sport** (GLC-008): volitelná device-local reference na UserSport ID resolvovaná bez owner filtru — vlastnictví cíle je nezávislé (funguje i pro cíl navázaný na kolizí-anonymní sport po C15 attach). **Attach bezpodmínečný** (GLC-010 — cíle nemají cross-owner unikátní invarianty; `local_goals` v C15 attach transakci od tohoto slice, R3M-006). **UI:** `/goals` obrazovka (vstup z Today) — deterministicky řazený seznam (GLC-013), poctivý empty stav, bottom-sheet formulář (title, typ, priorita, horizont, volitelný sport z profilu, termín, poznámka), lifecycle akce (terminální cíl bez menu), typované chybové bannery; lokalizace EN/CS přes ICU select (GLC-002). Ověřeno novými testy: migrace řetězem v1→v6, persistence/validace/lifecycle/řazení nad skutečnou SQLite (vč. immutability terminálního cíle), attach (bezpodmínečně vč. cíle s vazbou na kolizí-anonymní sport), widget testy (empty→add→list, prázdný title chyba, complete → terminální bez menu). Mobile suite zelená (**261 testů**), `flutter analyze` čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R3-02` je implementován → dalším krokem je **kontrakt C19 – Availability, equipment and constraints** (`docs/06-domain/r3-availability-contract.md`), poté implementace `R3-03`. Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C19–C24).
+`R3-03 – Availability, Equipment and Basic Constraints` je implementován (blocking kontrakt **C19 – Availability, equipment and constraints** vznikl v témže cyklu: `docs/06-domain/r3-availability-contract.md`, `AVC-001..015` — P0 podmnožina scheduling/recovery modelů: **deklarace, ne vynucení**; mimo P0 zůstávají AvailabilityException, RecurrenceSeries, časová okna, kapacitní validace a medicínská interpretace). **Mobilní Drift schema verze 7** (C16 §4 — aditivní migrace v6→v7 vytváří tři prázdné tabulky; migrační řetěz od reálného v1 ověřen). **Tři vlastnitelné aggregate roots dle C19** (born ownable and syncable): `local_availability_rules` (**typický týden** — nejvýše jedna deklarace na den a vlastníka /AVC-003/, level `AVAILABLE/LIMITED/UNAVAILABLE`, volitelný budget minut a preferovaná část dne; den bez deklarace = unknown, ne nedostupný /AVC-004/; **zpětvzetí dne je legitimní DELETE** current-state preference /AVC-008/), `local_equipment_items` (**vybavení** — katalog 13 stabilních kódů XOR custom název; nejvýše jedna ne-`ARCHIVED` položka na kód a vlastníka /AVC-006/; archivace je stav, reaktivace znovu kontroluje duplicitu) a `local_constraints` (**základní omezení** — povinný title, bez interpretace a diagnostiky /AVC-009/; vyřešení je stav /AVC-007/). **Attach dle C19 §8**: kolizní den a kolizní equipment zůstávají anonymní (vzor C17); omezení bezpodmínečně. **UI:** `/availability` obrazovka (vstup z Today) — tři sekce: týden MON..SUN s bottom-sheet editací a zpětvzetím, vybavení s archivací, omezení s vyřešením; typované chybové bannery, EN/CS přes ICU select. Ověřeno novými testy: migrace řetězem v1→v7, persistence/invarianty/stavy nad skutečnou SQLite, attach kolizní scénáře (MON a DUMBBELLS zůstávají anonymní, TUE/BARBELL/omezení se připojí, invarianty účtu drží), widget testy tří sekcí. Mobile suite zelená (**269 testů**), `flutter analyze` čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R3-03` je implementován → dalším krokem je **kontrakt C20 – Manual training plan and internal calendar** (`docs/06-domain/r3-manual-plan-contract.md`), poté implementace `R3-04 – Manual Training Plan and Internal Calendar` (jádro hodnoty R3). Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C20–C24).
 
 ---
 
@@ -358,11 +360,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` a `R3-02` jsou implementovány** (viz §3; mobilní schema v6). Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-03` jsou implementovány** (viz §3; mobilní schema v7). Další kanonický krok:
 
 ```text
-C19 – Availability, equipment and constraints contract  (docs/06-domain/r3-availability-contract.md)
-→ poté je R3-03 – Availability, Equipment and Basic Constraints READY
+C20 – Manual training plan and internal calendar contract  (docs/06-domain/r3-manual-plan-contract.md)
+→ poté je R3-04 – Manual Training Plan and Internal Calendar READY
 ```
 
 Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
