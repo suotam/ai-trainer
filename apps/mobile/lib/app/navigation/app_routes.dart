@@ -42,6 +42,10 @@ abstract final class AppRoutes {
   static const String goalsName = 'goals';
   static const String goalsPath = '/goals';
 
+  /// Dostupnost a tréninkový kontext (R3-03, C19) — offline-first.
+  static const String availabilityName = 'availability';
+  static const String availabilityPath = '/availability';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';

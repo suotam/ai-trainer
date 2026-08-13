@@ -1,4 +1,5 @@
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/availability_tables.dart';
 import '../../../core/database/tables/sports_tables.dart';
 import '../../../core/database/tables/workout_tables.dart';
 import '../domain/local_account_attach.dart';
@@ -77,6 +78,35 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
       // nemají cross-owner unikátní invarianty.
       await _db.customStatement(
         'UPDATE local_goals SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+      // 7. Typický týden (R3-03, C19 §8): kolizní den (účet už má
+      // deklaraci téhož dne) zůstává anonymní (AVC-003/010).
+      await _db.customStatement(
+        'UPDATE local_availability_rules SET owner_id = ?1 '
+        "WHERE owner_id = '$localAnonymousOwnerId' AND NOT EXISTS ("
+        '  SELECT 1 FROM local_availability_rules a WHERE a.owner_id = ?1 '
+        '  AND a.day_of_week = local_availability_rules.day_of_week'
+        ')',
+        [accountId],
+      );
+      // 8. Vybavení (R3-03, C19 §8): kolizní ne-ARCHIVED katalogový kód
+      // zůstává anonymní (AVC-006/010).
+      await _db.customStatement(
+        'UPDATE local_equipment_items SET owner_id = ?1 '
+        "WHERE owner_id = '$localAnonymousOwnerId' AND NOT ("
+        "  equipment_code IS NOT NULL AND status != '$equipmentStatusArchived' "
+        '  AND EXISTS (SELECT 1 FROM local_equipment_items a '
+        '    WHERE a.owner_id = ?1 '
+        '    AND a.equipment_code = local_equipment_items.equipment_code '
+        "    AND a.status != '$equipmentStatusArchived')"
+        ')',
+        [accountId],
+      );
+      // 9. Omezení (R3-03, C19 §8): bezpodmínečný attach.
+      await _db.customStatement(
+        'UPDATE local_constraints SET owner_id = ? '
         "WHERE owner_id = '$localAnonymousOwnerId'",
         [accountId],
       );
