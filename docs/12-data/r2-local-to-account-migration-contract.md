@@ -69,6 +69,7 @@ Rozhodnutí, **co se připojuje**, vychází z existující R2-01/R2-05 sémanti
 |---|---|---|
 | WorkoutSession, Step/SetPerformance, WorkoutFeedback, ActivitySummary vlastněné `local-anonymous` | **uživatelská** — vznikají výhradně uživatelskou akcí | **ano** |
 | WorkoutInstance vlastněná `local-anonymous`, **na které existuje session nebo má `started_session_id`** | **uživatelsky dotčená** — uživatel na ní trénoval (kanonické kritérium; shodné s R2-05 stamping pravidlem „start je uživatelská akce") | **ano** |
+| WorkoutInstance vlastněná `local-anonymous` se **`source_type = USER_PLAN`** (ručně vytvořená, C20/MPC-009) | **uživatelská od vzniku** — vytvoření je uživatelská akce; session není podmínkou | **ano** |
 | Ostatní WorkoutInstance vlastněné `local-anonymous` (typicky seed/demo — `source_type = DEMO`, bez session) | **čistý seed/demo** | **ne** (plán §12 — seed se nesynchronizuje jako uživatelská data) |
 | Data už vlastněná jiným účtem (`owner_id` = jiný account) | cizí účet na témže zařízení (`sync-model §76`) | **nikdy** (LAM-007) |
 | Outbox položky, sync verze, resolutions | technická metadata | řídí se vlastníkem entity (§5) |
