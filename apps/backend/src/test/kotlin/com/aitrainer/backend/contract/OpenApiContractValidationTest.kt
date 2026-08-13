@@ -63,6 +63,17 @@ class OpenApiContractValidationTest {
     }
 
     @Test
+    fun `revokacni operace deklaruji kanonicke operationId a status codes (C13)`() {
+        val revokeAll = assertNotNull(openApi.paths["/api/v1/auth/sessions"]?.delete)
+        assertEquals("revokeAllSessions", revokeAll.operationId)
+        assertEquals(setOf("204", "401", "429", "500"), revokeAll.responses.keys)
+
+        val revokeDevice = assertNotNull(openApi.paths["/api/v1/devices/{installationId}"]?.delete)
+        assertEquals("revokeDevice", revokeDevice.operationId)
+        assertEquals(setOf("204", "401", "404", "500"), revokeDevice.responses.keys)
+    }
+
+    @Test
     fun `sync push operace deklaruje kanonicke operationId, status codes a schemata`() {
         val push = assertNotNull(openApi.paths["/api/v1/sync/push"]?.post)
         assertEquals("pushSyncOperations", push.operationId)
