@@ -1,0 +1,10 @@
+{
+  "name": "valid-basic",
+  "description": "Minimální validní návrh: jeden workout s povinným reason.",
+  "modelOutput": "{\"summary\":\"One focused strength session to start the cycle.\",\"planTitle\":\"Starter Week\",\"workouts\":[{\"title\":\"Full Body A\",\"workoutType\":\"STRENGTH\",\"dayOffset\":0,\"reason\":\"Baseline stimulus for the main goal.\"}]}",
+  "expected": {
+    "verdict": "VALID",
+    "workoutCount": 1,
+    "planTitle": "Starter Week"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "invalid-empty-workouts",
+  "description": "Prázdný seznam workoutů je nevalidní (1–14).",
+  "modelOutput": "{\"summary\":\"Empty plan.\",\"planTitle\":\"Nothing Week\",\"workouts\":[]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

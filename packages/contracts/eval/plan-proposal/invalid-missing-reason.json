@@ -1,0 +1,8 @@
+{
+  "name": "invalid-missing-reason",
+  "description": "Vysvětlitelnost je povinná: workout bez reason je nevalidní (C28).",
+  "modelOutput": "{\"summary\":\"Plan without explanations.\",\"planTitle\":\"Silent Week\",\"workouts\":[{\"title\":\"Full Body\",\"workoutType\":\"STRENGTH\",\"dayOffset\":0}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

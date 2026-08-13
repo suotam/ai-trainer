@@ -1,0 +1,8 @@
+{
+  "name": "invalid-workout-type",
+  "description": "Neznámý workoutType mimo C20 množinu je nevalidní — žádná oprava (SOV-005).",
+  "modelOutput": "{\"summary\":\"Plan with unknown type.\",\"planTitle\":\"Cardio Week\",\"workouts\":[{\"title\":\"Cardio Blast\",\"workoutType\":\"CARDIO\",\"dayOffset\":0,\"reason\":\"Not a valid type.\"}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "invalid-free-text",
+  "description": "Adversariální: model odpověděl prózou místo JSON — nikdy se neprovede (SOV-005).",
+  "modelOutput": "Sure! Here is your plan: do squats on Monday, run on Wednesday and stretch on Friday. Let me know if you want more!",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

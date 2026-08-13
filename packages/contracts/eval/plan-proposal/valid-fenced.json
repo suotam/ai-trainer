@@ -1,0 +1,10 @@
+{
+  "name": "valid-fenced",
+  "description": "Model obalil JSON do markdown fence — server jej deterministicky extrahuje (SOV-011).",
+  "modelOutput": "```json\n{\"summary\":\"Fenced proposal.\",\"planTitle\":\"Fenced Week\",\"workouts\":[{\"title\":\"Mobility\",\"workoutType\":\"MOBILITY\",\"dayOffset\":1,\"reason\":\"Recovery focus.\"}]}\n```",
+  "expected": {
+    "verdict": "VALID",
+    "workoutCount": 1,
+    "planTitle": "Fenced Week"
+  }
+}

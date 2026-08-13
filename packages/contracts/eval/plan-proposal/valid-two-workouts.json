@@ -1,0 +1,10 @@
+{
+  "name": "valid-two-workouts",
+  "description": "Typický týden: dva workouty, jeden s cviky.",
+  "modelOutput": "{\"summary\":\"Two-session week balancing strength and recovery.\",\"planTitle\":\"Balanced Week\",\"workouts\":[{\"title\":\"Full Body A\",\"workoutType\":\"STRENGTH\",\"dayOffset\":0,\"reason\":\"Main stimulus.\",\"plannedDurationMinutes\":60,\"exercises\":[{\"title\":\"Squat\",\"sets\":3,\"repetitions\":5,\"weightKg\":80},{\"title\":\"Press\",\"sets\":3,\"repetitions\":8}]},{\"title\":\"Easy Mobility\",\"workoutType\":\"MOBILITY\",\"dayOffset\":2,\"reason\":\"Active recovery between sessions.\"}]}",
+  "expected": {
+    "verdict": "VALID",
+    "workoutCount": 2,
+    "planTitle": "Balanced Week"
+  }
+}
