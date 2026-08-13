@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.48  
+**Verze:** 2.49  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -214,7 +214,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R4-01 – Backend AI Gateway Baseline` je implementován (blocking kontrakty **C25 – AI gateway** /ADR-012 + `docs/09-ai/r4-ai-gateway-contract.md`, `AGW-001..015`/ a **C26 – Prompt versioning & AI audit** /`docs/09-ai/r4-prompt-audit-contract.md`, `PAA-001..015`/ vznikly v témže cyklu). **ADR-012:** AI volání výhradně server-side přes gateway za `AiModelProvider` abstrakcí; první provider **Anthropic Claude (Messages API)**, model je konfigurační hodnota; klíče nikdy na klientu/v repu; testy a CI výhradně proti fake provideru. **Backend modul `ai/`**: `AiModelProvider` port s typovanými selháními (`TIMEOUT/PROVIDER_ERROR/RATE_LIMITED_UPSTREAM/INVALID_RESPONSE` — nikdy raw výjimka ani předstíraný úspěch), **verzovaný `PromptRegistry`** (jediný zdroj promptů; `plan-proposal-v1`; vydaná verze immutable; šablona bez uživatelských dat — kontext je oddělený payload, „data nejsou instrukce"), `FakeModelProvider` (default bez klíče, deterministické fixtures) a `AnthropicModelProvider` (aktivní jen s `aitrainer.ai.provider=anthropic`; klíč validován při startu; timeout povinný, bez auto-retry). **`AiGateway`**: resolvuje prompt verzi, volá provider, **audituje bez obsahu** (`AiProposalRequested/Generated/Failed` dle C26 §4 — nikdy prompt/kontext/odpověď/PII; selhání vždy s druhem) a vrací výsledek s povinnou trojicí verzí (prompt + schema `plan-proposal-schema-v1` + skutečný model id). Žádný produktový endpoint (přijde s R4-03/C28) a žádná interpretace výstupu (AGW-007). Ověřeno **4 novými testy** (trojice verzí + audit bez obsahu vč. „SENSITIVE-CONTEXT" negativní kontroly, typované selhání s auditem druhu, registry stabilita a immutabilita, fake provider determinismus). Backend suite **95/95** + ktlint čistý; mobil beze změny.
 
-**Přesný další kanonický krok:** `R4-01` je implementován → dalším krokem je **kontrakt C27 – AIContext & request classification** (`docs/09-ai/r4-aicontext-contract.md`), poté implementace `R4-02 – AIContext and Request Classification` (mobile). Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R4 slices čekají na své kontrakty (C27–C32).
+`R4-02 – AIContext and Request Classification` je implementován (blocking kontrakt **C27 – AIContext & request classification** vznikl v témže cyklu: `docs/09-ai/r4-aicontext-contract.md`, `ACX-001..015`). AIContext je **jediný obsah, který o uživateli odchází do modelu** — proto nejpřísnější disciplína: **mobilní `DriftAiContextBuilder`** staví kontext pro `PLAN_PROPOSAL` čistě lokálně z R3 read modelů aktuálního vlastníka (ACX-002/012, bez sítě): sporty (jen ACTIVE/PAUSED, vč. participation patternu), aktivní cíle (**sport link resolvován na kód/název — nikdy ID**, ACX-003), typický týden, aktivní vybavení a omezení, plus **C23 agregáty za 30 dní místo detailní historie** (ACX-007). **Zakázaný obsah (ACX-004/005):** žádné entity/account/owner ID, žádné volné poznámky (`note` — mohou nést PII), žádná sync/verzovací metadata, žádné secrets; ENDED/ARCHIVED/RESOLVED/ABANDONED entity se nepřenášejí (ACX-006). **Determinismus (ACX-008):** stejný stav DB → bajtově identická serializace; prázdný profil je validní kontext (ACX-009); sekce mají deterministický přiznaný ořez při >50 položkách (ACX-010). Ověřeno **3 novými testy** — klíčový negativní test vkládá markery do všech poznámek a ověřuje, že se v serializaci neobjeví žádný marker, žádné ID, `local-anonymous`, `owner`, `rowVersion` ani `syncState`; dále bajtový determinismus, stavové filtry, resolvace sport linku, prázdný profil a „agregáty místo historie" (název konkrétní aktivity se nepřenáší). Mobile suite zelená (**290 testů**), `flutter analyze` čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R4-02` je implementován → dalším krokem jsou **kontrakty C28 – Structured output schema & validation a C29 – AIProposal lifecycle** (`docs/09-ai/r4-structured-output-contract.md`, `docs/09-ai/r4-proposal-lifecycle-contract.md`), poté implementace `R4-03 – Structured Plan Proposal` (endpoint + validace + lokální AIProposal). Tvorba kontraktů i implementace smí začít až po samostatném pokynu. Ostatní R4 slices čekají na své kontrakty (C28–C32).
 
 ---
 
@@ -399,11 +401,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`, backlog `R4-01` až `R4-08`, contract map C25–C32, `R4P-001..015`); **`R4-01` je implementován** (ADR-012, AI gateway s fake/Anthropic providerem, prompt registry, AI audit). Další kanonický krok:
+Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`, backlog `R4-01` až `R4-08`, contract map C25–C32, `R4P-001..015`); **`R4-01` a `R4-02` jsou implementovány** (AI gateway + minimalizovaný AIContext builder). Další kanonický krok:
 
 ```text
-C27 – AIContext & request classification contract  (docs/09-ai/r4-aicontext-contract.md)
-→ poté je R4-02 – AIContext and Request Classification READY
+C28 – Structured output schema & validation + C29 – AIProposal lifecycle
+→ poté je R4-03 – Structured Plan Proposal READY
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r4-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
