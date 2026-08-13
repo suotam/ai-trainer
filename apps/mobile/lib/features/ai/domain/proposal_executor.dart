@@ -19,10 +19,12 @@ sealed class ExecuteProposalResult {
   const ExecuteProposalResult();
 }
 
-/// Plán vznikl, návrh je EXECUTED s referencí (CSE-005, APL-010).
+/// Provedeno, návrh je EXECUTED (CSE-005). U plan proposal nese referenci
+/// vzniklého plánu (APL-010); u adjustmentu je evidence C21 kalendářní
+/// evidence + návrh sám (C38 §5) — reference jen při ADD obsahu.
 final class ExecutionSaved extends ExecuteProposalResult {
   const ExecutionSaved(this.planId);
-  final String planId;
+  final String? planId;
 }
 
 final class ExecutionNotFound extends ExecuteProposalResult {
@@ -44,4 +46,22 @@ final class ExecutionActivePlanConflict extends ExecuteProposalResult {
 /// (CSE-003), žádná oprava payloadu (CSE-012).
 final class ExecutionInvalidPayload extends ExecuteProposalResult {
   const ExecutionInvalidPayload();
+}
+
+/// Target adjustmentu se nepodařilo deterministicky resolvovat (C38 §3):
+/// týden se od návrhu změnil, nebo je shoda nejednoznačná — nikdy odhad.
+final class ExecutionTargetUnresolved extends ExecuteProposalResult {
+  const ExecutionTargetUnresolved();
+}
+
+/// Safety veto (C38 §4, AJE-005): STOP stav blokuje zátěž přidávající
+/// operace; AI ho nikdy neobchází — řešení je na uživateli.
+final class ExecutionSafetyConflict extends ExecuteProposalResult {
+  const ExecutionSafetyConflict();
+}
+
+/// Doménové odmítnutí operace (C21 guardy, chybějící ACTIVE plán pro ADD)
+/// — pravidla platí i pro AI (AJE-002).
+final class ExecutionOperationRejected extends ExecuteProposalResult {
+  const ExecutionOperationRejected();
 }

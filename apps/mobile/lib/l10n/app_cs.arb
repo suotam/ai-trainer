@@ -277,6 +277,8 @@
   "aiErrorExecutionConflict": "Už máš aktivní plán. Nejdřív ho archivuj a pak návrh proveď znovu.",
   "aiErrorExecutionFailed": "Provedení návrhu selhalo. Nic se nezměnilo — návrh zůstává, zkus to znovu.",
   "aiRetry": "Provést znovu",
+  "aiErrorExecutionTarget": "Návrh odkazuje na workout, který už v týdnu nesedí. Nic se nezměnilo — požádej o novou úpravu.",
+  "aiErrorExecutionSafety": "Dnešní signály doporučují odpočinek, přidání zátěže se proto neprovedlo. Nic se nezměnilo — uprav check-in, nebo návrh odmítni.",
   "aiRequestAdjustment": "Upravit tento týden",
   "aiOperationsHeader": "Navržené změny",
   "aiOperationLabel": "{code, select, MOVE{Přesunout} CANCEL{Zrušit} REPLACE{Nahradit} ADD{Přidat} other{{code}}}",

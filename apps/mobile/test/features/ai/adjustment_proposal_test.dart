@@ -5,8 +5,11 @@ import 'package:ai_trainer_mobile/features/ai/application/ai_providers.dart';
 import 'package:ai_trainer_mobile/features/ai/data/adjustment_proposal_client_validator.dart';
 import 'package:ai_trainer_mobile/features/ai/data/http_ai_api_client.dart';
 import 'package:ai_trainer_mobile/features/ai/presentation/ai_proposals_screen.dart';
+import 'package:ai_trainer_mobile/features/ai/data/drift_proposal_executor.dart';
 import 'package:ai_trainer_mobile/features/auth/application/auth_providers.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
+import 'package:ai_trainer_mobile/features/plan/data/drift_training_plan_repository.dart';
+import 'package:ai_trainer_mobile/features/plan/domain/training_plan.dart';
 import 'package:ai_trainer_mobile/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,13 +165,29 @@ void main() {
   }
 
   testWidgets('žádost o úpravu → PROPOSED s adjustment trojicí verzí → '
-      'review operací s důvody → potvrzení zůstává CONFIRMED bez execution '
-      '(ASJ-008/009/014)', (tester) async {
+      'review operací s důvody → potvrzení = provedení C21 cestami '
+      '(ASJ-008/014, C38 §2)', (tester) async {
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     final database = createTestDatabase();
     addTearDown(database.close);
+    // Týden odpovídající fixture targetům (resolvace dle C38 §3).
+    final plans = DriftTrainingPlanRepository(database);
+    await plans.createPlan(title: 'Můj plán', newId: 'p1', now: now);
+    var seq = 0;
+    for (final (title, offset) in [('Full Body A', 0), ('Intervaly', 1)]) {
+      await plans.addWorkout(
+        'p1',
+        PlannedWorkoutInput(
+          title: title,
+          workoutType: 'STRENGTH',
+          scheduledLocalDate: scheduledDateForOffset(now, offset),
+        ),
+        newId: () => 'w-${seq++}',
+        now: now,
+      );
+    }
     final api = _ScriptedAdjustmentApi();
     await tester.pumpWidget(app(database, api));
     await tester.pumpAndSettle();
@@ -184,18 +203,28 @@ void main() {
     expect(find.textContaining('Day 0 → Day 2'), findsOneWidget);
     expect(find.textContaining('Vysoká hlášená únava.'), findsOneWidget);
 
-    // Potvrzení: CONFIRMED (Accepted), žádná execution do C38 (ASJ-009).
+    // Potvrzení = souhlas s provedením (C38 §2): MOVE + CANCEL proběhly
+    // C21 cestami, návrh je EXECUTED s viditelným stavem Applied.
     await tester.tap(find.byKey(const Key('ai_review_confirm')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Accepted'), findsOneWidget);
-    final plans = await database
-        .customSelect('SELECT COUNT(*) AS c FROM local_training_plans')
+    expect(find.textContaining('Applied'), findsOneWidget);
+    final moved = await database
+        .customSelect(
+          'SELECT scheduled_local_date, status FROM local_workout_instances '
+          "WHERE title = 'Full Body A'",
+        )
         .getSingle();
-    expect(plans.data['c'], 0);
+    expect(moved.data['scheduled_local_date'], scheduledDateForOffset(now, 2));
+    final cancelled = await database
+        .customSelect(
+          "SELECT status FROM local_workout_instances WHERE title = 'Intervaly'",
+        )
+        .getSingle();
+    expect(cancelled.data['status'], 'CANCELLED');
     final status = await database
         .customSelect('SELECT status, request_type FROM local_ai_proposals')
         .getSingle();
-    expect(status.data['status'], 'CONFIRMED');
+    expect(status.data['status'], 'EXECUTED');
     expect(status.data['request_type'], 'ADJUSTMENT_PROPOSAL');
   });
 }

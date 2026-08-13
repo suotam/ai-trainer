@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.57  
+**Verze:** 2.58  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -167,6 +167,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 
 - `r5-adjustment-schema-contract.md` (**C37**, vlastník Domain + Backend + Mobile) vlastní `adjustment-proposal-schema-v1`: seznam 1–10 operací **MOVE/CANCEL/REPLACE/ADD s povinným `reason` per operace**, přesnou tvarovou tabulkou (REPLACE workout bez dayOffset — den dědí z targetu), target by-value dayOffset 0–6 + title (žádná ID; resolvace instance je C38), **jediný endpoint s `requestType` v requestu**, dvojí deterministickou validaci, AIProposal reuse beze změny (C29), **potvrzení ≠ provedení** (`CONFIRMED` čeká na C38), povinné eval rozšíření (adresář `adjustment-proposal/`) a invarianty `ASJ-001` až `ASJ-015`. Contract-only. Blokuje `R5-05`.
 
+- `r5-adjustment-execution-contract.md` (**C38**, vlastník Domain + Mobile) vlastní provedení potvrzeného adjustmentu: **jediná cesta = C21/C20 operace** (guardy platí i pro AI), **deterministická resolvace by-value targetů** (přesná shoda datum+title, nejednoznačnost = typované selhání — nikdy odhad), dny relativní k lokálnímu datu vzniku návrhu, **safety veto** (STOP stav blokuje ADD/REPLACE deterministicky; MOVE/CANCEL jako konzervativní směr projdou), atomicitu s rollbackem, append-only C21 evidenci, typovaná selhání (`TargetUnresolved`/`SafetyConflict`/`OperationRejected`) a invarianty `AJE-001` až `AJE-015`. Contract-only. Blokuje `R5-06`.
+
 - `r4-changeset-execution-contract.md` (**C30**, vlastník Domain / ai-and-change-model + Mobile) vlastní provedení potvrzeného návrhu: **jediná cesta změny = C20 operace** (doménová pravidla vč. MPC-002 platí beze změny), mapování `dayOffset` → lokální datum provedení, atomicitu s rollbackem (žádný částečný stav), provenance `origin = AI_PROPOSAL` + `executedPlanId` referenci, typovaná selhání s explicitním retry a invarianty `CSE-001` až `CSE-015`. Contract-only. Blokuje `R4-05`.
 
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
@@ -215,7 +217,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **`R5-01` až `R5-05` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C38–C40).
+- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **`R5-01` až `R5-06` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R5-07` čeká na kontrakty C39–C40.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 
 - `r4-eval-gate-contract.md` (**C32**, vlastník Quality + Domain) vlastní R4 eval release gate: **sdílený dataset `packages/contracts/eval/plan-proposal/*.json`** (jediný zdroj pro obě strany dvojí validace), deterministický harness bez živého providera v běžné CI suite (backend `EvalGateTest` + mobilní konzistence klientského validátoru), gate kritéria (100% shoda verdiktů, vysvětlitelnost `reason`, kanonizace `mustNotContain`, minimální velikost datasetu, žádný skip/retry), poctivě přiznaný scope (kontraktní vrstva, ne kvalita modelu — ta patří smoke evidenci plánu §12), postup rozšiřování a invarianty `EVG-001` až `EVG-015`. Contract-only. Blokuje `R4-07`. **Tímto je kontraktní mapa R4 (C25–C32) kompletní.**
@@ -438,14 +440,14 @@ implementováno, R4 Exit Review proveden a Release 4 uzavřen** (otevřené
 sync, DELETE a plán struktura mimo P0 — viz `DOCUMENTATION_STATUS.md` §3).
 Existuje kanonický R5 vertical-slice plán
 (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`,
-contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-05` jsou
+contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-06` jsou
 implementovány** (denní check-in — schema v13, backend V6; deterministická
-safety pravidla; doporučení dne; adjustment kontext + strukturovaný
-adjustment návrh s dvojí validací a review operací — potvrzení čeká na
-C38 execution). Další kanonický krok:
+safety pravidla; doporučení dne; celý adjustment cyklus: kontext →
+strukturovaný návrh s dvojí validací → review → atomické provedení C21/C20
+cestami s deterministickou resolvací a safety vetem). Další kanonický krok:
 
 ```text
-C38 – Adjustment execution kontrakt → R5-06 – Adjustment ChangeSet Execution
+C39 + C40 kontrakty → R5-07 – Weekly Summary, Progress Explanation and Local Notifications
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
