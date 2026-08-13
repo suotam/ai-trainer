@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 5', () async {
-    // R3-01 zvýšil schema na verzi 5 (sportovní profil, C16 §4).
+  test('databaze vznikne od prazdneho stavu se schema verzi 6', () async {
+    // R3-02 zvýšil schema na verzi 6 (cíle, C16 §4).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 5);
+    expect(version.data.values.first, 6);
 
     final tables = await db
         .customSelect(
@@ -91,6 +91,7 @@ void main() {
     expect(tables.map((r) => r.data['name']), [
       'local_activity_summaries',
       'local_app_state',
+      'local_goals',
       'local_outbox',
       'local_set_performances',
       'local_set_plans',
