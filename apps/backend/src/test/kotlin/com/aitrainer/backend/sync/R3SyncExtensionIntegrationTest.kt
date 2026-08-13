@@ -159,6 +159,39 @@ class R3SyncExtensionIntegrationTest {
     }
 
     @Test
+    fun `DAILY_CHECK_IN se pushne aditivnim typem s replay idempotenci (C33 par 4)`() {
+        val principal = registerPrincipalWithDevice()
+        val checkInId = UUID.randomUUID().toString()
+        val create =
+            operation(
+                1,
+                "DAILY_CHECK_IN",
+                checkInId,
+                mapOf(
+                    "localDate" to "2026-08-14",
+                    "energyLevel" to 4,
+                    "fatigueLevel" to 2,
+                    "painLevel" to 3,
+                    "painAreaCode" to "SHOULDER",
+                    "rowVersion" to 1,
+                ),
+            )
+
+        assertEquals(listOf("SUCCESS"), results(push(principal, listOf(create))).map { it["result"] })
+        assertEquals(
+            1,
+            jdbc.queryForObject(
+                "SELECT count(*) FROM synced_daily_check_in WHERE id = ?::uuid AND account_id = ?::uuid",
+                Int::class.java,
+                checkInId,
+                principal.accountId,
+            ),
+        )
+        // Replay = ALREADY_APPLIED bez duplicity (SXC-005).
+        assertEquals(listOf("ALREADY_APPLIED"), results(push(principal, listOf(create))).map { it["result"] })
+    }
+
+    @Test
     fun `replay R3 operace vraci ALREADY_APPLIED bez duplicity a konflikt je explicitni`() {
         val principal = registerPrincipalWithDevice()
         val sportId = UUID.randomUUID().toString()
