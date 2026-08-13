@@ -81,6 +81,25 @@ class JdbcDeviceInstallationRepository(
             .update()
     }
 
+    override fun revoke(
+        accountId: UUID,
+        installationId: UUID,
+        now: Instant,
+    ) {
+        jdbc
+            .sql(
+                """
+                UPDATE device_installation
+                SET status = 'REVOKED', last_seen_at = :now, row_version = row_version + 1
+                WHERE account_id = :accountId AND installation_id = :installationId
+                  AND status = 'ACTIVE'
+                """.trimIndent(),
+            ).param("now", Timestamp.from(now))
+            .param("accountId", accountId)
+            .param("installationId", installationId)
+            .update()
+    }
+
     override fun touchLastSync(
         accountId: UUID,
         installationId: UUID,

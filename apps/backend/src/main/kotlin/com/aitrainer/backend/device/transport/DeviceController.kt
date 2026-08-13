@@ -4,12 +4,15 @@ import com.aitrainer.backend.auth.transport.PrincipalResolver
 import com.aitrainer.backend.device.application.DeviceInstallationRepository
 import com.aitrainer.backend.device.application.RegisterDeviceInstallation
 import com.aitrainer.backend.device.application.RegisterDeviceResult
+import com.aitrainer.backend.device.application.RevokeDeviceInstallation
+import com.aitrainer.backend.device.application.RevokeDeviceResult
 import com.aitrainer.backend.device.domain.DeviceInstallation
 import com.aitrainer.backend.infrastructure.http.ApiException
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -49,8 +52,38 @@ data class DeviceListResponseDto(
 class DeviceController(
     private val principalResolver: PrincipalResolver,
     private val registerDeviceInstallation: RegisterDeviceInstallation,
+    private val revokeDeviceInstallation: RevokeDeviceInstallation,
     private val deviceRepository: DeviceInstallationRepository,
 ) {
+    /**
+     * Revokace instalace (C13 §4, RVC-002/003): zneplatní instalaci i na ni
+     * vázané session. Cizí a neexistující instalace jsou shodně 404;
+     * opakování je idempotentní no-op (RVC-004).
+     */
+    @DeleteMapping("/{installationId}")
+    fun revoke(
+        @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) authorization: String?,
+        @PathVariable installationId: String,
+    ): ResponseEntity<Void> {
+        val principal = principalResolver.require(authorization)
+        return when (revokeDeviceInstallation.revoke(principal.accountId, installationId)) {
+            RevokeDeviceResult.Revoked -> {
+                ResponseEntity
+                    .noContent()
+                    .cacheControl(CacheControl.noStore())
+                    .build()
+            }
+
+            RevokeDeviceResult.NotFound -> {
+                throw ApiException(
+                    status = HttpStatus.NOT_FOUND,
+                    code = "RESOURCE_NOT_FOUND",
+                    message = "The requested resource was not found.",
+                )
+            }
+        }
+    }
+
     @PutMapping("/{installationId}")
     fun register(
         @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) authorization: String?,
