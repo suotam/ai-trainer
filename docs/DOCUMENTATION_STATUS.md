@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.58  
+**Verze:** 2.59  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -259,7 +259,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-02 – Deterministic Safety Rules` je implementován (blocking kontrakt **C34 – Deterministic safety rules** /`docs/06-domain/r5-safety-rules-contract.md`, `SFR-001..015`/ vznikl v témže cyklu). **Čistá deterministická funkce `evaluateSafety`** (SFR-001: žádná síť, čas, AI ani persistence — assessment je rekonstruovatelný read model): dnešní check-in + aktivní C19 omezení → P0 podmnožina modelu §32 (`INSUFFICIENT_INFORMATION` / `SAFE_WITH_CURRENT_INFORMATION` / `CAUTION` / `DO_NOT_RECOMMEND_ACTIVITY`) + typované flags **vždy se zdrojem** (bolest nese oblast+úroveň, omezení titul). **Tabulková konzervativní pravidla (C34 §3):** bolest ≥4 nebo únava 5 = STOP; bolest 1–3, únava 4, energie ≤2, spánek ≤2, aktivní omezení = CAUTION; **chybějící check-in = poctivé `INSUFFICIENT_INFORMATION`, nikdy implicitní OK** (SFR-004); klinické stavy modelu §31 vědomě mimo P0 do odborného/právního review (SFR-007). **AI výsledku nikdy nevelí** (SFR-003, model §33.4) — C36/C38 ho budou konzumovat jako fakt. **UI:** `SafetyCard` na check-in obrazovce s opatrnými formulacemi bez medicínských tvrzení a viditelnou beta hranicí (SFR-008). Ověřeno **3 novými testy** (tabulková matice 14 případů vč. hran 4/5 a kombinací se STOP prioritou; determinismus opakovaného běhu + pořadí flags + zdroje; widget evidence STOP stavu s viditelnými zdroji flags a dvojí „not medical advice" formulací) — mobile suite **315 testů**, analyze čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R5-02` je implementován → dalším krokem je vytvoření blocking kontraktu **C35 – Today recommendation read model** (`docs/06-domain/r5-today-recommendation-contract.md`) a poté implementace `R5-03 – Today Recommendation`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C36–C40).
+`R5-03 – Today Recommendation` je implementován (blocking kontrakt **C35 – Today recommendation** /`docs/06-domain/r5-today-recommendation-contract.md`, `TDR-001..015`/ vznikl v témže cyklu). **Deterministický read model dne**: čistá mapovací funkce C34 safety stavu + počtu dnešních workoutů na P0 stavy — `CHECK_IN_MISSING` (výzva s CTA na check-in, žádná implicitní rada, TDR-004), `CONSIDER_REST`, `CONSIDER_LIGHTER_DAY`, `TRAIN_AS_PLANNED`, `NOTHING_PLANNED`. **Jediný zdroj signálů je C34** (TDR-002 — doporučení nemá vlastní pravidla; důvody = safety flags beze změny se zdroji) a **safety má konzervativní přednost před plánem** (TDR-003 — „zvaž odpočinek" platí i s naplánovaným workoutem). **UI `TodayRecommendationCard`** na Today: jedna poctivá věta + viditelné důvody + CTA; nedostupný podklad kartu skryje — Today nikdy neshodí (TDR-009); R1 stavy Today (seznam/empty/error) zůstávají nedotčené (TDR-011, dokázáno stávajícími testy v téže suite). Vše plně offline (TDR-008). Ověřeno **4 novými testy** (mapovací matice 8 kombinací + determinismus + průchod flags; widget: výzva s CTA + nedotčený empty stav; STOP s viditelným důvodem i při naplánovaném workoutu; trénuj podle plánu) — mobile suite **319 testů**, analyze čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R5-03` je implementován → dalším krokem je vytvoření blocking kontraktu **C36 – Adjustment context & classification** (`docs/09-ai/r5-adjustment-context-contract.md`) a poté implementace `R5-04 – Adjustment Context and Classification`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C37–C40).
 
 ---
 
@@ -444,10 +446,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` a `R5-02` jsou implementovány** (denní check-in + deterministická safety pravidla). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-03` jsou implementovány** (denní check-in, deterministická safety pravidla, doporučení dne na Today). Další kanonický krok:
 
 ```text
-C35 – Today recommendation kontrakt → R5-03 – Today Recommendation
+C36 – Adjustment context kontrakt → R5-04 – Adjustment Context and Classification
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
