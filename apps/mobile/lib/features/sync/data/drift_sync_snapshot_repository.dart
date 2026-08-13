@@ -169,8 +169,151 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
       );
     }
 
+    // R3 entity (C24 §2, SXC-006): samostatné roots bez serverových
+    // parentů, řazené deterministicky za R1 šesticí v pořadí registru.
+    await _collectR3Roots(planned, ownerId, salts);
+
     return planned;
   }
+
+  /// Sběr R3 roots (R3-07): plný stav řádku jako camelCase payload;
+  /// pending = LOCAL_ONLY/DIRTY vlastněné účtem (shodné s R1 pravidly).
+  Future<void> _collectR3Roots(
+    List<PlannedSyncEntity> planned,
+    String ownerId,
+    Map<String, int> salts,
+  ) async {
+    Future<void> collect(
+      String entityType,
+      String tableName,
+      Map<String, Object?> Function(Map<String, Object?> row) payload,
+    ) async {
+      final rows = await _db
+          .customSelect(
+            'SELECT * FROM $tableName WHERE owner_id = ? '
+            "AND sync_state IN ('LOCAL_ONLY','DIRTY') ORDER BY created_at, id",
+            variables: [Variable.withString(ownerId)],
+          )
+          .get();
+      for (final row in rows) {
+        final data = row.data;
+        planned.add(
+          PlannedSyncEntity(
+            entityType: entityType,
+            entityId: data['id']! as String,
+            payload: payload(data),
+            localRevision: _withSalt(
+              salts,
+              entityType,
+              data['id']! as String,
+              'v${data['row_version']}',
+            ),
+            stateEntityType: entityType,
+            stateEntityId: data['id']! as String,
+          ),
+        );
+      }
+    }
+
+    await collect('USER_SPORT', 'local_user_sports', _userSportPayload);
+    await collect('GOAL', 'local_goals', _goalPayload);
+    await collect(
+      'AVAILABILITY_RULE',
+      'local_availability_rules',
+      _availabilityPayload,
+    );
+    await collect('EQUIPMENT_ITEM', 'local_equipment_items', _equipmentPayload);
+    await collect('CONSTRAINT_ITEM', 'local_constraints', _constraintPayload);
+    await collect('TRAINING_PLAN', 'local_training_plans', _planPayload);
+    await collect(
+      'CALENDAR_CHANGE',
+      'local_calendar_changes',
+      _calendarChangePayload,
+    );
+    await collect('MANUAL_ACTIVITY', 'local_activities', _activityPayload);
+  }
+
+  Map<String, Object?> _userSportPayload(Map<String, Object?> row) => {
+    'sportCode': row['sport_code'],
+    'customName': row['custom_name'],
+    'customCategory': row['custom_category'],
+    'role': row['role'],
+    'priority': row['priority'],
+    'experienceLevel': row['experience_level'],
+    'lastRegularActivityDate': row['last_regular_activity_date'],
+    'returnAfterPause': row['return_after_pause'],
+    'note': row['note'],
+    'frequencyPerWeek': row['frequency_per_week'],
+    'typicalDurationMinutes': row['typical_duration_minutes'],
+    'typicalIntensity': row['typical_intensity'],
+    'environment': row['environment'],
+    'fixedDays': row['fixed_days'],
+    'status': row['status'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _goalPayload(Map<String, Object?> row) => {
+    'title': row['title'],
+    'goalType': row['goal_type'],
+    'priority': row['priority'],
+    'horizon': row['horizon'],
+    'status': row['status'],
+    'userSportId': row['user_sport_id'],
+    'targetLocalDate': row['target_local_date'],
+    'note': row['note'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _availabilityPayload(Map<String, Object?> row) => {
+    'dayOfWeek': row['day_of_week'],
+    'level': row['level'],
+    'budgetMinutes': row['budget_minutes'],
+    'preferredPartOfDay': row['preferred_part_of_day'],
+    'note': row['note'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _equipmentPayload(Map<String, Object?> row) => {
+    'equipmentCode': row['equipment_code'],
+    'customName': row['custom_name'],
+    'note': row['note'],
+    'status': row['status'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _constraintPayload(Map<String, Object?> row) => {
+    'title': row['title'],
+    'note': row['note'],
+    'status': row['status'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _planPayload(Map<String, Object?> row) => {
+    'title': row['title'],
+    'note': row['note'],
+    'status': row['status'],
+    'rowVersion': row['row_version'],
+  };
+
+  Map<String, Object?> _calendarChangePayload(Map<String, Object?> row) => {
+    'workoutInstanceId': row['workout_instance_id'],
+    'changeType': row['change_type'],
+    'fromLocalDate': row['from_local_date'],
+    'toLocalDate': row['to_local_date'],
+    'replacementInstanceId': row['replacement_instance_id'],
+    'createdAt': row['created_at'],
+  };
+
+  Map<String, Object?> _activityPayload(Map<String, Object?> row) => {
+    'title': row['title'],
+    'localDate': row['local_date'],
+    'durationMinutes': row['duration_minutes'],
+    'userSportId': row['user_sport_id'],
+    'workoutInstanceId': row['workout_instance_id'],
+    'note': row['note'],
+    'source': row['source'],
+    'rowVersion': row['row_version'],
+  };
 
   @override
   Future<int?> serverVersion(String entityType, String entityId) async {
@@ -212,6 +355,15 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
       'WORKOUT_INSTANCE' => 'local_workout_instances',
       'WORKOUT_SESSION' => 'local_workout_sessions',
       'ACTIVITY_SUMMARY' => 'local_activity_summaries',
+      // R3 roots (C24 §2).
+      'USER_SPORT' => 'local_user_sports',
+      'GOAL' => 'local_goals',
+      'AVAILABILITY_RULE' => 'local_availability_rules',
+      'EQUIPMENT_ITEM' => 'local_equipment_items',
+      'CONSTRAINT_ITEM' => 'local_constraints',
+      'TRAINING_PLAN' => 'local_training_plans',
+      'CALENDAR_CHANGE' => 'local_calendar_changes',
+      'MANUAL_ACTIVITY' => 'local_activities',
       _ => throw ArgumentError('Not an aggregate root: $entityType'),
     };
     await _db.customStatement('UPDATE $table SET sync_state = ? WHERE id = ?', [
@@ -308,6 +460,15 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
   String _stateTypeFor(String entityType) => switch (entityType) {
     'WORKOUT_INSTANCE' => 'WORKOUT_INSTANCE',
     'ACTIVITY_SUMMARY' => 'ACTIVITY_SUMMARY',
+    // R3 roots jsou samy sobě stavovou entitou (C24 §2).
+    'USER_SPORT' ||
+    'GOAL' ||
+    'AVAILABILITY_RULE' ||
+    'EQUIPMENT_ITEM' ||
+    'CONSTRAINT_ITEM' ||
+    'TRAINING_PLAN' ||
+    'CALENDAR_CHANGE' ||
+    'MANUAL_ACTIVITY' => entityType,
     _ => 'WORKOUT_SESSION',
   };
 
