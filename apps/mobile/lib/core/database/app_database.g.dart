@@ -10278,6 +10278,810 @@ class LocalUserSportsCompanion extends UpdateCompanion<LocalUserSportRow> {
   }
 }
 
+class $LocalGoalsTable extends LocalGoals
+    with TableInfo<$LocalGoalsTable, LocalGoalRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalGoalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goalTypeMeta = const VerificationMeta(
+    'goalType',
+  );
+  @override
+  late final GeneratedColumn<String> goalType = GeneratedColumn<String>(
+    'goal_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<String> priority = GeneratedColumn<String>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _horizonMeta = const VerificationMeta(
+    'horizon',
+  );
+  @override
+  late final GeneratedColumn<String> horizon = GeneratedColumn<String>(
+    'horizon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('OPEN_ENDED'),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(goalStatusActive),
+  );
+  static const VerificationMeta _userSportIdMeta = const VerificationMeta(
+    'userSportId',
+  );
+  @override
+  late final GeneratedColumn<String> userSportId = GeneratedColumn<String>(
+    'user_sport_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES local_user_sports (id)',
+    ),
+  );
+  static const VerificationMeta _targetLocalDateMeta = const VerificationMeta(
+    'targetLocalDate',
+  );
+  @override
+  late final GeneratedColumn<String> targetLocalDate = GeneratedColumn<String>(
+    'target_local_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    goalType,
+    priority,
+    horizon,
+    status,
+    userSportId,
+    targetLocalDate,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_goals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalGoalRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('goal_type')) {
+      context.handle(
+        _goalTypeMeta,
+        goalType.isAcceptableOrUnknown(data['goal_type']!, _goalTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_goalTypeMeta);
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_priorityMeta);
+    }
+    if (data.containsKey('horizon')) {
+      context.handle(
+        _horizonMeta,
+        horizon.isAcceptableOrUnknown(data['horizon']!, _horizonMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('user_sport_id')) {
+      context.handle(
+        _userSportIdMeta,
+        userSportId.isAcceptableOrUnknown(
+          data['user_sport_id']!,
+          _userSportIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('target_local_date')) {
+      context.handle(
+        _targetLocalDateMeta,
+        targetLocalDate.isAcceptableOrUnknown(
+          data['target_local_date']!,
+          _targetLocalDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalGoalRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalGoalRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      goalType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}goal_type'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}priority'],
+      )!,
+      horizon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}horizon'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      userSportId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_sport_id'],
+      ),
+      targetLocalDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_local_date'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalGoalsTable createAlias(String alias) {
+    return $LocalGoalsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalGoalRow extends DataClass implements Insertable<LocalGoalRow> {
+  final String id;
+  final String title;
+  final String goalType;
+  final String priority;
+  final String horizon;
+  final String status;
+  final String? userSportId;
+  final String? targetLocalDate;
+  final String? note;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalGoalRow({
+    required this.id,
+    required this.title,
+    required this.goalType,
+    required this.priority,
+    required this.horizon,
+    required this.status,
+    this.userSportId,
+    this.targetLocalDate,
+    this.note,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['goal_type'] = Variable<String>(goalType);
+    map['priority'] = Variable<String>(priority);
+    map['horizon'] = Variable<String>(horizon);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || userSportId != null) {
+      map['user_sport_id'] = Variable<String>(userSportId);
+    }
+    if (!nullToAbsent || targetLocalDate != null) {
+      map['target_local_date'] = Variable<String>(targetLocalDate);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalGoalsCompanion toCompanion(bool nullToAbsent) {
+    return LocalGoalsCompanion(
+      id: Value(id),
+      title: Value(title),
+      goalType: Value(goalType),
+      priority: Value(priority),
+      horizon: Value(horizon),
+      status: Value(status),
+      userSportId: userSportId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userSportId),
+      targetLocalDate: targetLocalDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetLocalDate),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalGoalRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalGoalRow(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      goalType: serializer.fromJson<String>(json['goalType']),
+      priority: serializer.fromJson<String>(json['priority']),
+      horizon: serializer.fromJson<String>(json['horizon']),
+      status: serializer.fromJson<String>(json['status']),
+      userSportId: serializer.fromJson<String?>(json['userSportId']),
+      targetLocalDate: serializer.fromJson<String?>(json['targetLocalDate']),
+      note: serializer.fromJson<String?>(json['note']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'goalType': serializer.toJson<String>(goalType),
+      'priority': serializer.toJson<String>(priority),
+      'horizon': serializer.toJson<String>(horizon),
+      'status': serializer.toJson<String>(status),
+      'userSportId': serializer.toJson<String?>(userSportId),
+      'targetLocalDate': serializer.toJson<String?>(targetLocalDate),
+      'note': serializer.toJson<String?>(note),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalGoalRow copyWith({
+    String? id,
+    String? title,
+    String? goalType,
+    String? priority,
+    String? horizon,
+    String? status,
+    Value<String?> userSportId = const Value.absent(),
+    Value<String?> targetLocalDate = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalGoalRow(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    goalType: goalType ?? this.goalType,
+    priority: priority ?? this.priority,
+    horizon: horizon ?? this.horizon,
+    status: status ?? this.status,
+    userSportId: userSportId.present ? userSportId.value : this.userSportId,
+    targetLocalDate: targetLocalDate.present
+        ? targetLocalDate.value
+        : this.targetLocalDate,
+    note: note.present ? note.value : this.note,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalGoalRow copyWithCompanion(LocalGoalsCompanion data) {
+    return LocalGoalRow(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      goalType: data.goalType.present ? data.goalType.value : this.goalType,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      horizon: data.horizon.present ? data.horizon.value : this.horizon,
+      status: data.status.present ? data.status.value : this.status,
+      userSportId: data.userSportId.present
+          ? data.userSportId.value
+          : this.userSportId,
+      targetLocalDate: data.targetLocalDate.present
+          ? data.targetLocalDate.value
+          : this.targetLocalDate,
+      note: data.note.present ? data.note.value : this.note,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalGoalRow(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('goalType: $goalType, ')
+          ..write('priority: $priority, ')
+          ..write('horizon: $horizon, ')
+          ..write('status: $status, ')
+          ..write('userSportId: $userSportId, ')
+          ..write('targetLocalDate: $targetLocalDate, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    goalType,
+    priority,
+    horizon,
+    status,
+    userSportId,
+    targetLocalDate,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalGoalRow &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.goalType == this.goalType &&
+          other.priority == this.priority &&
+          other.horizon == this.horizon &&
+          other.status == this.status &&
+          other.userSportId == this.userSportId &&
+          other.targetLocalDate == this.targetLocalDate &&
+          other.note == this.note &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalGoalsCompanion extends UpdateCompanion<LocalGoalRow> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> goalType;
+  final Value<String> priority;
+  final Value<String> horizon;
+  final Value<String> status;
+  final Value<String?> userSportId;
+  final Value<String?> targetLocalDate;
+  final Value<String?> note;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalGoalsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.goalType = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.horizon = const Value.absent(),
+    this.status = const Value.absent(),
+    this.userSportId = const Value.absent(),
+    this.targetLocalDate = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalGoalsCompanion.insert({
+    required String id,
+    required String title,
+    required String goalType,
+    required String priority,
+    this.horizon = const Value.absent(),
+    this.status = const Value.absent(),
+    this.userSportId = const Value.absent(),
+    this.targetLocalDate = const Value.absent(),
+    this.note = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       goalType = Value(goalType),
+       priority = Value(priority),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalGoalRow> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? goalType,
+    Expression<String>? priority,
+    Expression<String>? horizon,
+    Expression<String>? status,
+    Expression<String>? userSportId,
+    Expression<String>? targetLocalDate,
+    Expression<String>? note,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (goalType != null) 'goal_type': goalType,
+      if (priority != null) 'priority': priority,
+      if (horizon != null) 'horizon': horizon,
+      if (status != null) 'status': status,
+      if (userSportId != null) 'user_sport_id': userSportId,
+      if (targetLocalDate != null) 'target_local_date': targetLocalDate,
+      if (note != null) 'note': note,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalGoalsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? goalType,
+    Value<String>? priority,
+    Value<String>? horizon,
+    Value<String>? status,
+    Value<String?>? userSportId,
+    Value<String?>? targetLocalDate,
+    Value<String?>? note,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalGoalsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      goalType: goalType ?? this.goalType,
+      priority: priority ?? this.priority,
+      horizon: horizon ?? this.horizon,
+      status: status ?? this.status,
+      userSportId: userSportId ?? this.userSportId,
+      targetLocalDate: targetLocalDate ?? this.targetLocalDate,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (goalType.present) {
+      map['goal_type'] = Variable<String>(goalType.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<String>(priority.value);
+    }
+    if (horizon.present) {
+      map['horizon'] = Variable<String>(horizon.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (userSportId.present) {
+      map['user_sport_id'] = Variable<String>(userSportId.value);
+    }
+    if (targetLocalDate.present) {
+      map['target_local_date'] = Variable<String>(targetLocalDate.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalGoalsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('goalType: $goalType, ')
+          ..write('priority: $priority, ')
+          ..write('horizon: $horizon, ')
+          ..write('status: $status, ')
+          ..write('userSportId: $userSportId, ')
+          ..write('targetLocalDate: $targetLocalDate, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -10307,6 +11111,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalUserSportsTable localUserSports = $LocalUserSportsTable(
     this,
   );
+  late final $LocalGoalsTable localGoals = $LocalGoalsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10326,6 +11131,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localSyncedVersions,
     localSyncResolutions,
     localUserSports,
+    localGoals,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -17383,6 +18189,38 @@ typedef $$LocalUserSportsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
+final class $$LocalUserSportsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalUserSportsTable,
+          LocalUserSportRow
+        > {
+  $$LocalUserSportsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$LocalGoalsTable, List<LocalGoalRow>>
+  _localGoalsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.localGoals,
+    aliasName: 'local_user_sports__id__local_goals__user_sport_id',
+  );
+
+  $$LocalGoalsTableProcessedTableManager get localGoalsRefs {
+    final manager = $$LocalGoalsTableTableManager(
+      $_db,
+      $_db.localGoals,
+    ).filter((f) => f.userSportId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_localGoalsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$LocalUserSportsTableFilterComposer
     extends Composer<_$AppDatabase, $LocalUserSportsTable> {
   $$LocalUserSportsTableFilterComposer({
@@ -17496,6 +18334,31 @@ class $$LocalUserSportsTableFilterComposer
     column: $table.syncState,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> localGoalsRefs(
+    Expression<bool> Function($$LocalGoalsTableFilterComposer f) f,
+  ) {
+    final $$LocalGoalsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localGoals,
+      getReferencedColumn: (t) => t.userSportId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalGoalsTableFilterComposer(
+            $db: $db,
+            $table: $db.localGoals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocalUserSportsTableOrderingComposer
@@ -17704,6 +18567,31 @@ class $$LocalUserSportsTableAnnotationComposer
 
   GeneratedColumn<String> get syncState =>
       $composableBuilder(column: $table.syncState, builder: (column) => column);
+
+  Expression<T> localGoalsRefs<T extends Object>(
+    Expression<T> Function($$LocalGoalsTableAnnotationComposer a) f,
+  ) {
+    final $$LocalGoalsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localGoals,
+      getReferencedColumn: (t) => t.userSportId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalGoalsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localGoals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocalUserSportsTableTableManager
@@ -17717,16 +18605,9 @@ class $$LocalUserSportsTableTableManager
           $$LocalUserSportsTableAnnotationComposer,
           $$LocalUserSportsTableCreateCompanionBuilder,
           $$LocalUserSportsTableUpdateCompanionBuilder,
-          (
-            LocalUserSportRow,
-            BaseReferences<
-              _$AppDatabase,
-              $LocalUserSportsTable,
-              LocalUserSportRow
-            >,
-          ),
+          (LocalUserSportRow, $$LocalUserSportsTableReferences),
           LocalUserSportRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool localGoalsRefs})
         > {
   $$LocalUserSportsTableTableManager(
     _$AppDatabase db,
@@ -17838,9 +18719,45 @@ class $$LocalUserSportsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LocalUserSportsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({localGoalsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (localGoalsRefs) db.localGoals],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (localGoalsRefs)
+                    await $_getPrefetchedData<
+                      LocalUserSportRow,
+                      $LocalUserSportsTable,
+                      LocalGoalRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$LocalUserSportsTableReferences
+                          ._localGoalsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$LocalUserSportsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).localGoalsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.userSportId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -17855,12 +18772,502 @@ typedef $$LocalUserSportsTableProcessedTableManager =
       $$LocalUserSportsTableAnnotationComposer,
       $$LocalUserSportsTableCreateCompanionBuilder,
       $$LocalUserSportsTableUpdateCompanionBuilder,
-      (
-        LocalUserSportRow,
-        BaseReferences<_$AppDatabase, $LocalUserSportsTable, LocalUserSportRow>,
-      ),
+      (LocalUserSportRow, $$LocalUserSportsTableReferences),
       LocalUserSportRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool localGoalsRefs})
+    >;
+typedef $$LocalGoalsTableCreateCompanionBuilder =
+    LocalGoalsCompanion Function({
+      required String id,
+      required String title,
+      required String goalType,
+      required String priority,
+      Value<String> horizon,
+      Value<String> status,
+      Value<String?> userSportId,
+      Value<String?> targetLocalDate,
+      Value<String?> note,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalGoalsTableUpdateCompanionBuilder =
+    LocalGoalsCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> goalType,
+      Value<String> priority,
+      Value<String> horizon,
+      Value<String> status,
+      Value<String?> userSportId,
+      Value<String?> targetLocalDate,
+      Value<String?> note,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+final class $$LocalGoalsTableReferences
+    extends BaseReferences<_$AppDatabase, $LocalGoalsTable, LocalGoalRow> {
+  $$LocalGoalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocalUserSportsTable _userSportIdTable(_$AppDatabase db) => db
+      .localUserSports
+      .createAlias('local_goals__user_sport_id__local_user_sports__id');
+
+  $$LocalUserSportsTableProcessedTableManager? get userSportId {
+    final $_column = $_itemColumn<String>('user_sport_id');
+    if ($_column == null) return null;
+    final manager = $$LocalUserSportsTableTableManager(
+      $_db,
+      $_db.localUserSports,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userSportIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalGoalsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalGoalsTable> {
+  $$LocalGoalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get goalType => $composableBuilder(
+    column: $table.goalType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get horizon => $composableBuilder(
+    column: $table.horizon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetLocalDate => $composableBuilder(
+    column: $table.targetLocalDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LocalUserSportsTableFilterComposer get userSportId {
+    final $$LocalUserSportsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableFilterComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalGoalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalGoalsTable> {
+  $$LocalGoalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get goalType => $composableBuilder(
+    column: $table.goalType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get horizon => $composableBuilder(
+    column: $table.horizon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetLocalDate => $composableBuilder(
+    column: $table.targetLocalDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocalUserSportsTableOrderingComposer get userSportId {
+    final $$LocalUserSportsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableOrderingComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalGoalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalGoalsTable> {
+  $$LocalGoalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get goalType =>
+      $composableBuilder(column: $table.goalType, builder: (column) => column);
+
+  GeneratedColumn<String> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<String> get horizon =>
+      $composableBuilder(column: $table.horizon, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get targetLocalDate => $composableBuilder(
+    column: $table.targetLocalDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+
+  $$LocalUserSportsTableAnnotationComposer get userSportId {
+    final $$LocalUserSportsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalGoalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalGoalsTable,
+          LocalGoalRow,
+          $$LocalGoalsTableFilterComposer,
+          $$LocalGoalsTableOrderingComposer,
+          $$LocalGoalsTableAnnotationComposer,
+          $$LocalGoalsTableCreateCompanionBuilder,
+          $$LocalGoalsTableUpdateCompanionBuilder,
+          (LocalGoalRow, $$LocalGoalsTableReferences),
+          LocalGoalRow,
+          PrefetchHooks Function({bool userSportId})
+        > {
+  $$LocalGoalsTableTableManager(_$AppDatabase db, $LocalGoalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalGoalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalGoalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalGoalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> goalType = const Value.absent(),
+                Value<String> priority = const Value.absent(),
+                Value<String> horizon = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> userSportId = const Value.absent(),
+                Value<String?> targetLocalDate = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalGoalsCompanion(
+                id: id,
+                title: title,
+                goalType: goalType,
+                priority: priority,
+                horizon: horizon,
+                status: status,
+                userSportId: userSportId,
+                targetLocalDate: targetLocalDate,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String goalType,
+                required String priority,
+                Value<String> horizon = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> userSportId = const Value.absent(),
+                Value<String?> targetLocalDate = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalGoalsCompanion.insert(
+                id: id,
+                title: title,
+                goalType: goalType,
+                priority: priority,
+                horizon: horizon,
+                status: status,
+                userSportId: userSportId,
+                targetLocalDate: targetLocalDate,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LocalGoalsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userSportId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userSportId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userSportId,
+                                referencedTable: $$LocalGoalsTableReferences
+                                    ._userSportIdTable(db),
+                                referencedColumn: $$LocalGoalsTableReferences
+                                    ._userSportIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LocalGoalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalGoalsTable,
+      LocalGoalRow,
+      $$LocalGoalsTableFilterComposer,
+      $$LocalGoalsTableOrderingComposer,
+      $$LocalGoalsTableAnnotationComposer,
+      $$LocalGoalsTableCreateCompanionBuilder,
+      $$LocalGoalsTableUpdateCompanionBuilder,
+      (LocalGoalRow, $$LocalGoalsTableReferences),
+      LocalGoalRow,
+      PrefetchHooks Function({bool userSportId})
     >;
 
 class $AppDatabaseManager {
@@ -17897,4 +19304,6 @@ class $AppDatabaseManager {
       $$LocalSyncResolutionsTableTableManager(_db, _db.localSyncResolutions);
   $$LocalUserSportsTableTableManager get localUserSports =>
       $$LocalUserSportsTableTableManager(_db, _db.localUserSports);
+  $$LocalGoalsTableTableManager get localGoals =>
+      $$LocalGoalsTableTableManager(_db, _db.localGoals);
 }

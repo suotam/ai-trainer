@@ -73,6 +73,13 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
         ')',
         [accountId],
       );
+      // 6. Cíle (R3-02, C18 §8): bezpodmínečný attach (GLC-010) — cíle
+      // nemají cross-owner unikátní invarianty.
+      await _db.customStatement(
+        'UPDATE local_goals SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
     });
   }
 }
