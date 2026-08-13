@@ -699,6 +699,20 @@
   "@checkinHistoryHeader": {"description": "Check-in history section header."},
   "checkinHistoryEmpty": "No check-ins yet.",
   "@checkinHistoryEmpty": {"description": "Honest empty history state."},
+  "safetyHeader": "Today's readiness (beta)",
+  "@safetyHeader": {"description": "R5-02 safety assessment card header (C34)."},
+  "safetyStateLabel": "{code, select, INSUFFICIENT_INFORMATION{No check-in today yet - fill it in to get guidance.} SAFE_WITH_CURRENT_INFORMATION{No warning signals in today's check-in.} CAUTION{Some signals suggest taking it easier today.} DO_NOT_RECOMMEND_ACTIVITY{Today's signals suggest considering rest.} other{{code}}}",
+  "@safetyStateLabel": {
+    "description": "Careful non-medical wording (SFR-008, model par. 32.3).",
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "safetyFlagLabel": "{code, select, SEVERE_PAIN{Strong pain reported} PAIN_REPORTED{Pain reported} VERY_HIGH_FATIGUE{Very high fatigue} HIGH_FATIGUE{High fatigue} LOW_ENERGY{Low energy} POOR_SLEEP{Poor sleep} ACTIVE_CONSTRAINT{Active limitation} other{{code}}}",
+  "@safetyFlagLabel": {
+    "description": "Stable P0 safety flag codes (C34 par. 2).",
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "safetyNotMedical": "Conservative, informational guidance only - not medical advice.",
+  "@safetyNotMedical": {"description": "Medical boundary wording (SFR-008, R5P-003)."},
   "aiConfirm": "Accept proposal",
   "@aiConfirm": {"description": "Confirm proposal action (APL-005)."},
   "aiReject": "Reject",

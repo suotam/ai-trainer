@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.57  
+**Verze:** 2.58  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -257,7 +257,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-01 – DailyCheckIn` je implementován (blocking kontrakt **C33 – DailyCheckIn model & persistence** /`docs/06-domain/r5-daily-checkin-contract.md`, `DCI-001..015`/ vznikl v témže cyklu). **P0 tvar** (vědomá podmnožina recovery modelu §5): škály 1–5 s definovaným významem — energie a únava povinné, spánek volitelný, **bolest vždy strukturovaně** level + stabilní kód oblasti (9 kódů, DCI-004); volný text jen jako **výhradně lokální poznámka** (DCI-006 — nikdy sync ani AI kontext, marker test). **Denní klíč (DCI-002):** nejvýše jeden záznam na den a vlastníka, vynucený repository v transakci (DB unique by kolidoval s C15 attach) — opakovaný zápis dne je editace téhož záznamu (`rowVersion+1`, `SYNCED → DIRTY`); žádné mazání v P0. **Born ownable & syncable (mobilní schema v13):** owner stamping při zápisu, attach s kolizí denního klíče (kolizní anonymní den zůstává anonymní, nikdy se nemaže), **sync typ `DAILY_CHECK_IN`** (C24 vzor: mobilní collection, backend registr, **Flyway V6** `synced_daily_check_in`, OpenAPI enum) — payload bez note. **UI:** obrazovka `/checkin` z Today (škálové chipy, oblast bolesti, lokální poznámka, historie) s beta označením „nejde o zdravotní doporučení" (R5P-003, DCI-014); check-in není nikdy povinný (DCI-001). Ověřeno **3 novými mobilními testy** (denní klíč/editace/DIRTY/validace vč. bolesti bez oblasti; attach kolize + sync payload bez note; widget flow vyplnění → uložení → historie → editace dne) — suite **312 testů**, analyze čistý; **1 novým backend testem** (push `DAILY_CHECK_IN` + replay idempotence) — suite **108/108** + ktlint, migrace V1–V6.
 
-**Přesný další kanonický krok:** `R5-01` je implementován → dalším krokem je vytvoření blocking kontraktu **C34 – Deterministic safety rules** (`docs/06-domain/r5-safety-rules-contract.md`) a poté implementace `R5-02 – Deterministic Safety Rules`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C35–C40).
+`R5-02 – Deterministic Safety Rules` je implementován (blocking kontrakt **C34 – Deterministic safety rules** /`docs/06-domain/r5-safety-rules-contract.md`, `SFR-001..015`/ vznikl v témže cyklu). **Čistá deterministická funkce `evaluateSafety`** (SFR-001: žádná síť, čas, AI ani persistence — assessment je rekonstruovatelný read model): dnešní check-in + aktivní C19 omezení → P0 podmnožina modelu §32 (`INSUFFICIENT_INFORMATION` / `SAFE_WITH_CURRENT_INFORMATION` / `CAUTION` / `DO_NOT_RECOMMEND_ACTIVITY`) + typované flags **vždy se zdrojem** (bolest nese oblast+úroveň, omezení titul). **Tabulková konzervativní pravidla (C34 §3):** bolest ≥4 nebo únava 5 = STOP; bolest 1–3, únava 4, energie ≤2, spánek ≤2, aktivní omezení = CAUTION; **chybějící check-in = poctivé `INSUFFICIENT_INFORMATION`, nikdy implicitní OK** (SFR-004); klinické stavy modelu §31 vědomě mimo P0 do odborného/právního review (SFR-007). **AI výsledku nikdy nevelí** (SFR-003, model §33.4) — C36/C38 ho budou konzumovat jako fakt. **UI:** `SafetyCard` na check-in obrazovce s opatrnými formulacemi bez medicínských tvrzení a viditelnou beta hranicí (SFR-008). Ověřeno **3 novými testy** (tabulková matice 14 případů vč. hran 4/5 a kombinací se STOP prioritou; determinismus opakovaného běhu + pořadí flags + zdroje; widget evidence STOP stavu s viditelnými zdroji flags a dvojí „not medical advice" formulací) — mobile suite **315 testů**, analyze čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R5-02` je implementován → dalším krokem je vytvoření blocking kontraktu **C35 – Today recommendation read model** (`docs/06-domain/r5-today-recommendation-contract.md`) a poté implementace `R5-03 – Today Recommendation`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C36–C40).
 
 ---
 
@@ -442,10 +444,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` je implementován** (denní check-in: schema v13, backend V6, sync typ `DAILY_CHECK_IN`). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` a `R5-02` jsou implementovány** (denní check-in + deterministická safety pravidla). Další kanonický krok:
 
 ```text
-C34 – Deterministic safety rules kontrakt → R5-02 – Deterministic Safety Rules
+C35 – Today recommendation kontrakt → R5-03 – Today Recommendation
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
