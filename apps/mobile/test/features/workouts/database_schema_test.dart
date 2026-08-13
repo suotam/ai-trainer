@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 10', () async {
-    // R3-06 zvýšil schema na verzi 10 (ruční aktivity, C16 §4).
+  test('databaze vznikne od prazdneho stavu se schema verzi 11', () async {
+    // R4-03 zvýšil schema na verzi 11 (AI návrhy, C29 §2).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 10);
+    expect(version.data.values.first, 11);
 
     final tables = await db
         .customSelect(
@@ -91,6 +91,7 @@ void main() {
     expect(tables.map((r) => r.data['name']), [
       'local_activities',
       'local_activity_summaries',
+      'local_ai_proposals',
       'local_app_state',
       'local_availability_rules',
       'local_calendar_changes',

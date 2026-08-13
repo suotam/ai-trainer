@@ -128,6 +128,12 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
         "WHERE owner_id = '$localAnonymousOwnerId'",
         [accountId],
       );
+      // 11b. AI návrhy (R4-03, C29 APL-011): bezpodmínečný attach.
+      await _db.customStatement(
+        'UPDATE local_ai_proposals SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
       // 12. Tréninkový plán (R3-04, C20 §7, MPC-010): kolizní anonymní
       // ACTIVE plán (účet už ACTIVE plán má) zůstává anonymní; jeho
       // instance se připojují nezávisle (device-local reference).
