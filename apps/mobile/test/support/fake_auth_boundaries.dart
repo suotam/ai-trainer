@@ -206,6 +206,25 @@ class FakeAuthApiClient implements AuthApiClient {
   }
 
   @override
+  Future<void> revokeAllSessions(String accessToken) async {
+    _requireOnline();
+    final matches = _sessions.where((s) => s.accessToken == accessToken);
+    if (matches.isEmpty) {
+      throw const AuthApiFailure(AuthApiFailureKind.accessSessionExpired);
+    }
+    final caller = matches.first;
+    if (caller.revoked) {
+      throw const AuthApiFailure(AuthApiFailureKind.sessionRevoked);
+    }
+    // Globální revokace (C13, RVC-001): všechny session téhož účtu.
+    for (final session in _sessions.where(
+      (s) => s.accountId == caller.accountId,
+    )) {
+      session.revoked = true;
+    }
+  }
+
+  @override
   Future<AuthSessionContext> sessionContext(String accessToken) async {
     _requireOnline();
     final matches = _sessions.where((s) => s.accessToken == accessToken);
