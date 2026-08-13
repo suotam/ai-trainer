@@ -132,6 +132,34 @@ class PlanProposalApiIntegrationTest {
     }
 
     @Test
+    fun `adjustment request type vraci validovany adjustment s vlastni trojici verzi (C37)`() {
+        val (_, accessToken) = registerAccount()
+        val response =
+            exchange(
+                HttpMethod.POST,
+                "/api/v1/ai/plan-proposals",
+                body = mapOf("context" to context, "requestType" to "ADJUSTMENT_PROPOSAL"),
+                accessToken = accessToken,
+            )
+        assertEquals(200, response.statusCode.value())
+        val json = JsonPath.parse(response.body)
+        assertEquals("adjustment-proposal-v1", json.read("$.promptVersion"))
+        assertEquals("adjustment-proposal-schema-v1", json.read("$.schemaVersion"))
+        assertTrue(json.read<List<Any>>("$.proposal.operations").isNotEmpty())
+
+        // Neznámý typ = typované odmítnutí (ASJ-006).
+        val unknown =
+            exchange(
+                HttpMethod.POST,
+                "/api/v1/ai/plan-proposals",
+                body = mapOf("context" to context, "requestType" to "CHAT"),
+                accessToken = accessToken,
+            )
+        assertEquals(400, unknown.statusCode.value())
+        assertEquals("INVALID_REQUEST", JsonPath.parse(unknown.body).read("$.code"))
+    }
+
+    @Test
     fun `per-account AI limit vraci RATE_LIMITED s Retry-After (C31 AIS-004)`() {
         val (_, accessToken) = registerAccount()
         repeat(3) {

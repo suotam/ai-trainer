@@ -23,6 +23,7 @@ class _ScriptedAiApi implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async => const PlanProposalResponse(
     proposal: {
       'summary': 'Silový týden podle profilu.',

@@ -25,6 +25,7 @@ class _FailingAiApi implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async {
     calls++;
     throw const AiApiFailure(AiApiFailureKind.unavailable);

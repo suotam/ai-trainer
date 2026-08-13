@@ -1,0 +1,8 @@
+{
+  "name": "invalid-move-shape",
+  "description": "MOVE bez toDayOffset porušuje tvarovou tabulku (ASJ-003).",
+  "modelOutput": "{\"summary\":\"Broken move.\",\"operations\":[{\"operation\":\"MOVE\",\"reason\":\"Shift it.\",\"target\":{\"dayOffset\":0,\"title\":\"Full Body A\"}}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

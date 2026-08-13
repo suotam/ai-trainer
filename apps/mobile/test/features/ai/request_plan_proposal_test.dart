@@ -29,6 +29,7 @@ class _FakeAiApiClient implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) {
     calls += 1;
     return _behavior();

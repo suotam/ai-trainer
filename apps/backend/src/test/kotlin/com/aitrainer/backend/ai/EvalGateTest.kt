@@ -1,5 +1,6 @@
 package com.aitrainer.backend.ai
 
+import com.aitrainer.backend.ai.application.AdjustmentProposalValidator
 import com.aitrainer.backend.ai.application.PlanProposalValidation
 import com.aitrainer.backend.ai.application.PlanProposalValidator
 import org.junit.jupiter.api.Test
@@ -54,6 +55,60 @@ class EvalGateTest {
             }
         }
         assertTrue(failures.isEmpty(), "Eval gate červený:\n" + failures.joinToString("\n"))
+    }
+
+    @Test
+    fun `eval gate adjustment - shody verdiktu, reason per operace a kanonizace (C37 ASJ-013)`() {
+        val files =
+            File("../../packages/contracts/eval/adjustment-proposal")
+                .listFiles { file -> file.extension == "json" }
+                ?.sortedBy { it.name }
+                .orEmpty()
+        assertTrue(files.size >= 6, "adjustment dataset se zmenšil: ${files.size} < 6 (ASJ-013)")
+
+        val adjustmentValidator = AdjustmentProposalValidator()
+        val failures = mutableListOf<String>()
+        for (file in files) {
+            val case = mapper.readTree(file.readText(Charsets.UTF_8))
+            val name = case.path("name").asString()
+            val expected = case.path("expected")
+            val expectedVerdict = expected.path("verdict").asString()
+            when (val result = adjustmentValidator.validate(case.path("modelOutput").asString())) {
+                is PlanProposalValidation.Valid -> {
+                    if (expectedVerdict != "VALID") {
+                        failures += "$name: očekáván INVALID, validátor přijal"
+                        continue
+                    }
+                    @Suppress("UNCHECKED_CAST")
+                    val operations = result.canonical["operations"] as? List<Map<String, Any?>> ?: emptyList()
+                    if (operations.size !in 1..10) {
+                        failures += "$name: počet operací ${operations.size} mimo 1–10"
+                    }
+                    operations.forEachIndexed { index, operation ->
+                        val reason = operation["reason"] as? String
+                        if (reason.isNullOrBlank()) {
+                            failures += "$name: operace #$index bez reason (ASJ-002)"
+                        }
+                    }
+                    if (expected.has("operationCount") && operations.size != expected.path("operationCount").asInt()) {
+                        failures += "$name: operationCount ${operations.size} != ${expected.path("operationCount").asInt()}"
+                    }
+                    val serialized = mapper.writeValueAsString(result.canonical)
+                    expected.path("mustNotContain").forEach { forbidden ->
+                        if (serialized.contains(forbidden.asString())) {
+                            failures += "$name: kanonický výstup obsahuje '${forbidden.asString()}'"
+                        }
+                    }
+                }
+
+                PlanProposalValidation.Invalid -> {
+                    if (expectedVerdict != "INVALID") {
+                        failures += "$name: očekáván VALID, validátor odmítl"
+                    }
+                }
+            }
+        }
+        assertTrue(failures.isEmpty(), "Adjustment eval gate červený:\n" + failures.joinToString("\n"))
     }
 
     /** Kvalitativní vlastnosti validních návrhů (C32 §4.2, EVG-005/008). */
