@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.43  
+**Verze:** 2.44  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -179,7 +179,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 `R3-05 – Calendar Operations: Move, Cancel, Replace` je implementován (blocking kontrakt **C21 – Calendar operations** vznikl v témže cyklu: `docs/06-domain/r3-calendar-operations-contract.md`, `CAL-001..015`). **Mobilní Drift schema verze 9** (aditivní migrace v8→v9 — append-only evidence tabulka `local_calendar_changes`; řetěz od reálného v1 ověřen). **Tři bezpečné operace nad ručně plánovanými workouty** (scoped na `source_type = USER_PLAN` — seed/demo je v P0 read-only, řízené rozhodnutí CAL-001): **přesun** (nové datum + evidence `MOVED` s oběma daty; stejné datum = idempotentní no-op), **zrušení** (status `CANCELLED` — kanonický kód dle scheduling modelu §6.8; struktura instance beze změny, opakovaně no-op) a **atomické nahrazení** (originál `CANCELLED` + náhrada plnou C20 cestou + evidence `REPLACED` s referencí — jedna transakce, žádný částečný stav). **Guardy (CAL-002):** instance se session, započatá nebo dokončená je typovaně odmítnuta a data zůstávají byte-po-bytu nedotčená — fakta jsou nedotknutelná. **Append-only evidence** (`CalendarChange`, born ownable and syncable, attach bezpodmínečný) umožňuje historickou interpretaci plánu a je budoucí vstup R5 adaptací. **Aditivní změna R1 read modelu (CAL-008):** kalendářní přehledy (Today/range) vylučují `CANCELLED` instance; detail podle ID i editor plánu je nadále zobrazují (se stavem). Operace zvyšují verzi instance a přepínají `SYNCED→DIRTY` — synchronizují se existujícím push (CAL-009); evidence tabulka do registru přibude v C24 (evidované rozhodnutí). **UI:** menu operací na workoutech plánu (přesun se sheet výběrem data, zrušení, nahrazení formulářem workoutu), typované chybové bannery vč. „už nelze měnit". Ověřeno novými testy: move/cancel/replace s evidencí a idempotencí, guardy (session/seed/missing) s byte-po-bytu nedotčenými daty, CANCELLED mimo Today a viditelný v editoru, nevalidní náhrada bez částečného stavu, widget test zrušení. Mobile suite zelená (**281 testů**), `flutter analyze` čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R3-05` je implementován → dalším krokem jsou **kontrakty C22 – Manual activity a C23 – Progress statistics** (`docs/06-domain/r3-manual-activity-contract.md`, `docs/06-domain/r3-progress-statistics-contract.md`), poté implementace `R3-06 – Manual Activity and Basic Progress Statistics`. Tvorba kontraktů i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C22–C24).
+`R3-06 – Manual Activity and Basic Progress Statistics` je implementován (blocking kontrakty **C22 – Manual activity** a **C23 – Progress statistics** vznikly v témže cyklu: `docs/06-domain/r3-manual-activity-contract.md` /`MAC-001..015`/ a `docs/06-domain/r3-progress-statistics-contract.md` /`PST-001..015`/). **Mobilní Drift schema verze 10** (aditivní migrace v9→v10 — tabulka `local_activities`; řetěz od reálného v1 ověřen). **Ruční aktivita dle C22**: fakt po skutečnosti bez lifecycle (zdroj výhradně `MANUAL`), povinný jen popis a datum; volitelná délka, device-local vazby na sport a workout instanci (dokumentační — skutečnost nemění plán, MAC-007); editovatelná current-state, nemazatelná; born ownable and syncable, attach bezpodmínečný. **Statistiky dle C23 — čistý deterministický read model bez perzistence** (PST-001/002, žádné uložené agregáty): za období plannedCount (instance mimo `CANCELLED` — konzistentní s C21), completedCount (výhradně ze summaries — fakt dokončení; zdroj instance nerozhoduje), completionRate (definován jen pro plán > 0, jinak „—" — žádná falešná přesnost PST-004), manualActivityCount a manualMinutes (**bez dvojího započtení** — aktivita vázaná na instanci se nepočítá vedle summary, PST-006; aktivity bez délky se do minut nedopočítávají). Řízené rozhodnutí PST-008: device-local scope bez owner filtru (konzistentní s Today); owner scoping je budoucí rozhodnutí. **UI:** `/activity` obrazovka (vstup z Today) — karty posledních 7/30 dní (období z injektovaného clocku, PST-012), seznam ručních aktivit datum-sestupně, bottom-sheet formulář s předvyplněným dneškem a výběrem sportu z profilu; poctivé empty stavy. Ověřeno novými testy: aktivita (owner stamping, editace SYNCED→DIRTY, validace vč. neexistujících referencí, řazení), **statistiky — determinismus (stejný vstup → identický výsledek), CANCELLED mimo plán, dvojí započtení vázané aktivity, empty stav s completionRate null, období mimo data**, widget testy (empty → zápis → přepočet statistik; nevalidní zápis s typovanou chybou). Mobile suite zelená (**285 testů**), `flutter analyze` čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R3-06` je implementován → dalším krokem je **kontrakt C24 – R3 sync extension** (`docs/12-data/r3-sync-extension-contract.md`), poté implementace `R3-07 – R3 Sync Extension` (mobile + backend). Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Poslední slice `R3-08` čeká na dokončení R3-07.
 
 ---
 
@@ -364,11 +366,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-05` jsou implementovány** (viz §3; mobilní schema v9). Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-06` jsou implementovány** (viz §3; mobilní schema v10). Další kanonický krok:
 
 ```text
-C22 – Manual activity contract + C23 – Progress statistics contract
-→ poté je R3-06 – Manual Activity and Basic Progress Statistics READY
+C24 – R3 sync extension contract  (docs/12-data/r3-sync-extension-contract.md)
+→ poté je R3-07 – R3 Sync Extension READY
 ```
 
 Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

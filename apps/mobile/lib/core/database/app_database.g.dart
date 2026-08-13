@@ -14072,6 +14072,779 @@ class LocalCalendarChangesCompanion
   }
 }
 
+class $LocalActivitiesTable extends LocalActivities
+    with TableInfo<$LocalActivitiesTable, LocalActivityRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalActivitiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localDateMeta = const VerificationMeta(
+    'localDate',
+  );
+  @override
+  late final GeneratedColumn<String> localDate = GeneratedColumn<String>(
+    'local_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _userSportIdMeta = const VerificationMeta(
+    'userSportId',
+  );
+  @override
+  late final GeneratedColumn<String> userSportId = GeneratedColumn<String>(
+    'user_sport_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES local_user_sports (id)',
+    ),
+  );
+  static const VerificationMeta _workoutInstanceIdMeta = const VerificationMeta(
+    'workoutInstanceId',
+  );
+  @override
+  late final GeneratedColumn<String> workoutInstanceId =
+      GeneratedColumn<String>(
+        'workout_instance_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_workout_instances (id)',
+        ),
+      );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(activitySourceManual),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    localDate,
+    durationMinutes,
+    userSportId,
+    workoutInstanceId,
+    note,
+    source,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_activities';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalActivityRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('local_date')) {
+      context.handle(
+        _localDateMeta,
+        localDate.isAcceptableOrUnknown(data['local_date']!, _localDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localDateMeta);
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('user_sport_id')) {
+      context.handle(
+        _userSportIdMeta,
+        userSportId.isAcceptableOrUnknown(
+          data['user_sport_id']!,
+          _userSportIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('workout_instance_id')) {
+      context.handle(
+        _workoutInstanceIdMeta,
+        workoutInstanceId.isAcceptableOrUnknown(
+          data['workout_instance_id']!,
+          _workoutInstanceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalActivityRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalActivityRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      localDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_date'],
+      )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      ),
+      userSportId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_sport_id'],
+      ),
+      workoutInstanceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}workout_instance_id'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalActivitiesTable createAlias(String alias) {
+    return $LocalActivitiesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalActivityRow extends DataClass
+    implements Insertable<LocalActivityRow> {
+  final String id;
+  final String title;
+  final String localDate;
+  final int? durationMinutes;
+  final String? userSportId;
+  final String? workoutInstanceId;
+  final String? note;
+  final String source;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalActivityRow({
+    required this.id,
+    required this.title,
+    required this.localDate,
+    this.durationMinutes,
+    this.userSportId,
+    this.workoutInstanceId,
+    this.note,
+    required this.source,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['local_date'] = Variable<String>(localDate);
+    if (!nullToAbsent || durationMinutes != null) {
+      map['duration_minutes'] = Variable<int>(durationMinutes);
+    }
+    if (!nullToAbsent || userSportId != null) {
+      map['user_sport_id'] = Variable<String>(userSportId);
+    }
+    if (!nullToAbsent || workoutInstanceId != null) {
+      map['workout_instance_id'] = Variable<String>(workoutInstanceId);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['source'] = Variable<String>(source);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalActivitiesCompanion toCompanion(bool nullToAbsent) {
+    return LocalActivitiesCompanion(
+      id: Value(id),
+      title: Value(title),
+      localDate: Value(localDate),
+      durationMinutes: durationMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMinutes),
+      userSportId: userSportId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userSportId),
+      workoutInstanceId: workoutInstanceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workoutInstanceId),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      source: Value(source),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalActivityRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalActivityRow(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      localDate: serializer.fromJson<String>(json['localDate']),
+      durationMinutes: serializer.fromJson<int?>(json['durationMinutes']),
+      userSportId: serializer.fromJson<String?>(json['userSportId']),
+      workoutInstanceId: serializer.fromJson<String?>(
+        json['workoutInstanceId'],
+      ),
+      note: serializer.fromJson<String?>(json['note']),
+      source: serializer.fromJson<String>(json['source']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'localDate': serializer.toJson<String>(localDate),
+      'durationMinutes': serializer.toJson<int?>(durationMinutes),
+      'userSportId': serializer.toJson<String?>(userSportId),
+      'workoutInstanceId': serializer.toJson<String?>(workoutInstanceId),
+      'note': serializer.toJson<String?>(note),
+      'source': serializer.toJson<String>(source),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalActivityRow copyWith({
+    String? id,
+    String? title,
+    String? localDate,
+    Value<int?> durationMinutes = const Value.absent(),
+    Value<String?> userSportId = const Value.absent(),
+    Value<String?> workoutInstanceId = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? source,
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalActivityRow(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    localDate: localDate ?? this.localDate,
+    durationMinutes: durationMinutes.present
+        ? durationMinutes.value
+        : this.durationMinutes,
+    userSportId: userSportId.present ? userSportId.value : this.userSportId,
+    workoutInstanceId: workoutInstanceId.present
+        ? workoutInstanceId.value
+        : this.workoutInstanceId,
+    note: note.present ? note.value : this.note,
+    source: source ?? this.source,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalActivityRow copyWithCompanion(LocalActivitiesCompanion data) {
+    return LocalActivityRow(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      localDate: data.localDate.present ? data.localDate.value : this.localDate,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
+      userSportId: data.userSportId.present
+          ? data.userSportId.value
+          : this.userSportId,
+      workoutInstanceId: data.workoutInstanceId.present
+          ? data.workoutInstanceId.value
+          : this.workoutInstanceId,
+      note: data.note.present ? data.note.value : this.note,
+      source: data.source.present ? data.source.value : this.source,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalActivityRow(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('localDate: $localDate, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('userSportId: $userSportId, ')
+          ..write('workoutInstanceId: $workoutInstanceId, ')
+          ..write('note: $note, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    localDate,
+    durationMinutes,
+    userSportId,
+    workoutInstanceId,
+    note,
+    source,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalActivityRow &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.localDate == this.localDate &&
+          other.durationMinutes == this.durationMinutes &&
+          other.userSportId == this.userSportId &&
+          other.workoutInstanceId == this.workoutInstanceId &&
+          other.note == this.note &&
+          other.source == this.source &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalActivitiesCompanion extends UpdateCompanion<LocalActivityRow> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> localDate;
+  final Value<int?> durationMinutes;
+  final Value<String?> userSportId;
+  final Value<String?> workoutInstanceId;
+  final Value<String?> note;
+  final Value<String> source;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalActivitiesCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.localDate = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
+    this.userSportId = const Value.absent(),
+    this.workoutInstanceId = const Value.absent(),
+    this.note = const Value.absent(),
+    this.source = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalActivitiesCompanion.insert({
+    required String id,
+    required String title,
+    required String localDate,
+    this.durationMinutes = const Value.absent(),
+    this.userSportId = const Value.absent(),
+    this.workoutInstanceId = const Value.absent(),
+    this.note = const Value.absent(),
+    this.source = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       localDate = Value(localDate),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalActivityRow> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? localDate,
+    Expression<int>? durationMinutes,
+    Expression<String>? userSportId,
+    Expression<String>? workoutInstanceId,
+    Expression<String>? note,
+    Expression<String>? source,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (localDate != null) 'local_date': localDate,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
+      if (userSportId != null) 'user_sport_id': userSportId,
+      if (workoutInstanceId != null) 'workout_instance_id': workoutInstanceId,
+      if (note != null) 'note': note,
+      if (source != null) 'source': source,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalActivitiesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? localDate,
+    Value<int?>? durationMinutes,
+    Value<String?>? userSportId,
+    Value<String?>? workoutInstanceId,
+    Value<String?>? note,
+    Value<String>? source,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalActivitiesCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      localDate: localDate ?? this.localDate,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      userSportId: userSportId ?? this.userSportId,
+      workoutInstanceId: workoutInstanceId ?? this.workoutInstanceId,
+      note: note ?? this.note,
+      source: source ?? this.source,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (localDate.present) {
+      map['local_date'] = Variable<String>(localDate.value);
+    }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
+    if (userSportId.present) {
+      map['user_sport_id'] = Variable<String>(userSportId.value);
+    }
+    if (workoutInstanceId.present) {
+      map['workout_instance_id'] = Variable<String>(workoutInstanceId.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalActivitiesCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('localDate: $localDate, ')
+          ..write('durationMinutes: $durationMinutes, ')
+          ..write('userSportId: $userSportId, ')
+          ..write('workoutInstanceId: $workoutInstanceId, ')
+          ..write('note: $note, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -14113,6 +14886,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalTrainingPlansTable(this);
   late final $LocalCalendarChangesTable localCalendarChanges =
       $LocalCalendarChangesTable(this);
+  late final $LocalActivitiesTable localActivities = $LocalActivitiesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -14138,6 +14914,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localConstraints,
     localTrainingPlans,
     localCalendarChanges,
+    localActivities,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -14337,6 +15114,27 @@ final class $$LocalWorkoutInstancesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$LocalActivitiesTable, List<LocalActivityRow>>
+  _localActivitiesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.localActivities,
+    aliasName:
+        'local_workout_instances__id__local_activities__workout_instance_id',
+  );
+
+  $$LocalActivitiesTableProcessedTableManager get localActivitiesRefs {
+    final manager =
+        $$LocalActivitiesTableTableManager($_db, $_db.localActivities).filter(
+          (f) => f.workoutInstanceId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _localActivitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$LocalWorkoutInstancesTableFilterComposer
@@ -14521,6 +15319,31 @@ class $$LocalWorkoutInstancesTableFilterComposer
                     $removeJoinBuilderFromRootComposer,
               ),
         );
+    return f(composer);
+  }
+
+  Expression<bool> localActivitiesRefs(
+    Expression<bool> Function($$LocalActivitiesTableFilterComposer f) f,
+  ) {
+    final $$LocalActivitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localActivities,
+      getReferencedColumn: (t) => t.workoutInstanceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalActivitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.localActivities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -14805,6 +15628,31 @@ class $$LocalWorkoutInstancesTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> localActivitiesRefs<T extends Object>(
+    Expression<T> Function($$LocalActivitiesTableAnnotationComposer a) f,
+  ) {
+    final $$LocalActivitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localActivities,
+      getReferencedColumn: (t) => t.workoutInstanceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalActivitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localActivities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocalWorkoutInstancesTableTableManager
@@ -14824,6 +15672,7 @@ class $$LocalWorkoutInstancesTableTableManager
             bool localWorkoutSectionsRefs,
             bool localWorkoutSessionsRefs,
             bool localActivitySummariesRefs,
+            bool localActivitiesRefs,
           })
         > {
   $$LocalWorkoutInstancesTableTableManager(
@@ -14953,6 +15802,7 @@ class $$LocalWorkoutInstancesTableTableManager
                 localWorkoutSectionsRefs = false,
                 localWorkoutSessionsRefs = false,
                 localActivitySummariesRefs = false,
+                localActivitiesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -14960,6 +15810,7 @@ class $$LocalWorkoutInstancesTableTableManager
                     if (localWorkoutSectionsRefs) db.localWorkoutSections,
                     if (localWorkoutSessionsRefs) db.localWorkoutSessions,
                     if (localActivitySummariesRefs) db.localActivitySummaries,
+                    if (localActivitiesRefs) db.localActivities,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -15030,6 +15881,28 @@ class $$LocalWorkoutInstancesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (localActivitiesRefs)
+                        await $_getPrefetchedData<
+                          LocalWorkoutInstanceRow,
+                          $LocalWorkoutInstancesTable,
+                          LocalActivityRow
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$LocalWorkoutInstancesTableReferences
+                                  ._localActivitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocalWorkoutInstancesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).localActivitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.workoutInstanceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -15054,6 +15927,7 @@ typedef $$LocalWorkoutInstancesTableProcessedTableManager =
         bool localWorkoutSectionsRefs,
         bool localWorkoutSessionsRefs,
         bool localActivitySummariesRefs,
+        bool localActivitiesRefs,
       })
     >;
 typedef $$LocalWorkoutSectionsTableCreateCompanionBuilder =
@@ -21225,6 +22099,26 @@ final class $$LocalUserSportsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$LocalActivitiesTable, List<LocalActivityRow>>
+  _localActivitiesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.localActivities,
+    aliasName: 'local_user_sports__id__local_activities__user_sport_id',
+  );
+
+  $$LocalActivitiesTableProcessedTableManager get localActivitiesRefs {
+    final manager = $$LocalActivitiesTableTableManager(
+      $_db,
+      $_db.localActivities,
+    ).filter((f) => f.userSportId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _localActivitiesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$LocalUserSportsTableFilterComposer
@@ -21357,6 +22251,31 @@ class $$LocalUserSportsTableFilterComposer
           }) => $$LocalGoalsTableFilterComposer(
             $db: $db,
             $table: $db.localGoals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> localActivitiesRefs(
+    Expression<bool> Function($$LocalActivitiesTableFilterComposer f) f,
+  ) {
+    final $$LocalActivitiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localActivities,
+      getReferencedColumn: (t) => t.userSportId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalActivitiesTableFilterComposer(
+            $db: $db,
+            $table: $db.localActivities,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -21598,6 +22517,31 @@ class $$LocalUserSportsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> localActivitiesRefs<T extends Object>(
+    Expression<T> Function($$LocalActivitiesTableAnnotationComposer a) f,
+  ) {
+    final $$LocalActivitiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localActivities,
+      getReferencedColumn: (t) => t.userSportId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalActivitiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localActivities,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocalUserSportsTableTableManager
@@ -21613,7 +22557,10 @@ class $$LocalUserSportsTableTableManager
           $$LocalUserSportsTableUpdateCompanionBuilder,
           (LocalUserSportRow, $$LocalUserSportsTableReferences),
           LocalUserSportRow,
-          PrefetchHooks Function({bool localGoalsRefs})
+          PrefetchHooks Function({
+            bool localGoalsRefs,
+            bool localActivitiesRefs,
+          })
         > {
   $$LocalUserSportsTableTableManager(
     _$AppDatabase db,
@@ -21732,38 +22679,63 @@ class $$LocalUserSportsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({localGoalsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (localGoalsRefs) db.localGoals],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (localGoalsRefs)
-                    await $_getPrefetchedData<
-                      LocalUserSportRow,
-                      $LocalUserSportsTable,
-                      LocalGoalRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$LocalUserSportsTableReferences
-                          ._localGoalsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$LocalUserSportsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).localGoalsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.userSportId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({localGoalsRefs = false, localActivitiesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (localGoalsRefs) db.localGoals,
+                    if (localActivitiesRefs) db.localActivities,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (localGoalsRefs)
+                        await $_getPrefetchedData<
+                          LocalUserSportRow,
+                          $LocalUserSportsTable,
+                          LocalGoalRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LocalUserSportsTableReferences
+                              ._localGoalsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocalUserSportsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).localGoalsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userSportId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (localActivitiesRefs)
+                        await $_getPrefetchedData<
+                          LocalUserSportRow,
+                          $LocalUserSportsTable,
+                          LocalActivityRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LocalUserSportsTableReferences
+                              ._localActivitiesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocalUserSportsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).localActivitiesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userSportId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -21780,7 +22752,7 @@ typedef $$LocalUserSportsTableProcessedTableManager =
       $$LocalUserSportsTableUpdateCompanionBuilder,
       (LocalUserSportRow, $$LocalUserSportsTableReferences),
       LocalUserSportRow,
-      PrefetchHooks Function({bool localGoalsRefs})
+      PrefetchHooks Function({bool localGoalsRefs, bool localActivitiesRefs})
     >;
 typedef $$LocalGoalsTableCreateCompanionBuilder =
     LocalGoalsCompanion Function({
@@ -24037,6 +25009,584 @@ typedef $$LocalCalendarChangesTableProcessedTableManager =
         bool replacementInstanceId,
       })
     >;
+typedef $$LocalActivitiesTableCreateCompanionBuilder =
+    LocalActivitiesCompanion Function({
+      required String id,
+      required String title,
+      required String localDate,
+      Value<int?> durationMinutes,
+      Value<String?> userSportId,
+      Value<String?> workoutInstanceId,
+      Value<String?> note,
+      Value<String> source,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalActivitiesTableUpdateCompanionBuilder =
+    LocalActivitiesCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> localDate,
+      Value<int?> durationMinutes,
+      Value<String?> userSportId,
+      Value<String?> workoutInstanceId,
+      Value<String?> note,
+      Value<String> source,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+final class $$LocalActivitiesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $LocalActivitiesTable, LocalActivityRow> {
+  $$LocalActivitiesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LocalUserSportsTable _userSportIdTable(_$AppDatabase db) => db
+      .localUserSports
+      .createAlias('local_activities__user_sport_id__local_user_sports__id');
+
+  $$LocalUserSportsTableProcessedTableManager? get userSportId {
+    final $_column = $_itemColumn<String>('user_sport_id');
+    if ($_column == null) return null;
+    final manager = $$LocalUserSportsTableTableManager(
+      $_db,
+      $_db.localUserSports,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userSportIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $LocalWorkoutInstancesTable _workoutInstanceIdTable(
+    _$AppDatabase db,
+  ) => db.localWorkoutInstances.createAlias(
+    'local_activities__workout_instance_id__local_workout_instances__id',
+  );
+
+  $$LocalWorkoutInstancesTableProcessedTableManager? get workoutInstanceId {
+    final $_column = $_itemColumn<String>('workout_instance_id');
+    if ($_column == null) return null;
+    final manager = $$LocalWorkoutInstancesTableTableManager(
+      $_db,
+      $_db.localWorkoutInstances,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_workoutInstanceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalActivitiesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalActivitiesTable> {
+  $$LocalActivitiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localDate => $composableBuilder(
+    column: $table.localDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LocalUserSportsTableFilterComposer get userSportId {
+    final $$LocalUserSportsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableFilterComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableFilterComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableFilterComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalActivitiesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalActivitiesTable> {
+  $$LocalActivitiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localDate => $composableBuilder(
+    column: $table.localDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocalUserSportsTableOrderingComposer get userSportId {
+    final $$LocalUserSportsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableOrderingComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableOrderingComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableOrderingComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalActivitiesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalActivitiesTable> {
+  $$LocalActivitiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get localDate =>
+      $composableBuilder(column: $table.localDate, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+
+  $$LocalUserSportsTableAnnotationComposer get userSportId {
+    final $$LocalUserSportsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userSportId,
+      referencedTable: $db.localUserSports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalUserSportsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localUserSports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableAnnotationComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalActivitiesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalActivitiesTable,
+          LocalActivityRow,
+          $$LocalActivitiesTableFilterComposer,
+          $$LocalActivitiesTableOrderingComposer,
+          $$LocalActivitiesTableAnnotationComposer,
+          $$LocalActivitiesTableCreateCompanionBuilder,
+          $$LocalActivitiesTableUpdateCompanionBuilder,
+          (LocalActivityRow, $$LocalActivitiesTableReferences),
+          LocalActivityRow,
+          PrefetchHooks Function({bool userSportId, bool workoutInstanceId})
+        > {
+  $$LocalActivitiesTableTableManager(
+    _$AppDatabase db,
+    $LocalActivitiesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalActivitiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalActivitiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalActivitiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> localDate = const Value.absent(),
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<String?> userSportId = const Value.absent(),
+                Value<String?> workoutInstanceId = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalActivitiesCompanion(
+                id: id,
+                title: title,
+                localDate: localDate,
+                durationMinutes: durationMinutes,
+                userSportId: userSportId,
+                workoutInstanceId: workoutInstanceId,
+                note: note,
+                source: source,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String localDate,
+                Value<int?> durationMinutes = const Value.absent(),
+                Value<String?> userSportId = const Value.absent(),
+                Value<String?> workoutInstanceId = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalActivitiesCompanion.insert(
+                id: id,
+                title: title,
+                localDate: localDate,
+                durationMinutes: durationMinutes,
+                userSportId: userSportId,
+                workoutInstanceId: workoutInstanceId,
+                note: note,
+                source: source,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LocalActivitiesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({userSportId = false, workoutInstanceId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (userSportId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.userSportId,
+                                    referencedTable:
+                                        $$LocalActivitiesTableReferences
+                                            ._userSportIdTable(db),
+                                    referencedColumn:
+                                        $$LocalActivitiesTableReferences
+                                            ._userSportIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (workoutInstanceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.workoutInstanceId,
+                                    referencedTable:
+                                        $$LocalActivitiesTableReferences
+                                            ._workoutInstanceIdTable(db),
+                                    referencedColumn:
+                                        $$LocalActivitiesTableReferences
+                                            ._workoutInstanceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$LocalActivitiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalActivitiesTable,
+      LocalActivityRow,
+      $$LocalActivitiesTableFilterComposer,
+      $$LocalActivitiesTableOrderingComposer,
+      $$LocalActivitiesTableAnnotationComposer,
+      $$LocalActivitiesTableCreateCompanionBuilder,
+      $$LocalActivitiesTableUpdateCompanionBuilder,
+      (LocalActivityRow, $$LocalActivitiesTableReferences),
+      LocalActivityRow,
+      PrefetchHooks Function({bool userSportId, bool workoutInstanceId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -24087,4 +25637,6 @@ class $AppDatabaseManager {
       $$LocalTrainingPlansTableTableManager(_db, _db.localTrainingPlans);
   $$LocalCalendarChangesTableTableManager get localCalendarChanges =>
       $$LocalCalendarChangesTableTableManager(_db, _db.localCalendarChanges);
+  $$LocalActivitiesTableTableManager get localActivities =>
+      $$LocalActivitiesTableTableManager(_db, _db.localActivities);
 }
