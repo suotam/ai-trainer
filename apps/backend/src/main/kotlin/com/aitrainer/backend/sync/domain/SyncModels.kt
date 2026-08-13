@@ -18,6 +18,17 @@ enum class SyncEntityType(
     SET_PERFORMANCE("synced_set_performance", "step_performance_id", "stepPerformanceId"),
     WORKOUT_FEEDBACK("synced_workout_feedback", "workout_session_id", "workoutSessionId"),
     ACTIVITY_SUMMARY("synced_activity_summary", "workout_session_id", "workoutSessionId"),
+
+    // R3-07 (C24 §2): R3 entity bez serverových parentů — device-local
+    // reference jsou součást neprůhledného payloadu (SXC-003).
+    USER_SPORT("synced_user_sport", null, null),
+    GOAL("synced_goal", null, null),
+    AVAILABILITY_RULE("synced_availability_rule", null, null),
+    EQUIPMENT_ITEM("synced_equipment_item", null, null),
+    CONSTRAINT_ITEM("synced_constraint", null, null),
+    TRAINING_PLAN("synced_training_plan", null, null),
+    CALENDAR_CHANGE("synced_calendar_change", null, null),
+    MANUAL_ACTIVITY("synced_activity", null, null),
     ;
 
     /** Parent typ dle R1 hierarchie; enum konstanty se odkazují jménem, aby nevznikla dopředná reference. */
@@ -25,11 +36,20 @@ enum class SyncEntityType(
         get() =
             when (this) {
                 WORKOUT_INSTANCE -> null
+
                 WORKOUT_SESSION -> WORKOUT_INSTANCE
+
                 STEP_PERFORMANCE -> WORKOUT_SESSION
+
                 SET_PERFORMANCE -> STEP_PERFORMANCE
+
                 WORKOUT_FEEDBACK -> WORKOUT_SESSION
+
                 ACTIVITY_SUMMARY -> WORKOUT_SESSION
+
+                USER_SPORT, GOAL, AVAILABILITY_RULE, EQUIPMENT_ITEM,
+                CONSTRAINT_ITEM, TRAINING_PLAN, CALENDAR_CHANGE, MANUAL_ACTIVITY,
+                -> null
             }
 }
 
