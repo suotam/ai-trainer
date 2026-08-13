@@ -1,6 +1,6 @@
 # AI Trainer – R2 Local-to-Account Migration Contract (C15)
 
-**Verze:** 0.1
+**Verze:** 0.2 (0.2: zpřesnění §4/LAM-006 — attach-eligibility instance se určuje existencí session/`started_session_id`, ne source/status kódy; kanonické kritérium shodné s R2-05 stamping pravidlem)
 **Stav:** Draft
 **Soubor:** `docs/12-data/r2-local-to-account-migration-contract.md`
 **Vlastník:** Data Architecture + Domain (identity-and-profile-model / sync-and-offline-model)
@@ -68,8 +68,8 @@ Rozhodnutí, **co se připojuje**, vychází z existující R2-01/R2-05 sémanti
 | Data | Klasifikace | Attach? |
 |---|---|---|
 | WorkoutSession, Step/SetPerformance, WorkoutFeedback, ActivitySummary vlastněné `local-anonymous` | **uživatelská** — vznikají výhradně uživatelskou akcí | **ano** |
-| WorkoutInstance vlastněná `local-anonymous`, na které existuje session (nebo je `startedSessionId`/status mimo `PLANNED`) | **uživatelsky dotčená** — uživatel na ní trénoval | **ano** |
-| WorkoutInstance vlastněná `local-anonymous` se `sourceType = SEED`, bez session a ve stavu `PLANNED` | **čistý seed/demo** | **ne** (plán §12 — seed se nesynchronizuje jako uživatelská data) |
+| WorkoutInstance vlastněná `local-anonymous`, **na které existuje session nebo má `started_session_id`** | **uživatelsky dotčená** — uživatel na ní trénoval (kanonické kritérium; shodné s R2-05 stamping pravidlem „start je uživatelská akce") | **ano** |
+| Ostatní WorkoutInstance vlastněné `local-anonymous` (typicky seed/demo — `source_type = DEMO`, bez session) | **čistý seed/demo** | **ne** (plán §12 — seed se nesynchronizuje jako uživatelská data) |
 | Data už vlastněná jiným účtem (`owner_id` = jiný account) | cizí účet na témže zařízení (`sync-model §76`) | **nikdy** (LAM-007) |
 | Outbox položky, sync verze, resolutions | technická metadata | řídí se vlastníkem entity (§5) |
 
@@ -130,7 +130,7 @@ Nová řada. Doplňuje, neoslabuje `INV-*`, `ISC-*`, `LSM-*`, `SPC-*`, `IDC-*`.
 - **LAM-003 — Vše-nebo-nic.** Attach běží v jedné lokální transakci; restart uprostřed nezanechá částečný stav.
 - **LAM-004 — ID se nemění.** Lokální client-generated ID, idempotency keys ani `row_version` se attachem nemění (`LSM-013`, `INV-021`).
 - **LAM-005 — Jen anonymní data.** Attach přepisuje výhradně `owner_id = local-anonymous`; data jiného účtu se nikdy nepřepisují (LAM-007).
-- **LAM-006 — Seed se nepřipojuje.** Čistý seed/demo (SEED, bez session, `PLANNED`) zůstává anonymní a nesynchronizuje se; uživatelským se stává až uživatelskou akcí.
+- **LAM-006 — Seed se nepřipojuje.** Čistý seed/demo (anonymní instance bez session a bez `started_session_id`) zůstává anonymní a nesynchronizuje se; uživatelským se stává až uživatelskou akcí (startem workoutu).
 - **LAM-007 — Žádné přivlastnění cizích dat.** Data vlastněná účtem A se nikdy nepřipojí k účtu B; server ownership je druhá linie (C8).
 - **LAM-008 — Hierarchická konzistence.** Připojení session implikuje připojení její instance; žádná account-owned entita nesmí mít anonymního parenta.
 - **LAM-009 — Sync stav se nemění.** Attach mění vlastníka, ne `sync_state` ani outbox status; konflikt/rejection stavy zůstávají viditelné (C12).
