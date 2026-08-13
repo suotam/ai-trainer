@@ -8804,6 +8804,279 @@ class LocalSyncedVersionsCompanion
   }
 }
 
+class $LocalSyncResolutionsTable extends LocalSyncResolutions
+    with TableInfo<$LocalSyncResolutionsTable, LocalSyncResolutionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalSyncResolutionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _outboxIdMeta = const VerificationMeta(
+    'outboxId',
+  );
+  @override
+  late final GeneratedColumn<String> outboxId = GeneratedColumn<String>(
+    'outbox_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decisionMeta = const VerificationMeta(
+    'decision',
+  );
+  @override
+  late final GeneratedColumn<String> decision = GeneratedColumn<String>(
+    'decision',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resolvedAtMeta = const VerificationMeta(
+    'resolvedAt',
+  );
+  @override
+  late final GeneratedColumn<int> resolvedAt = GeneratedColumn<int>(
+    'resolved_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [outboxId, decision, resolvedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_sync_resolutions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalSyncResolutionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('outbox_id')) {
+      context.handle(
+        _outboxIdMeta,
+        outboxId.isAcceptableOrUnknown(data['outbox_id']!, _outboxIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_outboxIdMeta);
+    }
+    if (data.containsKey('decision')) {
+      context.handle(
+        _decisionMeta,
+        decision.isAcceptableOrUnknown(data['decision']!, _decisionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_decisionMeta);
+    }
+    if (data.containsKey('resolved_at')) {
+      context.handle(
+        _resolvedAtMeta,
+        resolvedAt.isAcceptableOrUnknown(data['resolved_at']!, _resolvedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_resolvedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {outboxId};
+  @override
+  LocalSyncResolutionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalSyncResolutionRow(
+      outboxId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outbox_id'],
+      )!,
+      decision: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}decision'],
+      )!,
+      resolvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}resolved_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalSyncResolutionsTable createAlias(String alias) {
+    return $LocalSyncResolutionsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalSyncResolutionRow extends DataClass
+    implements Insertable<LocalSyncResolutionRow> {
+  final String outboxId;
+  final String decision;
+  final int resolvedAt;
+  const LocalSyncResolutionRow({
+    required this.outboxId,
+    required this.decision,
+    required this.resolvedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['outbox_id'] = Variable<String>(outboxId);
+    map['decision'] = Variable<String>(decision);
+    map['resolved_at'] = Variable<int>(resolvedAt);
+    return map;
+  }
+
+  LocalSyncResolutionsCompanion toCompanion(bool nullToAbsent) {
+    return LocalSyncResolutionsCompanion(
+      outboxId: Value(outboxId),
+      decision: Value(decision),
+      resolvedAt: Value(resolvedAt),
+    );
+  }
+
+  factory LocalSyncResolutionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalSyncResolutionRow(
+      outboxId: serializer.fromJson<String>(json['outboxId']),
+      decision: serializer.fromJson<String>(json['decision']),
+      resolvedAt: serializer.fromJson<int>(json['resolvedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'outboxId': serializer.toJson<String>(outboxId),
+      'decision': serializer.toJson<String>(decision),
+      'resolvedAt': serializer.toJson<int>(resolvedAt),
+    };
+  }
+
+  LocalSyncResolutionRow copyWith({
+    String? outboxId,
+    String? decision,
+    int? resolvedAt,
+  }) => LocalSyncResolutionRow(
+    outboxId: outboxId ?? this.outboxId,
+    decision: decision ?? this.decision,
+    resolvedAt: resolvedAt ?? this.resolvedAt,
+  );
+  LocalSyncResolutionRow copyWithCompanion(LocalSyncResolutionsCompanion data) {
+    return LocalSyncResolutionRow(
+      outboxId: data.outboxId.present ? data.outboxId.value : this.outboxId,
+      decision: data.decision.present ? data.decision.value : this.decision,
+      resolvedAt: data.resolvedAt.present
+          ? data.resolvedAt.value
+          : this.resolvedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalSyncResolutionRow(')
+          ..write('outboxId: $outboxId, ')
+          ..write('decision: $decision, ')
+          ..write('resolvedAt: $resolvedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(outboxId, decision, resolvedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalSyncResolutionRow &&
+          other.outboxId == this.outboxId &&
+          other.decision == this.decision &&
+          other.resolvedAt == this.resolvedAt);
+}
+
+class LocalSyncResolutionsCompanion
+    extends UpdateCompanion<LocalSyncResolutionRow> {
+  final Value<String> outboxId;
+  final Value<String> decision;
+  final Value<int> resolvedAt;
+  final Value<int> rowid;
+  const LocalSyncResolutionsCompanion({
+    this.outboxId = const Value.absent(),
+    this.decision = const Value.absent(),
+    this.resolvedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalSyncResolutionsCompanion.insert({
+    required String outboxId,
+    required String decision,
+    required int resolvedAt,
+    this.rowid = const Value.absent(),
+  }) : outboxId = Value(outboxId),
+       decision = Value(decision),
+       resolvedAt = Value(resolvedAt);
+  static Insertable<LocalSyncResolutionRow> custom({
+    Expression<String>? outboxId,
+    Expression<String>? decision,
+    Expression<int>? resolvedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (outboxId != null) 'outbox_id': outboxId,
+      if (decision != null) 'decision': decision,
+      if (resolvedAt != null) 'resolved_at': resolvedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalSyncResolutionsCompanion copyWith({
+    Value<String>? outboxId,
+    Value<String>? decision,
+    Value<int>? resolvedAt,
+    Value<int>? rowid,
+  }) {
+    return LocalSyncResolutionsCompanion(
+      outboxId: outboxId ?? this.outboxId,
+      decision: decision ?? this.decision,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (outboxId.present) {
+      map['outbox_id'] = Variable<String>(outboxId.value);
+    }
+    if (decision.present) {
+      map['decision'] = Variable<String>(decision.value);
+    }
+    if (resolvedAt.present) {
+      map['resolved_at'] = Variable<int>(resolvedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalSyncResolutionsCompanion(')
+          ..write('outboxId: $outboxId, ')
+          ..write('decision: $decision, ')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8828,6 +9101,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalOutboxTable localOutbox = $LocalOutboxTable(this);
   late final $LocalSyncedVersionsTable localSyncedVersions =
       $LocalSyncedVersionsTable(this);
+  late final $LocalSyncResolutionsTable localSyncResolutions =
+      $LocalSyncResolutionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8845,6 +9120,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localAppState,
     localOutbox,
     localSyncedVersions,
+    localSyncResolutions,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -15671,6 +15947,186 @@ typedef $$LocalSyncedVersionsTableProcessedTableManager =
       LocalSyncedVersionRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalSyncResolutionsTableCreateCompanionBuilder =
+    LocalSyncResolutionsCompanion Function({
+      required String outboxId,
+      required String decision,
+      required int resolvedAt,
+      Value<int> rowid,
+    });
+typedef $$LocalSyncResolutionsTableUpdateCompanionBuilder =
+    LocalSyncResolutionsCompanion Function({
+      Value<String> outboxId,
+      Value<String> decision,
+      Value<int> resolvedAt,
+      Value<int> rowid,
+    });
+
+class $$LocalSyncResolutionsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalSyncResolutionsTable> {
+  $$LocalSyncResolutionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get outboxId => $composableBuilder(
+    column: $table.outboxId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalSyncResolutionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalSyncResolutionsTable> {
+  $$LocalSyncResolutionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get outboxId => $composableBuilder(
+    column: $table.outboxId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get decision => $composableBuilder(
+    column: $table.decision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalSyncResolutionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalSyncResolutionsTable> {
+  $$LocalSyncResolutionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get outboxId =>
+      $composableBuilder(column: $table.outboxId, builder: (column) => column);
+
+  GeneratedColumn<String> get decision =>
+      $composableBuilder(column: $table.decision, builder: (column) => column);
+
+  GeneratedColumn<int> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$LocalSyncResolutionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalSyncResolutionsTable,
+          LocalSyncResolutionRow,
+          $$LocalSyncResolutionsTableFilterComposer,
+          $$LocalSyncResolutionsTableOrderingComposer,
+          $$LocalSyncResolutionsTableAnnotationComposer,
+          $$LocalSyncResolutionsTableCreateCompanionBuilder,
+          $$LocalSyncResolutionsTableUpdateCompanionBuilder,
+          (
+            LocalSyncResolutionRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalSyncResolutionsTable,
+              LocalSyncResolutionRow
+            >,
+          ),
+          LocalSyncResolutionRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalSyncResolutionsTableTableManager(
+    _$AppDatabase db,
+    $LocalSyncResolutionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalSyncResolutionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalSyncResolutionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalSyncResolutionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> outboxId = const Value.absent(),
+                Value<String> decision = const Value.absent(),
+                Value<int> resolvedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalSyncResolutionsCompanion(
+                outboxId: outboxId,
+                decision: decision,
+                resolvedAt: resolvedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String outboxId,
+                required String decision,
+                required int resolvedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalSyncResolutionsCompanion.insert(
+                outboxId: outboxId,
+                decision: decision,
+                resolvedAt: resolvedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalSyncResolutionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalSyncResolutionsTable,
+      LocalSyncResolutionRow,
+      $$LocalSyncResolutionsTableFilterComposer,
+      $$LocalSyncResolutionsTableOrderingComposer,
+      $$LocalSyncResolutionsTableAnnotationComposer,
+      $$LocalSyncResolutionsTableCreateCompanionBuilder,
+      $$LocalSyncResolutionsTableUpdateCompanionBuilder,
+      (
+        LocalSyncResolutionRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalSyncResolutionsTable,
+          LocalSyncResolutionRow
+        >,
+      ),
+      LocalSyncResolutionRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -15702,4 +16158,6 @@ class $AppDatabaseManager {
       $$LocalOutboxTableTableManager(_db, _db.localOutbox);
   $$LocalSyncedVersionsTableTableManager get localSyncedVersions =>
       $$LocalSyncedVersionsTableTableManager(_db, _db.localSyncedVersions);
+  $$LocalSyncResolutionsTableTableManager get localSyncResolutions =>
+      $$LocalSyncResolutionsTableTableManager(_db, _db.localSyncResolutions);
 }

@@ -109,6 +109,23 @@ class HttpAuthApiClient implements AuthApiClient {
   }
 
   @override
+  Future<void> revokeAllSessions(String accessToken) async {
+    final response = await _send(
+      () => httpClient.delete(
+        _endpoint(_sessionsPath),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+    if (response.statusCode == 204) {
+      return;
+    }
+    throw _failureFor(response);
+  }
+
+  @override
   Future<AuthSessionContext> sessionContext(String accessToken) async {
     final response = await _send(
       () => httpClient.get(

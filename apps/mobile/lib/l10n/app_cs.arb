@@ -120,5 +120,11 @@
   "profileCreateError": "Profil se nepodařilo vytvořit.",
   "profileCreateInvalid": "Zadej zobrazované jméno.",
   "accountSyncButton": "Synchronizovat",
-  "syncResultSummary": "Synchronizováno {synced} — konflikty {conflicts} — odmítnuto {rejected} — čeká {pending}"
+  "syncResultSummary": "Synchronizováno {synced} — konflikty {conflicts} — odmítnuto {rejected} — čeká {pending}",
+  "accountSignOutEverywhereButton": "Odhlásit všude",
+  "syncIssuesTitle": "Problémy synchronizace",
+  "syncIssueConflictLabel": "Změněno na jiném zařízení — vyber, co zachovat.",
+  "syncIssueRejectedLabel": "Server toto odeslání odmítl.",
+  "syncIssueUseLocal": "Použít moji verzi",
+  "syncIssueDiscard": "Nechat jen v tomto zařízení"
 }

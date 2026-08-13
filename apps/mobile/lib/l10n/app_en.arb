@@ -353,5 +353,17 @@
       "rejected": {"type": "int"},
       "synced": {"type": "int"}
     }
-  }
+  },
+  "accountSignOutEverywhereButton": "Sign out everywhere",
+  "@accountSignOutEverywhereButton": {"description": "Global revocation of all account sessions (C13, RVC-001)."},
+  "syncIssuesTitle": "Sync issues",
+  "@syncIssuesTitle": {"description": "Heading of unresolved conflict/rejection list (R2-06)."},
+  "syncIssueConflictLabel": "Changed on another device - choose what to keep.",
+  "@syncIssueConflictLabel": {"description": "Human explanation of a version conflict, no technical diff (CRC-011)."},
+  "syncIssueRejectedLabel": "The server rejected this upload.",
+  "@syncIssueRejectedLabel": {"description": "Human explanation of a rejected operation."},
+  "syncIssueUseLocal": "Use my version",
+  "@syncIssueUseLocal": {"description": "USE_LOCAL resolution - confirmed re-push (CRC-004)."},
+  "syncIssueDiscard": "Keep only on this device",
+  "@syncIssueDiscard": {"description": "CANCEL_LOCAL_CHANGE - stops upload, local data untouched and difference stays visible (CRC-006/007)."}
 }

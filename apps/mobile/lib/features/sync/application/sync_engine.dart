@@ -160,6 +160,18 @@ class SyncEngine {
           rootStates.putIfAbsent(rootKey, () => 'SYNCED');
         case 'VERSION_CONFLICT':
           conflicts += 1;
+          // Aktuální serverová verze z konfliktu se uloží jako cache pro
+          // případné USE_LOCAL rozhodnutí (C12 §5.1) — není to potvrzení
+          // synchronizace (SPC-005), jen autoritativní verze serveru.
+          final conflictVersion = outcome.serverVersion;
+          if (conflictVersion != null) {
+            await _snapshot.storeServerVersion(
+              entity.entityType,
+              entity.entityId,
+              conflictVersion,
+              now: now,
+            );
+          }
           await _snapshot.markOutboxStatus(outcome.operationId, 'CONFLICT');
           rootStates[rootKey] = 'CONFLICT';
         case 'VALIDATION_FAILED':
