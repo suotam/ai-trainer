@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.35  
+**Verze:** 2.36  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-13
@@ -113,13 +113,16 @@ docs/12-data/r2-local-to-account-migration-contract.md
 docs/12-data/r2-server-data-model.md
 docs/12-data/r3-mobile-schema-migration.md
 docs/06-domain/r3-sports-profile-contract.md
+docs/06-domain/r3-goals-contract.md
 ```
 
 - `r2-local-to-account-migration-contract.md` (**C15**, vlastník Data Architecture + Domain) vlastní připojení předpřihlašovacích anonymních dat k účtu: klasifikaci (uživatelská data ano; čistý seed ne; cizí účet nikdy), **lokální idempotentní attach** (přepis `owner_id` v jedné transakci, žádná změna ID/klíčů/hodnot — duplicitní ochranu zajišťují existující vrstvy C10/C11/C6), chování při odhlášení a druhém účtu na zařízení a invarianty `LAM-001` až `LAM-015`. Contract-only. Blokuje `R2-07`. **Tímto je kontraktní mapa R2 (C1–C15) kompletní.**
 
 - `r3-mobile-schema-migration.md` (**C16**, vlastník Data Architecture) vlastní evoluci mobilního schématu v R3 (verze `5+`): dědí C1/`MSM-*` beze změny, verzování per slice, kontraktní přírůstky R3 tabulek, pravidlo **born ownable and syncable** (owner/sync metadata od vzniku, owner stamping při zápisu), **attach coverage** nových tabulek ve stejném slice (zpřesnění plánu §9.7 — R3-07 attach jen ověřuje) a invarianty `R3M-001` až `R3M-015`. Contract-only. Blokuje `R3-01` a každou další R3 schema změnu.
 
-- `r3-sports-profile-contract.md` (**C17**, vlastník Domain / sports-and-goals-model + Mobile) vlastní závaznou P0 podmnožinu sportovního profilu: aggregate `UserSport` s participation patternem, minimální katalog stabilních kódů sportů + custom sport, kódy rolí/priorit/zkušeností/intenzity/prostředí, lifecycle `ACTIVE/PAUSED/ENDED` (konec je stav, ne mazání), anonymní paritu s attach pokrytím od R3-01 a invarianty `ASP-001` až `ASP-015`. Contract-only. Blokuje `R3-01`.
+- `r3-sports-profile-contract.md` (**C17**, vlastník Domain / sports-and-goals-model + Mobile) vlastní závaznou P0 podmnožinu sportovního profilu: aggregate `UserSport` s participation patternem, minimální katalog stabilních kódů sportů + custom sport, kódy rolí/priorit/zkušeností/intenzity/prostředí, lifecycle `ACTIVE/PAUSED/ENDED` (konec je stav, ne mazání), anonymní paritu s attach pokrytím od R3-01 (vč. kolizních pravidel §8) a invarianty `ASP-001` až `ASP-015`. Contract-only. Blokuje `R3-01`.
+
+- `r3-goals-contract.md` (**C18**, vlastník Domain / sports-and-goals-model + Mobile) vlastní závaznou P0 podmnožinu cílů: aggregate `Goal` (strukturovaná deklarace — povinný jen title), stabilní kódy typů/priorit/horizontů/stavů, lifecycle `ACTIVE↔PAUSED → COMPLETED/ABANDONED` (terminální stavy konečné, žádné mazání), volitelnou device-local vazbu na UserSport, bezpodmínečný attach a invarianty `GLC-001` až `GLC-015`. Mimo P0: metriky, hierarchie, konflikty, milníky, expirace. Contract-only. Blokuje `R3-02`.
 
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
@@ -161,7 +164,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
-- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **`R3-01` je implementován** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R3 slices čekají na své kontrakty (C18–C24).
+- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **`R3-01` a `R3-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R3 slices čekají na své kontrakty (C19–C24).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -188,7 +191,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Existuje R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`) s backlogem `R3-01` až `R3-08` a contract mapou C16–C24; **`R3-01 – Structured Sports Profile` je implementován** (schema v5, UserSport dle C17, attach coverage, UI). Dalším kanonickým krokem je **kontrakt C18 – Goals and priorities** (→ `R3-02` READY), po samostatném pokynu.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Existuje R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`) s backlogem `R3-01` až `R3-08` a contract mapou C16–C24; **`R3-01` a `R3-02` jsou implementovány** (schema v6, UserSport dle C17, Goal dle C18, attach coverage, `/sports` a `/goals` UI). Dalším kanonickým krokem je **kontrakt C19 – Availability, equipment and constraints** (→ `R3-03` READY), po samostatném pokynu.
 
 ---
 
@@ -372,13 +375,13 @@ uvést pravdivou evidence summary
 Release 1 i Release 2 jsou uzavřené (Exit Review provedeny; otevřený dluh R2 =
 emulátorová runtime evidence, postup doplnění v R2 Exit Review). Existuje kanonický
 R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
-`R3-01` až `R3-08`, contract map C16–C24). **`R3-01 – Structured Sports Profile`
-je implementován** (schema v5 dle C16, UserSport aggregate dle C17, attach
-coverage s kolizními pravidly, `/sports` UI). Další kanonický krok:
+`R3-01` až `R3-08`, contract map C16–C24). **`R3-01` a `R3-02` jsou
+implementovány** (schema v6, UserSport dle C17, Goal dle C18, attach coverage,
+`/sports` a `/goals` UI). Další kanonický krok:
 
 ```text
-C18 – Goals and priorities contract  (docs/06-domain/r3-goals-contract.md)
-→ poté je R3-02 – Goals and Priorities READY
+C19 – Availability, equipment and constraints contract  (docs/06-domain/r3-availability-contract.md)
+→ poté je R3-03 – Availability, Equipment and Basic Constraints READY
 ```
 
 Tvorba kontraktů i implementace R3 slices smí začít až po samostatném pokynu.
