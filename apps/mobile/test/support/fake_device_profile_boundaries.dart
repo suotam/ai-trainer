@@ -187,6 +187,7 @@ ProviderContainer createR2AuthContainer({
       localOwnerBindingProvider.overrideWithValue(
         ownerBinding ?? FakeLocalOwnerBinding(),
       ),
+      localAccountAttachProvider.overrideWithValue(FakeLocalAccountAttach()),
       if (idGenerator != null)
         idGeneratorProvider.overrideWithValue(idGenerator),
       if (authIdempotencyKeys != null)
@@ -229,6 +230,7 @@ Widget r2AccountApp({
     ),
     syncApiClientProvider.overrideWithValue(syncApi ?? FakeSyncApiClient()),
     localOwnerBindingProvider.overrideWithValue(FakeLocalOwnerBinding()),
+    localAccountAttachProvider.overrideWithValue(FakeLocalAccountAttach()),
   ],
   child: const MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,

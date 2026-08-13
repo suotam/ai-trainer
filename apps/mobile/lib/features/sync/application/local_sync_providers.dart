@@ -7,9 +7,11 @@ import '../../../core/ids/id_generator.dart';
 import '../../../core/time/clock.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../device/application/device_registrar.dart';
+import '../data/drift_local_account_attach.dart';
 import '../data/drift_local_sync_metadata_repository.dart';
 import '../data/drift_sync_snapshot_repository.dart';
 import '../data/http_sync_api_client.dart';
+import '../domain/local_account_attach.dart';
 import '../domain/local_owner_binding.dart';
 import '../domain/local_sync_metadata_repository.dart';
 import '../domain/sync_push_models.dart';
@@ -32,6 +34,11 @@ final localOwnerBindingProvider = Provider<LocalOwnerBinding>(
     ref.watch(appDatabaseProvider),
     ref.watch(clockProvider),
   ),
+);
+
+/// Připojení anonymních dat k účtu po přihlášení (R2-07, C15).
+final localAccountAttachProvider = Provider<LocalAccountAttach>(
+  (ref) => DriftLocalAccountAttach(ref.watch(appDatabaseProvider)),
 );
 
 /// Snapshot lokálních dat k push a aplikace potvrzených výsledků (R2-05).

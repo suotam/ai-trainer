@@ -1,0 +1,59 @@
+import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/workout_tables.dart';
+import '../domain/local_account_attach.dart';
+
+/// Drift implementace attach (C15 §5): jedna transakce, přepis `owner_id`
+/// z `local-anonymous` na účet u attach-eligible entit (§4):
+///
+/// - sessions a summaries jsou vždy uživatelská data,
+/// - instance jsou uživatelsky dotčené, pokud na nich existuje session
+///   nebo mají `started_session_id` — čistý seed (bez session) zůstává
+///   anonymní (LAM-006),
+/// - hierarchická konzistence (LAM-008): instance se sessions se připojují
+///   vždy, aby account-owned session neměla anonymního parenta,
+/// - anonymní outbox položky následují vlastníka entit,
+/// - children (performance/feedback) jsou vlastněny tranzitivně přes
+///   session (LAM-014).
+///
+/// Kromě `owner_id` se nemění nic (LAM-004): ID, row_version, sync_state,
+/// časy i doménové hodnoty zůstávají byte-po-bytu stejné.
+class DriftLocalAccountAttach implements LocalAccountAttach {
+  DriftLocalAccountAttach(this._db);
+
+  final AppDatabase _db;
+
+  @override
+  Future<void> attachAnonymousData(String accountId) {
+    return _db.transaction(() async {
+      // 1. Instance: uživatelsky dotčené anonymní instance (LAM-006/008) —
+      // kanonické kritérium je existence session / started_session_id
+      // (C15 §4); čistý seed (DEMO bez session) zůstává anonymní.
+      await _db.customStatement(
+        'UPDATE local_workout_instances SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId' AND ("
+        '  id IN (SELECT workout_instance_id FROM local_workout_sessions) '
+        '  OR started_session_id IS NOT NULL'
+        ')',
+        [accountId],
+      );
+      // 2. Sessions — vždy uživatelská data.
+      await _db.customStatement(
+        'UPDATE local_workout_sessions SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+      // 3. Summaries — vždy uživatelská data.
+      await _db.customStatement(
+        'UPDATE local_activity_summaries SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+      // 4. Outbox následuje vlastníka entit (C15 §5 bod 4).
+      await _db.customStatement(
+        'UPDATE local_outbox SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+    });
+  }
+}
