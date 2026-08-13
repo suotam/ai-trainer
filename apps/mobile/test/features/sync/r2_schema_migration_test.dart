@@ -97,12 +97,12 @@ void main() {
       addTearDown(db.close);
       await db.customSelect('SELECT 1').get(); // vynutĂ­ otevĹ™enĂ­ + migraci
 
-      // Schema version je aktuální (v5 od R3-01).
+      // Schema version je aktuální (v6 od R3-02).
       final ver = await db
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 5);
+      expect(ver, 6);
 
       // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>
@@ -167,9 +167,10 @@ void main() {
           .getSingle();
       expect(seed.data['value'], '1');
 
-      // 6. R3-01 (C16 R3M-008/010): migrační řetěz přes reálný v4 stav
-      // vytvoří prázdnou tabulku sportovního profilu.
+      // 6. R3-01/R3-02 (C16 R3M-008/010): migrační řetěz přes reálné
+      // předchozí stavy vytvoří prázdné R3 tabulky.
       expect(await count('local_user_sports'), 0);
+      expect(await count('local_goals'), 0);
 
       // 7. FK integrita ÄŤistĂˇ po migraci (MSM-008).
       final violations = await db
