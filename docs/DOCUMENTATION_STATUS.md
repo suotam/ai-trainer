@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.44  
+**Verze:** 2.45  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -181,7 +181,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 `R3-06 – Manual Activity and Basic Progress Statistics` je implementován (blocking kontrakty **C22 – Manual activity** a **C23 – Progress statistics** vznikly v témže cyklu: `docs/06-domain/r3-manual-activity-contract.md` /`MAC-001..015`/ a `docs/06-domain/r3-progress-statistics-contract.md` /`PST-001..015`/). **Mobilní Drift schema verze 10** (aditivní migrace v9→v10 — tabulka `local_activities`; řetěz od reálného v1 ověřen). **Ruční aktivita dle C22**: fakt po skutečnosti bez lifecycle (zdroj výhradně `MANUAL`), povinný jen popis a datum; volitelná délka, device-local vazby na sport a workout instanci (dokumentační — skutečnost nemění plán, MAC-007); editovatelná current-state, nemazatelná; born ownable and syncable, attach bezpodmínečný. **Statistiky dle C23 — čistý deterministický read model bez perzistence** (PST-001/002, žádné uložené agregáty): za období plannedCount (instance mimo `CANCELLED` — konzistentní s C21), completedCount (výhradně ze summaries — fakt dokončení; zdroj instance nerozhoduje), completionRate (definován jen pro plán > 0, jinak „—" — žádná falešná přesnost PST-004), manualActivityCount a manualMinutes (**bez dvojího započtení** — aktivita vázaná na instanci se nepočítá vedle summary, PST-006; aktivity bez délky se do minut nedopočítávají). Řízené rozhodnutí PST-008: device-local scope bez owner filtru (konzistentní s Today); owner scoping je budoucí rozhodnutí. **UI:** `/activity` obrazovka (vstup z Today) — karty posledních 7/30 dní (období z injektovaného clocku, PST-012), seznam ručních aktivit datum-sestupně, bottom-sheet formulář s předvyplněným dneškem a výběrem sportu z profilu; poctivé empty stavy. Ověřeno novými testy: aktivita (owner stamping, editace SYNCED→DIRTY, validace vč. neexistujících referencí, řazení), **statistiky — determinismus (stejný vstup → identický výsledek), CANCELLED mimo plán, dvojí započtení vázané aktivity, empty stav s completionRate null, období mimo data**, widget testy (empty → zápis → přepočet statistik; nevalidní zápis s typovanou chybou). Mobile suite zelená (**285 testů**), `flutter analyze` čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R3-06` je implementován → dalším krokem je **kontrakt C24 – R3 sync extension** (`docs/12-data/r3-sync-extension-contract.md`), poté implementace `R3-07 – R3 Sync Extension` (mobile + backend). Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Poslední slice `R3-08` čeká na dokončení R3-07.
+`R3-07 – R3 Sync Extension` je implementován (blocking kontrakt **C24 – R3 sync extension** vznikl v témže cyklu: `docs/12-data/r3-sync-extension-contract.md`, `SXC-001..015` — **kontraktní mapa R3 (C16–C24) je tímto kompletní**). Všechny R3 entity se synchronizují existujícím R2 push mechanismem **beze změny sémantiky C10/C11/C8** (SXC-001): **backend** — Flyway `V5__r3_synced_entities` (osm tabulek přesně dle C6 §8.4 kostry **bez parent sloupců** — R3 entity nemají serverové parenty, device-local reference jsou součást neprůhledného JSONB payloadu), aditivní rozšíření `SyncEntityType` registru o `USER_SPORT/GOAL/AVAILABILITY_RULE/EQUIPMENT_ITEM/CONSTRAINT_ITEM/TRAINING_PLAN/CALENDAR_CHANGE/MANUAL_ACTIVITY` a OpenAPI enum — **žádný nový endpoint** (SXC-012), ownership/idempotence/konflikt beze změny; **mobil** — collect R3 roots za R1 šesticí v deterministickém pořadí registru (state-based camelCase payload, SXC-006), potvrzení po commitu, `markRootSyncState`/state mapování pro R3 typy. **Vyřešená otevřená rozhodnutí (C24 §4):** struktura plán snapshotu (sekce/kroky/sety) se v R3 nesynchronizuje (lokální; smysl až s pull/restore — SXC-010) a zpětvzetí availability deklarace se nepřenáší (DELETE mimo P0; serverová kopie může zůstat zastaralá — vědomé evidované omezení, SXC-011). Ověřeno **3 novými backend Testcontainers testy** (R3 typy push se zachovaným client ID, `ALREADY_APPLIED` replay bez duplicity + `VERSION_CONFLICT`, cizí entita `PERMISSION_DENIED` bez efektu) a **novým mobilním engine testem** (sběr a push všech R3 oblastí → SYNCED po commitu, replay no-op, editace → DIRTY → UPDATE s payloadem). Backend suite **91/91** + ktlint čistý (vč. aktualizace Flyway V1–V5 testů a recovery drop listu), mobile suite zelená, `flutter analyze` čistý.
+
+**Přesný další kanonický krok:** `R3-01` až `R3-07` jsou implementovány → **`R3-08 – R3 Critical End-to-End Evidence and Exit Review` je `READY`** (poslední R3 slice). Implementace smí začít až po samostatném pokynu.
 
 ---
 
@@ -366,11 +368,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-06` jsou implementovány** (viz §3; mobilní schema v10). Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-07` jsou implementovány** (viz §3; kontraktní mapa R3 C16–C24 kompletní). Další kanonický krok:
 
 ```text
-C24 – R3 sync extension contract  (docs/12-data/r3-sync-extension-contract.md)
-→ poté je R3-07 – R3 Sync Extension READY
+R3-08 – R3 Critical End-to-End Evidence and Exit Review  (implementace)
 ```
 
 Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
