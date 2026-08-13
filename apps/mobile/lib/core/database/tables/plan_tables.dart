@@ -18,6 +18,10 @@ const String planStatusArchived = 'ARCHIVED';
 /// Stabilní source kód ručně vytvořené instance (C20 §5.1, MPC-005).
 const String userPlanSourceType = 'USER_PLAN';
 
+/// Provenance plánu (C30, CSE-004): ruční vs. provedený AI návrh.
+const String planOriginManual = 'MANUAL';
+const String planOriginAiProposal = 'AI_PROPOSAL';
+
 @DataClassName('LocalTrainingPlanRow')
 class LocalTrainingPlans extends Table {
   @override
@@ -28,6 +32,10 @@ class LocalTrainingPlans extends Table {
   TextColumn get note => text().nullable()();
   TextColumn get status =>
       text().withDefault(const Constant(planStatusActive))();
+
+  /// Provenance (C30, CSE-004): `AI_PROPOSAL` nese plán vzniklý execution.
+  TextColumn get origin =>
+      text().withDefault(const Constant(planOriginManual))();
 
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
@@ -44,6 +52,7 @@ class LocalTrainingPlans extends Table {
   List<String> get customConstraints => [
     'CHECK (length(trim(title)) > 0)',
     "CHECK (status IN ('ACTIVE','ARCHIVED'))",
+    "CHECK (origin IN ('MANUAL','AI_PROPOSAL'))",
     'CHECK (row_version >= 1)',
     syncStateCheck,
   ];

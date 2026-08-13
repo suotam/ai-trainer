@@ -12962,6 +12962,16 @@ class $LocalTrainingPlansTable extends LocalTrainingPlans
     requiredDuringInsert: false,
     defaultValue: const Constant(planStatusActive),
   );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<String> origin = GeneratedColumn<String>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(planOriginManual),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -13025,6 +13035,7 @@ class $LocalTrainingPlansTable extends LocalTrainingPlans
     title,
     note,
     status,
+    origin,
     createdAt,
     updatedAt,
     rowVersion,
@@ -13066,6 +13077,12 @@ class $LocalTrainingPlansTable extends LocalTrainingPlans
       context.handle(
         _statusMeta,
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -13129,6 +13146,10 @@ class $LocalTrainingPlansTable extends LocalTrainingPlans
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -13164,6 +13185,9 @@ class LocalTrainingPlanRow extends DataClass
   final String title;
   final String? note;
   final String status;
+
+  /// Provenance (C30, CSE-004): `AI_PROPOSAL` nese plán vzniklý execution.
+  final String origin;
   final int createdAt;
   final int updatedAt;
   final int rowVersion;
@@ -13174,6 +13198,7 @@ class LocalTrainingPlanRow extends DataClass
     required this.title,
     this.note,
     required this.status,
+    required this.origin,
     required this.createdAt,
     required this.updatedAt,
     required this.rowVersion,
@@ -13189,6 +13214,7 @@ class LocalTrainingPlanRow extends DataClass
       map['note'] = Variable<String>(note);
     }
     map['status'] = Variable<String>(status);
+    map['origin'] = Variable<String>(origin);
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
     map['row_version'] = Variable<int>(rowVersion);
@@ -13203,6 +13229,7 @@ class LocalTrainingPlanRow extends DataClass
       title: Value(title),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       status: Value(status),
+      origin: Value(origin),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       rowVersion: Value(rowVersion),
@@ -13221,6 +13248,7 @@ class LocalTrainingPlanRow extends DataClass
       title: serializer.fromJson<String>(json['title']),
       note: serializer.fromJson<String?>(json['note']),
       status: serializer.fromJson<String>(json['status']),
+      origin: serializer.fromJson<String>(json['origin']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
       rowVersion: serializer.fromJson<int>(json['rowVersion']),
@@ -13236,6 +13264,7 @@ class LocalTrainingPlanRow extends DataClass
       'title': serializer.toJson<String>(title),
       'note': serializer.toJson<String?>(note),
       'status': serializer.toJson<String>(status),
+      'origin': serializer.toJson<String>(origin),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
       'rowVersion': serializer.toJson<int>(rowVersion),
@@ -13249,6 +13278,7 @@ class LocalTrainingPlanRow extends DataClass
     String? title,
     Value<String?> note = const Value.absent(),
     String? status,
+    String? origin,
     int? createdAt,
     int? updatedAt,
     int? rowVersion,
@@ -13259,6 +13289,7 @@ class LocalTrainingPlanRow extends DataClass
     title: title ?? this.title,
     note: note.present ? note.value : this.note,
     status: status ?? this.status,
+    origin: origin ?? this.origin,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     rowVersion: rowVersion ?? this.rowVersion,
@@ -13271,6 +13302,7 @@ class LocalTrainingPlanRow extends DataClass
       title: data.title.present ? data.title.value : this.title,
       note: data.note.present ? data.note.value : this.note,
       status: data.status.present ? data.status.value : this.status,
+      origin: data.origin.present ? data.origin.value : this.origin,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       rowVersion: data.rowVersion.present
@@ -13288,6 +13320,7 @@ class LocalTrainingPlanRow extends DataClass
           ..write('title: $title, ')
           ..write('note: $note, ')
           ..write('status: $status, ')
+          ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowVersion: $rowVersion, ')
@@ -13303,6 +13336,7 @@ class LocalTrainingPlanRow extends DataClass
     title,
     note,
     status,
+    origin,
     createdAt,
     updatedAt,
     rowVersion,
@@ -13317,6 +13351,7 @@ class LocalTrainingPlanRow extends DataClass
           other.title == this.title &&
           other.note == this.note &&
           other.status == this.status &&
+          other.origin == this.origin &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.rowVersion == this.rowVersion &&
@@ -13330,6 +13365,7 @@ class LocalTrainingPlansCompanion
   final Value<String> title;
   final Value<String?> note;
   final Value<String> status;
+  final Value<String> origin;
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<int> rowVersion;
@@ -13341,6 +13377,7 @@ class LocalTrainingPlansCompanion
     this.title = const Value.absent(),
     this.note = const Value.absent(),
     this.status = const Value.absent(),
+    this.origin = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowVersion = const Value.absent(),
@@ -13353,6 +13390,7 @@ class LocalTrainingPlansCompanion
     required String title,
     this.note = const Value.absent(),
     this.status = const Value.absent(),
+    this.origin = const Value.absent(),
     required int createdAt,
     required int updatedAt,
     required int rowVersion,
@@ -13369,6 +13407,7 @@ class LocalTrainingPlansCompanion
     Expression<String>? title,
     Expression<String>? note,
     Expression<String>? status,
+    Expression<String>? origin,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowVersion,
@@ -13381,6 +13420,7 @@ class LocalTrainingPlansCompanion
       if (title != null) 'title': title,
       if (note != null) 'note': note,
       if (status != null) 'status': status,
+      if (origin != null) 'origin': origin,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowVersion != null) 'row_version': rowVersion,
@@ -13395,6 +13435,7 @@ class LocalTrainingPlansCompanion
     Value<String>? title,
     Value<String?>? note,
     Value<String>? status,
+    Value<String>? origin,
     Value<int>? createdAt,
     Value<int>? updatedAt,
     Value<int>? rowVersion,
@@ -13407,6 +13448,7 @@ class LocalTrainingPlansCompanion
       title: title ?? this.title,
       note: note ?? this.note,
       status: status ?? this.status,
+      origin: origin ?? this.origin,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowVersion: rowVersion ?? this.rowVersion,
@@ -13430,6 +13472,9 @@ class LocalTrainingPlansCompanion
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
@@ -13459,6 +13504,7 @@ class LocalTrainingPlansCompanion
           ..write('title: $title, ')
           ..write('note: $note, ')
           ..write('status: $status, ')
+          ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowVersion: $rowVersion, ')
@@ -25025,6 +25071,7 @@ typedef $$LocalTrainingPlansTableCreateCompanionBuilder =
       required String title,
       Value<String?> note,
       Value<String> status,
+      Value<String> origin,
       required int createdAt,
       required int updatedAt,
       required int rowVersion,
@@ -25038,6 +25085,7 @@ typedef $$LocalTrainingPlansTableUpdateCompanionBuilder =
       Value<String> title,
       Value<String?> note,
       Value<String> status,
+      Value<String> origin,
       Value<int> createdAt,
       Value<int> updatedAt,
       Value<int> rowVersion,
@@ -25072,6 +25120,11 @@ class $$LocalTrainingPlansTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get origin => $composableBuilder(
+    column: $table.origin,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -25130,6 +25183,11 @@ class $$LocalTrainingPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -25176,6 +25234,9 @@ class $$LocalTrainingPlansTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -25239,6 +25300,7 @@ class $$LocalTrainingPlansTableTableManager
                 Value<String> title = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String> origin = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
                 Value<int> rowVersion = const Value.absent(),
@@ -25250,6 +25312,7 @@ class $$LocalTrainingPlansTableTableManager
                 title: title,
                 note: note,
                 status: status,
+                origin: origin,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,
@@ -25263,6 +25326,7 @@ class $$LocalTrainingPlansTableTableManager
                 required String title,
                 Value<String?> note = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String> origin = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
                 required int rowVersion,
@@ -25274,6 +25338,7 @@ class $$LocalTrainingPlansTableTableManager
                 title: title,
                 note: note,
                 status: status,
+                origin: origin,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowVersion: rowVersion,

@@ -5,17 +5,22 @@ import '../../../app/configuration/app_environment.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/ids/id_generator.dart';
 import '../../../core/time/clock.dart';
+import '../../../core/database/tables/ai_tables.dart';
 import '../../activity/application/activity_providers.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../availability/application/availability_providers.dart';
 import '../../goals/application/goals_providers.dart';
+import '../../plan/application/plan_providers.dart';
 import '../../sports/application/sports_profile_providers.dart';
+import '../../workouts/application/today_providers.dart';
 import '../data/drift_ai_context_builder.dart';
 import '../data/drift_ai_proposal_repository.dart';
+import '../data/drift_proposal_executor.dart';
 import '../data/http_ai_api_client.dart';
 import '../domain/ai_context.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
+import '../domain/proposal_executor.dart';
 import 'request_plan_proposal.dart';
 
 /// Composition AI vrstvy (R4-02/03, C27–C29). Builder je čistě lokální
@@ -39,6 +44,15 @@ final aiApiClientProvider = Provider<AiApiClient>((ref) {
 
 final aiProposalRepositoryProvider = Provider<AiProposalRepository>(
   (ref) => DriftAiProposalRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// Execution potvrzeného návrhu (C30): jediná cesta změny = C20 port.
+final proposalExecutorProvider = Provider<ProposalExecutor>(
+  (ref) => DriftProposalExecutor(
+    ref.watch(appDatabaseProvider),
+    ref.watch(trainingPlanRepositoryProvider),
+    ref.watch(aiProposalRepositoryProvider),
+  ),
 );
 
 /// Návrhy aktuálního vlastníka (APL-012).
@@ -85,6 +99,13 @@ class AiDecisionFailure extends AiScreenState {
   final DecideProposalResult result;
 }
 
+/// Typované selhání provedení (CSE-006) — ruční cesty nedegradované
+/// (CSE-013); opakování jen explicitní akcí (CSE-007).
+class AiExecutionFailure extends AiScreenState {
+  const AiExecutionFailure(this.result);
+  final ExecuteProposalResult result;
+}
+
 /// Controller AI obrazovky: double-submit guard, typované chyby,
 /// invalidace read modelu; rozhodnutí výhradně explicitní akcí (APL-005).
 class AiScreenController extends Notifier<AiScreenState> {
@@ -107,10 +128,39 @@ class AiScreenController extends Notifier<AiScreenState> {
             .read(aiProposalRepositoryProvider)
             .decide(proposalId, decision, now: ref.read(clockProvider)());
         return switch (result) {
+          // Potvrzení = souhlas s provedením (C30 §2): execution následuje
+          // v témže uživatelském kroku.
+          DecisionSaved(:final newStatus)
+              when newStatus == proposalStatusConfirmed =>
+            await _executeNow(proposalId),
           DecisionSaved() => const AiDone(),
           _ => AiDecisionFailure(result),
         };
       });
+
+  /// Explicitní opakování po EXECUTION_FAILED (CSE-007).
+  Future<void> executeProposal(String proposalId) =>
+      _run(() => _executeNow(proposalId));
+
+  Future<AiScreenState> _executeNow(String proposalId) async {
+    final result = await ref
+        .read(proposalExecutorProvider)
+        .execute(
+          proposalId,
+          newId: ref.read(idGeneratorProvider).newId,
+          now: ref.read(clockProvider)(),
+        );
+    if (result is! ExecutionSaved) {
+      return AiExecutionFailure(result);
+    }
+    // Vzniklá data žijí běžným lifecycle (CSE-009) — plán i Today read
+    // modely se obnoví okamžitě.
+    ref
+      ..invalidate(trainingPlansProvider)
+      ..invalidate(planWorkoutsProvider)
+      ..invalidate(todayWorkoutsProvider);
+    return const AiDone();
+  }
 
   Future<void> _run(Future<AiScreenState> Function() action) async {
     if (_inFlight) {

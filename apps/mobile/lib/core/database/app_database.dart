@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
   /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
   /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -162,6 +162,13 @@ class AppDatabase extends _$AppDatabase {
       // aditivní, prázdná.
       if (from < 11) {
         await m.createTable(localAiProposals);
+      }
+      // Migrace v11 → v12 (R4-05, C30 CSE-004): provenance plánu —
+      // aditivní sloupec s defaultem MANUAL, žádná data se nemění.
+      // Migrace z < v8 tabulku právě vytvořila už včetně origin, proto
+      // se sloupec přidává jen tam, kde tabulka existovala dřív.
+      if (from >= 8 && from < 12) {
+        await m.addColumn(localTrainingPlans, localTrainingPlans.origin);
       }
     },
     beforeOpen: (details) async {

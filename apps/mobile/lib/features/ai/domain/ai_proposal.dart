@@ -34,6 +34,9 @@ class AiProposal {
   final String? executedPlanId;
 
   bool get isPending => status == 'PROPOSED';
+
+  /// Po EXECUTION_FAILED je dovolen explicitní nový pokus (CSE-007).
+  bool get canRetryExecution => status == 'EXECUTION_FAILED';
 }
 
 /// Typovaný výsledek AI požadavku (R4-03) — nikdy raw výjimka do UI.

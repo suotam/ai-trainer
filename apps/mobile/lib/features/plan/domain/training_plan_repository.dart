@@ -10,9 +10,12 @@ abstract interface class TrainingPlanRepository {
   Future<List<TrainingPlan>> plansForCurrentOwner();
 
   /// Vytvoří plán; druhý ACTIVE je typovaně odmítnut (MPC-002).
+  /// `origin` je provenance (C30 CSE-004): default MANUAL, execution
+  /// potvrzeného AI návrhu předává AI_PROPOSAL.
   Future<PlanWriteResult> createPlan({
     required String title,
     String? note,
+    String origin = 'MANUAL',
     required String newId,
     required DateTime now,
   });
