@@ -1,4 +1,4 @@
-import 'package:ai_trainer_mobile/core/database/app_database.dart';
+﻿import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:ai_trainer_mobile/core/database/database_provider.dart';
 import 'package:ai_trainer_mobile/core/database/tables/workout_tables.dart';
 import 'package:ai_trainer_mobile/core/time/clock.dart';
@@ -11,10 +11,13 @@ import 'package:ai_trainer_mobile/features/ai/domain/proposal_executor.dart';
 import 'package:ai_trainer_mobile/features/ai/presentation/ai_proposals_screen.dart';
 import 'package:ai_trainer_mobile/features/auth/application/auth_providers.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
+import 'package:ai_trainer_mobile/features/availability/data/drift_availability_profile_repository.dart';
+import 'package:ai_trainer_mobile/features/checkin/data/drift_daily_check_in_repository.dart';
+import 'package:ai_trainer_mobile/features/plan/data/drift_calendar_operations_repository.dart';
+import 'package:ai_trainer_mobile/features/workouts/data/drift_workout_instance_repository.dart';
 import 'package:ai_trainer_mobile/features/plan/data/drift_training_plan_repository.dart';
 import 'package:ai_trainer_mobile/features/plan/domain/training_plan.dart';
 import 'package:ai_trainer_mobile/features/sync/data/drift_sync_snapshot_repository.dart';
-import 'package:ai_trainer_mobile/features/workouts/data/drift_workout_instance_repository.dart';
 import 'package:ai_trainer_mobile/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,6 +59,20 @@ void main() {
 
   // Poledne UTC: lokální datum je stejné pro všechny běžné časové zóny.
   final now = DateTime.utc(2026, 8, 14, 12);
+
+  DriftProposalExecutor buildExecutor(
+    AppDatabase db,
+    DriftTrainingPlanRepository plans,
+    DriftAiProposalRepository proposals,
+  ) => DriftProposalExecutor(
+    db,
+    plans,
+    proposals,
+    DriftCalendarOperationsRepository(db),
+    DriftWorkoutInstanceRepository(db),
+    DriftDailyCheckInRepository(db),
+    DriftAvailabilityProfileRepository(db),
+  );
   final day0 = scheduledDateForOffset(now, 0);
   final day2 = scheduledDateForOffset(now, 2);
 
@@ -117,7 +134,7 @@ void main() {
     addTearDown(db.close);
     final proposals = DriftAiProposalRepository(db);
     final plans = DriftTrainingPlanRepository(db);
-    final executor = DriftProposalExecutor(db, plans, proposals);
+    final executor = buildExecutor(db, plans, proposals);
 
     await seedConfirmedProposal(proposals, id: 'p-1', payload: validPayload);
 
@@ -127,7 +144,7 @@ void main() {
       now: now,
     );
     expect(result, isA<ExecutionSaved>());
-    final planId = (result as ExecutionSaved).planId;
+    final planId = (result as ExecutionSaved).planId!;
 
     // dayOffset mapování: den 2 = den provedení + 2 dny (CSE-008).
     expect(DateTime.parse(day2).difference(DateTime.parse(day0)).inDays, 2);
@@ -195,7 +212,7 @@ void main() {
     addTearDown(db.close);
     final proposals = DriftAiProposalRepository(db);
     final plans = DriftTrainingPlanRepository(db);
-    final executor = DriftProposalExecutor(db, plans, proposals);
+    final executor = buildExecutor(db, plans, proposals);
 
     expect(
       await plans.createPlan(title: 'Můj plán', newId: 'manual-1', now: now),
@@ -232,7 +249,7 @@ void main() {
     addTearDown(db.close);
     final proposals = DriftAiProposalRepository(db);
     final plans = DriftTrainingPlanRepository(db);
-    final executor = DriftProposalExecutor(db, plans, proposals);
+    final executor = buildExecutor(db, plans, proposals);
 
     // První workout je validní — vloží se a rollback ho musí odvolat.
     await seedConfirmedProposal(
