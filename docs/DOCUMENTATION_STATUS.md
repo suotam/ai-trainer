@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.59  
+**Verze:** 2.60  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -261,7 +261,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-03 – Today Recommendation` je implementován (blocking kontrakt **C35 – Today recommendation** /`docs/06-domain/r5-today-recommendation-contract.md`, `TDR-001..015`/ vznikl v témže cyklu). **Deterministický read model dne**: čistá mapovací funkce C34 safety stavu + počtu dnešních workoutů na P0 stavy — `CHECK_IN_MISSING` (výzva s CTA na check-in, žádná implicitní rada, TDR-004), `CONSIDER_REST`, `CONSIDER_LIGHTER_DAY`, `TRAIN_AS_PLANNED`, `NOTHING_PLANNED`. **Jediný zdroj signálů je C34** (TDR-002 — doporučení nemá vlastní pravidla; důvody = safety flags beze změny se zdroji) a **safety má konzervativní přednost před plánem** (TDR-003 — „zvaž odpočinek" platí i s naplánovaným workoutem). **UI `TodayRecommendationCard`** na Today: jedna poctivá věta + viditelné důvody + CTA; nedostupný podklad kartu skryje — Today nikdy neshodí (TDR-009); R1 stavy Today (seznam/empty/error) zůstávají nedotčené (TDR-011, dokázáno stávajícími testy v téže suite). Vše plně offline (TDR-008). Ověřeno **4 novými testy** (mapovací matice 8 kombinací + determinismus + průchod flags; widget: výzva s CTA + nedotčený empty stav; STOP s viditelným důvodem i při naplánovaném workoutu; trénuj podle plánu) — mobile suite **319 testů**, analyze čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R5-03` je implementován → dalším krokem je vytvoření blocking kontraktu **C36 – Adjustment context & classification** (`docs/09-ai/r5-adjustment-context-contract.md`) a poté implementace `R5-04 – Adjustment Context and Classification`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C37–C40).
+`R5-04 – Adjustment Context and Classification` je implementován (blocking kontrakt **C36 – Adjustment context & classification** /`docs/09-ai/r5-adjustment-context-contract.md`, `ADX-001..015`/ vznikl v témže cyklu). **Druhý AI request typ `ADJUSTMENT_PROPOSAL`** (rozšíření C27 klasifikace výhradně kontraktem, ACX-001): mobilní builder staví adjustment kontext = **celý C27 základ + tři nové sekce** — `weekPlan` by-value (dayOffset 0–6 místo kalendářních dat /ADX-003/, title/typ/status/délka, **žádná instance ID** /ADX-004 — mapování na instance vlastní C37/C38/), `checkIns` (dnešní by-value **bez note** /DCI-006/ + 7denní agregáty místo historie /ADX-007/) a `safety` (**C34 assessment jako fakt** /ADX-005, SFR-003/ — stav + flags, bez duplikace titulů omezení). Všechna C27 minimalizační pravidla dědí beze změny (ADX-001), bajtový determinismus trvá (ADX-002), prázdný stav je validní kontext (ADX-012). **Backend:** `AiRequestType.ADJUSTMENT_PROPOSAL`, nová immutable prompt verze **`adjustment-proposal-v1`** v registru (bez uživatelských dat, instruuje konzervativní respekt k safety — vynucení ale zůstává deterministické), **schema verze podle typu** (`adjustment-proposal-schema-v1` — obsah vlastní C37; trojice verzí povinná, ADX-009); gateway/audit/limity beze změny (ADX-011/014). Ověřeno **2 novými mobilními testy** (marker test zakázaného obsahu vč. check-in note a instance ID, dayOffset mapování + 7denní okno, agregáty, safety průchod, bajtový determinismus; prázdný stav) — suite **321 testů**, analyze čistý; **1 novým backend testem** (adjustment typ → vlastní prompt + schema verze, registry immutabilita, plan-proposal nedotčen) — suite **109/109** + ktlint.
+
+**Přesný další kanonický krok:** `R5-04` je implementován → dalším krokem je vytvoření blocking kontraktu **C37 – Adjustment structured output & proposal** (`docs/09-ai/r5-adjustment-schema-contract.md`) a poté implementace `R5-05 – Structured Adjustment Proposal`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C38–C40).
 
 ---
 
@@ -446,10 +448,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-03` jsou implementovány** (denní check-in, deterministická safety pravidla, doporučení dne na Today). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-04` jsou implementovány** (denní check-in, deterministická safety pravidla, doporučení dne, adjustment request typ + kontext). Další kanonický krok:
 
 ```text
-C36 – Adjustment context kontrakt → R5-04 – Adjustment Context and Classification
+C37 – Adjustment structured output kontrakt → R5-05 – Structured Adjustment Proposal
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
