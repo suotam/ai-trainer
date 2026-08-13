@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/account_screen.dart';
 import '../../features/availability/presentation/availability_screen.dart';
 import '../../features/goals/presentation/goals_screen.dart';
+import '../../features/plan/presentation/plan_screen.dart';
 import '../../features/sports/presentation/sports_profile_screen.dart';
 import '../../features/workouts/presentation/active_session_screen.dart';
 import '../../features/workouts/presentation/completed_workout_detail_screen.dart';
@@ -79,6 +80,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.availabilityName,
         path: AppRoutes.availabilityPath,
         builder: (context, state) => const AvailabilityScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.planName,
+        path: AppRoutes.planPath,
+        builder: (context, state) => const PlanScreen(),
       ),
       GoRoute(
         name: AppRoutes.startupName,

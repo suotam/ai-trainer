@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.41  
+**Verze:** 2.42  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-08-13  
+**Poslední aktualizace:** 2026-08-14  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -175,7 +175,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 `R3-03 – Availability, Equipment and Basic Constraints` je implementován (blocking kontrakt **C19 – Availability, equipment and constraints** vznikl v témže cyklu: `docs/06-domain/r3-availability-contract.md`, `AVC-001..015` — P0 podmnožina scheduling/recovery modelů: **deklarace, ne vynucení**; mimo P0 zůstávají AvailabilityException, RecurrenceSeries, časová okna, kapacitní validace a medicínská interpretace). **Mobilní Drift schema verze 7** (C16 §4 — aditivní migrace v6→v7 vytváří tři prázdné tabulky; migrační řetěz od reálného v1 ověřen). **Tři vlastnitelné aggregate roots dle C19** (born ownable and syncable): `local_availability_rules` (**typický týden** — nejvýše jedna deklarace na den a vlastníka /AVC-003/, level `AVAILABLE/LIMITED/UNAVAILABLE`, volitelný budget minut a preferovaná část dne; den bez deklarace = unknown, ne nedostupný /AVC-004/; **zpětvzetí dne je legitimní DELETE** current-state preference /AVC-008/), `local_equipment_items` (**vybavení** — katalog 13 stabilních kódů XOR custom název; nejvýše jedna ne-`ARCHIVED` položka na kód a vlastníka /AVC-006/; archivace je stav, reaktivace znovu kontroluje duplicitu) a `local_constraints` (**základní omezení** — povinný title, bez interpretace a diagnostiky /AVC-009/; vyřešení je stav /AVC-007/). **Attach dle C19 §8**: kolizní den a kolizní equipment zůstávají anonymní (vzor C17); omezení bezpodmínečně. **UI:** `/availability` obrazovka (vstup z Today) — tři sekce: týden MON..SUN s bottom-sheet editací a zpětvzetím, vybavení s archivací, omezení s vyřešením; typované chybové bannery, EN/CS přes ICU select. Ověřeno novými testy: migrace řetězem v1→v7, persistence/invarianty/stavy nad skutečnou SQLite, attach kolizní scénáře (MON a DUMBBELLS zůstávají anonymní, TUE/BARBELL/omezení se připojí, invarianty účtu drží), widget testy tří sekcí. Mobile suite zelená (**269 testů**), `flutter analyze` čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R3-03` je implementován → dalším krokem je **kontrakt C20 – Manual training plan and internal calendar** (`docs/06-domain/r3-manual-plan-contract.md`), poté implementace `R3-04 – Manual Training Plan and Internal Calendar` (jádro hodnoty R3). Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C20–C24).
+`R3-04 – Manual Training Plan and Internal Calendar` je implementován — **jádro hodnoty R3** (blocking kontrakt **C20 – Manual training plan and internal calendar** vznikl v témže cyklu: `docs/06-domain/r3-manual-plan-contract.md`, `MPC-001..015`; současně append-only rozšířena klasifikace C15 §4). Klíčové rozhodnutí kontraktu: **ručně plánovaný workout JE existující R1 `WorkoutInstance`** (MPC-001) — žádná paralelní struktura; Today, detail, tracker, completion, historie i sync fungují beze změny. **Mobilní Drift schema verze 8** (aditivní migrace v7→v8 — tabulka `local_training_plans`; řetěz od reálného v1 ověřen). **`TrainingPlan` aggregate** (born ownable and syncable): nejvýše jeden `ACTIVE` plán na vlastníka (MPC-002, typovaný konflikt), archivace je stav a nemění vygenerované instance (MPC-003). **`addWorkout`** vytvoří v jedné transakci plnohodnotnou R1 strukturu (MPC-004): instance `READY`/`source_type = USER_PLAN`/`source_reference = plan id` + MAIN sekce + exercise kroky (`SET_REP`) + set plans dle zadání (název cviku, série × opakování × volitelná váha); prázdný workout dovolen (MPC-011); workout jen do ACTIVE plánu. **Interní kalendář = existující R1 read modely** (C20 §6) — ruční workout se objeví v Today bez jakékoli změny R1 (MPC-007). **Attach:** USER_PLAN instance je uživatelská data od vzniku — připojí se i bez session (C15 §4 rozšíření, MPC-009); kolizní anonymní ACTIVE plán zůstává anonymní, jeho instance se připojí nezávisle (MPC-010, device-local reference). **Sync poznámka (C20 §5.3):** instance se synchronizuje existujícím R2-05 push; struktura snapshotu (sekce/kroky/sety) v registru není — rozhodne C24 (evidované otevřené rozhodnutí). **UI:** `/plan` obrazovka (vstup z Today) — vytvoření plánu, archivace, seznam workoutů podle data, bottom-sheet formulář s dynamickým seznamem cviků a předvyplněným dneškem; EN/CS. Ověřeno novými testy: persistence (jeden ACTIVE, atomická struktura 1 sekce + 2 kroky + 7 setů, validace, archivovaný plán odmítá zápis), **klíčový R1 integrační důkaz (MPC-006): ruční workout → Today read model → start session → tracker (cvik viditelný) → zápis výkonu → completion → historie**, attach (USER_PLAN bez session se připojí; kolizní plán anonymní; invariant účtu drží), widget testy (create → add workout s cvikem → seznam; archivace). Mobile suite zelená (**276 testů**), `flutter analyze` čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R3-04` je implementován → dalším krokem je **kontrakt C21 – Calendar operations** (`docs/06-domain/r3-calendar-operations-contract.md`), poté implementace `R3-05 – Calendar Operations: Move, Cancel, Replace`. Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C21–C24).
 
 ---
 
@@ -360,11 +362,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-03` jsou implementovány** (viz §3; mobilní schema v7). Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-04` jsou implementovány** (viz §3; mobilní schema v8). Další kanonický krok:
 
 ```text
-C20 – Manual training plan and internal calendar contract  (docs/06-domain/r3-manual-plan-contract.md)
-→ poté je R3-04 – Manual Training Plan and Internal Calendar READY
+C21 – Calendar operations contract  (docs/06-domain/r3-calendar-operations-contract.md)
+→ poté je R3-05 – Calendar Operations: Move, Cancel, Replace READY
 ```
 
 Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

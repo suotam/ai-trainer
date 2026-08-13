@@ -97,12 +97,12 @@ void main() {
       addTearDown(db.close);
       await db.customSelect('SELECT 1').get(); // vynutĂ­ otevĹ™enĂ­ + migraci
 
-      // Schema version je aktuální (v7 od R3-03).
+      // Schema version je aktuální (v8 od R3-04).
       final ver = await db
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 7);
+      expect(ver, 8);
 
       // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>
@@ -174,6 +174,7 @@ void main() {
       expect(await count('local_availability_rules'), 0);
       expect(await count('local_equipment_items'), 0);
       expect(await count('local_constraints'), 0);
+      expect(await count('local_training_plans'), 0);
 
       // 7. FK integrita ÄŤistĂˇ po migraci (MSM-008).
       final violations = await db

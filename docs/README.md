@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.37  
+**Verze:** 2.38  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-08-13
+**Poslední aktualizace:** 2026-08-14
 
 ---
 
@@ -115,6 +115,7 @@ docs/12-data/r3-mobile-schema-migration.md
 docs/06-domain/r3-sports-profile-contract.md
 docs/06-domain/r3-goals-contract.md
 docs/06-domain/r3-availability-contract.md
+docs/06-domain/r3-manual-plan-contract.md
 ```
 
 - `r2-local-to-account-migration-contract.md` (**C15**, vlastník Data Architecture + Domain) vlastní připojení předpřihlašovacích anonymních dat k účtu: klasifikaci (uživatelská data ano; čistý seed ne; cizí účet nikdy), **lokální idempotentní attach** (přepis `owner_id` v jedné transakci, žádná změna ID/klíčů/hodnot — duplicitní ochranu zajišťují existující vrstvy C10/C11/C6), chování při odhlášení a druhém účtu na zařízení a invarianty `LAM-001` až `LAM-015`. Contract-only. Blokuje `R2-07`. **Tímto je kontraktní mapa R2 (C1–C15) kompletní.**
@@ -126,6 +127,8 @@ docs/06-domain/r3-availability-contract.md
 - `r3-goals-contract.md` (**C18**, vlastník Domain / sports-and-goals-model + Mobile) vlastní závaznou P0 podmnožinu cílů: aggregate `Goal` (strukturovaná deklarace — povinný jen title), stabilní kódy typů/priorit/horizontů/stavů, lifecycle `ACTIVE↔PAUSED → COMPLETED/ABANDONED` (terminální stavy konečné, žádné mazání), volitelnou device-local vazbu na UserSport, bezpodmínečný attach a invarianty `GLC-001` až `GLC-015`. Mimo P0: metriky, hierarchie, konflikty, milníky, expirace. Contract-only. Blokuje `R3-02`.
 
 - `r3-availability-contract.md` (**C19**, vlastník Domain / scheduling + recovery model + Mobile) vlastní závaznou P0 podmnožinu dostupnosti a tréninkového kontextu: typický týden (jedna deklarace na den, level + budget + část dne, den bez deklarace = unknown, zpětvzetí legitimní), vybavení (katalog 13 kódů XOR custom, archivace jako stav), základní omezení (deklarace bez interpretace, vyřešení jako stav), attach kolizní pravidla a invarianty `AVC-001` až `AVC-015`. **Deklarace, ne vynucení.** Contract-only. Blokuje `R3-03`.
+
+- `r3-manual-plan-contract.md` (**C20**, vlastník Domain / training-plan + scheduling model + Mobile) vlastní závaznou P0 podmnožinu ručního plánování: `TrainingPlan` aggregate (nejvýše jeden ACTIVE na vlastníka, archivace jako stav), klíčové rozhodnutí **ručně plánovaný workout = existující R1 `WorkoutInstance`** (`source_type = USER_PLAN`, atomické vytvoření s MAIN sekcí/kroky/sety), interní kalendář = existující R1 read modely, koexistenci se seedem, attach pravidla (USER_PLAN instance = uživatelská data od vzniku; rozšíření C15 §4) a invarianty `MPC-001` až `MPC-015`. Contract-only. Blokuje `R3-04`.
 
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
@@ -167,7 +170,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
-- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **`R3-01` až `R3-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R3 slices čekají na své kontrakty (C20–C24).
+- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **`R3-01` až `R3-04` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R3 slices čekají na své kontrakty (C21–C24).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -194,7 +197,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Existuje R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`) s backlogem `R3-01` až `R3-08` a contract mapou C16–C24; **`R3-01` až `R3-03` jsou implementovány** (schema v7; sportovní profil, cíle, dostupnost/vybavení/omezení; attach coverage; `/sports`, `/goals` a `/availability` UI). Dalším kanonickým krokem je **kontrakt C20 – Manual training plan and internal calendar** (→ `R3-04` READY), po samostatném pokynu.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Existuje R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`) s backlogem `R3-01` až `R3-08` a contract mapou C16–C24; **`R3-01` až `R3-04` jsou implementovány** (schema v8; sportovní profil, cíle, dostupnost/vybavení/omezení, ruční plán generující R1 instance; attach coverage; `/sports`, `/goals`, `/availability` a `/plan` UI). Dalším kanonickým krokem je **kontrakt C21 – Calendar operations** (→ `R3-05` READY), po samostatném pokynu.
 
 ---
 
@@ -378,13 +381,14 @@ uvést pravdivou evidence summary
 Release 1 i Release 2 jsou uzavřené (Exit Review provedeny; otevřený dluh R2 =
 emulátorová runtime evidence, postup doplnění v R2 Exit Review). Existuje kanonický
 R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
-`R3-01` až `R3-08`, contract map C16–C24). **`R3-01` až `R3-03` jsou
-implementovány** (schema v7; sportovní profil, cíle, dostupnost/vybavení/omezení;
-attach coverage; `/sports`, `/goals` a `/availability` UI). Další kanonický krok:
+`R3-01` až `R3-08`, contract map C16–C24). **`R3-01` až `R3-04` jsou
+implementovány** (schema v8; sportovní profil, cíle, dostupnost/vybavení/omezení,
+ruční plán generující R1 instance; attach coverage; `/sports`, `/goals`,
+`/availability` a `/plan` UI). Další kanonický krok:
 
 ```text
-C20 – Manual training plan and internal calendar contract  (docs/06-domain/r3-manual-plan-contract.md)
-→ poté je R3-04 – Manual Training Plan and Internal Calendar READY
+C21 – Calendar operations contract  (docs/06-domain/r3-calendar-operations-contract.md)
+→ poté je R3-05 – Calendar Operations: Move, Cancel, Replace READY
 ```
 
 Tvorba kontraktů i implementace R3 slices smí začít až po samostatném pokynu.

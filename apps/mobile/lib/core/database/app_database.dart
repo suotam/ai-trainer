@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'tables/availability_tables.dart';
 import 'tables/goals_tables.dart';
+import 'tables/plan_tables.dart';
 import 'tables/sports_tables.dart';
 import 'tables/workout_tables.dart';
 
@@ -32,19 +33,22 @@ part 'app_database.g.dart';
     LocalAvailabilityRules,
     LocalEquipmentItems,
     LocalConstraints,
+    LocalTrainingPlans,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 7 (R3-03, C16 §4): tabulky dostupnosti, vybavení a
-  /// omezení — aditivní, born ownable and syncable (R3M-004). Verze 6
-  /// (R3-02) přidala cíle, verze 5 (R3-01) sportovní profil, verze 4
+  /// Schema version 8 (R3-04, C16 §4): tabulka ručního plánu
+  /// `local_training_plans` — aditivní, born ownable and syncable
+  /// (R3M-004); ruční workouty jsou existující `local_workout_instances`
+  /// (MPC-001). Verze 7 (R3-03) přidala dostupnost/vybavení/omezení,
+  /// verze 6 (R3-02) cíle, verze 5 (R3-01) sportovní profil, verze 4
   /// (R2-06) conflict/rejection rozhodnutí, verze 3 (R2-05) serverové
   /// verze synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data
   /// i aktivní session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -132,6 +136,11 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(localAvailabilityRules);
         await m.createTable(localEquipmentItems);
         await m.createTable(localConstraints);
+      }
+      // Migrace v7 → v8 (R3-04, C16 §5): jen nová tabulka plánu —
+      // aditivní, prázdná (R3M-008), žádná existující data se nemění.
+      if (from < 8) {
+        await m.createTable(localTrainingPlans);
       }
     },
     beforeOpen: (details) async {
