@@ -1,0 +1,10 @@
+{
+  "name": "valid-unknown-fields",
+  "description": "Neznámá pole na všech úrovních se kanonizací zahazují (SOV-009/010).",
+  "modelOutput": "{\"summary\":\"Proposal with extras.\",\"planTitle\":\"Extras Week\",\"confidence\":0.97,\"workouts\":[{\"title\":\"Endurance Base\",\"workoutType\":\"ENDURANCE\",\"dayOffset\":3,\"reason\":\"Aerobic base.\",\"heartRateZone\":2,\"exercises\":[{\"title\":\"Run\",\"sets\":1,\"repetitions\":1,\"tempo\":\"easy\"}]}],\"disclaimer\":\"generated\"}",
+  "expected": {
+    "verdict": "VALID",
+    "workoutCount": 1,
+    "mustNotContain": ["confidence", "heartRateZone", "tempo", "disclaimer"]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "valid-max-bounds",
+  "description": "Hraniční meze schématu: dayOffset 27, duration 600, sets 20, reps 100, weight 500.",
+  "modelOutput": "{\"summary\":\"Edge-of-bounds session.\",\"planTitle\":\"Bounds Week\",\"workouts\":[{\"title\":\"Max Bounds\",\"workoutType\":\"STRENGTH\",\"dayOffset\":27,\"reason\":\"Validates upper bounds.\",\"plannedDurationMinutes\":600,\"exercises\":[{\"title\":\"Deadlift\",\"sets\":20,\"repetitions\":100,\"weightKg\":500}]}]}",
+  "expected": {
+    "verdict": "VALID",
+    "workoutCount": 1
+  }
+}

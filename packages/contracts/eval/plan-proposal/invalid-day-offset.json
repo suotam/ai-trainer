@@ -1,0 +1,8 @@
+{
+  "name": "invalid-day-offset",
+  "description": "dayOffset mimo 0–27 je nevalidní (C28 §2).",
+  "modelOutput": "{\"summary\":\"Plan too far ahead.\",\"planTitle\":\"Far Week\",\"workouts\":[{\"title\":\"Future Session\",\"workoutType\":\"GENERAL\",\"dayOffset\":28,\"reason\":\"Too far out.\"}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}
