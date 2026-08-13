@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 
-/// Klasifikace AI požadavků (C27 §2). P0 typ je jediný; nový typ se
-/// přidává kontraktem, ne implementací (ACX-001).
+/// Klasifikace AI požadavků (C27 §2 + C36 §2). Nový typ se přidává
+/// výhradně kontraktem, ne implementací (ACX-001).
 enum AiRequestType {
-  planProposal('PLAN_PROPOSAL');
+  planProposal('PLAN_PROPOSAL'),
+
+  /// Úprava existujícího dne/týdne (R5, C36).
+  adjustmentProposal('ADJUSTMENT_PROPOSAL');
 
   const AiRequestType(this.code);
 
@@ -28,4 +31,8 @@ class AiContext {
 /// data výhradně aktuálního vlastníka (ACX-012).
 abstract interface class AiContextBuilder {
   Future<AiContext> buildPlanProposalContext({required DateTime now});
+
+  /// Adjustment kontext (C36 §3): C27 základ + týden plánu by-value,
+  /// check-in agregáty a C34 safety stav jako fakt (ADX-005).
+  Future<AiContext> buildAdjustmentContext({required DateTime now});
 }

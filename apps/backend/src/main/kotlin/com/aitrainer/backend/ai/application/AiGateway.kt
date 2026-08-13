@@ -4,8 +4,8 @@ import com.aitrainer.backend.ai.domain.AiFailureKind
 import com.aitrainer.backend.ai.domain.AiModelProvider
 import com.aitrainer.backend.ai.domain.AiModelResult
 import com.aitrainer.backend.ai.domain.AiRequestType
-import com.aitrainer.backend.ai.domain.PLAN_PROPOSAL_SCHEMA_VERSION
 import com.aitrainer.backend.ai.domain.PromptRegistry
+import com.aitrainer.backend.ai.domain.schemaVersionFor
 import com.aitrainer.backend.auth.application.AuditEntry
 import com.aitrainer.backend.auth.application.AuditOutcome
 import com.aitrainer.backend.auth.application.AuditRecorder
@@ -52,7 +52,9 @@ class AiGateway(
                 target = "${type.name}/${prompt.id}",
             ),
         )
-        return when (val result = provider.generate(prompt, contextJson, PLAN_PROPOSAL_SCHEMA_VERSION)) {
+        // Schema verze podle typu (C36 §2, ADX-009).
+        val schemaVersion = schemaVersionFor(type)
+        return when (val result = provider.generate(prompt, contextJson, schemaVersion)) {
             is AiModelResult.Success -> {
                 auditRecorder.record(
                     AuditEntry(
@@ -65,7 +67,7 @@ class AiGateway(
                 AiGatewayResult.Generated(
                     rawJson = result.rawJson,
                     promptVersion = prompt.id,
-                    schemaVersion = PLAN_PROPOSAL_SCHEMA_VERSION,
+                    schemaVersion = schemaVersion,
                     modelId = result.modelId,
                 )
             }

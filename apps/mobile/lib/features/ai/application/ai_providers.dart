@@ -9,10 +9,12 @@ import '../../../core/database/tables/ai_tables.dart';
 import '../../activity/application/activity_providers.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../availability/application/availability_providers.dart';
+import '../../checkin/application/checkin_providers.dart';
 import '../../goals/application/goals_providers.dart';
 import '../../plan/application/plan_providers.dart';
 import '../../sports/application/sports_profile_providers.dart';
 import '../../workouts/application/today_providers.dart';
+import '../../workouts/application/workout_providers.dart';
 import '../data/drift_ai_context_builder.dart';
 import '../data/drift_ai_proposal_repository.dart';
 import '../data/drift_proposal_executor.dart';
@@ -31,6 +33,8 @@ final aiContextBuilderProvider = Provider<AiContextBuilder>(
     ref.watch(goalRepositoryProvider),
     ref.watch(availabilityProfileRepositoryProvider),
     ref.watch(activityRepositoryProvider),
+    ref.watch(dailyCheckInRepositoryProvider),
+    ref.watch(workoutInstanceRepositoryProvider),
   ),
 );
 
