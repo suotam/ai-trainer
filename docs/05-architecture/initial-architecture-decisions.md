@@ -596,6 +596,10 @@ R1 MUSÍ mít automatizovaný restart/recovery test hlavního lokálního workou
 
 R2 autentizace MUSÍ používat backend jako first-party autoritu aplikační session za provider-neutral `AuthenticationIdentity` adaptérem; konkrétní externí federated provider je odložen a NESMÍ být zaveden do kódu bez samostatného rozhodnutí. Externí provider identifier NESMÍ automaticky nahradit interní doménovou identitu.
 
+## ADR-012
+
+R4 AI volání MUSÍ probíhat výhradně server-side přes AI gateway za provider abstrakcí (`AiModelProvider`). Prvním podporovaným providerem je **Anthropic (Claude, Messages API)**; konkrétní model je konfigurační hodnota, ne kód. Provider klíče NESMÍ existovat na klientu ani v repozitáři (výhradně runtime konfigurace serveru). Testy a CI MUSÍ běžet deterministicky proti fake provideru — živý provider NESMÍ být podmínkou žádného gate. Výměna providera je nové rozhodnutí za touž abstrakcí, ne přepis volajícího kódu. (C25, `docs/09-ai/r4-ai-gateway-contract.md`)
+
 ---
 
 # 17. Připravenost a další krok
