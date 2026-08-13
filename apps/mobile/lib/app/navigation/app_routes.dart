@@ -34,6 +34,10 @@ abstract final class AppRoutes {
   static const String accountName = 'account';
   static const String accountPath = '/account';
 
+  /// Sportovní profil (R3-01, C17) — offline-first, bez závislosti na účtu.
+  static const String sportsProfileName = 'sportsProfile';
+  static const String sportsProfilePath = '/sports';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';

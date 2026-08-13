@@ -1,4 +1,5 @@
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/sports_tables.dart';
 import '../../../core/database/tables/workout_tables.dart';
 import '../domain/local_account_attach.dart';
 
@@ -52,6 +53,24 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
       await _db.customStatement(
         'UPDATE local_outbox SET owner_id = ? '
         "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+      // 5. Sportovní profil (R3-01, C16 R3M-006, C17 §8): anonymní
+      // UserSport se připojí, pokud tím neporuší invarianty účtu —
+      // kolizní záznam (duplicitní ne-ENDED katalogový sport nebo druhý
+      // ACTIVE PRIMARY) zůstává anonymní, nikdy se nemaže ani nemutuje.
+      await _db.customStatement(
+        'UPDATE local_user_sports SET owner_id = ?1 '
+        "WHERE owner_id = '$localAnonymousOwnerId' AND NOT ("
+        "  (sport_code IS NOT NULL AND status != '$userSportStatusEnded' "
+        '   AND EXISTS (SELECT 1 FROM local_user_sports a '
+        '     WHERE a.owner_id = ?1 AND a.sport_code = local_user_sports.sport_code '
+        "     AND a.status != '$userSportStatusEnded')) "
+        "  OR (role = 'PRIMARY' AND status = '$userSportStatusActive' "
+        '   AND EXISTS (SELECT 1 FROM local_user_sports a '
+        "     WHERE a.owner_id = ?1 AND a.role = 'PRIMARY' "
+        "     AND a.status = '$userSportStatusActive'))"
+        ')',
         [accountId],
       );
     });

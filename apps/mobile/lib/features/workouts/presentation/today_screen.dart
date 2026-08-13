@@ -24,6 +24,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key listKey = Key('today_workout_list');
   static const Key historyActionKey = Key('today_history_action');
   static const Key accountActionKey = Key('today_account_action');
+  static const Key sportsActionKey = Key('today_sports_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -37,6 +38,12 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.todayScreenTitle),
         actions: [
+          IconButton(
+            key: sportsActionKey,
+            icon: const Icon(Icons.sports_gymnastics),
+            tooltip: l10n.sportsOpenTooltip,
+            onPressed: () => context.push(AppRoutes.sportsProfilePath),
+          ),
           IconButton(
             key: historyActionKey,
             icon: const Icon(Icons.history),

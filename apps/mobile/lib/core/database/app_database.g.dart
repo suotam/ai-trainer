@@ -9077,6 +9077,1207 @@ class LocalSyncResolutionsCompanion
   }
 }
 
+class $LocalUserSportsTable extends LocalUserSports
+    with TableInfo<$LocalUserSportsTable, LocalUserSportRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalUserSportsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sportCodeMeta = const VerificationMeta(
+    'sportCode',
+  );
+  @override
+  late final GeneratedColumn<String> sportCode = GeneratedColumn<String>(
+    'sport_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customNameMeta = const VerificationMeta(
+    'customName',
+  );
+  @override
+  late final GeneratedColumn<String> customName = GeneratedColumn<String>(
+    'custom_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customCategoryMeta = const VerificationMeta(
+    'customCategory',
+  );
+  @override
+  late final GeneratedColumn<String> customCategory = GeneratedColumn<String>(
+    'custom_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<String> priority = GeneratedColumn<String>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _experienceLevelMeta = const VerificationMeta(
+    'experienceLevel',
+  );
+  @override
+  late final GeneratedColumn<String> experienceLevel = GeneratedColumn<String>(
+    'experience_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('UNKNOWN'),
+  );
+  static const VerificationMeta _lastRegularActivityDateMeta =
+      const VerificationMeta('lastRegularActivityDate');
+  @override
+  late final GeneratedColumn<String> lastRegularActivityDate =
+      GeneratedColumn<String>(
+        'last_regular_activity_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _returnAfterPauseMeta = const VerificationMeta(
+    'returnAfterPause',
+  );
+  @override
+  late final GeneratedColumn<bool> returnAfterPause = GeneratedColumn<bool>(
+    'return_after_pause',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("return_after_pause" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _frequencyPerWeekMeta = const VerificationMeta(
+    'frequencyPerWeek',
+  );
+  @override
+  late final GeneratedColumn<int> frequencyPerWeek = GeneratedColumn<int>(
+    'frequency_per_week',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typicalDurationMinutesMeta =
+      const VerificationMeta('typicalDurationMinutes');
+  @override
+  late final GeneratedColumn<int> typicalDurationMinutes = GeneratedColumn<int>(
+    'typical_duration_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typicalIntensityMeta = const VerificationMeta(
+    'typicalIntensity',
+  );
+  @override
+  late final GeneratedColumn<String> typicalIntensity = GeneratedColumn<String>(
+    'typical_intensity',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _environmentMeta = const VerificationMeta(
+    'environment',
+  );
+  @override
+  late final GeneratedColumn<String> environment = GeneratedColumn<String>(
+    'environment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fixedDaysMeta = const VerificationMeta(
+    'fixedDays',
+  );
+  @override
+  late final GeneratedColumn<String> fixedDays = GeneratedColumn<String>(
+    'fixed_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(userSportStatusActive),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sportCode,
+    customName,
+    customCategory,
+    role,
+    priority,
+    experienceLevel,
+    lastRegularActivityDate,
+    returnAfterPause,
+    note,
+    frequencyPerWeek,
+    typicalDurationMinutes,
+    typicalIntensity,
+    environment,
+    fixedDays,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_user_sports';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalUserSportRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('sport_code')) {
+      context.handle(
+        _sportCodeMeta,
+        sportCode.isAcceptableOrUnknown(data['sport_code']!, _sportCodeMeta),
+      );
+    }
+    if (data.containsKey('custom_name')) {
+      context.handle(
+        _customNameMeta,
+        customName.isAcceptableOrUnknown(data['custom_name']!, _customNameMeta),
+      );
+    }
+    if (data.containsKey('custom_category')) {
+      context.handle(
+        _customCategoryMeta,
+        customCategory.isAcceptableOrUnknown(
+          data['custom_category']!,
+          _customCategoryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_priorityMeta);
+    }
+    if (data.containsKey('experience_level')) {
+      context.handle(
+        _experienceLevelMeta,
+        experienceLevel.isAcceptableOrUnknown(
+          data['experience_level']!,
+          _experienceLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_regular_activity_date')) {
+      context.handle(
+        _lastRegularActivityDateMeta,
+        lastRegularActivityDate.isAcceptableOrUnknown(
+          data['last_regular_activity_date']!,
+          _lastRegularActivityDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('return_after_pause')) {
+      context.handle(
+        _returnAfterPauseMeta,
+        returnAfterPause.isAcceptableOrUnknown(
+          data['return_after_pause']!,
+          _returnAfterPauseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('frequency_per_week')) {
+      context.handle(
+        _frequencyPerWeekMeta,
+        frequencyPerWeek.isAcceptableOrUnknown(
+          data['frequency_per_week']!,
+          _frequencyPerWeekMeta,
+        ),
+      );
+    }
+    if (data.containsKey('typical_duration_minutes')) {
+      context.handle(
+        _typicalDurationMinutesMeta,
+        typicalDurationMinutes.isAcceptableOrUnknown(
+          data['typical_duration_minutes']!,
+          _typicalDurationMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('typical_intensity')) {
+      context.handle(
+        _typicalIntensityMeta,
+        typicalIntensity.isAcceptableOrUnknown(
+          data['typical_intensity']!,
+          _typicalIntensityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('environment')) {
+      context.handle(
+        _environmentMeta,
+        environment.isAcceptableOrUnknown(
+          data['environment']!,
+          _environmentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fixed_days')) {
+      context.handle(
+        _fixedDaysMeta,
+        fixedDays.isAcceptableOrUnknown(data['fixed_days']!, _fixedDaysMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalUserSportRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalUserSportRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      sportCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sport_code'],
+      ),
+      customName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_name'],
+      ),
+      customCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_category'],
+      ),
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}priority'],
+      )!,
+      experienceLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}experience_level'],
+      )!,
+      lastRegularActivityDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_regular_activity_date'],
+      ),
+      returnAfterPause: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}return_after_pause'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      frequencyPerWeek: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}frequency_per_week'],
+      ),
+      typicalDurationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}typical_duration_minutes'],
+      ),
+      typicalIntensity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}typical_intensity'],
+      ),
+      environment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}environment'],
+      ),
+      fixedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fixed_days'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalUserSportsTable createAlias(String alias) {
+    return $LocalUserSportsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalUserSportRow extends DataClass
+    implements Insertable<LocalUserSportRow> {
+  final String id;
+  final String? sportCode;
+  final String? customName;
+  final String? customCategory;
+  final String role;
+  final String priority;
+  final String experienceLevel;
+  final String? lastRegularActivityDate;
+  final bool returnAfterPause;
+  final String? note;
+  final int? frequencyPerWeek;
+  final int? typicalDurationMinutes;
+  final String? typicalIntensity;
+  final String? environment;
+  final String? fixedDays;
+  final String status;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalUserSportRow({
+    required this.id,
+    this.sportCode,
+    this.customName,
+    this.customCategory,
+    required this.role,
+    required this.priority,
+    required this.experienceLevel,
+    this.lastRegularActivityDate,
+    required this.returnAfterPause,
+    this.note,
+    this.frequencyPerWeek,
+    this.typicalDurationMinutes,
+    this.typicalIntensity,
+    this.environment,
+    this.fixedDays,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || sportCode != null) {
+      map['sport_code'] = Variable<String>(sportCode);
+    }
+    if (!nullToAbsent || customName != null) {
+      map['custom_name'] = Variable<String>(customName);
+    }
+    if (!nullToAbsent || customCategory != null) {
+      map['custom_category'] = Variable<String>(customCategory);
+    }
+    map['role'] = Variable<String>(role);
+    map['priority'] = Variable<String>(priority);
+    map['experience_level'] = Variable<String>(experienceLevel);
+    if (!nullToAbsent || lastRegularActivityDate != null) {
+      map['last_regular_activity_date'] = Variable<String>(
+        lastRegularActivityDate,
+      );
+    }
+    map['return_after_pause'] = Variable<bool>(returnAfterPause);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || frequencyPerWeek != null) {
+      map['frequency_per_week'] = Variable<int>(frequencyPerWeek);
+    }
+    if (!nullToAbsent || typicalDurationMinutes != null) {
+      map['typical_duration_minutes'] = Variable<int>(typicalDurationMinutes);
+    }
+    if (!nullToAbsent || typicalIntensity != null) {
+      map['typical_intensity'] = Variable<String>(typicalIntensity);
+    }
+    if (!nullToAbsent || environment != null) {
+      map['environment'] = Variable<String>(environment);
+    }
+    if (!nullToAbsent || fixedDays != null) {
+      map['fixed_days'] = Variable<String>(fixedDays);
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalUserSportsCompanion toCompanion(bool nullToAbsent) {
+    return LocalUserSportsCompanion(
+      id: Value(id),
+      sportCode: sportCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sportCode),
+      customName: customName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customName),
+      customCategory: customCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customCategory),
+      role: Value(role),
+      priority: Value(priority),
+      experienceLevel: Value(experienceLevel),
+      lastRegularActivityDate: lastRegularActivityDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastRegularActivityDate),
+      returnAfterPause: Value(returnAfterPause),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      frequencyPerWeek: frequencyPerWeek == null && nullToAbsent
+          ? const Value.absent()
+          : Value(frequencyPerWeek),
+      typicalDurationMinutes: typicalDurationMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(typicalDurationMinutes),
+      typicalIntensity: typicalIntensity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(typicalIntensity),
+      environment: environment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(environment),
+      fixedDays: fixedDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fixedDays),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalUserSportRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalUserSportRow(
+      id: serializer.fromJson<String>(json['id']),
+      sportCode: serializer.fromJson<String?>(json['sportCode']),
+      customName: serializer.fromJson<String?>(json['customName']),
+      customCategory: serializer.fromJson<String?>(json['customCategory']),
+      role: serializer.fromJson<String>(json['role']),
+      priority: serializer.fromJson<String>(json['priority']),
+      experienceLevel: serializer.fromJson<String>(json['experienceLevel']),
+      lastRegularActivityDate: serializer.fromJson<String?>(
+        json['lastRegularActivityDate'],
+      ),
+      returnAfterPause: serializer.fromJson<bool>(json['returnAfterPause']),
+      note: serializer.fromJson<String?>(json['note']),
+      frequencyPerWeek: serializer.fromJson<int?>(json['frequencyPerWeek']),
+      typicalDurationMinutes: serializer.fromJson<int?>(
+        json['typicalDurationMinutes'],
+      ),
+      typicalIntensity: serializer.fromJson<String?>(json['typicalIntensity']),
+      environment: serializer.fromJson<String?>(json['environment']),
+      fixedDays: serializer.fromJson<String?>(json['fixedDays']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sportCode': serializer.toJson<String?>(sportCode),
+      'customName': serializer.toJson<String?>(customName),
+      'customCategory': serializer.toJson<String?>(customCategory),
+      'role': serializer.toJson<String>(role),
+      'priority': serializer.toJson<String>(priority),
+      'experienceLevel': serializer.toJson<String>(experienceLevel),
+      'lastRegularActivityDate': serializer.toJson<String?>(
+        lastRegularActivityDate,
+      ),
+      'returnAfterPause': serializer.toJson<bool>(returnAfterPause),
+      'note': serializer.toJson<String?>(note),
+      'frequencyPerWeek': serializer.toJson<int?>(frequencyPerWeek),
+      'typicalDurationMinutes': serializer.toJson<int?>(typicalDurationMinutes),
+      'typicalIntensity': serializer.toJson<String?>(typicalIntensity),
+      'environment': serializer.toJson<String?>(environment),
+      'fixedDays': serializer.toJson<String?>(fixedDays),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalUserSportRow copyWith({
+    String? id,
+    Value<String?> sportCode = const Value.absent(),
+    Value<String?> customName = const Value.absent(),
+    Value<String?> customCategory = const Value.absent(),
+    String? role,
+    String? priority,
+    String? experienceLevel,
+    Value<String?> lastRegularActivityDate = const Value.absent(),
+    bool? returnAfterPause,
+    Value<String?> note = const Value.absent(),
+    Value<int?> frequencyPerWeek = const Value.absent(),
+    Value<int?> typicalDurationMinutes = const Value.absent(),
+    Value<String?> typicalIntensity = const Value.absent(),
+    Value<String?> environment = const Value.absent(),
+    Value<String?> fixedDays = const Value.absent(),
+    String? status,
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalUserSportRow(
+    id: id ?? this.id,
+    sportCode: sportCode.present ? sportCode.value : this.sportCode,
+    customName: customName.present ? customName.value : this.customName,
+    customCategory: customCategory.present
+        ? customCategory.value
+        : this.customCategory,
+    role: role ?? this.role,
+    priority: priority ?? this.priority,
+    experienceLevel: experienceLevel ?? this.experienceLevel,
+    lastRegularActivityDate: lastRegularActivityDate.present
+        ? lastRegularActivityDate.value
+        : this.lastRegularActivityDate,
+    returnAfterPause: returnAfterPause ?? this.returnAfterPause,
+    note: note.present ? note.value : this.note,
+    frequencyPerWeek: frequencyPerWeek.present
+        ? frequencyPerWeek.value
+        : this.frequencyPerWeek,
+    typicalDurationMinutes: typicalDurationMinutes.present
+        ? typicalDurationMinutes.value
+        : this.typicalDurationMinutes,
+    typicalIntensity: typicalIntensity.present
+        ? typicalIntensity.value
+        : this.typicalIntensity,
+    environment: environment.present ? environment.value : this.environment,
+    fixedDays: fixedDays.present ? fixedDays.value : this.fixedDays,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalUserSportRow copyWithCompanion(LocalUserSportsCompanion data) {
+    return LocalUserSportRow(
+      id: data.id.present ? data.id.value : this.id,
+      sportCode: data.sportCode.present ? data.sportCode.value : this.sportCode,
+      customName: data.customName.present
+          ? data.customName.value
+          : this.customName,
+      customCategory: data.customCategory.present
+          ? data.customCategory.value
+          : this.customCategory,
+      role: data.role.present ? data.role.value : this.role,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      experienceLevel: data.experienceLevel.present
+          ? data.experienceLevel.value
+          : this.experienceLevel,
+      lastRegularActivityDate: data.lastRegularActivityDate.present
+          ? data.lastRegularActivityDate.value
+          : this.lastRegularActivityDate,
+      returnAfterPause: data.returnAfterPause.present
+          ? data.returnAfterPause.value
+          : this.returnAfterPause,
+      note: data.note.present ? data.note.value : this.note,
+      frequencyPerWeek: data.frequencyPerWeek.present
+          ? data.frequencyPerWeek.value
+          : this.frequencyPerWeek,
+      typicalDurationMinutes: data.typicalDurationMinutes.present
+          ? data.typicalDurationMinutes.value
+          : this.typicalDurationMinutes,
+      typicalIntensity: data.typicalIntensity.present
+          ? data.typicalIntensity.value
+          : this.typicalIntensity,
+      environment: data.environment.present
+          ? data.environment.value
+          : this.environment,
+      fixedDays: data.fixedDays.present ? data.fixedDays.value : this.fixedDays,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalUserSportRow(')
+          ..write('id: $id, ')
+          ..write('sportCode: $sportCode, ')
+          ..write('customName: $customName, ')
+          ..write('customCategory: $customCategory, ')
+          ..write('role: $role, ')
+          ..write('priority: $priority, ')
+          ..write('experienceLevel: $experienceLevel, ')
+          ..write('lastRegularActivityDate: $lastRegularActivityDate, ')
+          ..write('returnAfterPause: $returnAfterPause, ')
+          ..write('note: $note, ')
+          ..write('frequencyPerWeek: $frequencyPerWeek, ')
+          ..write('typicalDurationMinutes: $typicalDurationMinutes, ')
+          ..write('typicalIntensity: $typicalIntensity, ')
+          ..write('environment: $environment, ')
+          ..write('fixedDays: $fixedDays, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    sportCode,
+    customName,
+    customCategory,
+    role,
+    priority,
+    experienceLevel,
+    lastRegularActivityDate,
+    returnAfterPause,
+    note,
+    frequencyPerWeek,
+    typicalDurationMinutes,
+    typicalIntensity,
+    environment,
+    fixedDays,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalUserSportRow &&
+          other.id == this.id &&
+          other.sportCode == this.sportCode &&
+          other.customName == this.customName &&
+          other.customCategory == this.customCategory &&
+          other.role == this.role &&
+          other.priority == this.priority &&
+          other.experienceLevel == this.experienceLevel &&
+          other.lastRegularActivityDate == this.lastRegularActivityDate &&
+          other.returnAfterPause == this.returnAfterPause &&
+          other.note == this.note &&
+          other.frequencyPerWeek == this.frequencyPerWeek &&
+          other.typicalDurationMinutes == this.typicalDurationMinutes &&
+          other.typicalIntensity == this.typicalIntensity &&
+          other.environment == this.environment &&
+          other.fixedDays == this.fixedDays &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalUserSportsCompanion extends UpdateCompanion<LocalUserSportRow> {
+  final Value<String> id;
+  final Value<String?> sportCode;
+  final Value<String?> customName;
+  final Value<String?> customCategory;
+  final Value<String> role;
+  final Value<String> priority;
+  final Value<String> experienceLevel;
+  final Value<String?> lastRegularActivityDate;
+  final Value<bool> returnAfterPause;
+  final Value<String?> note;
+  final Value<int?> frequencyPerWeek;
+  final Value<int?> typicalDurationMinutes;
+  final Value<String?> typicalIntensity;
+  final Value<String?> environment;
+  final Value<String?> fixedDays;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalUserSportsCompanion({
+    this.id = const Value.absent(),
+    this.sportCode = const Value.absent(),
+    this.customName = const Value.absent(),
+    this.customCategory = const Value.absent(),
+    this.role = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.experienceLevel = const Value.absent(),
+    this.lastRegularActivityDate = const Value.absent(),
+    this.returnAfterPause = const Value.absent(),
+    this.note = const Value.absent(),
+    this.frequencyPerWeek = const Value.absent(),
+    this.typicalDurationMinutes = const Value.absent(),
+    this.typicalIntensity = const Value.absent(),
+    this.environment = const Value.absent(),
+    this.fixedDays = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalUserSportsCompanion.insert({
+    required String id,
+    this.sportCode = const Value.absent(),
+    this.customName = const Value.absent(),
+    this.customCategory = const Value.absent(),
+    required String role,
+    required String priority,
+    this.experienceLevel = const Value.absent(),
+    this.lastRegularActivityDate = const Value.absent(),
+    this.returnAfterPause = const Value.absent(),
+    this.note = const Value.absent(),
+    this.frequencyPerWeek = const Value.absent(),
+    this.typicalDurationMinutes = const Value.absent(),
+    this.typicalIntensity = const Value.absent(),
+    this.environment = const Value.absent(),
+    this.fixedDays = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       role = Value(role),
+       priority = Value(priority),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalUserSportRow> custom({
+    Expression<String>? id,
+    Expression<String>? sportCode,
+    Expression<String>? customName,
+    Expression<String>? customCategory,
+    Expression<String>? role,
+    Expression<String>? priority,
+    Expression<String>? experienceLevel,
+    Expression<String>? lastRegularActivityDate,
+    Expression<bool>? returnAfterPause,
+    Expression<String>? note,
+    Expression<int>? frequencyPerWeek,
+    Expression<int>? typicalDurationMinutes,
+    Expression<String>? typicalIntensity,
+    Expression<String>? environment,
+    Expression<String>? fixedDays,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sportCode != null) 'sport_code': sportCode,
+      if (customName != null) 'custom_name': customName,
+      if (customCategory != null) 'custom_category': customCategory,
+      if (role != null) 'role': role,
+      if (priority != null) 'priority': priority,
+      if (experienceLevel != null) 'experience_level': experienceLevel,
+      if (lastRegularActivityDate != null)
+        'last_regular_activity_date': lastRegularActivityDate,
+      if (returnAfterPause != null) 'return_after_pause': returnAfterPause,
+      if (note != null) 'note': note,
+      if (frequencyPerWeek != null) 'frequency_per_week': frequencyPerWeek,
+      if (typicalDurationMinutes != null)
+        'typical_duration_minutes': typicalDurationMinutes,
+      if (typicalIntensity != null) 'typical_intensity': typicalIntensity,
+      if (environment != null) 'environment': environment,
+      if (fixedDays != null) 'fixed_days': fixedDays,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalUserSportsCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? sportCode,
+    Value<String?>? customName,
+    Value<String?>? customCategory,
+    Value<String>? role,
+    Value<String>? priority,
+    Value<String>? experienceLevel,
+    Value<String?>? lastRegularActivityDate,
+    Value<bool>? returnAfterPause,
+    Value<String?>? note,
+    Value<int?>? frequencyPerWeek,
+    Value<int?>? typicalDurationMinutes,
+    Value<String?>? typicalIntensity,
+    Value<String?>? environment,
+    Value<String?>? fixedDays,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalUserSportsCompanion(
+      id: id ?? this.id,
+      sportCode: sportCode ?? this.sportCode,
+      customName: customName ?? this.customName,
+      customCategory: customCategory ?? this.customCategory,
+      role: role ?? this.role,
+      priority: priority ?? this.priority,
+      experienceLevel: experienceLevel ?? this.experienceLevel,
+      lastRegularActivityDate:
+          lastRegularActivityDate ?? this.lastRegularActivityDate,
+      returnAfterPause: returnAfterPause ?? this.returnAfterPause,
+      note: note ?? this.note,
+      frequencyPerWeek: frequencyPerWeek ?? this.frequencyPerWeek,
+      typicalDurationMinutes:
+          typicalDurationMinutes ?? this.typicalDurationMinutes,
+      typicalIntensity: typicalIntensity ?? this.typicalIntensity,
+      environment: environment ?? this.environment,
+      fixedDays: fixedDays ?? this.fixedDays,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sportCode.present) {
+      map['sport_code'] = Variable<String>(sportCode.value);
+    }
+    if (customName.present) {
+      map['custom_name'] = Variable<String>(customName.value);
+    }
+    if (customCategory.present) {
+      map['custom_category'] = Variable<String>(customCategory.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<String>(priority.value);
+    }
+    if (experienceLevel.present) {
+      map['experience_level'] = Variable<String>(experienceLevel.value);
+    }
+    if (lastRegularActivityDate.present) {
+      map['last_regular_activity_date'] = Variable<String>(
+        lastRegularActivityDate.value,
+      );
+    }
+    if (returnAfterPause.present) {
+      map['return_after_pause'] = Variable<bool>(returnAfterPause.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (frequencyPerWeek.present) {
+      map['frequency_per_week'] = Variable<int>(frequencyPerWeek.value);
+    }
+    if (typicalDurationMinutes.present) {
+      map['typical_duration_minutes'] = Variable<int>(
+        typicalDurationMinutes.value,
+      );
+    }
+    if (typicalIntensity.present) {
+      map['typical_intensity'] = Variable<String>(typicalIntensity.value);
+    }
+    if (environment.present) {
+      map['environment'] = Variable<String>(environment.value);
+    }
+    if (fixedDays.present) {
+      map['fixed_days'] = Variable<String>(fixedDays.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalUserSportsCompanion(')
+          ..write('id: $id, ')
+          ..write('sportCode: $sportCode, ')
+          ..write('customName: $customName, ')
+          ..write('customCategory: $customCategory, ')
+          ..write('role: $role, ')
+          ..write('priority: $priority, ')
+          ..write('experienceLevel: $experienceLevel, ')
+          ..write('lastRegularActivityDate: $lastRegularActivityDate, ')
+          ..write('returnAfterPause: $returnAfterPause, ')
+          ..write('note: $note, ')
+          ..write('frequencyPerWeek: $frequencyPerWeek, ')
+          ..write('typicalDurationMinutes: $typicalDurationMinutes, ')
+          ..write('typicalIntensity: $typicalIntensity, ')
+          ..write('environment: $environment, ')
+          ..write('fixedDays: $fixedDays, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -9103,6 +10304,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalSyncedVersionsTable(this);
   late final $LocalSyncResolutionsTable localSyncResolutions =
       $LocalSyncResolutionsTable(this);
+  late final $LocalUserSportsTable localUserSports = $LocalUserSportsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -9121,6 +10325,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localOutbox,
     localSyncedVersions,
     localSyncResolutions,
+    localUserSports,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -16127,6 +17332,536 @@ typedef $$LocalSyncResolutionsTableProcessedTableManager =
       LocalSyncResolutionRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalUserSportsTableCreateCompanionBuilder =
+    LocalUserSportsCompanion Function({
+      required String id,
+      Value<String?> sportCode,
+      Value<String?> customName,
+      Value<String?> customCategory,
+      required String role,
+      required String priority,
+      Value<String> experienceLevel,
+      Value<String?> lastRegularActivityDate,
+      Value<bool> returnAfterPause,
+      Value<String?> note,
+      Value<int?> frequencyPerWeek,
+      Value<int?> typicalDurationMinutes,
+      Value<String?> typicalIntensity,
+      Value<String?> environment,
+      Value<String?> fixedDays,
+      Value<String> status,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalUserSportsTableUpdateCompanionBuilder =
+    LocalUserSportsCompanion Function({
+      Value<String> id,
+      Value<String?> sportCode,
+      Value<String?> customName,
+      Value<String?> customCategory,
+      Value<String> role,
+      Value<String> priority,
+      Value<String> experienceLevel,
+      Value<String?> lastRegularActivityDate,
+      Value<bool> returnAfterPause,
+      Value<String?> note,
+      Value<int?> frequencyPerWeek,
+      Value<int?> typicalDurationMinutes,
+      Value<String?> typicalIntensity,
+      Value<String?> environment,
+      Value<String?> fixedDays,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalUserSportsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalUserSportsTable> {
+  $$LocalUserSportsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sportCode => $composableBuilder(
+    column: $table.sportCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customCategory => $composableBuilder(
+    column: $table.customCategory,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get experienceLevel => $composableBuilder(
+    column: $table.experienceLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastRegularActivityDate => $composableBuilder(
+    column: $table.lastRegularActivityDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get returnAfterPause => $composableBuilder(
+    column: $table.returnAfterPause,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get frequencyPerWeek => $composableBuilder(
+    column: $table.frequencyPerWeek,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get typicalDurationMinutes => $composableBuilder(
+    column: $table.typicalDurationMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typicalIntensity => $composableBuilder(
+    column: $table.typicalIntensity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get environment => $composableBuilder(
+    column: $table.environment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fixedDays => $composableBuilder(
+    column: $table.fixedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalUserSportsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalUserSportsTable> {
+  $$LocalUserSportsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sportCode => $composableBuilder(
+    column: $table.sportCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customCategory => $composableBuilder(
+    column: $table.customCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get experienceLevel => $composableBuilder(
+    column: $table.experienceLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastRegularActivityDate => $composableBuilder(
+    column: $table.lastRegularActivityDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get returnAfterPause => $composableBuilder(
+    column: $table.returnAfterPause,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get frequencyPerWeek => $composableBuilder(
+    column: $table.frequencyPerWeek,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get typicalDurationMinutes => $composableBuilder(
+    column: $table.typicalDurationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get typicalIntensity => $composableBuilder(
+    column: $table.typicalIntensity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get environment => $composableBuilder(
+    column: $table.environment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fixedDays => $composableBuilder(
+    column: $table.fixedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalUserSportsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalUserSportsTable> {
+  $$LocalUserSportsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get sportCode =>
+      $composableBuilder(column: $table.sportCode, builder: (column) => column);
+
+  GeneratedColumn<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customCategory => $composableBuilder(
+    column: $table.customCategory,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<String> get experienceLevel => $composableBuilder(
+    column: $table.experienceLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastRegularActivityDate => $composableBuilder(
+    column: $table.lastRegularActivityDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get returnAfterPause => $composableBuilder(
+    column: $table.returnAfterPause,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get frequencyPerWeek => $composableBuilder(
+    column: $table.frequencyPerWeek,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get typicalDurationMinutes => $composableBuilder(
+    column: $table.typicalDurationMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get typicalIntensity => $composableBuilder(
+    column: $table.typicalIntensity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get environment => $composableBuilder(
+    column: $table.environment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fixedDays =>
+      $composableBuilder(column: $table.fixedDays, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalUserSportsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalUserSportsTable,
+          LocalUserSportRow,
+          $$LocalUserSportsTableFilterComposer,
+          $$LocalUserSportsTableOrderingComposer,
+          $$LocalUserSportsTableAnnotationComposer,
+          $$LocalUserSportsTableCreateCompanionBuilder,
+          $$LocalUserSportsTableUpdateCompanionBuilder,
+          (
+            LocalUserSportRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalUserSportsTable,
+              LocalUserSportRow
+            >,
+          ),
+          LocalUserSportRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalUserSportsTableTableManager(
+    _$AppDatabase db,
+    $LocalUserSportsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalUserSportsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalUserSportsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalUserSportsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> sportCode = const Value.absent(),
+                Value<String?> customName = const Value.absent(),
+                Value<String?> customCategory = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String> priority = const Value.absent(),
+                Value<String> experienceLevel = const Value.absent(),
+                Value<String?> lastRegularActivityDate = const Value.absent(),
+                Value<bool> returnAfterPause = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int?> frequencyPerWeek = const Value.absent(),
+                Value<int?> typicalDurationMinutes = const Value.absent(),
+                Value<String?> typicalIntensity = const Value.absent(),
+                Value<String?> environment = const Value.absent(),
+                Value<String?> fixedDays = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalUserSportsCompanion(
+                id: id,
+                sportCode: sportCode,
+                customName: customName,
+                customCategory: customCategory,
+                role: role,
+                priority: priority,
+                experienceLevel: experienceLevel,
+                lastRegularActivityDate: lastRegularActivityDate,
+                returnAfterPause: returnAfterPause,
+                note: note,
+                frequencyPerWeek: frequencyPerWeek,
+                typicalDurationMinutes: typicalDurationMinutes,
+                typicalIntensity: typicalIntensity,
+                environment: environment,
+                fixedDays: fixedDays,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> sportCode = const Value.absent(),
+                Value<String?> customName = const Value.absent(),
+                Value<String?> customCategory = const Value.absent(),
+                required String role,
+                required String priority,
+                Value<String> experienceLevel = const Value.absent(),
+                Value<String?> lastRegularActivityDate = const Value.absent(),
+                Value<bool> returnAfterPause = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int?> frequencyPerWeek = const Value.absent(),
+                Value<int?> typicalDurationMinutes = const Value.absent(),
+                Value<String?> typicalIntensity = const Value.absent(),
+                Value<String?> environment = const Value.absent(),
+                Value<String?> fixedDays = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalUserSportsCompanion.insert(
+                id: id,
+                sportCode: sportCode,
+                customName: customName,
+                customCategory: customCategory,
+                role: role,
+                priority: priority,
+                experienceLevel: experienceLevel,
+                lastRegularActivityDate: lastRegularActivityDate,
+                returnAfterPause: returnAfterPause,
+                note: note,
+                frequencyPerWeek: frequencyPerWeek,
+                typicalDurationMinutes: typicalDurationMinutes,
+                typicalIntensity: typicalIntensity,
+                environment: environment,
+                fixedDays: fixedDays,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalUserSportsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalUserSportsTable,
+      LocalUserSportRow,
+      $$LocalUserSportsTableFilterComposer,
+      $$LocalUserSportsTableOrderingComposer,
+      $$LocalUserSportsTableAnnotationComposer,
+      $$LocalUserSportsTableCreateCompanionBuilder,
+      $$LocalUserSportsTableUpdateCompanionBuilder,
+      (
+        LocalUserSportRow,
+        BaseReferences<_$AppDatabase, $LocalUserSportsTable, LocalUserSportRow>,
+      ),
+      LocalUserSportRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -16160,4 +17895,6 @@ class $AppDatabaseManager {
       $$LocalSyncedVersionsTableTableManager(_db, _db.localSyncedVersions);
   $$LocalSyncResolutionsTableTableManager get localSyncResolutions =>
       $$LocalSyncResolutionsTableTableManager(_db, _db.localSyncResolutions);
+  $$LocalUserSportsTableTableManager get localUserSports =>
+      $$LocalUserSportsTableTableManager(_db, _db.localUserSports);
 }
