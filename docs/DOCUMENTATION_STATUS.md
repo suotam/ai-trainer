@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.54  
+**Verze:** 2.55  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -226,7 +226,34 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R4-07 – Eval Dataset and Release Gate` je implementován (blocking kontrakt **C32 – Eval dataset & release gate** /`docs/14-quality/r4-eval-gate-contract.md`, `EVG-001..015`/ vznikl v témže cyklu — **kontraktní mapa R4 C25–C32 je kompletní**). **Sdílený dataset** `packages/contracts/eval/plan-proposal/*.json` (12 cases: validní základ/hraniční meze/fence/neznámá pole/injektovaná pole/typický týden + adversariální a nevalidní: volný text, chybějící reason, dayOffset mimo meze, neznámý typ, prázdné workouts, JSON instrukce místo návrhu) je **jediný zdroj pro obě strany dvojí validace** (EVG-003). **Backend `EvalGateTest`**: auto-discovery adresáře, 100% shoda verdiktů (EVG-004), kvalitativní vlastnosti validních návrhů (každý workout má neprázdný `reason` — vysvětlitelnost jako gate vlastnost EVG-005; dayOffset/počty v mezích; `mustNotContain` nad kanonickým výstupem EVG-008), ochrana proti tichému zmenšení datasetu (≥10, EVG-007); běží v běžné suite = závazný release gate bez zvláštního pipeline kroku (EVG-001), deterministicky bez živého providera (EVG-002). **Mobilní `eval_gate_consistency_test`**: tentýž dataset přes klientský validátor — konzistence dvojí validace (EVG-009, SOV-003); server-only tvary (fence, volný text) se poctivě přeskakují s hlídaným minimem ≥8 klientských cases. **Poctivý scope (EVG-011):** gate ověřuje deterministickou kontraktní vrstvu, ne kvalitu úsudku modelu — ta se dokládá manuálním smoke během (plán §12), jehož redakované výstupy se stávají novými fixtures (postup §5). Ověřeno: backend suite **107/107** + ktlint, mobil **307 testů** + analyze čistý.
 
-**Přesný další kanonický krok:** `R4-07` je implementován → dalším krokem je `R4-08 – R4 Critical End-to-End Evidence and Exit Review` (deterministický E2E: profil → žádost → návrh /fake provider/ → review → potvrzení → ChangeSet → workout v Today → R1 flow → sync; plus odmítnutí a fallback větve; R4 Exit Review dle plánu §13 vč. řízené live-provider smoke evidence nebo poctivě přiznaného dluhu). Implementace smí začít až po samostatném pokynu.
+`R4-08 – R4 Critical End-to-End Evidence and Exit Review` je implementován. **Kritická R4 E2E** (`r4_critical_path_e2e_test.dart`, deterministická nad skutečnou SQLite, fake jen síť/AI API/storage/clock): účet → strukturovaný profil → **minimalizovaný AIContext** (negativní kontrola: žádná ID, owner, rowVersion) → žádost → validovaný návrh `PROPOSED` s trojicí verzí → **odmítnutí jako viditelný zachovaný stav** → potvrzení = **atomické provedení přes C20 s provenance** (plán `AI_PROPOSAL`, datumy z dayOffset) → AI workout v Today → **celý R1 flow** (start → zápis setu → completion → historie) → **push existujícím mechanismem** (TRAINING_PLAN payload nese origin; návrhy se nesynchronizují — APL-011; replay no-op). Druhý test kryje **fallback větve**: nedostupnost (typovaná, jediné volání, nic nepersistováno) a nevalidní výstup (klientská re-validace odmítne, nic nepersistováno).
+
+## R4 Exit Review (dle `r4-vertical-slice-plan.md` §13)
+
+- **návrh z minimalizovaného autorizovaného kontextu** — R4-02 marker testy (žádné ID/poznámky/owner/secrets) + E2E krok 2.
+- **deterministická validace strukturovaného výstupu; nevalidní se neprovede** — R4-03 dvojí validace (server + klient), C31 oversized guard, eval gate; E2E fallback větev.
+- **úplný AIProposal lifecycle vč. viditelného odmítnutí a expirace** — R4-04 decide testy (terminalita, expirace při rozhodnutí, žádné mazání); E2E krok 4.
+- **atomické provedení přes C20 s AI provenance; žádný jiný zápisový kanál** — R4-05 executor testy (rollback bez částečného stavu, MPC-002 platí i pro AI) + E2E krok 5; jediná cesta = C20 port (CSE-001).
+- **AI plán žije běžným R3 lifecycle** — E2E kroky 6–7 (Today, R1 flow, push existujícím mechanismem).
+- **bezpečný fallback; manuální cesty nedegradované** — R4-06 testy (jediné volání, C20 po selhání AI funkční) + E2E fallback test.
+- **verzované prompty/schémata/modely; audit bez PII; žádné klíče v repo** — PromptRegistry immutable verze, trojice verzí povinná na každém návrhu, audit negativní testy (SENSITIVE/INJECTION markery), klíč jen runtime konfigurace (start-up validace).
+- **rate limiting AI endpointů funkční** — R4-06 test 429 per-account + IP baseline.
+- **eval gate deterministicky v CI a prochází** — R4-07 (backend EvalGateTest + mobilní konzistence, sdílený dataset 12 cases, běžná suite).
+- **R1, R2 i R3 kritické E2E zelené** — všechny čtyři kritické E2E v téže suite (309/309).
+- **CI zelené; R4 E2E deterministicky prochází** — lokálně mobil **309/309** + analyze, backend **107/107** (`cleanTest test`, Testcontainers) + ktlint; CI na main se ověří po merge (stejné suites v gates).
+- **živý provider smoke** — **NEPROVEDEN, poctivě evidován jako otevřený dluh** (viz výjimky níže).
+- **žádný známý blocker ani critical defect** — žádný známý defekt; řízené výjimky níže.
+
+**Otevřené řízené výjimky (poctivě přiznané):**
+1. **Živý provider smoke** (plán §12) — na vývojovém prostředí není Anthropic API klíč; `AnthropicModelProvider` je implementován a testován proti typovaným selháním, ale reálné volání modelu nebylo provedeno. Postup: nastavit `aitrainer.ai.provider=anthropic` + runtime klíč, provést manuální smoke (žádost → validace → review), redakovaný výstup uložit jako eval fixture (C32 §5). Do té doby je kvalita reálného modelu nedoložená — deterministická kontraktní vrstva doložená je.
+2. **Emulátorová runtime evidence** (přenesená z R2/R3) — bez Android SDK; on-device průchod všech flow zůstává otevřený dluh (rozšířit o R4 kroky: žádost → review → provedení → Today).
+3. **Pull sync / obnova na novém zařízení** — trvá (C10 P0 omezení); AI návrhy jsou navíc vědomě device-local (APL-011).
+4. **DELETE se nepřenáší** (SXC-011) a **struktura plán snapshotu se nesynchronizuje** (SXC-010) — trvají, týkají se i AI-vytvořených workoutů (struktura lokální, plán root se synchronizuje).
+5. Výjimky přenesené z R1/R2 (aktivní čas = 0, `feeling` kanonizace, JSONB promoce, distribuovaný rate limiter, capability registry) trvají a nejsou R4 blocker.
+
+**Release 4 je uzavřen** (R4-08 mergnut, R4 Exit Review proveden; otevřené dluhy výše).
+
+**Přesný další kanonický krok:** Release 4 je uzavřen → dalším krokem je **naplánování Release 5** (kanonický R5 vertical-slice plán; kandidáti dle vision/roadmap: adaptace plánů podle skutečného výkonu, pull sync/obnova zařízení, splacení dluhů — živý provider smoke, DELETE sync). Plánování začíná až po samostatném pokynu.
 
 ---
 
@@ -411,10 +438,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`, backlog `R4-01` až `R4-08`, contract map C25–C32, `R4P-001..015`); **`R4-01` až `R4-03` jsou implementovány** (AI gateway, AIContext builder, strukturovaný návrh s dvojí validací a lokálním AIProposal; mobilní schema v11). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Celé R4 (`R4-01` až `R4-08`, kontrakty C25–C32) je implementováno: AI gateway s fake/Anthropic providerem, minimalizovaný AIContext, strukturovaný návrh s dvojí validací, review s explicitním rozhodnutím, atomické provedení C20 cestami s provenance, safety hardening, eval release gate a kritická R4 E2E. Další kanonický krok:
 
 ```text
-R4-04 – Proposal Review  (implementace dle C29 — kontrakt existuje)
+Naplánování Release 5  (R5 vertical-slice plán)
 ```
 
-Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r4-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R4 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

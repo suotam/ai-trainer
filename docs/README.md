@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.50  
+**Verze:** 2.51  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -203,7 +203,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
-- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **`R4-01` až `R4-07` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); zbývá `R4-08` (E2E + Exit Review).
+- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 
 - `r4-eval-gate-contract.md` (**C32**, vlastník Quality + Domain) vlastní R4 eval release gate: **sdílený dataset `packages/contracts/eval/plan-proposal/*.json`** (jediný zdroj pro obě strany dvojí validace), deterministický harness bez živého providera v běžné CI suite (backend `EvalGateTest` + mobilní konzistence klientského validátoru), gate kritéria (100% shoda verdiktů, vysvětlitelnost `reason`, kanonizace `mustNotContain`, minimální velikost datasetu, žádný skip/retry), poctivě přiznaný scope (kontraktní vrstva, ne kvalita modelu — ta patří smoke evidenci plánu §12), postup rozšiřování a invarianty `EVG-001` až `EVG-015`. Contract-only. Blokuje `R4-07`. **Tímto je kontraktní mapa R4 (C25–C32) kompletní.**
@@ -420,15 +420,14 @@ R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
 R3 Exit Review proveden a Release 3 uzavřen** (otevřené řízené výjimky:
 emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0).
 Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`,
-backlog `R4-01` až `R4-08`, contract map C25–C32 — kompletní). **`R4-01` až
-`R4-07` jsou implementovány** (AI gateway, AIContext builder, strukturovaný
-návrh s dvojí validací, lokální AIProposal, review s explicitním rozhodnutím,
-atomické provedení výhradně C20 cestami s provenance — mobilní schema v12,
-AI safety hardening a deterministický eval release gate nad sdíleným
-datasetem). Další kanonický krok:
+backlog `R4-01` až `R4-08`, contract map C25–C32 — kompletní). **Celé R4 je
+implementováno, R4 Exit Review proveden a Release 4 uzavřen** (otevřené
+řízené výjimky: živý provider smoke, emulátorová runtime evidence, pull
+sync, DELETE a plán struktura mimo P0 — viz `DOCUMENTATION_STATUS.md` §3).
+Další kanonický krok:
 
 ```text
-R4-08 – R4 Critical End-to-End Evidence and Exit Review
+Naplánování Release 5  (R5 vertical-slice plán)
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
