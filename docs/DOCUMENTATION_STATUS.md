@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.60  
+**Verze:** 2.61  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -263,7 +263,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-04 – Adjustment Context and Classification` je implementován (blocking kontrakt **C36 – Adjustment context & classification** /`docs/09-ai/r5-adjustment-context-contract.md`, `ADX-001..015`/ vznikl v témže cyklu). **Druhý AI request typ `ADJUSTMENT_PROPOSAL`** (rozšíření C27 klasifikace výhradně kontraktem, ACX-001): mobilní builder staví adjustment kontext = **celý C27 základ + tři nové sekce** — `weekPlan` by-value (dayOffset 0–6 místo kalendářních dat /ADX-003/, title/typ/status/délka, **žádná instance ID** /ADX-004 — mapování na instance vlastní C37/C38/), `checkIns` (dnešní by-value **bez note** /DCI-006/ + 7denní agregáty místo historie /ADX-007/) a `safety` (**C34 assessment jako fakt** /ADX-005, SFR-003/ — stav + flags, bez duplikace titulů omezení). Všechna C27 minimalizační pravidla dědí beze změny (ADX-001), bajtový determinismus trvá (ADX-002), prázdný stav je validní kontext (ADX-012). **Backend:** `AiRequestType.ADJUSTMENT_PROPOSAL`, nová immutable prompt verze **`adjustment-proposal-v1`** v registru (bez uživatelských dat, instruuje konzervativní respekt k safety — vynucení ale zůstává deterministické), **schema verze podle typu** (`adjustment-proposal-schema-v1` — obsah vlastní C37; trojice verzí povinná, ADX-009); gateway/audit/limity beze změny (ADX-011/014). Ověřeno **2 novými mobilními testy** (marker test zakázaného obsahu vč. check-in note a instance ID, dayOffset mapování + 7denní okno, agregáty, safety průchod, bajtový determinismus; prázdný stav) — suite **321 testů**, analyze čistý; **1 novým backend testem** (adjustment typ → vlastní prompt + schema verze, registry immutabilita, plan-proposal nedotčen) — suite **109/109** + ktlint.
 
-**Přesný další kanonický krok:** `R5-04` je implementován → dalším krokem je vytvoření blocking kontraktu **C37 – Adjustment structured output & proposal** (`docs/09-ai/r5-adjustment-schema-contract.md`) a poté implementace `R5-05 – Structured Adjustment Proposal`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C38–C40).
+`R5-05 – Structured Adjustment Proposal` je implementován (blocking kontrakt **C37 – Adjustment structured output & proposal** /`docs/09-ai/r5-adjustment-schema-contract.md`, `ASJ-001..015`/ vznikl v témže cyklu). **Schéma `adjustment-proposal-schema-v1`** (C37 §3): summary + 1–10 operací **MOVE/CANCEL/REPLACE/ADD s povinným `reason` per operace** (vysvětlitelnost, ASJ-002) a přesnou tvarovou tabulkou (MOVE: target+toDayOffset; CANCEL: jen target; REPLACE: target+workout **bez dayOffset** — den dědí z targetu; ADD: workout s dayOffset; porušení = nevalidní, nikdy oprava); **target by-value** dayOffset 0–6 + title z kontextového týdne — žádná ID (resolvace instance je C38, ASJ-004). **Jediný endpoint trvá (ASJ-006):** `POST /api/v1/ai/plan-proposals` + `requestType` v requestu (neznámý typ = 400), server volí prompt/schema/validátor podle typu; OpenAPI rozšířeno; fake provider má deterministickou adjustment fixture podle schema verze. **Dvojí validace:** backend `AdjustmentProposalValidator` + zrcadlový klientský validátor (sdílené fence/field helpery refaktorovány do `AiOutputJson`). **Persistence = AIProposal beze změny** (C29): requestType `ADJUSTMENT_PROPOSAL`, kanonický payload, adjustment trojice verzí; **potvrzení ≠ provedení (ASJ-009)** — potvrzený adjustment zůstává `CONFIRMED` do C38, controller execution spouští jen pro plan proposals. **Review UI s dopady (ASJ-014):** tlačítko „Upravit tento týden", operace čitelně (Přesunout · Full Body A (Den 0 → Den 2)) s důvody. **Eval gate rozšířen (ASJ-013):** nový sdílený adresář `packages/contracts/eval/adjustment-proposal/` (8 cases vč. adversariálních), backend i mobilní harness. Ověřeno: backend **114/114** (+3 validator fixtures, +1 endpoint typ vč. 400, +1 adjustment eval) + ktlint; mobil **324 testů** (+3: klientský validátor tvarová tabulka, widget žádost → review operací → CONFIRMED bez execution /žádný plán nevznikl/, adjustment eval konzistence) + analyze čistý.
+
+**Přesný další kanonický krok:** `R5-05` je implementován → dalším krokem je vytvoření blocking kontraktu **C38 – Adjustment execution** (`docs/09-ai/r5-adjustment-execution-contract.md`) a poté implementace `R5-06 – Adjustment ChangeSet Execution`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C39–C40).
 
 ---
 
@@ -448,10 +450,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-04` jsou implementovány** (denní check-in, deterministická safety pravidla, doporučení dne, adjustment request typ + kontext). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-05` jsou implementovány** (denní check-in, safety pravidla, doporučení dne, adjustment kontext i strukturovaný návrh s dvojí validací). Další kanonický krok:
 
 ```text
-C37 – Adjustment structured output kontrakt → R5-05 – Structured Adjustment Proposal
+C38 – Adjustment execution kontrakt → R5-06 – Adjustment ChangeSet Execution
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
