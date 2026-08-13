@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.45  
+**Verze:** 2.46  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -183,7 +183,34 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 `R3-07 – R3 Sync Extension` je implementován (blocking kontrakt **C24 – R3 sync extension** vznikl v témže cyklu: `docs/12-data/r3-sync-extension-contract.md`, `SXC-001..015` — **kontraktní mapa R3 (C16–C24) je tímto kompletní**). Všechny R3 entity se synchronizují existujícím R2 push mechanismem **beze změny sémantiky C10/C11/C8** (SXC-001): **backend** — Flyway `V5__r3_synced_entities` (osm tabulek přesně dle C6 §8.4 kostry **bez parent sloupců** — R3 entity nemají serverové parenty, device-local reference jsou součást neprůhledného JSONB payloadu), aditivní rozšíření `SyncEntityType` registru o `USER_SPORT/GOAL/AVAILABILITY_RULE/EQUIPMENT_ITEM/CONSTRAINT_ITEM/TRAINING_PLAN/CALENDAR_CHANGE/MANUAL_ACTIVITY` a OpenAPI enum — **žádný nový endpoint** (SXC-012), ownership/idempotence/konflikt beze změny; **mobil** — collect R3 roots za R1 šesticí v deterministickém pořadí registru (state-based camelCase payload, SXC-006), potvrzení po commitu, `markRootSyncState`/state mapování pro R3 typy. **Vyřešená otevřená rozhodnutí (C24 §4):** struktura plán snapshotu (sekce/kroky/sety) se v R3 nesynchronizuje (lokální; smysl až s pull/restore — SXC-010) a zpětvzetí availability deklarace se nepřenáší (DELETE mimo P0; serverová kopie může zůstat zastaralá — vědomé evidované omezení, SXC-011). Ověřeno **3 novými backend Testcontainers testy** (R3 typy push se zachovaným client ID, `ALREADY_APPLIED` replay bez duplicity + `VERSION_CONFLICT`, cizí entita `PERMISSION_DENIED` bez efektu) a **novým mobilním engine testem** (sběr a push všech R3 oblastí → SYNCED po commitu, replay no-op, editace → DIRTY → UPDATE s payloadem). Backend suite **91/91** + ktlint čistý (vč. aktualizace Flyway V1–V5 testů a recovery drop listu), mobile suite zelená, `flutter analyze` čistý.
 
-**Přesný další kanonický krok:** `R3-01` až `R3-07` jsou implementovány → **`R3-08 – R3 Critical End-to-End Evidence and Exit Review` je `READY`** (poslední R3 slice). Implementace smí začít až po samostatném pokynu.
+`R3-08 – R3 Critical End-to-End Evidence and Exit Review` je implementován: existuje **automatizovaný důkaz hlavní hodnoty R3**. Nový test `apps/mobile/test/features/sync/r3_critical_path_e2e_test.dart` prokazuje celý povinný cross-slice scénář (R3 plán §11) v jednom deterministickém testu nad skutečnou SQLite (reálné repository všech R3 oblastí, reálný attach a SyncEngine; fake jen technické hranice): 1. anonymní strukturovaný profil (sport + cíl s vazbou + typický týden + vybavení + omezení), 2. ruční plán se třemi workouty, 3. **interní kalendář = Today read model → celý R1 flow na ručním workoutu** (start → tracker → zápis 5×82,5 kg → completion → historie), 4. kalendářní operace (přesun s evidencí, zrušení; dokončený workout typovaně odmítnut — fakta nedotknutelná), 5. ruční aktivita + **deterministické statistiky** (zrušený není plán, vázaná aktivita bez dvojího započtení), 6. registrace → **attach všech R3 oblastí k účtu** (8 tabulek ověřeno), 7. **push R1 i R3 typů pod client-generated ID → SYNCED → replay no-op**. Žádná nová business funkcionalita ani schema změna. Ověřeno: mobile suite zelená (**287 testů** vč. R1 i R2 kritických E2E — oba zůstávají zelené), `flutter analyze` čistý; backend **91/91** (Testcontainers, vč. R3 sync testů) + ktlint čistý. **R3-08 je poslední R3 slice → proveden R3 Exit Review (níže).**
+
+## R3 Exit Review
+
+R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). Kritéria:
+
+- **profil/cíle/dostupnost offline s přežitím restartu** — R3-01..03 persistence testy nad skutečnou SQLite (restart = nová repository nad touž DB) + R3 E2E krok 1.
+- **ruční plán generuje instance viditelné v Today a proveditelné R1 flow** — R3-04 klíčový integrační test + R3 E2E kroky 2–3 (start → zápis → completion → historie na ručním workoutu).
+- **přesun/zrušení/nahrazení jen na budoucích instancích, evidované, bez dotyku výsledků** — R3-05 testy (guardy s byte-po-bytu nedotčenými daty, append-only evidence, atomické nahrazení) + E2E krok 4.
+- **ruční aktivita zaznamenatelná a správně započtená** — R3-06 testy + E2E krok 5 (PST-006 dvojí započtení).
+- **statistiky deterministické a rekonstruovatelné** — R3-06 determinismus testy (stejný vstup → identický výsledek, žádné uložené agregáty).
+- **všechny nové R3 entity se idempotentně synchronizují s ownership vynucením** — R3-07 backend testy (SUCCESS/ALREADY_APPLIED/VERSION_CONFLICT/PERMISSION_DENIED) + mobilní engine test + E2E krok 7.
+- **attach pokrývá R3 entity** — attach coverage od slice vzniku každé tabulky (R3M-006) vč. kolizních pravidel (sport/den/vybavení/plán) a bezpodmínečných faktů; E2E krok 6 ověřuje všech 8 oblastí.
+- **R1 offline kritický tok i R2 kritický tok zůstávají funkční** — `r1_critical_path_e2e_test` i `r2_critical_path_e2e_test` zelené v téže suite (287/287).
+- **žádné secrets v lokální DB/logu** — beze změny R2 záruk (no-secret-in-DB scan test stále zelený).
+- **CI zelené a kritická E2E deterministicky prochází** — lokálně mobile 287/287 + analyze, backend 91/91 (`cleanTest test`, Testcontainers) + ktlint; CI na main se ověří po merge (stejné suites v gates).
+- **žádný známý blocker ani critical defect** — žádný známý defekt; řízené výjimky níže.
+
+**Otevřené řízené výjimky (poctivě přiznané):**
+1. **Emulátorová runtime evidence** (přenesená z R2) — na vývojovém stroji chybí Android SDK; on-device průchod R2 i R3 flow zůstává otevřený dluh s postupem popsaným v R2 Exit Review (rozšířit o R3 kroky: profil → plán → workout → operace → aktivita → statistiky → sync).
+2. **Pull sync / obnova na novém zařízení** — data tečou jen nahoru (vědomé P0 omezení C10, eviduje se od R2; kandidát pro R4/R5 plán).
+3. **DELETE se nepřenáší** (SXC-011) — zpětvzetí availability deklarace je lokální; serverová kopie může zůstat zastaralá do DELETE/pull rozšíření.
+4. **Struktura plán snapshotu se nesynchronizuje** (SXC-010) — sekce/kroky/sety ručních workoutů jsou lokální; přenos má smysl až s pull/restore.
+5. Výjimky přenesené z R1/R2 (aktivní čas = 0, `feeling` kanonizace, JSONB promoce, distribuovaný rate limiter, capability registry) trvají a nejsou R3 blocker.
+
+**Release 3 je uzavřen** (R3-08 mergnut, R3 Exit Review proveden; otevřené dluhy výše).
+
+**Přesný další kanonický krok:** R3 je uzavřen. Další práce začíná **plánováním Release 4 – AI Plan Proposal Slice** (release scope §8: AIContext, verzovaný prompt, provider abstraction, structured output, deterministická validace, AIProposal → potvrzení → ChangeSet; zakázané zkratky §8.3), analogicky R2/R3: release scope → vertical-slice plán → blocking kontrakty. Nový release plán vznikne až po samostatném pokynu.
 
 ---
 
@@ -368,10 +395,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01` až `R3-07` jsou implementovány** (viz §3; kontraktní mapa R3 C16–C24 kompletní). Další kanonický krok:
+Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3; otevřené řízené výjimky: emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0). Další kanonický krok:
 
 ```text
-R3-08 – R3 Critical End-to-End Evidence and Exit Review  (implementace)
+Plánování Release 4 – AI Plan Proposal Slice  (release scope §8 → vertical-slice plán → blocking kontrakty)
 ```
 
-Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Plánování ani implementace R4 nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle delivery a coding-agent kontraktů.

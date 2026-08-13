@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.41  
+**Verze:** 2.42  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -182,7 +182,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
-- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **`R3-01` až `R3-07` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3; kontraktní mapa C16–C24 kompletní); **`R3-08` je `READY`** (poslední R3 slice).
+- `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -209,7 +209,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). Existuje R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`) s backlogem `R3-01` až `R3-08` a contract mapou C16–C24; **`R3-01` až `R3-07` jsou implementovány** (schema v10, backend V5, sync všech R3 entit existujícím push mechanismem). Dalším kanonickým krokem je **implementace `R3-08`** (E2E evidence + R3 Exit Review), po samostatném pokynu.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** — Release 3 je uzavřen (schema v10, backend V5, sync všech R3 entit, kritická E2E evidence). Dalším kanonickým krokem je **plánování Release 4 – AI Plan Proposal Slice** (po samostatném pokynu).
 
 ---
 
@@ -393,14 +393,15 @@ uvést pravdivou evidence summary
 Release 1 i Release 2 jsou uzavřené (Exit Review provedeny; otevřený dluh R2 =
 emulátorová runtime evidence, postup doplnění v R2 Exit Review). Existuje kanonický
 R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
-`R3-01` až `R3-08`, contract map C16–C24). **`R3-01` až `R3-07` jsou
-implementovány** (schema v10, backend V5, sync všech R3 entit existujícím
-push mechanismem; kontraktní mapa R3 kompletní). Další kanonický krok:
+`R3-01` až `R3-08`, contract map C16–C24). **Celé R3 je implementováno,
+R3 Exit Review proveden a Release 3 uzavřen** (otevřené řízené výjimky:
+emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0).
+Další kanonický krok:
 
 ```text
-R3-08 – R3 Critical End-to-End Evidence and Exit Review  (implementace)
+Plánování Release 4 – AI Plan Proposal Slice  (release scope §8)
 ```
 
-Tvorba kontraktů i implementace R3 slices smí začít až po samostatném pokynu.
+Plánování ani implementace R4 nezačíná bez samostatného pokynu.
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
