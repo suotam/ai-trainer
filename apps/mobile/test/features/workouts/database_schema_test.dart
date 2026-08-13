@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 12', () async {
-    // R4-05 zvýšil schema na verzi 12 (provenance plánu, C30 CSE-004).
+  test('databaze vznikne od prazdneho stavu se schema verzi 13', () async {
+    // R5-01 zvýšil schema na verzi 13 (denní check-in, C33 §3).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 12);
+    expect(version.data.values.first, 13);
 
     final tables = await db
         .customSelect(
@@ -96,6 +96,7 @@ void main() {
       'local_availability_rules',
       'local_calendar_changes',
       'local_constraints',
+      'local_daily_check_ins',
       'local_equipment_items',
       'local_goals',
       'local_outbox',

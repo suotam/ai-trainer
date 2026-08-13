@@ -58,6 +58,10 @@ abstract final class AppRoutes {
   static const String aiProposalsName = 'aiProposals';
   static const String aiProposalsPath = '/ai';
 
+  /// Denní check-in (R5-01, C33) — offline-first, nikdy povinný (DCI-001).
+  static const String checkInName = 'checkIn';
+  static const String checkInPath = '/checkin';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';

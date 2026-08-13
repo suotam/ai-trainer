@@ -5,6 +5,7 @@ import '../../features/activity/presentation/activity_screen.dart';
 import '../../features/ai/presentation/ai_proposals_screen.dart';
 import '../../features/auth/presentation/account_screen.dart';
 import '../../features/availability/presentation/availability_screen.dart';
+import '../../features/checkin/presentation/checkin_screen.dart';
 import '../../features/goals/presentation/goals_screen.dart';
 import '../../features/plan/presentation/plan_screen.dart';
 import '../../features/sports/presentation/sports_profile_screen.dart';
@@ -97,6 +98,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.aiProposalsName,
         path: AppRoutes.aiProposalsPath,
         builder: (context, state) => const AiProposalsScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.checkInName,
+        path: AppRoutes.checkInPath,
+        builder: (context, state) => const CheckInScreen(),
       ),
       GoRoute(
         name: AppRoutes.startupName,
