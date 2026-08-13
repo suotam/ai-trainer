@@ -7,8 +7,10 @@ import 'package:ai_trainer_mobile/features/ai/domain/ai_proposal.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
 import 'package:ai_trainer_mobile/features/activity/data/drift_activity_repository.dart';
 import 'package:ai_trainer_mobile/features/availability/data/drift_availability_profile_repository.dart';
+import 'package:ai_trainer_mobile/features/checkin/data/drift_daily_check_in_repository.dart';
 import 'package:ai_trainer_mobile/features/goals/data/drift_goal_repository.dart';
 import 'package:ai_trainer_mobile/features/sports/data/drift_user_sport_repository.dart';
+import 'package:ai_trainer_mobile/features/workouts/data/drift_workout_instance_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_auth_boundaries.dart';
@@ -89,6 +91,8 @@ void main() {
           DriftGoalRepository(db),
           DriftAvailabilityProfileRepository(db),
           DriftActivityRepository(db),
+          DriftDailyCheckInRepository(db),
+          DriftWorkoutInstanceRepository(db),
         ),
         apiClient: api,
         proposals: repo,

@@ -99,6 +99,32 @@ class AiGatewayTest {
     }
 
     @Test
+    fun `adjustment typ resolvuje vlastni prompt a schema verzi (C36 ADX-008-009)`() {
+        val audit = RecordingAudit()
+        val gateway =
+            AiGateway(
+                ScriptedProvider(AiModelResult.Success(rawJson = "{}", modelId = "fake-model")),
+                audit,
+            )
+
+        val result = gateway.requestProposal(accountId, AiRequestType.ADJUSTMENT_PROPOSAL, secretContext)
+
+        val generated = assertIs<AiGatewayResult.Generated>(result)
+        assertEquals("adjustment-proposal-v1", generated.promptVersion)
+        assertEquals("adjustment-proposal-schema-v1", generated.schemaVersion)
+        assertTrue(audit.entries.all { it.target.orEmpty().contains("adjustment-proposal-v1") })
+
+        // Registry: nová verze je immutable artefakt bez uživatelských dat
+        // (PAA-002/003/004) a bez interpolace kontextu.
+        val prompt = PromptRegistry.promptFor(AiRequestType.ADJUSTMENT_PROPOSAL)
+        assertEquals("adjustment-proposal-v1", prompt.id)
+        assertEquals(prompt, PromptRegistry.promptFor(AiRequestType.ADJUSTMENT_PROPOSAL))
+        assertTrue(!prompt.template.contains("{"), "šablona nesmí interpolovat kontext")
+        // Plan-proposal verze zůstává nedotčená (aditivní rozšíření).
+        assertEquals("plan-proposal-v1", PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL).id)
+    }
+
+    @Test
     fun `fake provider je deterministicky - stejny vstup stejny vystup`() {
         val provider = FakeModelProvider()
         val prompt = PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL)

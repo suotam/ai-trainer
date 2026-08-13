@@ -4,10 +4,12 @@ import 'package:ai_trainer_mobile/features/activity/data/drift_activity_reposito
 import 'package:ai_trainer_mobile/features/activity/domain/manual_activity.dart';
 import 'package:ai_trainer_mobile/features/ai/data/drift_ai_context_builder.dart';
 import 'package:ai_trainer_mobile/features/availability/data/drift_availability_profile_repository.dart';
+import 'package:ai_trainer_mobile/features/checkin/data/drift_daily_check_in_repository.dart';
 import 'package:ai_trainer_mobile/features/goals/data/drift_goal_repository.dart';
 import 'package:ai_trainer_mobile/features/goals/domain/goal.dart';
 import 'package:ai_trainer_mobile/features/sports/data/drift_user_sport_repository.dart';
 import 'package:ai_trainer_mobile/features/sports/domain/user_sport.dart';
+import 'package:ai_trainer_mobile/features/workouts/data/drift_workout_instance_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/workout_test_scope.dart';
@@ -26,6 +28,8 @@ void main() {
     DriftGoalRepository(db),
     DriftAvailabilityProfileRepository(db),
     DriftActivityRepository(db),
+    DriftDailyCheckInRepository(db),
+    DriftWorkoutInstanceRepository(db),
   );
 
   test('kontext je deterministický, by-value bez ID/owner/poznámek a jen '
