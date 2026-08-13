@@ -29,9 +29,18 @@ class AuthRateLimiter(
     fun enforce(
         operation: String,
         clientKey: String,
+    ) = enforce(operation, clientKey, properties.rateLimit.limit, properties.rateLimit.window.toMillis())
+
+    /**
+     * Varianta s explicitním limitem — dedikovaný per-account AI limit
+     * (C31 §3, AIS-004) sdílí mechaniku, ne konfiguraci.
+     */
+    fun enforce(
+        operation: String,
+        clientKey: String,
+        limit: Int,
+        windowMs: Long,
     ) {
-        val limit = properties.rateLimit.limit
-        val windowMs = properties.rateLimit.window.toMillis()
         val nowMs = clock.millis()
         val key = "$operation:$clientKey"
         val window =

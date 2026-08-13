@@ -6,6 +6,7 @@ import com.aitrainer.backend.auth.transport.AuthRateLimiter
 import com.aitrainer.backend.auth.transport.PrincipalResolver
 import com.aitrainer.backend.infrastructure.http.ApiException
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import tools.jackson.databind.json.JsonMapper
+import java.time.Duration
 
 data class PlanProposalRequestDto(
     val context: Map<String, Any?>? = null,
@@ -40,6 +42,10 @@ class AiController(
     private val principalResolver: PrincipalResolver,
     private val rateLimiter: AuthRateLimiter,
     private val proposePlan: ProposePlan,
+    // Dedikovaný per-account AI limit (C31 §3, AIS-004) — přísnější než
+    // auth baseline, protože AI volání je drahé.
+    @param:Value("\${aitrainer.ai.rate-limit.limit:5}") private val aiRateLimit: Int,
+    @param:Value("\${aitrainer.ai.rate-limit.window:PT1M}") private val aiRateWindow: Duration,
 ) {
     companion object {
         private const val MAX_CONTEXT_CHARS = 32_000
@@ -53,8 +59,16 @@ class AiController(
         @RequestBody request: PlanProposalRequestDto,
         httpRequest: HttpServletRequest,
     ): ResponseEntity<PlanProposalResponseDto> {
+        // Dvě nezávislé vrstvy (C31 §3): pre-auth IP limit (AIS-005) a
+        // per-account AI limit po resolvu session (AIS-004).
         rateLimiter.enforce("ai-plan-proposal", httpRequest.remoteAddr ?: "unknown")
         val principal = principalResolver.require(authorization)
+        rateLimiter.enforce(
+            "ai-plan-proposal-account",
+            principal.accountId.toString(),
+            aiRateLimit,
+            aiRateWindow.toMillis(),
+        )
         val context = request.context ?: throw invalidRequest()
         val contextJson = mapper.writeValueAsString(context)
         if (contextJson.length > MAX_CONTEXT_CHARS) {
