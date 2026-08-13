@@ -19,6 +19,7 @@ ProviderContainer createAuthContainer({
   required InMemorySecureSessionStorage storage,
   required FakeAuthApiClient api,
   FakeLocalOwnerBinding? ownerBinding,
+  FakeLocalAccountAttach? accountAttach,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -29,6 +30,9 @@ ProviderContainer createAuthContainer({
       ),
       localOwnerBindingProvider.overrideWithValue(
         ownerBinding ?? FakeLocalOwnerBinding(),
+      ),
+      localAccountAttachProvider.overrideWithValue(
+        accountAttach ?? FakeLocalAccountAttach(),
       ),
     ],
   );

@@ -1,7 +1,22 @@
 import 'package:ai_trainer_mobile/features/auth/domain/auth_api_client.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/secure_session_storage.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
+import 'package:ai_trainer_mobile/features/sync/domain/local_account_attach.dart';
 import 'package:ai_trainer_mobile/features/sync/domain/local_owner_binding.dart';
+
+/// In-memory attach fake (R2-07) pro testy bez DB; zaznamenává volání.
+class FakeLocalAccountAttach implements LocalAccountAttach {
+  final List<String> attachedAccounts = [];
+  bool failAttach = false;
+
+  @override
+  Future<void> attachAnonymousData(String accountId) async {
+    if (failAttach) {
+      throw StateError('attach failed');
+    }
+    attachedAccounts.add(accountId);
+  }
+}
 
 /// In-memory vazba lokálního vlastníka (R2-05) pro testy bez DB.
 class FakeLocalOwnerBinding implements LocalOwnerBinding {
