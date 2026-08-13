@@ -11082,6 +11082,1843 @@ class LocalGoalsCompanion extends UpdateCompanion<LocalGoalRow> {
   }
 }
 
+class $LocalAvailabilityRulesTable extends LocalAvailabilityRules
+    with TableInfo<$LocalAvailabilityRulesTable, LocalAvailabilityRuleRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAvailabilityRulesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayOfWeekMeta = const VerificationMeta(
+    'dayOfWeek',
+  );
+  @override
+  late final GeneratedColumn<String> dayOfWeek = GeneratedColumn<String>(
+    'day_of_week',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<String> level = GeneratedColumn<String>(
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _budgetMinutesMeta = const VerificationMeta(
+    'budgetMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> budgetMinutes = GeneratedColumn<int>(
+    'budget_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _preferredPartOfDayMeta =
+      const VerificationMeta('preferredPartOfDay');
+  @override
+  late final GeneratedColumn<String> preferredPartOfDay =
+      GeneratedColumn<String>(
+        'preferred_part_of_day',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dayOfWeek,
+    level,
+    budgetMinutes,
+    preferredPartOfDay,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_availability_rules';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAvailabilityRuleRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('day_of_week')) {
+      context.handle(
+        _dayOfWeekMeta,
+        dayOfWeek.isAcceptableOrUnknown(data['day_of_week']!, _dayOfWeekMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayOfWeekMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_levelMeta);
+    }
+    if (data.containsKey('budget_minutes')) {
+      context.handle(
+        _budgetMinutesMeta,
+        budgetMinutes.isAcceptableOrUnknown(
+          data['budget_minutes']!,
+          _budgetMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('preferred_part_of_day')) {
+      context.handle(
+        _preferredPartOfDayMeta,
+        preferredPartOfDay.isAcceptableOrUnknown(
+          data['preferred_part_of_day']!,
+          _preferredPartOfDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAvailabilityRuleRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAvailabilityRuleRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      dayOfWeek: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_of_week'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}level'],
+      )!,
+      budgetMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}budget_minutes'],
+      ),
+      preferredPartOfDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preferred_part_of_day'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAvailabilityRulesTable createAlias(String alias) {
+    return $LocalAvailabilityRulesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAvailabilityRuleRow extends DataClass
+    implements Insertable<LocalAvailabilityRuleRow> {
+  final String id;
+  final String dayOfWeek;
+  final String level;
+  final int? budgetMinutes;
+  final String? preferredPartOfDay;
+  final String? note;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalAvailabilityRuleRow({
+    required this.id,
+    required this.dayOfWeek,
+    required this.level,
+    this.budgetMinutes,
+    this.preferredPartOfDay,
+    this.note,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['day_of_week'] = Variable<String>(dayOfWeek);
+    map['level'] = Variable<String>(level);
+    if (!nullToAbsent || budgetMinutes != null) {
+      map['budget_minutes'] = Variable<int>(budgetMinutes);
+    }
+    if (!nullToAbsent || preferredPartOfDay != null) {
+      map['preferred_part_of_day'] = Variable<String>(preferredPartOfDay);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalAvailabilityRulesCompanion toCompanion(bool nullToAbsent) {
+    return LocalAvailabilityRulesCompanion(
+      id: Value(id),
+      dayOfWeek: Value(dayOfWeek),
+      level: Value(level),
+      budgetMinutes: budgetMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(budgetMinutes),
+      preferredPartOfDay: preferredPartOfDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(preferredPartOfDay),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalAvailabilityRuleRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAvailabilityRuleRow(
+      id: serializer.fromJson<String>(json['id']),
+      dayOfWeek: serializer.fromJson<String>(json['dayOfWeek']),
+      level: serializer.fromJson<String>(json['level']),
+      budgetMinutes: serializer.fromJson<int?>(json['budgetMinutes']),
+      preferredPartOfDay: serializer.fromJson<String?>(
+        json['preferredPartOfDay'],
+      ),
+      note: serializer.fromJson<String?>(json['note']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'dayOfWeek': serializer.toJson<String>(dayOfWeek),
+      'level': serializer.toJson<String>(level),
+      'budgetMinutes': serializer.toJson<int?>(budgetMinutes),
+      'preferredPartOfDay': serializer.toJson<String?>(preferredPartOfDay),
+      'note': serializer.toJson<String?>(note),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalAvailabilityRuleRow copyWith({
+    String? id,
+    String? dayOfWeek,
+    String? level,
+    Value<int?> budgetMinutes = const Value.absent(),
+    Value<String?> preferredPartOfDay = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalAvailabilityRuleRow(
+    id: id ?? this.id,
+    dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+    level: level ?? this.level,
+    budgetMinutes: budgetMinutes.present
+        ? budgetMinutes.value
+        : this.budgetMinutes,
+    preferredPartOfDay: preferredPartOfDay.present
+        ? preferredPartOfDay.value
+        : this.preferredPartOfDay,
+    note: note.present ? note.value : this.note,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalAvailabilityRuleRow copyWithCompanion(
+    LocalAvailabilityRulesCompanion data,
+  ) {
+    return LocalAvailabilityRuleRow(
+      id: data.id.present ? data.id.value : this.id,
+      dayOfWeek: data.dayOfWeek.present ? data.dayOfWeek.value : this.dayOfWeek,
+      level: data.level.present ? data.level.value : this.level,
+      budgetMinutes: data.budgetMinutes.present
+          ? data.budgetMinutes.value
+          : this.budgetMinutes,
+      preferredPartOfDay: data.preferredPartOfDay.present
+          ? data.preferredPartOfDay.value
+          : this.preferredPartOfDay,
+      note: data.note.present ? data.note.value : this.note,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAvailabilityRuleRow(')
+          ..write('id: $id, ')
+          ..write('dayOfWeek: $dayOfWeek, ')
+          ..write('level: $level, ')
+          ..write('budgetMinutes: $budgetMinutes, ')
+          ..write('preferredPartOfDay: $preferredPartOfDay, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    dayOfWeek,
+    level,
+    budgetMinutes,
+    preferredPartOfDay,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAvailabilityRuleRow &&
+          other.id == this.id &&
+          other.dayOfWeek == this.dayOfWeek &&
+          other.level == this.level &&
+          other.budgetMinutes == this.budgetMinutes &&
+          other.preferredPartOfDay == this.preferredPartOfDay &&
+          other.note == this.note &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalAvailabilityRulesCompanion
+    extends UpdateCompanion<LocalAvailabilityRuleRow> {
+  final Value<String> id;
+  final Value<String> dayOfWeek;
+  final Value<String> level;
+  final Value<int?> budgetMinutes;
+  final Value<String?> preferredPartOfDay;
+  final Value<String?> note;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalAvailabilityRulesCompanion({
+    this.id = const Value.absent(),
+    this.dayOfWeek = const Value.absent(),
+    this.level = const Value.absent(),
+    this.budgetMinutes = const Value.absent(),
+    this.preferredPartOfDay = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAvailabilityRulesCompanion.insert({
+    required String id,
+    required String dayOfWeek,
+    required String level,
+    this.budgetMinutes = const Value.absent(),
+    this.preferredPartOfDay = const Value.absent(),
+    this.note = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       dayOfWeek = Value(dayOfWeek),
+       level = Value(level),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalAvailabilityRuleRow> custom({
+    Expression<String>? id,
+    Expression<String>? dayOfWeek,
+    Expression<String>? level,
+    Expression<int>? budgetMinutes,
+    Expression<String>? preferredPartOfDay,
+    Expression<String>? note,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dayOfWeek != null) 'day_of_week': dayOfWeek,
+      if (level != null) 'level': level,
+      if (budgetMinutes != null) 'budget_minutes': budgetMinutes,
+      if (preferredPartOfDay != null)
+        'preferred_part_of_day': preferredPartOfDay,
+      if (note != null) 'note': note,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAvailabilityRulesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? dayOfWeek,
+    Value<String>? level,
+    Value<int?>? budgetMinutes,
+    Value<String?>? preferredPartOfDay,
+    Value<String?>? note,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalAvailabilityRulesCompanion(
+      id: id ?? this.id,
+      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
+      level: level ?? this.level,
+      budgetMinutes: budgetMinutes ?? this.budgetMinutes,
+      preferredPartOfDay: preferredPartOfDay ?? this.preferredPartOfDay,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (dayOfWeek.present) {
+      map['day_of_week'] = Variable<String>(dayOfWeek.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<String>(level.value);
+    }
+    if (budgetMinutes.present) {
+      map['budget_minutes'] = Variable<int>(budgetMinutes.value);
+    }
+    if (preferredPartOfDay.present) {
+      map['preferred_part_of_day'] = Variable<String>(preferredPartOfDay.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAvailabilityRulesCompanion(')
+          ..write('id: $id, ')
+          ..write('dayOfWeek: $dayOfWeek, ')
+          ..write('level: $level, ')
+          ..write('budgetMinutes: $budgetMinutes, ')
+          ..write('preferredPartOfDay: $preferredPartOfDay, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalEquipmentItemsTable extends LocalEquipmentItems
+    with TableInfo<$LocalEquipmentItemsTable, LocalEquipmentItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalEquipmentItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _equipmentCodeMeta = const VerificationMeta(
+    'equipmentCode',
+  );
+  @override
+  late final GeneratedColumn<String> equipmentCode = GeneratedColumn<String>(
+    'equipment_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customNameMeta = const VerificationMeta(
+    'customName',
+  );
+  @override
+  late final GeneratedColumn<String> customName = GeneratedColumn<String>(
+    'custom_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(equipmentStatusActive),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    equipmentCode,
+    customName,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_equipment_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalEquipmentItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('equipment_code')) {
+      context.handle(
+        _equipmentCodeMeta,
+        equipmentCode.isAcceptableOrUnknown(
+          data['equipment_code']!,
+          _equipmentCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('custom_name')) {
+      context.handle(
+        _customNameMeta,
+        customName.isAcceptableOrUnknown(data['custom_name']!, _customNameMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalEquipmentItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalEquipmentItemRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      equipmentCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}equipment_code'],
+      ),
+      customName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_name'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalEquipmentItemsTable createAlias(String alias) {
+    return $LocalEquipmentItemsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalEquipmentItemRow extends DataClass
+    implements Insertable<LocalEquipmentItemRow> {
+  final String id;
+  final String? equipmentCode;
+  final String? customName;
+  final String? note;
+  final String status;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalEquipmentItemRow({
+    required this.id,
+    this.equipmentCode,
+    this.customName,
+    this.note,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || equipmentCode != null) {
+      map['equipment_code'] = Variable<String>(equipmentCode);
+    }
+    if (!nullToAbsent || customName != null) {
+      map['custom_name'] = Variable<String>(customName);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalEquipmentItemsCompanion toCompanion(bool nullToAbsent) {
+    return LocalEquipmentItemsCompanion(
+      id: Value(id),
+      equipmentCode: equipmentCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equipmentCode),
+      customName: customName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customName),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalEquipmentItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalEquipmentItemRow(
+      id: serializer.fromJson<String>(json['id']),
+      equipmentCode: serializer.fromJson<String?>(json['equipmentCode']),
+      customName: serializer.fromJson<String?>(json['customName']),
+      note: serializer.fromJson<String?>(json['note']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'equipmentCode': serializer.toJson<String?>(equipmentCode),
+      'customName': serializer.toJson<String?>(customName),
+      'note': serializer.toJson<String?>(note),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalEquipmentItemRow copyWith({
+    String? id,
+    Value<String?> equipmentCode = const Value.absent(),
+    Value<String?> customName = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? status,
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalEquipmentItemRow(
+    id: id ?? this.id,
+    equipmentCode: equipmentCode.present
+        ? equipmentCode.value
+        : this.equipmentCode,
+    customName: customName.present ? customName.value : this.customName,
+    note: note.present ? note.value : this.note,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalEquipmentItemRow copyWithCompanion(LocalEquipmentItemsCompanion data) {
+    return LocalEquipmentItemRow(
+      id: data.id.present ? data.id.value : this.id,
+      equipmentCode: data.equipmentCode.present
+          ? data.equipmentCode.value
+          : this.equipmentCode,
+      customName: data.customName.present
+          ? data.customName.value
+          : this.customName,
+      note: data.note.present ? data.note.value : this.note,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalEquipmentItemRow(')
+          ..write('id: $id, ')
+          ..write('equipmentCode: $equipmentCode, ')
+          ..write('customName: $customName, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    equipmentCode,
+    customName,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalEquipmentItemRow &&
+          other.id == this.id &&
+          other.equipmentCode == this.equipmentCode &&
+          other.customName == this.customName &&
+          other.note == this.note &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalEquipmentItemsCompanion
+    extends UpdateCompanion<LocalEquipmentItemRow> {
+  final Value<String> id;
+  final Value<String?> equipmentCode;
+  final Value<String?> customName;
+  final Value<String?> note;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalEquipmentItemsCompanion({
+    this.id = const Value.absent(),
+    this.equipmentCode = const Value.absent(),
+    this.customName = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalEquipmentItemsCompanion.insert({
+    required String id,
+    this.equipmentCode = const Value.absent(),
+    this.customName = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalEquipmentItemRow> custom({
+    Expression<String>? id,
+    Expression<String>? equipmentCode,
+    Expression<String>? customName,
+    Expression<String>? note,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (equipmentCode != null) 'equipment_code': equipmentCode,
+      if (customName != null) 'custom_name': customName,
+      if (note != null) 'note': note,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalEquipmentItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? equipmentCode,
+    Value<String?>? customName,
+    Value<String?>? note,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalEquipmentItemsCompanion(
+      id: id ?? this.id,
+      equipmentCode: equipmentCode ?? this.equipmentCode,
+      customName: customName ?? this.customName,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (equipmentCode.present) {
+      map['equipment_code'] = Variable<String>(equipmentCode.value);
+    }
+    if (customName.present) {
+      map['custom_name'] = Variable<String>(customName.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalEquipmentItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('equipmentCode: $equipmentCode, ')
+          ..write('customName: $customName, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalConstraintsTable extends LocalConstraints
+    with TableInfo<$LocalConstraintsTable, LocalConstraintRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalConstraintsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(constraintStatusActive),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_constraints';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalConstraintRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalConstraintRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalConstraintRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalConstraintsTable createAlias(String alias) {
+    return $LocalConstraintsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalConstraintRow extends DataClass
+    implements Insertable<LocalConstraintRow> {
+  final String id;
+  final String title;
+  final String? note;
+  final String status;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalConstraintRow({
+    required this.id,
+    required this.title,
+    this.note,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalConstraintsCompanion toCompanion(bool nullToAbsent) {
+    return LocalConstraintsCompanion(
+      id: Value(id),
+      title: Value(title),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalConstraintRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalConstraintRow(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      note: serializer.fromJson<String?>(json['note']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'note': serializer.toJson<String?>(note),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalConstraintRow copyWith({
+    String? id,
+    String? title,
+    Value<String?> note = const Value.absent(),
+    String? status,
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalConstraintRow(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    note: note.present ? note.value : this.note,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalConstraintRow copyWithCompanion(LocalConstraintsCompanion data) {
+    return LocalConstraintRow(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      note: data.note.present ? data.note.value : this.note,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalConstraintRow(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalConstraintRow &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.note == this.note &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalConstraintsCompanion extends UpdateCompanion<LocalConstraintRow> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String?> note;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalConstraintsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalConstraintsCompanion.insert({
+    required String id,
+    required String title,
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalConstraintRow> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? note,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (note != null) 'note': note,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalConstraintsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String?>? note,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalConstraintsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalConstraintsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -11112,6 +12949,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $LocalGoalsTable localGoals = $LocalGoalsTable(this);
+  late final $LocalAvailabilityRulesTable localAvailabilityRules =
+      $LocalAvailabilityRulesTable(this);
+  late final $LocalEquipmentItemsTable localEquipmentItems =
+      $LocalEquipmentItemsTable(this);
+  late final $LocalConstraintsTable localConstraints = $LocalConstraintsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -11132,6 +12976,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localSyncResolutions,
     localUserSports,
     localGoals,
+    localAvailabilityRules,
+    localEquipmentItems,
+    localConstraints,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -19269,6 +21116,950 @@ typedef $$LocalGoalsTableProcessedTableManager =
       LocalGoalRow,
       PrefetchHooks Function({bool userSportId})
     >;
+typedef $$LocalAvailabilityRulesTableCreateCompanionBuilder =
+    LocalAvailabilityRulesCompanion Function({
+      required String id,
+      required String dayOfWeek,
+      required String level,
+      Value<int?> budgetMinutes,
+      Value<String?> preferredPartOfDay,
+      Value<String?> note,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalAvailabilityRulesTableUpdateCompanionBuilder =
+    LocalAvailabilityRulesCompanion Function({
+      Value<String> id,
+      Value<String> dayOfWeek,
+      Value<String> level,
+      Value<int?> budgetMinutes,
+      Value<String?> preferredPartOfDay,
+      Value<String?> note,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalAvailabilityRulesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAvailabilityRulesTable> {
+  $$LocalAvailabilityRulesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dayOfWeek => $composableBuilder(
+    column: $table.dayOfWeek,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get budgetMinutes => $composableBuilder(
+    column: $table.budgetMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get preferredPartOfDay => $composableBuilder(
+    column: $table.preferredPartOfDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAvailabilityRulesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAvailabilityRulesTable> {
+  $$LocalAvailabilityRulesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dayOfWeek => $composableBuilder(
+    column: $table.dayOfWeek,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get budgetMinutes => $composableBuilder(
+    column: $table.budgetMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get preferredPartOfDay => $composableBuilder(
+    column: $table.preferredPartOfDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAvailabilityRulesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAvailabilityRulesTable> {
+  $$LocalAvailabilityRulesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get dayOfWeek =>
+      $composableBuilder(column: $table.dayOfWeek, builder: (column) => column);
+
+  GeneratedColumn<String> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<int> get budgetMinutes => $composableBuilder(
+    column: $table.budgetMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get preferredPartOfDay => $composableBuilder(
+    column: $table.preferredPartOfDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalAvailabilityRulesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAvailabilityRulesTable,
+          LocalAvailabilityRuleRow,
+          $$LocalAvailabilityRulesTableFilterComposer,
+          $$LocalAvailabilityRulesTableOrderingComposer,
+          $$LocalAvailabilityRulesTableAnnotationComposer,
+          $$LocalAvailabilityRulesTableCreateCompanionBuilder,
+          $$LocalAvailabilityRulesTableUpdateCompanionBuilder,
+          (
+            LocalAvailabilityRuleRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalAvailabilityRulesTable,
+              LocalAvailabilityRuleRow
+            >,
+          ),
+          LocalAvailabilityRuleRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalAvailabilityRulesTableTableManager(
+    _$AppDatabase db,
+    $LocalAvailabilityRulesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAvailabilityRulesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalAvailabilityRulesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalAvailabilityRulesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> dayOfWeek = const Value.absent(),
+                Value<String> level = const Value.absent(),
+                Value<int?> budgetMinutes = const Value.absent(),
+                Value<String?> preferredPartOfDay = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAvailabilityRulesCompanion(
+                id: id,
+                dayOfWeek: dayOfWeek,
+                level: level,
+                budgetMinutes: budgetMinutes,
+                preferredPartOfDay: preferredPartOfDay,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String dayOfWeek,
+                required String level,
+                Value<int?> budgetMinutes = const Value.absent(),
+                Value<String?> preferredPartOfDay = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAvailabilityRulesCompanion.insert(
+                id: id,
+                dayOfWeek: dayOfWeek,
+                level: level,
+                budgetMinutes: budgetMinutes,
+                preferredPartOfDay: preferredPartOfDay,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAvailabilityRulesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAvailabilityRulesTable,
+      LocalAvailabilityRuleRow,
+      $$LocalAvailabilityRulesTableFilterComposer,
+      $$LocalAvailabilityRulesTableOrderingComposer,
+      $$LocalAvailabilityRulesTableAnnotationComposer,
+      $$LocalAvailabilityRulesTableCreateCompanionBuilder,
+      $$LocalAvailabilityRulesTableUpdateCompanionBuilder,
+      (
+        LocalAvailabilityRuleRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalAvailabilityRulesTable,
+          LocalAvailabilityRuleRow
+        >,
+      ),
+      LocalAvailabilityRuleRow,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalEquipmentItemsTableCreateCompanionBuilder =
+    LocalEquipmentItemsCompanion Function({
+      required String id,
+      Value<String?> equipmentCode,
+      Value<String?> customName,
+      Value<String?> note,
+      Value<String> status,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalEquipmentItemsTableUpdateCompanionBuilder =
+    LocalEquipmentItemsCompanion Function({
+      Value<String> id,
+      Value<String?> equipmentCode,
+      Value<String?> customName,
+      Value<String?> note,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalEquipmentItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalEquipmentItemsTable> {
+  $$LocalEquipmentItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get equipmentCode => $composableBuilder(
+    column: $table.equipmentCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalEquipmentItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalEquipmentItemsTable> {
+  $$LocalEquipmentItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get equipmentCode => $composableBuilder(
+    column: $table.equipmentCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalEquipmentItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalEquipmentItemsTable> {
+  $$LocalEquipmentItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get equipmentCode => $composableBuilder(
+    column: $table.equipmentCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customName => $composableBuilder(
+    column: $table.customName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalEquipmentItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalEquipmentItemsTable,
+          LocalEquipmentItemRow,
+          $$LocalEquipmentItemsTableFilterComposer,
+          $$LocalEquipmentItemsTableOrderingComposer,
+          $$LocalEquipmentItemsTableAnnotationComposer,
+          $$LocalEquipmentItemsTableCreateCompanionBuilder,
+          $$LocalEquipmentItemsTableUpdateCompanionBuilder,
+          (
+            LocalEquipmentItemRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalEquipmentItemsTable,
+              LocalEquipmentItemRow
+            >,
+          ),
+          LocalEquipmentItemRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalEquipmentItemsTableTableManager(
+    _$AppDatabase db,
+    $LocalEquipmentItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalEquipmentItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalEquipmentItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalEquipmentItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> equipmentCode = const Value.absent(),
+                Value<String?> customName = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalEquipmentItemsCompanion(
+                id: id,
+                equipmentCode: equipmentCode,
+                customName: customName,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> equipmentCode = const Value.absent(),
+                Value<String?> customName = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalEquipmentItemsCompanion.insert(
+                id: id,
+                equipmentCode: equipmentCode,
+                customName: customName,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalEquipmentItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalEquipmentItemsTable,
+      LocalEquipmentItemRow,
+      $$LocalEquipmentItemsTableFilterComposer,
+      $$LocalEquipmentItemsTableOrderingComposer,
+      $$LocalEquipmentItemsTableAnnotationComposer,
+      $$LocalEquipmentItemsTableCreateCompanionBuilder,
+      $$LocalEquipmentItemsTableUpdateCompanionBuilder,
+      (
+        LocalEquipmentItemRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalEquipmentItemsTable,
+          LocalEquipmentItemRow
+        >,
+      ),
+      LocalEquipmentItemRow,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalConstraintsTableCreateCompanionBuilder =
+    LocalConstraintsCompanion Function({
+      required String id,
+      required String title,
+      Value<String?> note,
+      Value<String> status,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalConstraintsTableUpdateCompanionBuilder =
+    LocalConstraintsCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String?> note,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalConstraintsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalConstraintsTable> {
+  $$LocalConstraintsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalConstraintsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalConstraintsTable> {
+  $$LocalConstraintsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalConstraintsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalConstraintsTable> {
+  $$LocalConstraintsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalConstraintsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalConstraintsTable,
+          LocalConstraintRow,
+          $$LocalConstraintsTableFilterComposer,
+          $$LocalConstraintsTableOrderingComposer,
+          $$LocalConstraintsTableAnnotationComposer,
+          $$LocalConstraintsTableCreateCompanionBuilder,
+          $$LocalConstraintsTableUpdateCompanionBuilder,
+          (
+            LocalConstraintRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalConstraintsTable,
+              LocalConstraintRow
+            >,
+          ),
+          LocalConstraintRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalConstraintsTableTableManager(
+    _$AppDatabase db,
+    $LocalConstraintsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalConstraintsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalConstraintsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalConstraintsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalConstraintsCompanion(
+                id: id,
+                title: title,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalConstraintsCompanion.insert(
+                id: id,
+                title: title,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalConstraintsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalConstraintsTable,
+      LocalConstraintRow,
+      $$LocalConstraintsTableFilterComposer,
+      $$LocalConstraintsTableOrderingComposer,
+      $$LocalConstraintsTableAnnotationComposer,
+      $$LocalConstraintsTableCreateCompanionBuilder,
+      $$LocalConstraintsTableUpdateCompanionBuilder,
+      (
+        LocalConstraintRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalConstraintsTable,
+          LocalConstraintRow
+        >,
+      ),
+      LocalConstraintRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -19306,4 +22097,13 @@ class $AppDatabaseManager {
       $$LocalUserSportsTableTableManager(_db, _db.localUserSports);
   $$LocalGoalsTableTableManager get localGoals =>
       $$LocalGoalsTableTableManager(_db, _db.localGoals);
+  $$LocalAvailabilityRulesTableTableManager get localAvailabilityRules =>
+      $$LocalAvailabilityRulesTableTableManager(
+        _db,
+        _db.localAvailabilityRules,
+      );
+  $$LocalEquipmentItemsTableTableManager get localEquipmentItems =>
+      $$LocalEquipmentItemsTableTableManager(_db, _db.localEquipmentItems);
+  $$LocalConstraintsTableTableManager get localConstraints =>
+      $$LocalConstraintsTableTableManager(_db, _db.localConstraints);
 }
