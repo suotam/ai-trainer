@@ -12919,6 +12919,557 @@ class LocalConstraintsCompanion extends UpdateCompanion<LocalConstraintRow> {
   }
 }
 
+class $LocalTrainingPlansTable extends LocalTrainingPlans
+    with TableInfo<$LocalTrainingPlansTable, LocalTrainingPlanRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalTrainingPlansTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(planStatusActive),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_training_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalTrainingPlanRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalTrainingPlanRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalTrainingPlanRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalTrainingPlansTable createAlias(String alias) {
+    return $LocalTrainingPlansTable(attachedDatabase, alias);
+  }
+}
+
+class LocalTrainingPlanRow extends DataClass
+    implements Insertable<LocalTrainingPlanRow> {
+  final String id;
+  final String title;
+  final String? note;
+  final String status;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalTrainingPlanRow({
+    required this.id,
+    required this.title,
+    this.note,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalTrainingPlansCompanion toCompanion(bool nullToAbsent) {
+    return LocalTrainingPlansCompanion(
+      id: Value(id),
+      title: Value(title),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalTrainingPlanRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalTrainingPlanRow(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      note: serializer.fromJson<String?>(json['note']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'note': serializer.toJson<String?>(note),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalTrainingPlanRow copyWith({
+    String? id,
+    String? title,
+    Value<String?> note = const Value.absent(),
+    String? status,
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalTrainingPlanRow(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    note: note.present ? note.value : this.note,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalTrainingPlanRow copyWithCompanion(LocalTrainingPlansCompanion data) {
+    return LocalTrainingPlanRow(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      note: data.note.present ? data.note.value : this.note,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalTrainingPlanRow(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalTrainingPlanRow &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.note == this.note &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalTrainingPlansCompanion
+    extends UpdateCompanion<LocalTrainingPlanRow> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String?> note;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalTrainingPlansCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalTrainingPlansCompanion.insert({
+    required String id,
+    required String title,
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalTrainingPlanRow> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? note,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (note != null) 'note': note,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalTrainingPlansCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String?>? note,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalTrainingPlansCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalTrainingPlansCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -12956,6 +13507,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalConstraintsTable localConstraints = $LocalConstraintsTable(
     this,
   );
+  late final $LocalTrainingPlansTable localTrainingPlans =
+      $LocalTrainingPlansTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -12979,6 +13532,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localAvailabilityRules,
     localEquipmentItems,
     localConstraints,
+    localTrainingPlans,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -22060,6 +22614,297 @@ typedef $$LocalConstraintsTableProcessedTableManager =
       LocalConstraintRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalTrainingPlansTableCreateCompanionBuilder =
+    LocalTrainingPlansCompanion Function({
+      required String id,
+      required String title,
+      Value<String?> note,
+      Value<String> status,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalTrainingPlansTableUpdateCompanionBuilder =
+    LocalTrainingPlansCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String?> note,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalTrainingPlansTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalTrainingPlansTable> {
+  $$LocalTrainingPlansTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalTrainingPlansTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalTrainingPlansTable> {
+  $$LocalTrainingPlansTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalTrainingPlansTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalTrainingPlansTable> {
+  $$LocalTrainingPlansTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalTrainingPlansTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalTrainingPlansTable,
+          LocalTrainingPlanRow,
+          $$LocalTrainingPlansTableFilterComposer,
+          $$LocalTrainingPlansTableOrderingComposer,
+          $$LocalTrainingPlansTableAnnotationComposer,
+          $$LocalTrainingPlansTableCreateCompanionBuilder,
+          $$LocalTrainingPlansTableUpdateCompanionBuilder,
+          (
+            LocalTrainingPlanRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalTrainingPlansTable,
+              LocalTrainingPlanRow
+            >,
+          ),
+          LocalTrainingPlanRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalTrainingPlansTableTableManager(
+    _$AppDatabase db,
+    $LocalTrainingPlansTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalTrainingPlansTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalTrainingPlansTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalTrainingPlansTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalTrainingPlansCompanion(
+                id: id,
+                title: title,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                Value<String?> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalTrainingPlansCompanion.insert(
+                id: id,
+                title: title,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalTrainingPlansTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalTrainingPlansTable,
+      LocalTrainingPlanRow,
+      $$LocalTrainingPlansTableFilterComposer,
+      $$LocalTrainingPlansTableOrderingComposer,
+      $$LocalTrainingPlansTableAnnotationComposer,
+      $$LocalTrainingPlansTableCreateCompanionBuilder,
+      $$LocalTrainingPlansTableUpdateCompanionBuilder,
+      (
+        LocalTrainingPlanRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalTrainingPlansTable,
+          LocalTrainingPlanRow
+        >,
+      ),
+      LocalTrainingPlanRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -22106,4 +22951,6 @@ class $AppDatabaseManager {
       $$LocalEquipmentItemsTableTableManager(_db, _db.localEquipmentItems);
   $$LocalConstraintsTableTableManager get localConstraints =>
       $$LocalConstraintsTableTableManager(_db, _db.localConstraints);
+  $$LocalTrainingPlansTableTableManager get localTrainingPlans =>
+      $$LocalTrainingPlansTableTableManager(_db, _db.localTrainingPlans);
 }

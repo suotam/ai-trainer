@@ -46,6 +46,10 @@ abstract final class AppRoutes {
   static const String availabilityName = 'availability';
   static const String availabilityPath = '/availability';
 
+  /// Ruční tréninkový plán (R3-04, C20) — offline-first.
+  static const String planName = 'plan';
+  static const String planPath = '/plan';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';
