@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.38  
+**Verze:** 2.39  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -169,7 +169,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 **Vytvořené R3 kontrakty:** **C16 – R3 mobile schema migration** (`docs/12-data/r3-mobile-schema-migration.md`, Data Architecture, `R3M-001..015`) — evoluce mobilního schématu v R3 (verze 5+): dědí C1/`MSM-*`, verzování per slice, kontraktní přírůstky R3 tabulek, **born ownable and syncable** (owner/sync metadata od vzniku, owner stamping při zápisu, sync-state disciplína před rozšířením registru) a **attach coverage** — každá nová vlastnitelná tabulka je součástí C15 attach transakce od slice, který ji zavádí (zpřesnění plánu §9.7; R3-07 attach jen ověřuje). **C17 – Structured sports profile** (`docs/06-domain/r3-sports-profile-contract.md`, Domain / sports-and-goals-model + Mobile, `ASP-001..015`) — závazná P0 podmnožina sportovního profilu: aggregate `UserSport` s participation patternem (pattern ≠ kalendář, termíny vlastní C19/scheduling), minimální katalog 13 stabilních kódů sportů + custom sport, kódy rolí (`PRIMARY`…`SEASONAL`)/priorit (`CRITICAL`…`BACKGROUND`)/zkušeností (`BEGINNER`…`UNKNOWN`)/intenzity/prostředí, lifecycle `ACTIVE/PAUSED/ENDED` (konec je stav, ne mazání; nejvýše jeden ACTIVE PRIMARY; bez duplicit), neúplný profil validní (unknown ≠ zero), anonymní parita s attach pokrytím od R3-01. Oba contract-only.
 
-**Přesný další kanonický krok:** C16 a C17 existují → **`R3-01 – Structured Sports Profile` je `READY`**. Další krok je **implementace `R3-01`** (mobilní schema v5 dle C16, UserSport aggregate + participation pattern dle C17, UI profilu, rozšíření C15 attach o novou tabulku, persistence/migrační/attach testy). Implementace smí začít až po Ready kontrole a samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C18–C24).
+`R3-01 – Structured Sports Profile` je implementován: **mobilní Drift schema verze 5** (C16 §4 — aditivní migrace v4→v5 vytváří prázdnou tabulku `local_user_sports`; migrační řetěz od reálného v1 přes v2–v4 ověřen testem vč. zachování všech R1+R2 dat a aktivní session). **`UserSport` aggregate root dle C17** — born ownable and syncable (R3M-004): owner/sync metadata, `row_version` a časové značky od vzniku; sport reference katalogový kód XOR custom sport (DB CHECK), participation pattern součástí aggregate (frekvence/délka/intenzita/prostředí/pevné dny — vše volitelné, unknown ≠ zero), stabilní kódy rolí/priorit/zkušeností vynucené CHECK constrainty. **Minimální katalog 13 sportů** jako in-app statický seznam (`sport_catalog.dart`, kanonické kódy ASP-002). **Invarianty ASP-003/004** (nejvýše jeden ACTIVE PRIMARY, bez duplicitního ne-ENDED katalogového sportu na vlastníka) vynucuje repository v transakci s typovanými výsledky (`UserSportSaved/Duplicate/PrimaryConflict/ValidationFailed/NotFound`) — řízené rozhodnutí: DB partial unique index záměrně není, kolidoval by s C15 attach přepisem vlastníka. **Editace je current-state** (ASP-007: verze +1, `SYNCED→DIRTY`, `LOCAL_ONLY` zůstává); **lifecycle `ACTIVE/PAUSED/ENDED`** — konec je stav, ne mazání (ASP-008); resume kontroluje invarianty znovu. **Attach coverage od tohoto slice** (R3M-006): `local_user_sports` je součástí C15 attach transakce s **kolizními pravidly dle C17 §8** — anonymní záznam, který by porušil ASP-003/004 účtu, zůstává deterministicky anonymní (nemaže se, nemutuje). **Owner stamping při zápisu** aktuálním lokálním vlastníkem (R3M-005); sync-state jen poctivě eviduje stav — push začne s C24/R3-07 (R3M-007). **UI:** `/sports` obrazovka (vstup z Today) — deterministicky řazený seznam (ASP-014), poctivý empty stav, bottom-sheet formulář (katalog + custom, role/priorita/zkušenost/pattern), lifecycle akce, typované chybové bannery invariantů; lokalizace EN/CS přes ICU select podle stabilních kódů (ASP-011). Ověřeno novými testy: migrace v1→v5 řetězem (vč. prázdné v5 tabulky), persistence/invarianty/lifecycle/řazení nad skutečnou SQLite, attach vč. kolizních scénářů (duplicitní sport i druhý PRIMARY zůstávají anonymní; nekolizní se připojí; owner-filtrovaný read model po attach data vidí), widget testy (empty→add→list, chyba ASP-003, pause/end). Mobile suite zelená, `flutter analyze` čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R3-01` je implementován → dalším krokem je **kontrakt C18 – Goals and priorities** (`docs/06-domain/r3-goals-contract.md`), poté implementace `R3-02 – Goals and Priorities`. Tvorba kontraktu i implementace smí začít až po samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C18–C24).
 
 ---
 
@@ -354,10 +356,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). Kontrakty **C16** a **C17** existují → **`R3-01` je `READY` (neimplementováno)**. Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). **`R3-01 – Structured Sports Profile` je implementován** (viz §3; mobilní schema v5). Další kanonický krok:
 
 ```text
-R3-01 – Structured Sports Profile  (implementace, dle C16 + C17)
+C18 – Goals and priorities contract  (docs/06-domain/r3-goals-contract.md)
+→ poté je R3-02 – Goals and Priorities READY (implementace po samostatném pokynu)
 ```
 
-Implementace `R3-01` smí začít až po samostatném pokynu; před ní je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Tvorba kontraktu i implementace smí začít až po samostatném pokynu; před nimi je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
