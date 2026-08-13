@@ -121,7 +121,14 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
         "WHERE owner_id = '$localAnonymousOwnerId'",
         [accountId],
       );
-      // 11. Tréninkový plán (R3-04, C20 §7, MPC-010): kolizní anonymní
+      // 11. Ruční aktivity (R3-06, C22 §5, MAC-009): bezpodmínečný
+      // attach uživatelských faktů.
+      await _db.customStatement(
+        'UPDATE local_activities SET owner_id = ? '
+        "WHERE owner_id = '$localAnonymousOwnerId'",
+        [accountId],
+      );
+      // 12. Tréninkový plán (R3-04, C20 §7, MPC-010): kolizní anonymní
       // ACTIVE plán (účet už ACTIVE plán má) zůstává anonymní; jeho
       // instance se připojují nezávisle (device-local reference).
       await _db.customStatement(

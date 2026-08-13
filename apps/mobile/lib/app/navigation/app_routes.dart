@@ -50,6 +50,10 @@ abstract final class AppRoutes {
   static const String planName = 'plan';
   static const String planPath = '/plan';
 
+  /// Aktivita a progres (R3-06, C22/C23) — offline-first.
+  static const String activityName = 'activity';
+  static const String activityPath = '/activity';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';
