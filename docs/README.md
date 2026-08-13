@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.29  
+**Verze:** 2.30  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-12
@@ -109,8 +109,11 @@ docs/11-security/r2-authorization-ownership-contract.md
 docs/12-data/r2-mobile-schema-migration.md
 docs/12-data/r2-local-sync-metadata-contract.md
 docs/12-data/r2-idempotency-contract.md
+docs/12-data/r2-local-to-account-migration-contract.md
 docs/12-data/r2-server-data-model.md
 ```
+
+- `r2-local-to-account-migration-contract.md` (**C15**, vlastník Data Architecture + Domain) vlastní připojení předpřihlašovacích anonymních dat k účtu: klasifikaci (uživatelská data ano; čistý seed ne; cizí účet nikdy), **lokální idempotentní attach** (přepis `owner_id` v jedné transakci, žádná změna ID/klíčů/hodnot — duplicitní ochranu zajišťují existující vrstvy C10/C11/C6), chování při odhlášení a druhém účtu na zařízení a invarianty `LAM-001` až `LAM-015`. Contract-only. Blokuje `R2-07`. **Tímto je kontraktní mapa R2 (C1–C15) kompletní.**
 
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
@@ -150,7 +153,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `repository-strategy.md` vlastní monorepo layout, boundaries a `RER-001` až `RER-015`.
 - `definition-of-ready-and-done.md` vlastní Ready/Done gates a `DRD-001` až `DRD-015`.
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
-- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-06` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); `R2-07` a `R2-08` zůstávají `NOT_READY` (R2-07 čeká na poslední kontrakt C15).
+- `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **`R2-01` až `R2-06` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); kontrakt `R2-07` (**C15**) existuje → **`R2-07` je `READY` (neimplementováno)**; `R2-08` zůstává `NOT_READY` do dokončení R2-07.
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -177,7 +180,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` až `R2-06` jsou implementovány** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, **conflict/rejection resolution + revokace session a zařízení**); viz `DOCUMENTATION_STATUS.md` §3. `R2-07` a `R2-08` zůstávají `NOT_READY`. Dalším kanonickým krokem je příprava posledního kontraktu **C15 – Local-to-account migration** pro `R2-07`.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **`R2-01` až `R2-06` jsou implementovány** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace); viz `DOCUMENTATION_STATUS.md` §3. Kontrakt **C15** existuje a **kontraktní mapa R2 (C1–C15) je kompletní** → **`R2-07` je `READY` (neimplementováno)**. Dalším kanonickým krokem je **implementace `R2-07`**, poté `R2-08` (E2E evidence + R2 Exit Review).
 
 ---
 
@@ -362,16 +365,15 @@ Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review proveden a Rel
 uzavřen. Z R2 jsou implementovány **`R2-01` (lokální ownership/sync metadata)** a
 **`R2-02` (backend account/auth baseline — auth endpointy, PostgreSQL/Flyway V2, session
 issuance/rotace/revokace, rate limiting, audit)**; viz `DOCUMENTATION_STATUS.md` §3.
-**`R2-06 – Conflict, Rejection and Session Revocation` je implementován**
-(revoke-all + revokace instalace dle C13 s auditem a enumeration-safe 404;
-mobilní conflict/rejection resolution dle C12 — explicitní USE_LOCAL s novým
-idempotency klíčem a verzí z konfliktu / CANCEL bez dotyku dat; „Odhlásit
-všude" s poctivým offline chováním); `R2-07` a `R2-08` zůstávají `NOT_READY`.
+**`R2-06 – Conflict, Rejection and Session Revocation` je implementován**.
+Kontrakt **C15 – Local-to-account migration** (`LAM-001` až `LAM-015`) existuje —
+**kontraktní mapa R2 (C1–C15) je kompletní** → **`R2-07` je `READY`
+(neimplementováno)**; `R2-08` zůstává `NOT_READY` do dokončení R2-07.
 Další kanonický krok:
 
 ```text
-C15 – Local-to-account migration  [poslední kontrakt, pro R2-07]
-poté: implementace R2-07 a R2-08 (E2E evidence + R2 Exit Review)
+R2-07 – Local-to-Account Data Migration  (implementace, dle C15)
+poté: R2-08 – R2 Critical End-to-End Evidence and Exit Review
 ```
 
 Implementace R2 slices smí začít až po samostatném pokynu; příprava kontraktů pouze označuje
