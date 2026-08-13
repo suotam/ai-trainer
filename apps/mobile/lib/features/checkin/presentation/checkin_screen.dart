@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/tables/checkin_tables.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../safety/presentation/safety_card.dart';
 import '../application/checkin_providers.dart';
 import '../domain/daily_check_in.dart';
 
@@ -48,6 +49,8 @@ class CheckInScreen extends ConsumerWidget {
               content: Text(l10n.checkinError),
               actions: const [SizedBox.shrink()],
             ),
+          // Deterministické safety vyhodnocení dne (R5-02, C34).
+          const SafetyCard(),
           Expanded(
             child: today.when(
               loading: () => const Center(child: CircularProgressIndicator()),
