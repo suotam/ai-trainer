@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 11', () async {
-    // R4-03 zvýšil schema na verzi 11 (AI návrhy, C29 §2).
+  test('databaze vznikne od prazdneho stavu se schema verzi 12', () async {
+    // R4-05 zvýšil schema na verzi 12 (provenance plánu, C30 CSE-004).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 11);
+    expect(version.data.values.first, 12);
 
     final tables = await db
         .customSelect(
