@@ -40,6 +40,7 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
           id: row.data['id']! as String,
           title: row.data['title']! as String,
           status: row.data['status']! as String,
+          origin: row.data['origin']! as String,
           note: row.data['note'] as String?,
         ),
     ];
@@ -49,10 +50,12 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
   Future<PlanWriteResult> createPlan({
     required String title,
     String? note,
+    String origin = planOriginManual,
     required String newId,
     required DateTime now,
   }) {
-    if (title.trim().isEmpty) {
+    if (title.trim().isEmpty ||
+        (origin != planOriginManual && origin != planOriginAiProposal)) {
       return Future.value(const PlanWriteValidationFailed());
     }
     return _db.transaction(() async {
@@ -68,6 +71,7 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
               id: newId,
               title: title.trim(),
               note: Value(note),
+              origin: Value(origin),
               createdAt: nowMillis,
               updatedAt: nowMillis,
               rowVersion: 1,

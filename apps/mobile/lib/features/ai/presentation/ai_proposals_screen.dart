@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/ai_providers.dart';
 import '../domain/ai_proposal.dart';
+import '../domain/proposal_executor.dart';
 
 /// AI návrhy plánu (R4-04, C29): žádost o návrh, seznam návrhů a review
 /// s důvody a dopady; potvrzení/odmítnutí výhradně explicitní akcí
@@ -104,6 +105,9 @@ class AiProposalsScreen extends ConsumerWidget {
         AiRequestFailure() => l10n.aiErrorUnavailable,
         AiDecisionFailure(result: DecisionExpired()) => l10n.aiErrorExpired,
         AiDecisionFailure() => l10n.aiErrorDecision,
+        AiExecutionFailure(result: ExecutionActivePlanConflict()) =>
+          l10n.aiErrorExecutionConflict,
+        AiExecutionFailure() => l10n.aiErrorExecutionFailed,
         _ => null,
       };
 }
@@ -117,6 +121,7 @@ class _ProposalReviewSheet extends ConsumerWidget {
 
   static const Key confirmKey = Key('ai_review_confirm');
   static const Key rejectKey = Key('ai_review_reject');
+  static const Key retryKey = Key('ai_review_retry');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -191,6 +196,20 @@ class _ProposalReviewSheet extends ConsumerWidget {
               child: Text(l10n.aiReject),
             ),
           ],
+          // Po selhání provedení jen explicitní nový pokus (CSE-007).
+          if (proposal.canRetryExecution)
+            FilledButton(
+              key: retryKey,
+              onPressed: () async {
+                await ref
+                    .read(aiScreenControllerProvider.notifier)
+                    .executeProposal(proposalId);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text(l10n.aiRetry),
+            ),
           const SizedBox(height: 24),
         ],
       ),

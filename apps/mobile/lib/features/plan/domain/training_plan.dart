@@ -11,12 +11,16 @@ class TrainingPlan {
     required this.id,
     required this.title,
     required this.status,
+    this.origin = 'MANUAL',
     this.note,
   });
 
   final String id;
   final String title;
   final String status;
+
+  /// Provenance (C30 CSE-004): MANUAL | AI_PROPOSAL.
+  final String origin;
   final String? note;
 
   bool get isActive => status == 'ACTIVE';

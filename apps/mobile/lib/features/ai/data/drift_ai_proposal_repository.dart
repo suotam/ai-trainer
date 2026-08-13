@@ -68,10 +68,12 @@ class DriftAiProposalRepository implements AiProposalRepository {
 
   @override
   Future<AiProposal?> proposalById(String id) async {
+    // Owner-scoped čtení (APL-011): cizí návrh se chová jako neexistující.
+    final owner = await _currentOwnerId();
     final row = await (_db.select(
       _db.localAiProposals,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
-    return row == null ? null : _toDomain(row);
+    return row == null || row.ownerId != owner ? null : _toDomain(row);
   }
 
   static const _expiry = Duration(days: 7);
@@ -118,6 +120,57 @@ class DriftAiProposalRepository implements AiProposalRepository {
       };
       await setStatus(newStatus);
       return DecisionSaved(newStatus);
+    });
+  }
+
+  /// Stavy, ze kterých smí proběhnout execution přechod (C29 §3, C30 §2).
+  static const _executableStatuses = {
+    proposalStatusConfirmed,
+    proposalStatusExecutionFailed,
+  };
+
+  @override
+  Future<bool> markExecuted(
+    String id, {
+    required String executedPlanId,
+    required DateTime now,
+  }) => _markExecution(
+    id,
+    status: proposalStatusExecuted,
+    executedPlanId: executedPlanId,
+    now: now,
+  );
+
+  @override
+  Future<bool> markExecutionFailed(String id, {required DateTime now}) =>
+      _markExecution(id, status: proposalStatusExecutionFailed, now: now);
+
+  Future<bool> _markExecution(
+    String id, {
+    required String status,
+    String? executedPlanId,
+    required DateTime now,
+  }) {
+    return _db.transaction(() async {
+      final owner = await _currentOwnerId();
+      final row = await (_db.select(
+        _db.localAiProposals,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (row == null ||
+          row.ownerId != owner ||
+          !_executableStatuses.contains(row.status)) {
+        return false;
+      }
+      await (_db.update(
+        _db.localAiProposals,
+      )..where((t) => t.id.equals(id))).write(
+        LocalAiProposalsCompanion(
+          status: Value(status),
+          executedPlanId: Value(executedPlanId),
+          rowVersion: Value(row.rowVersion + 1),
+        ),
+      );
+      return true;
     });
   }
 

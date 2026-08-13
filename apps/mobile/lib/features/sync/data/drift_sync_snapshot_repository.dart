@@ -292,6 +292,8 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
     'title': row['title'],
     'note': row['note'],
     'status': row['status'],
+    // Provenance přežívá sync (C30, CSE-004).
+    'origin': row['origin'],
     'rowVersion': row['row_version'],
   };
 

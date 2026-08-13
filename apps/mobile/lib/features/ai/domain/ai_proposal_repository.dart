@@ -29,4 +29,17 @@ abstract interface class AiProposalRepository {
     ProposalDecision decision, {
     required DateTime now,
   });
+
+  /// Přechod CONFIRMED/EXECUTION_FAILED → EXECUTED s referencí plánu
+  /// (C30 CSE-005, APL-010). Vrací false při neplatném stavu/vlastníkovi —
+  /// volající (executor) pak celou transakci odvolá.
+  Future<bool> markExecuted(
+    String id, {
+    required String executedPlanId,
+    required DateTime now,
+  });
+
+  /// Přechod CONFIRMED/EXECUTION_FAILED → EXECUTION_FAILED (C30 CSE-005);
+  /// zapisuje se po rollbacku neúspěšného provedení.
+  Future<bool> markExecutionFailed(String id, {required DateTime now});
 }

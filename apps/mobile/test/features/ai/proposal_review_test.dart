@@ -173,7 +173,9 @@ void main() {
 
     await tester.tap(find.byKey(const Key('ai_review_confirm')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Accepted'), findsOneWidget);
+    // Od R4-05 (C30 §2) potvrzení = souhlas s provedením: návrh se v témže
+    // kroku provede a viditelný stav je Applied.
+    expect(find.textContaining('Applied'), findsOneWidget);
   });
 
   testWidgets('odmítnutí je viditelný stav (RSR-012) a rozhodovací akce '
