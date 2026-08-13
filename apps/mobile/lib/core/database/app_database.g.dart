@@ -14845,6 +14845,830 @@ class LocalActivitiesCompanion extends UpdateCompanion<LocalActivityRow> {
   }
 }
 
+class $LocalAiProposalsTable extends LocalAiProposals
+    with TableInfo<$LocalAiProposalsTable, LocalAiProposalRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAiProposalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _requestTypeMeta = const VerificationMeta(
+    'requestType',
+  );
+  @override
+  late final GeneratedColumn<String> requestType = GeneratedColumn<String>(
+    'request_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadJsonMeta = const VerificationMeta(
+    'payloadJson',
+  );
+  @override
+  late final GeneratedColumn<String> payloadJson = GeneratedColumn<String>(
+    'payload_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _promptVersionMeta = const VerificationMeta(
+    'promptVersion',
+  );
+  @override
+  late final GeneratedColumn<String> promptVersion = GeneratedColumn<String>(
+    'prompt_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<String> schemaVersion = GeneratedColumn<String>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modelIdMeta = const VerificationMeta(
+    'modelId',
+  );
+  @override
+  late final GeneratedColumn<String> modelId = GeneratedColumn<String>(
+    'model_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(proposalStatusProposed),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  @override
+  late final GeneratedColumn<int> decidedAt = GeneratedColumn<int>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _executedPlanIdMeta = const VerificationMeta(
+    'executedPlanId',
+  );
+  @override
+  late final GeneratedColumn<String> executedPlanId = GeneratedColumn<String>(
+    'executed_plan_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    requestType,
+    payloadJson,
+    summary,
+    promptVersion,
+    schemaVersion,
+    modelId,
+    status,
+    createdAt,
+    decidedAt,
+    executedPlanId,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_ai_proposals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAiProposalRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('request_type')) {
+      context.handle(
+        _requestTypeMeta,
+        requestType.isAcceptableOrUnknown(
+          data['request_type']!,
+          _requestTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_requestTypeMeta);
+    }
+    if (data.containsKey('payload_json')) {
+      context.handle(
+        _payloadJsonMeta,
+        payloadJson.isAcceptableOrUnknown(
+          data['payload_json']!,
+          _payloadJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadJsonMeta);
+    }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summaryMeta);
+    }
+    if (data.containsKey('prompt_version')) {
+      context.handle(
+        _promptVersionMeta,
+        promptVersion.isAcceptableOrUnknown(
+          data['prompt_version']!,
+          _promptVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_promptVersionMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_schemaVersionMeta);
+    }
+    if (data.containsKey('model_id')) {
+      context.handle(
+        _modelIdMeta,
+        modelId.isAcceptableOrUnknown(data['model_id']!, _modelIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_modelIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    if (data.containsKey('executed_plan_id')) {
+      context.handle(
+        _executedPlanIdMeta,
+        executedPlanId.isAcceptableOrUnknown(
+          data['executed_plan_id']!,
+          _executedPlanIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAiProposalRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAiProposalRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      requestType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}request_type'],
+      )!,
+      payloadJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload_json'],
+      )!,
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      )!,
+      promptVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prompt_version'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}schema_version'],
+      )!,
+      modelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}decided_at'],
+      ),
+      executedPlanId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}executed_plan_id'],
+      ),
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAiProposalsTable createAlias(String alias) {
+    return $LocalAiProposalsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAiProposalRow extends DataClass
+    implements Insertable<LocalAiProposalRow> {
+  final String id;
+  final String requestType;
+  final String payloadJson;
+  final String summary;
+  final String promptVersion;
+  final String schemaVersion;
+  final String modelId;
+  final String status;
+  final int createdAt;
+  final int? decidedAt;
+  final String? executedPlanId;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalAiProposalRow({
+    required this.id,
+    required this.requestType,
+    required this.payloadJson,
+    required this.summary,
+    required this.promptVersion,
+    required this.schemaVersion,
+    required this.modelId,
+    required this.status,
+    required this.createdAt,
+    this.decidedAt,
+    this.executedPlanId,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['request_type'] = Variable<String>(requestType);
+    map['payload_json'] = Variable<String>(payloadJson);
+    map['summary'] = Variable<String>(summary);
+    map['prompt_version'] = Variable<String>(promptVersion);
+    map['schema_version'] = Variable<String>(schemaVersion);
+    map['model_id'] = Variable<String>(modelId);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<int>(decidedAt);
+    }
+    if (!nullToAbsent || executedPlanId != null) {
+      map['executed_plan_id'] = Variable<String>(executedPlanId);
+    }
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalAiProposalsCompanion toCompanion(bool nullToAbsent) {
+    return LocalAiProposalsCompanion(
+      id: Value(id),
+      requestType: Value(requestType),
+      payloadJson: Value(payloadJson),
+      summary: Value(summary),
+      promptVersion: Value(promptVersion),
+      schemaVersion: Value(schemaVersion),
+      modelId: Value(modelId),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+      executedPlanId: executedPlanId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(executedPlanId),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalAiProposalRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAiProposalRow(
+      id: serializer.fromJson<String>(json['id']),
+      requestType: serializer.fromJson<String>(json['requestType']),
+      payloadJson: serializer.fromJson<String>(json['payloadJson']),
+      summary: serializer.fromJson<String>(json['summary']),
+      promptVersion: serializer.fromJson<String>(json['promptVersion']),
+      schemaVersion: serializer.fromJson<String>(json['schemaVersion']),
+      modelId: serializer.fromJson<String>(json['modelId']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      decidedAt: serializer.fromJson<int?>(json['decidedAt']),
+      executedPlanId: serializer.fromJson<String?>(json['executedPlanId']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'requestType': serializer.toJson<String>(requestType),
+      'payloadJson': serializer.toJson<String>(payloadJson),
+      'summary': serializer.toJson<String>(summary),
+      'promptVersion': serializer.toJson<String>(promptVersion),
+      'schemaVersion': serializer.toJson<String>(schemaVersion),
+      'modelId': serializer.toJson<String>(modelId),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'decidedAt': serializer.toJson<int?>(decidedAt),
+      'executedPlanId': serializer.toJson<String?>(executedPlanId),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalAiProposalRow copyWith({
+    String? id,
+    String? requestType,
+    String? payloadJson,
+    String? summary,
+    String? promptVersion,
+    String? schemaVersion,
+    String? modelId,
+    String? status,
+    int? createdAt,
+    Value<int?> decidedAt = const Value.absent(),
+    Value<String?> executedPlanId = const Value.absent(),
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalAiProposalRow(
+    id: id ?? this.id,
+    requestType: requestType ?? this.requestType,
+    payloadJson: payloadJson ?? this.payloadJson,
+    summary: summary ?? this.summary,
+    promptVersion: promptVersion ?? this.promptVersion,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+    modelId: modelId ?? this.modelId,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+    executedPlanId: executedPlanId.present
+        ? executedPlanId.value
+        : this.executedPlanId,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalAiProposalRow copyWithCompanion(LocalAiProposalsCompanion data) {
+    return LocalAiProposalRow(
+      id: data.id.present ? data.id.value : this.id,
+      requestType: data.requestType.present
+          ? data.requestType.value
+          : this.requestType,
+      payloadJson: data.payloadJson.present
+          ? data.payloadJson.value
+          : this.payloadJson,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      promptVersion: data.promptVersion.present
+          ? data.promptVersion.value
+          : this.promptVersion,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+      modelId: data.modelId.present ? data.modelId.value : this.modelId,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+      executedPlanId: data.executedPlanId.present
+          ? data.executedPlanId.value
+          : this.executedPlanId,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAiProposalRow(')
+          ..write('id: $id, ')
+          ..write('requestType: $requestType, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('summary: $summary, ')
+          ..write('promptVersion: $promptVersion, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('modelId: $modelId, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('executedPlanId: $executedPlanId, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    requestType,
+    payloadJson,
+    summary,
+    promptVersion,
+    schemaVersion,
+    modelId,
+    status,
+    createdAt,
+    decidedAt,
+    executedPlanId,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAiProposalRow &&
+          other.id == this.id &&
+          other.requestType == this.requestType &&
+          other.payloadJson == this.payloadJson &&
+          other.summary == this.summary &&
+          other.promptVersion == this.promptVersion &&
+          other.schemaVersion == this.schemaVersion &&
+          other.modelId == this.modelId &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.decidedAt == this.decidedAt &&
+          other.executedPlanId == this.executedPlanId &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalAiProposalsCompanion extends UpdateCompanion<LocalAiProposalRow> {
+  final Value<String> id;
+  final Value<String> requestType;
+  final Value<String> payloadJson;
+  final Value<String> summary;
+  final Value<String> promptVersion;
+  final Value<String> schemaVersion;
+  final Value<String> modelId;
+  final Value<String> status;
+  final Value<int> createdAt;
+  final Value<int?> decidedAt;
+  final Value<String?> executedPlanId;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalAiProposalsCompanion({
+    this.id = const Value.absent(),
+    this.requestType = const Value.absent(),
+    this.payloadJson = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.promptVersion = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.modelId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.executedPlanId = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAiProposalsCompanion.insert({
+    required String id,
+    required String requestType,
+    required String payloadJson,
+    required String summary,
+    required String promptVersion,
+    required String schemaVersion,
+    required String modelId,
+    this.status = const Value.absent(),
+    required int createdAt,
+    this.decidedAt = const Value.absent(),
+    this.executedPlanId = const Value.absent(),
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       requestType = Value(requestType),
+       payloadJson = Value(payloadJson),
+       summary = Value(summary),
+       promptVersion = Value(promptVersion),
+       schemaVersion = Value(schemaVersion),
+       modelId = Value(modelId),
+       createdAt = Value(createdAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalAiProposalRow> custom({
+    Expression<String>? id,
+    Expression<String>? requestType,
+    Expression<String>? payloadJson,
+    Expression<String>? summary,
+    Expression<String>? promptVersion,
+    Expression<String>? schemaVersion,
+    Expression<String>? modelId,
+    Expression<String>? status,
+    Expression<int>? createdAt,
+    Expression<int>? decidedAt,
+    Expression<String>? executedPlanId,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (requestType != null) 'request_type': requestType,
+      if (payloadJson != null) 'payload_json': payloadJson,
+      if (summary != null) 'summary': summary,
+      if (promptVersion != null) 'prompt_version': promptVersion,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (modelId != null) 'model_id': modelId,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (executedPlanId != null) 'executed_plan_id': executedPlanId,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAiProposalsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? requestType,
+    Value<String>? payloadJson,
+    Value<String>? summary,
+    Value<String>? promptVersion,
+    Value<String>? schemaVersion,
+    Value<String>? modelId,
+    Value<String>? status,
+    Value<int>? createdAt,
+    Value<int?>? decidedAt,
+    Value<String?>? executedPlanId,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalAiProposalsCompanion(
+      id: id ?? this.id,
+      requestType: requestType ?? this.requestType,
+      payloadJson: payloadJson ?? this.payloadJson,
+      summary: summary ?? this.summary,
+      promptVersion: promptVersion ?? this.promptVersion,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      modelId: modelId ?? this.modelId,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      decidedAt: decidedAt ?? this.decidedAt,
+      executedPlanId: executedPlanId ?? this.executedPlanId,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (requestType.present) {
+      map['request_type'] = Variable<String>(requestType.value);
+    }
+    if (payloadJson.present) {
+      map['payload_json'] = Variable<String>(payloadJson.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (promptVersion.present) {
+      map['prompt_version'] = Variable<String>(promptVersion.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<String>(schemaVersion.value);
+    }
+    if (modelId.present) {
+      map['model_id'] = Variable<String>(modelId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<int>(decidedAt.value);
+    }
+    if (executedPlanId.present) {
+      map['executed_plan_id'] = Variable<String>(executedPlanId.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAiProposalsCompanion(')
+          ..write('id: $id, ')
+          ..write('requestType: $requestType, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('summary: $summary, ')
+          ..write('promptVersion: $promptVersion, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('modelId: $modelId, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('executedPlanId: $executedPlanId, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -14889,6 +15713,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalActivitiesTable localActivities = $LocalActivitiesTable(
     this,
   );
+  late final $LocalAiProposalsTable localAiProposals = $LocalAiProposalsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -14915,6 +15742,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localTrainingPlans,
     localCalendarChanges,
     localActivities,
+    localAiProposals,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -25587,6 +26415,399 @@ typedef $$LocalActivitiesTableProcessedTableManager =
       LocalActivityRow,
       PrefetchHooks Function({bool userSportId, bool workoutInstanceId})
     >;
+typedef $$LocalAiProposalsTableCreateCompanionBuilder =
+    LocalAiProposalsCompanion Function({
+      required String id,
+      required String requestType,
+      required String payloadJson,
+      required String summary,
+      required String promptVersion,
+      required String schemaVersion,
+      required String modelId,
+      Value<String> status,
+      required int createdAt,
+      Value<int?> decidedAt,
+      Value<String?> executedPlanId,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalAiProposalsTableUpdateCompanionBuilder =
+    LocalAiProposalsCompanion Function({
+      Value<String> id,
+      Value<String> requestType,
+      Value<String> payloadJson,
+      Value<String> summary,
+      Value<String> promptVersion,
+      Value<String> schemaVersion,
+      Value<String> modelId,
+      Value<String> status,
+      Value<int> createdAt,
+      Value<int?> decidedAt,
+      Value<String?> executedPlanId,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalAiProposalsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAiProposalsTable> {
+  $$LocalAiProposalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requestType => $composableBuilder(
+    column: $table.requestType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get promptVersion => $composableBuilder(
+    column: $table.promptVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelId => $composableBuilder(
+    column: $table.modelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get executedPlanId => $composableBuilder(
+    column: $table.executedPlanId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAiProposalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAiProposalsTable> {
+  $$LocalAiProposalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requestType => $composableBuilder(
+    column: $table.requestType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get promptVersion => $composableBuilder(
+    column: $table.promptVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelId => $composableBuilder(
+    column: $table.modelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get executedPlanId => $composableBuilder(
+    column: $table.executedPlanId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAiProposalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAiProposalsTable> {
+  $$LocalAiProposalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get requestType => $composableBuilder(
+    column: $table.requestType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<String> get promptVersion => $composableBuilder(
+    column: $table.promptVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get modelId =>
+      $composableBuilder(column: $table.modelId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get executedPlanId => $composableBuilder(
+    column: $table.executedPlanId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalAiProposalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAiProposalsTable,
+          LocalAiProposalRow,
+          $$LocalAiProposalsTableFilterComposer,
+          $$LocalAiProposalsTableOrderingComposer,
+          $$LocalAiProposalsTableAnnotationComposer,
+          $$LocalAiProposalsTableCreateCompanionBuilder,
+          $$LocalAiProposalsTableUpdateCompanionBuilder,
+          (
+            LocalAiProposalRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalAiProposalsTable,
+              LocalAiProposalRow
+            >,
+          ),
+          LocalAiProposalRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalAiProposalsTableTableManager(
+    _$AppDatabase db,
+    $LocalAiProposalsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAiProposalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAiProposalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAiProposalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> requestType = const Value.absent(),
+                Value<String> payloadJson = const Value.absent(),
+                Value<String> summary = const Value.absent(),
+                Value<String> promptVersion = const Value.absent(),
+                Value<String> schemaVersion = const Value.absent(),
+                Value<String> modelId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int?> decidedAt = const Value.absent(),
+                Value<String?> executedPlanId = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAiProposalsCompanion(
+                id: id,
+                requestType: requestType,
+                payloadJson: payloadJson,
+                summary: summary,
+                promptVersion: promptVersion,
+                schemaVersion: schemaVersion,
+                modelId: modelId,
+                status: status,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                executedPlanId: executedPlanId,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String requestType,
+                required String payloadJson,
+                required String summary,
+                required String promptVersion,
+                required String schemaVersion,
+                required String modelId,
+                Value<String> status = const Value.absent(),
+                required int createdAt,
+                Value<int?> decidedAt = const Value.absent(),
+                Value<String?> executedPlanId = const Value.absent(),
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAiProposalsCompanion.insert(
+                id: id,
+                requestType: requestType,
+                payloadJson: payloadJson,
+                summary: summary,
+                promptVersion: promptVersion,
+                schemaVersion: schemaVersion,
+                modelId: modelId,
+                status: status,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                executedPlanId: executedPlanId,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAiProposalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAiProposalsTable,
+      LocalAiProposalRow,
+      $$LocalAiProposalsTableFilterComposer,
+      $$LocalAiProposalsTableOrderingComposer,
+      $$LocalAiProposalsTableAnnotationComposer,
+      $$LocalAiProposalsTableCreateCompanionBuilder,
+      $$LocalAiProposalsTableUpdateCompanionBuilder,
+      (
+        LocalAiProposalRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalAiProposalsTable,
+          LocalAiProposalRow
+        >,
+      ),
+      LocalAiProposalRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -25639,4 +26860,6 @@ class $AppDatabaseManager {
       $$LocalCalendarChangesTableTableManager(_db, _db.localCalendarChanges);
   $$LocalActivitiesTableTableManager get localActivities =>
       $$LocalActivitiesTableTableManager(_db, _db.localActivities);
+  $$LocalAiProposalsTableTableManager get localAiProposals =>
+      $$LocalAiProposalsTableTableManager(_db, _db.localAiProposals);
 }

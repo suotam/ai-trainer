@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import 'tables/activity_tables.dart';
+import 'tables/ai_tables.dart';
 import 'tables/availability_tables.dart';
 import 'tables/calendar_tables.dart';
 import 'tables/goals_tables.dart';
@@ -38,20 +39,22 @@ part 'app_database.g.dart';
     LocalTrainingPlans,
     LocalCalendarChanges,
     LocalActivities,
+    LocalAiProposals,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 10 (R3-06, C16 §4): tabulka ručních aktivit
-  /// `local_activities` (C22). Verze 9 (R3-05) přidala evidenci
-  /// kalendářních změn, verze 8 (R3-04) ruční plán, verze 7 (R3-03)
-  /// dostupnost/vybavení/omezení, verze 6 (R3-02) cíle, verze 5 (R3-01)
-  /// sportovní profil, verze 4 (R2-06) conflict/rejection rozhodnutí,
-  /// verze 3 (R2-05) serverové verze synced entit; `v1 → v2` (R2-01)
-  /// zachovává všechna R1 data i aktivní session (C1 `MSM-005`, PDR-009).
+  /// Schema version 11 (R4-03, C29 §2): tabulka AI návrhů
+  /// `local_ai_proposals`. Verze 10 (R3-06) přidala ruční aktivity,
+  /// verze 9 (R3-05) evidenci kalendářních změn, verze 8 (R3-04) ruční
+  /// plán, verze 7 (R3-03) dostupnost/vybavení/omezení, verze 6 (R3-02)
+  /// cíle, verze 5 (R3-01) sportovní profil, verze 4 (R2-06)
+  /// conflict/rejection rozhodnutí, verze 3 (R2-05) serverové verze
+  /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
+  /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -154,6 +157,11 @@ class AppDatabase extends _$AppDatabase {
       // aditivní, prázdná (R3M-008).
       if (from < 10) {
         await m.createTable(localActivities);
+      }
+      // Migrace v10 → v11 (R4-03, C29 §2): jen tabulka AI návrhů —
+      // aditivní, prázdná.
+      if (from < 11) {
+        await m.createTable(localAiProposals);
       }
     },
     beforeOpen: (details) async {

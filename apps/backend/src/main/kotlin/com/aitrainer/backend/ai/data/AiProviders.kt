@@ -34,9 +34,15 @@ class FakeModelProvider : AiModelProvider {
         AiModelResult.Success(
             rawJson =
                 """
-                {"schemaVersion":"$schemaVersion","summary":"Deterministic fake proposal",
-                 "workouts":[{"title":"Full Body A","workoutType":"STRENGTH","dayOfWeek":"MON",
-                 "reason":"Fixture reason"}]}
+                {"summary":"Deterministic fake proposal for $schemaVersion.",
+                 "planTitle":"Fake Weekly Plan",
+                 "workouts":[
+                   {"title":"Full Body A","workoutType":"STRENGTH","dayOffset":0,
+                    "reason":"Fixture reason A","plannedDurationMinutes":60,
+                    "exercises":[{"title":"Squat","sets":3,"repetitions":5,"weightKg":80}]},
+                   {"title":"Mobility","workoutType":"MOBILITY","dayOffset":2,
+                    "reason":"Fixture reason B"}
+                 ]}
                 """.trimIndent(),
             modelId = "fake-model",
         )
