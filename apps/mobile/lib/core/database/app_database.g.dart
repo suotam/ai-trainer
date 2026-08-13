@@ -15715,6 +15715,780 @@ class LocalAiProposalsCompanion extends UpdateCompanion<LocalAiProposalRow> {
   }
 }
 
+class $LocalDailyCheckInsTable extends LocalDailyCheckIns
+    with TableInfo<$LocalDailyCheckInsTable, LocalDailyCheckInRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalDailyCheckInsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localDateMeta = const VerificationMeta(
+    'localDate',
+  );
+  @override
+  late final GeneratedColumn<String> localDate = GeneratedColumn<String>(
+    'local_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _energyLevelMeta = const VerificationMeta(
+    'energyLevel',
+  );
+  @override
+  late final GeneratedColumn<int> energyLevel = GeneratedColumn<int>(
+    'energy_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fatigueLevelMeta = const VerificationMeta(
+    'fatigueLevel',
+  );
+  @override
+  late final GeneratedColumn<int> fatigueLevel = GeneratedColumn<int>(
+    'fatigue_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sleepQualityMeta = const VerificationMeta(
+    'sleepQuality',
+  );
+  @override
+  late final GeneratedColumn<int> sleepQuality = GeneratedColumn<int>(
+    'sleep_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _painLevelMeta = const VerificationMeta(
+    'painLevel',
+  );
+  @override
+  late final GeneratedColumn<int> painLevel = GeneratedColumn<int>(
+    'pain_level',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _painAreaCodeMeta = const VerificationMeta(
+    'painAreaCode',
+  );
+  @override
+  late final GeneratedColumn<String> painAreaCode = GeneratedColumn<String>(
+    'pain_area_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowVersionMeta = const VerificationMeta(
+    'rowVersion',
+  );
+  @override
+  late final GeneratedColumn<int> rowVersion = GeneratedColumn<int>(
+    'row_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    localDate,
+    energyLevel,
+    fatigueLevel,
+    sleepQuality,
+    painLevel,
+    painAreaCode,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_daily_check_ins';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalDailyCheckInRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('local_date')) {
+      context.handle(
+        _localDateMeta,
+        localDate.isAcceptableOrUnknown(data['local_date']!, _localDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_localDateMeta);
+    }
+    if (data.containsKey('energy_level')) {
+      context.handle(
+        _energyLevelMeta,
+        energyLevel.isAcceptableOrUnknown(
+          data['energy_level']!,
+          _energyLevelMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_energyLevelMeta);
+    }
+    if (data.containsKey('fatigue_level')) {
+      context.handle(
+        _fatigueLevelMeta,
+        fatigueLevel.isAcceptableOrUnknown(
+          data['fatigue_level']!,
+          _fatigueLevelMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_fatigueLevelMeta);
+    }
+    if (data.containsKey('sleep_quality')) {
+      context.handle(
+        _sleepQualityMeta,
+        sleepQuality.isAcceptableOrUnknown(
+          data['sleep_quality']!,
+          _sleepQualityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pain_level')) {
+      context.handle(
+        _painLevelMeta,
+        painLevel.isAcceptableOrUnknown(data['pain_level']!, _painLevelMeta),
+      );
+    }
+    if (data.containsKey('pain_area_code')) {
+      context.handle(
+        _painAreaCodeMeta,
+        painAreaCode.isAcceptableOrUnknown(
+          data['pain_area_code']!,
+          _painAreaCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('row_version')) {
+      context.handle(
+        _rowVersionMeta,
+        rowVersion.isAcceptableOrUnknown(data['row_version']!, _rowVersionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowVersionMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalDailyCheckInRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalDailyCheckInRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      localDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_date'],
+      )!,
+      energyLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}energy_level'],
+      )!,
+      fatigueLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fatigue_level'],
+      )!,
+      sleepQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sleep_quality'],
+      ),
+      painLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pain_level'],
+      ),
+      painAreaCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pain_area_code'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      rowVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}row_version'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalDailyCheckInsTable createAlias(String alias) {
+    return $LocalDailyCheckInsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalDailyCheckInRow extends DataClass
+    implements Insertable<LocalDailyCheckInRow> {
+  final String id;
+  final String localDate;
+  final int energyLevel;
+  final int fatigueLevel;
+  final int? sleepQuality;
+  final int? painLevel;
+  final String? painAreaCode;
+
+  /// Výhradně lokální poznámka — nikdy sync/AI (DCI-006).
+  final String? note;
+  final int createdAt;
+  final int updatedAt;
+  final int rowVersion;
+  final String ownerId;
+  final String syncState;
+  const LocalDailyCheckInRow({
+    required this.id,
+    required this.localDate,
+    required this.energyLevel,
+    required this.fatigueLevel,
+    this.sleepQuality,
+    this.painLevel,
+    this.painAreaCode,
+    this.note,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rowVersion,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['local_date'] = Variable<String>(localDate);
+    map['energy_level'] = Variable<int>(energyLevel);
+    map['fatigue_level'] = Variable<int>(fatigueLevel);
+    if (!nullToAbsent || sleepQuality != null) {
+      map['sleep_quality'] = Variable<int>(sleepQuality);
+    }
+    if (!nullToAbsent || painLevel != null) {
+      map['pain_level'] = Variable<int>(painLevel);
+    }
+    if (!nullToAbsent || painAreaCode != null) {
+      map['pain_area_code'] = Variable<String>(painAreaCode);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    map['row_version'] = Variable<int>(rowVersion);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalDailyCheckInsCompanion toCompanion(bool nullToAbsent) {
+    return LocalDailyCheckInsCompanion(
+      id: Value(id),
+      localDate: Value(localDate),
+      energyLevel: Value(energyLevel),
+      fatigueLevel: Value(fatigueLevel),
+      sleepQuality: sleepQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sleepQuality),
+      painLevel: painLevel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(painLevel),
+      painAreaCode: painAreaCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(painAreaCode),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      rowVersion: Value(rowVersion),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalDailyCheckInRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalDailyCheckInRow(
+      id: serializer.fromJson<String>(json['id']),
+      localDate: serializer.fromJson<String>(json['localDate']),
+      energyLevel: serializer.fromJson<int>(json['energyLevel']),
+      fatigueLevel: serializer.fromJson<int>(json['fatigueLevel']),
+      sleepQuality: serializer.fromJson<int?>(json['sleepQuality']),
+      painLevel: serializer.fromJson<int?>(json['painLevel']),
+      painAreaCode: serializer.fromJson<String?>(json['painAreaCode']),
+      note: serializer.fromJson<String?>(json['note']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      rowVersion: serializer.fromJson<int>(json['rowVersion']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'localDate': serializer.toJson<String>(localDate),
+      'energyLevel': serializer.toJson<int>(energyLevel),
+      'fatigueLevel': serializer.toJson<int>(fatigueLevel),
+      'sleepQuality': serializer.toJson<int?>(sleepQuality),
+      'painLevel': serializer.toJson<int?>(painLevel),
+      'painAreaCode': serializer.toJson<String?>(painAreaCode),
+      'note': serializer.toJson<String?>(note),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'rowVersion': serializer.toJson<int>(rowVersion),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalDailyCheckInRow copyWith({
+    String? id,
+    String? localDate,
+    int? energyLevel,
+    int? fatigueLevel,
+    Value<int?> sleepQuality = const Value.absent(),
+    Value<int?> painLevel = const Value.absent(),
+    Value<String?> painAreaCode = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    int? createdAt,
+    int? updatedAt,
+    int? rowVersion,
+    String? ownerId,
+    String? syncState,
+  }) => LocalDailyCheckInRow(
+    id: id ?? this.id,
+    localDate: localDate ?? this.localDate,
+    energyLevel: energyLevel ?? this.energyLevel,
+    fatigueLevel: fatigueLevel ?? this.fatigueLevel,
+    sleepQuality: sleepQuality.present ? sleepQuality.value : this.sleepQuality,
+    painLevel: painLevel.present ? painLevel.value : this.painLevel,
+    painAreaCode: painAreaCode.present ? painAreaCode.value : this.painAreaCode,
+    note: note.present ? note.value : this.note,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    rowVersion: rowVersion ?? this.rowVersion,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalDailyCheckInRow copyWithCompanion(LocalDailyCheckInsCompanion data) {
+    return LocalDailyCheckInRow(
+      id: data.id.present ? data.id.value : this.id,
+      localDate: data.localDate.present ? data.localDate.value : this.localDate,
+      energyLevel: data.energyLevel.present
+          ? data.energyLevel.value
+          : this.energyLevel,
+      fatigueLevel: data.fatigueLevel.present
+          ? data.fatigueLevel.value
+          : this.fatigueLevel,
+      sleepQuality: data.sleepQuality.present
+          ? data.sleepQuality.value
+          : this.sleepQuality,
+      painLevel: data.painLevel.present ? data.painLevel.value : this.painLevel,
+      painAreaCode: data.painAreaCode.present
+          ? data.painAreaCode.value
+          : this.painAreaCode,
+      note: data.note.present ? data.note.value : this.note,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      rowVersion: data.rowVersion.present
+          ? data.rowVersion.value
+          : this.rowVersion,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalDailyCheckInRow(')
+          ..write('id: $id, ')
+          ..write('localDate: $localDate, ')
+          ..write('energyLevel: $energyLevel, ')
+          ..write('fatigueLevel: $fatigueLevel, ')
+          ..write('sleepQuality: $sleepQuality, ')
+          ..write('painLevel: $painLevel, ')
+          ..write('painAreaCode: $painAreaCode, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    localDate,
+    energyLevel,
+    fatigueLevel,
+    sleepQuality,
+    painLevel,
+    painAreaCode,
+    note,
+    createdAt,
+    updatedAt,
+    rowVersion,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalDailyCheckInRow &&
+          other.id == this.id &&
+          other.localDate == this.localDate &&
+          other.energyLevel == this.energyLevel &&
+          other.fatigueLevel == this.fatigueLevel &&
+          other.sleepQuality == this.sleepQuality &&
+          other.painLevel == this.painLevel &&
+          other.painAreaCode == this.painAreaCode &&
+          other.note == this.note &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.rowVersion == this.rowVersion &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalDailyCheckInsCompanion
+    extends UpdateCompanion<LocalDailyCheckInRow> {
+  final Value<String> id;
+  final Value<String> localDate;
+  final Value<int> energyLevel;
+  final Value<int> fatigueLevel;
+  final Value<int?> sleepQuality;
+  final Value<int?> painLevel;
+  final Value<String?> painAreaCode;
+  final Value<String?> note;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int> rowVersion;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalDailyCheckInsCompanion({
+    this.id = const Value.absent(),
+    this.localDate = const Value.absent(),
+    this.energyLevel = const Value.absent(),
+    this.fatigueLevel = const Value.absent(),
+    this.sleepQuality = const Value.absent(),
+    this.painLevel = const Value.absent(),
+    this.painAreaCode = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowVersion = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalDailyCheckInsCompanion.insert({
+    required String id,
+    required String localDate,
+    required int energyLevel,
+    required int fatigueLevel,
+    this.sleepQuality = const Value.absent(),
+    this.painLevel = const Value.absent(),
+    this.painAreaCode = const Value.absent(),
+    this.note = const Value.absent(),
+    required int createdAt,
+    required int updatedAt,
+    required int rowVersion,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       localDate = Value(localDate),
+       energyLevel = Value(energyLevel),
+       fatigueLevel = Value(fatigueLevel),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       rowVersion = Value(rowVersion);
+  static Insertable<LocalDailyCheckInRow> custom({
+    Expression<String>? id,
+    Expression<String>? localDate,
+    Expression<int>? energyLevel,
+    Expression<int>? fatigueLevel,
+    Expression<int>? sleepQuality,
+    Expression<int>? painLevel,
+    Expression<String>? painAreaCode,
+    Expression<String>? note,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowVersion,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (localDate != null) 'local_date': localDate,
+      if (energyLevel != null) 'energy_level': energyLevel,
+      if (fatigueLevel != null) 'fatigue_level': fatigueLevel,
+      if (sleepQuality != null) 'sleep_quality': sleepQuality,
+      if (painLevel != null) 'pain_level': painLevel,
+      if (painAreaCode != null) 'pain_area_code': painAreaCode,
+      if (note != null) 'note': note,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowVersion != null) 'row_version': rowVersion,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalDailyCheckInsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? localDate,
+    Value<int>? energyLevel,
+    Value<int>? fatigueLevel,
+    Value<int?>? sleepQuality,
+    Value<int?>? painLevel,
+    Value<String?>? painAreaCode,
+    Value<String?>? note,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int>? rowVersion,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalDailyCheckInsCompanion(
+      id: id ?? this.id,
+      localDate: localDate ?? this.localDate,
+      energyLevel: energyLevel ?? this.energyLevel,
+      fatigueLevel: fatigueLevel ?? this.fatigueLevel,
+      sleepQuality: sleepQuality ?? this.sleepQuality,
+      painLevel: painLevel ?? this.painLevel,
+      painAreaCode: painAreaCode ?? this.painAreaCode,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowVersion: rowVersion ?? this.rowVersion,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (localDate.present) {
+      map['local_date'] = Variable<String>(localDate.value);
+    }
+    if (energyLevel.present) {
+      map['energy_level'] = Variable<int>(energyLevel.value);
+    }
+    if (fatigueLevel.present) {
+      map['fatigue_level'] = Variable<int>(fatigueLevel.value);
+    }
+    if (sleepQuality.present) {
+      map['sleep_quality'] = Variable<int>(sleepQuality.value);
+    }
+    if (painLevel.present) {
+      map['pain_level'] = Variable<int>(painLevel.value);
+    }
+    if (painAreaCode.present) {
+      map['pain_area_code'] = Variable<String>(painAreaCode.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (rowVersion.present) {
+      map['row_version'] = Variable<int>(rowVersion.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalDailyCheckInsCompanion(')
+          ..write('id: $id, ')
+          ..write('localDate: $localDate, ')
+          ..write('energyLevel: $energyLevel, ')
+          ..write('fatigueLevel: $fatigueLevel, ')
+          ..write('sleepQuality: $sleepQuality, ')
+          ..write('painLevel: $painLevel, ')
+          ..write('painAreaCode: $painAreaCode, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowVersion: $rowVersion, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -15762,6 +16536,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalAiProposalsTable localAiProposals = $LocalAiProposalsTable(
     this,
   );
+  late final $LocalDailyCheckInsTable localDailyCheckIns =
+      $LocalDailyCheckInsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -15789,6 +16565,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localCalendarChanges,
     localActivities,
     localAiProposals,
+    localDailyCheckIns,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -26873,6 +27650,381 @@ typedef $$LocalAiProposalsTableProcessedTableManager =
       LocalAiProposalRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalDailyCheckInsTableCreateCompanionBuilder =
+    LocalDailyCheckInsCompanion Function({
+      required String id,
+      required String localDate,
+      required int energyLevel,
+      required int fatigueLevel,
+      Value<int?> sleepQuality,
+      Value<int?> painLevel,
+      Value<String?> painAreaCode,
+      Value<String?> note,
+      required int createdAt,
+      required int updatedAt,
+      required int rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalDailyCheckInsTableUpdateCompanionBuilder =
+    LocalDailyCheckInsCompanion Function({
+      Value<String> id,
+      Value<String> localDate,
+      Value<int> energyLevel,
+      Value<int> fatigueLevel,
+      Value<int?> sleepQuality,
+      Value<int?> painLevel,
+      Value<String?> painAreaCode,
+      Value<String?> note,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int> rowVersion,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+class $$LocalDailyCheckInsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalDailyCheckInsTable> {
+  $$LocalDailyCheckInsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localDate => $composableBuilder(
+    column: $table.localDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get energyLevel => $composableBuilder(
+    column: $table.energyLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fatigueLevel => $composableBuilder(
+    column: $table.fatigueLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sleepQuality => $composableBuilder(
+    column: $table.sleepQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get painLevel => $composableBuilder(
+    column: $table.painLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get painAreaCode => $composableBuilder(
+    column: $table.painAreaCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalDailyCheckInsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalDailyCheckInsTable> {
+  $$LocalDailyCheckInsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localDate => $composableBuilder(
+    column: $table.localDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get energyLevel => $composableBuilder(
+    column: $table.energyLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fatigueLevel => $composableBuilder(
+    column: $table.fatigueLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sleepQuality => $composableBuilder(
+    column: $table.sleepQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get painLevel => $composableBuilder(
+    column: $table.painLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get painAreaCode => $composableBuilder(
+    column: $table.painAreaCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalDailyCheckInsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalDailyCheckInsTable> {
+  $$LocalDailyCheckInsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get localDate =>
+      $composableBuilder(column: $table.localDate, builder: (column) => column);
+
+  GeneratedColumn<int> get energyLevel => $composableBuilder(
+    column: $table.energyLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get fatigueLevel => $composableBuilder(
+    column: $table.fatigueLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sleepQuality => $composableBuilder(
+    column: $table.sleepQuality,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get painLevel =>
+      $composableBuilder(column: $table.painLevel, builder: (column) => column);
+
+  GeneratedColumn<String> get painAreaCode => $composableBuilder(
+    column: $table.painAreaCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get rowVersion => $composableBuilder(
+    column: $table.rowVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+}
+
+class $$LocalDailyCheckInsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalDailyCheckInsTable,
+          LocalDailyCheckInRow,
+          $$LocalDailyCheckInsTableFilterComposer,
+          $$LocalDailyCheckInsTableOrderingComposer,
+          $$LocalDailyCheckInsTableAnnotationComposer,
+          $$LocalDailyCheckInsTableCreateCompanionBuilder,
+          $$LocalDailyCheckInsTableUpdateCompanionBuilder,
+          (
+            LocalDailyCheckInRow,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalDailyCheckInsTable,
+              LocalDailyCheckInRow
+            >,
+          ),
+          LocalDailyCheckInRow,
+          PrefetchHooks Function()
+        > {
+  $$LocalDailyCheckInsTableTableManager(
+    _$AppDatabase db,
+    $LocalDailyCheckInsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalDailyCheckInsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalDailyCheckInsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalDailyCheckInsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> localDate = const Value.absent(),
+                Value<int> energyLevel = const Value.absent(),
+                Value<int> fatigueLevel = const Value.absent(),
+                Value<int?> sleepQuality = const Value.absent(),
+                Value<int?> painLevel = const Value.absent(),
+                Value<String?> painAreaCode = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int> rowVersion = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalDailyCheckInsCompanion(
+                id: id,
+                localDate: localDate,
+                energyLevel: energyLevel,
+                fatigueLevel: fatigueLevel,
+                sleepQuality: sleepQuality,
+                painLevel: painLevel,
+                painAreaCode: painAreaCode,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String localDate,
+                required int energyLevel,
+                required int fatigueLevel,
+                Value<int?> sleepQuality = const Value.absent(),
+                Value<int?> painLevel = const Value.absent(),
+                Value<String?> painAreaCode = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required int createdAt,
+                required int updatedAt,
+                required int rowVersion,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalDailyCheckInsCompanion.insert(
+                id: id,
+                localDate: localDate,
+                energyLevel: energyLevel,
+                fatigueLevel: fatigueLevel,
+                sleepQuality: sleepQuality,
+                painLevel: painLevel,
+                painAreaCode: painAreaCode,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowVersion: rowVersion,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalDailyCheckInsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalDailyCheckInsTable,
+      LocalDailyCheckInRow,
+      $$LocalDailyCheckInsTableFilterComposer,
+      $$LocalDailyCheckInsTableOrderingComposer,
+      $$LocalDailyCheckInsTableAnnotationComposer,
+      $$LocalDailyCheckInsTableCreateCompanionBuilder,
+      $$LocalDailyCheckInsTableUpdateCompanionBuilder,
+      (
+        LocalDailyCheckInRow,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalDailyCheckInsTable,
+          LocalDailyCheckInRow
+        >,
+      ),
+      LocalDailyCheckInRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -26927,4 +28079,6 @@ class $AppDatabaseManager {
       $$LocalActivitiesTableTableManager(_db, _db.localActivities);
   $$LocalAiProposalsTableTableManager get localAiProposals =>
       $$LocalAiProposalsTableTableManager(_db, _db.localAiProposals);
+  $$LocalDailyCheckInsTableTableManager get localDailyCheckIns =>
+      $$LocalDailyCheckInsTableTableManager(_db, _db.localDailyCheckIns);
 }

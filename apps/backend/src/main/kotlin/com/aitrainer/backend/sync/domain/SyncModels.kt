@@ -29,6 +29,10 @@ enum class SyncEntityType(
     TRAINING_PLAN("synced_training_plan", null, null),
     CALENDAR_CHANGE("synced_calendar_change", null, null),
     MANUAL_ACTIVITY("synced_activity", null, null),
+
+    // R5-01 (C33 §4): denní check-in — bez serverového parenta, payload
+    // bez lokální poznámky (DCI-006).
+    DAILY_CHECK_IN("synced_daily_check_in", null, null),
     ;
 
     /** Parent typ dle R1 hierarchie; enum konstanty se odkazují jménem, aby nevznikla dopředná reference. */
@@ -49,6 +53,7 @@ enum class SyncEntityType(
 
                 USER_SPORT, GOAL, AVAILABILITY_RULE, EQUIPMENT_ITEM,
                 CONSTRAINT_ITEM, TRAINING_PLAN, CALENDAR_CHANGE, MANUAL_ACTIVITY,
+                DAILY_CHECK_IN,
                 -> null
             }
 }

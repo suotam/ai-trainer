@@ -231,7 +231,23 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
       _calendarChangePayload,
     );
     await collect('MANUAL_ACTIVITY', 'local_activities', _activityPayload);
+    await collect(
+      'DAILY_CHECK_IN',
+      'local_daily_check_ins',
+      _dailyCheckInPayload,
+    );
   }
+
+  /// C33 §4: payload bez `note` (DCI-006) a bez owner/sync metadat.
+  Map<String, Object?> _dailyCheckInPayload(Map<String, Object?> row) => {
+    'localDate': row['local_date'],
+    'energyLevel': row['energy_level'],
+    'fatigueLevel': row['fatigue_level'],
+    'sleepQuality': row['sleep_quality'],
+    'painLevel': row['pain_level'],
+    'painAreaCode': row['pain_area_code'],
+    'rowVersion': row['row_version'],
+  };
 
   Map<String, Object?> _userSportPayload(Map<String, Object?> row) => {
     'sportCode': row['sport_code'],

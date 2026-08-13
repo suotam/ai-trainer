@@ -4,6 +4,7 @@ import 'tables/activity_tables.dart';
 import 'tables/ai_tables.dart';
 import 'tables/availability_tables.dart';
 import 'tables/calendar_tables.dart';
+import 'tables/checkin_tables.dart';
 import 'tables/goals_tables.dart';
 import 'tables/plan_tables.dart';
 import 'tables/sports_tables.dart';
@@ -40,12 +41,15 @@ part 'app_database.g.dart';
     LocalCalendarChanges,
     LocalActivities,
     LocalAiProposals,
+    LocalDailyCheckIns,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 11 (R4-03, C29 §2): tabulka AI návrhů
+  /// Schema version 13 (R5-01, C33 §3): tabulka denního check-inu
+  /// `local_daily_check_ins`. Verze 12 (R4-05) přidala provenance plánu,
+  /// verze 11 (R4-03, C29 §2) tabulku AI návrhů
   /// `local_ai_proposals`. Verze 10 (R3-06) přidala ruční aktivity,
   /// verze 9 (R3-05) evidenci kalendářních změn, verze 8 (R3-04) ruční
   /// plán, verze 7 (R3-03) dostupnost/vybavení/omezení, verze 6 (R3-02)
@@ -54,7 +58,7 @@ class AppDatabase extends _$AppDatabase {
   /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
   /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -169,6 +173,11 @@ class AppDatabase extends _$AppDatabase {
       // se sloupec přidává jen tam, kde tabulka existovala dřív.
       if (from >= 8 && from < 12) {
         await m.addColumn(localTrainingPlans, localTrainingPlans.origin);
+      }
+      // Migrace v12 → v13 (R5-01, C33 §3): jen tabulka denního check-inu —
+      // aditivní, prázdná.
+      if (from < 13) {
+        await m.createTable(localDailyCheckIns);
       }
     },
     beforeOpen: (details) async {

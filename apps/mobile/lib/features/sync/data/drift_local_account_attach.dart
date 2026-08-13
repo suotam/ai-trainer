@@ -134,6 +134,17 @@ class DriftLocalAccountAttach implements LocalAccountAttach {
         "WHERE owner_id = '$localAnonymousOwnerId'",
         [accountId],
       );
+      // 11c. Denní check-iny (R5-01, C33 §4, DCI-010): kolize denního
+      // klíče — anonymní den, který už účet má, zůstává anonymní.
+      await _db.customStatement(
+        'UPDATE local_daily_check_ins SET owner_id = ?1 '
+        "WHERE owner_id = '$localAnonymousOwnerId' AND NOT ("
+        '  EXISTS (SELECT 1 FROM local_daily_check_ins a '
+        '    WHERE a.owner_id = ?1 '
+        '    AND a.local_date = local_daily_check_ins.local_date)'
+        ')',
+        [accountId],
+      );
       // 12. Tréninkový plán (R3-04, C20 §7, MPC-010): kolizní anonymní
       // ACTIVE plán (účet už ACTIVE plán má) zůstává anonymní; jeho
       // instance se připojují nezávisle (device-local reference).
