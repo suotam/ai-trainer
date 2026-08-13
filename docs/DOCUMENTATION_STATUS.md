@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.36  
+**Verze:** 2.37  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -165,7 +165,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 **Release 2 je uzavřen** (R2-08 mergnut, R2 Exit Review proveden; jediný otevřený dluh je emulátorová runtime evidence výše).
 
-**Přesný další kanonický krok:** R2 je uzavřen. Další práce začíná **plánováním Release 3** (analogicky R2: release scope → vertical-slice plán → blocking kontrakty), případně doplněním emulátorové runtime evidence, jakmile bude k dispozici Android SDK. Nový release plán vznikne až po samostatném pokynu.
+**R3 – Profile and Manual Planning je naplánované, ale implementace nezačala.** Existuje kanonický R3 vertical-slice plán `docs/13-delivery/r3-vertical-slice-plan.md` (pořadí R3, blocking contract map C16–C24, evidence gates, R3 Exit Review a pravidla `R3P-001` až `R3P-015`). Definovaný R3 backlog: `R3-01` Structured Sports Profile, `R3-02` Goals and Priorities, `R3-03` Availability, Equipment and Basic Constraints, `R3-04` Manual Training Plan and Internal Calendar, `R3-05` Calendar Operations (move/cancel/replace), `R3-06` Manual Activity and Basic Progress Statistics, `R3-07` R3 Sync Extension, `R3-08` R3 Critical E2E Evidence and Exit Review. R3 je celé local-first a bez AI (manual path, `RSR-005`); nové entity se rodí vlastnitelné a synchronizovatelné (R2-01 vzor) a synchronizují se existujícím R2 push mechanismem (aditivní rozšíření registru, C24). **Žádný R3 slice není `READY`** — všechny čekají na blokující kontrakty (C16–C24).
+
+**Přesný další kanonický krok:** vytvořit blokující kontrakty **C16 – R3 mobile schema migration** (`docs/12-data/r3-mobile-schema-migration.md`, Data Architecture) a **C17 – Structured sports profile** (`docs/06-domain/r3-sports-profile-contract.md`, Domain / sports-and-goals-model) → tím se `R3-01` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices. Implementace `R3-01` smí začít až po Ready kontrole a samostatném pokynu.
 
 ---
 
@@ -350,10 +352,12 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Celé R1 (`R1-01` až `R1-08`) je implementované, R1 Exit Review je proveden (viz §3) a Release 1 je uzavřen. Existuje R2 vertical-slice plán. **Kontraktní mapa R2 (C1–C15) je kompletní** (C15 v `docs/12-data/r2-local-to-account-migration-contract.md`, `LAM-001..015`). **`R2-01` až `R2-07` jsou implementovány**; **`R2-08` je `READY` (neimplementováno, poslední R2 slice)**. Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`); **žádný R3 slice není `READY`**. Další kanonický krok:
 
 ```text
-R2-08 – R2 Critical End-to-End Evidence and Exit Review  (implementace)
+C16 – R3 mobile schema migration contract   (docs/12-data/r3-mobile-schema-migration.md)
+C17 – Structured sports profile contract    (docs/06-domain/r3-sports-profile-contract.md)
+→ poté je R3-01 – Structured Sports Profile READY (implementace po samostatném pokynu)
 ```
 
-Implementace `R2-08` smí začít až po samostatném pokynu; před ní je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r2-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`. Součástí R2-08 je R2 Exit Review a poctivé vypořádání dlužné emulátorové runtime evidence (na tomto stroji chybí Android SDK — řízená výjimka evidovaná od R2-03).
+Před tvorbou kontraktů i implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
