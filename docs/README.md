@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.47  
+**Verze:** 2.48  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -157,6 +157,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 
 - `r4-proposal-lifecycle-contract.md` (**C29**, vlastník Domain / ai-and-change-model + Mobile) vlastní lokální persistence `AIProposal` (kanonický payload + povinná trojice verzí), P0 stavy `PROPOSED→CONFIRMED/REJECTED→EXECUTED/EXECUTION_FAILED` + `EXPIRED` (7 dní při rozhodnutí), žádné mazání, rozhodnutí výhradně uživatelem a invarianty `APL-001` až `APL-015`. Contract-only. Blokuje `R4-03`/`R4-04`.
 
+- `r4-changeset-execution-contract.md` (**C30**, vlastník Domain / ai-and-change-model + Mobile) vlastní provedení potvrzeného návrhu: **jediná cesta změny = C20 operace** (doménová pravidla vč. MPC-002 platí beze změny), mapování `dayOffset` → lokální datum provedení, atomicitu s rollbackem (žádný částečný stav), provenance `origin = AI_PROPOSAL` + `executedPlanId` referenci, typovaná selhání s explicitním retry a invarianty `CSE-001` až `CSE-015`. Contract-only. Blokuje `R4-05`.
+
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
 - `r2-idempotency-contract.md` (**C11**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2 replay protokol: IdempotencyRecord (klíč+účet, requestHash bez secrets, výsledková reference, expirace), `ALREADY_APPLIED` bez vedlejších efektů, „stejný klíč, jiný payload = chyba", atomicitu záznamu s efektem, souběh a invarianty `IDC-001` až `IDC-015`. Jednotný protokol pro registraci účtu (R2-02) i sync (R2-05). Contract-only. Blokuje `R2-05`.
@@ -199,7 +201,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
-- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **`R4-01` až `R4-04` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C30–C32).
+- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **`R4-01` až `R4-05` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C31–C32).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -414,13 +416,14 @@ R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
 R3 Exit Review proveden a Release 3 uzavřen** (otevřené řízené výjimky:
 emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0).
 Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`,
-backlog `R4-01` až `R4-08`, contract map C25–C32). **`R4-01` až `R4-04` jsou
+backlog `R4-01` až `R4-08`, contract map C25–C32). **`R4-01` až `R4-05` jsou
 implementovány** (AI gateway, AIContext builder, strukturovaný návrh s dvojí
-validací, lokální AIProposal — mobilní schema v11, review s explicitním
-potvrzením/odmítnutím a expirací dle C29). Další kanonický krok:
+validací, lokální AIProposal, review s explicitním rozhodnutím a atomické
+provedení výhradně C20 cestami s provenance — mobilní schema v12). Další
+kanonický krok:
 
 ```text
-C30 – ChangeSet execution kontrakt → R4-05 – ChangeSet Execution Boundary
+C31 – AI safety & abuse kontrakt → R4-06 – AI Safety, Fallback and Abuse Protection
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
