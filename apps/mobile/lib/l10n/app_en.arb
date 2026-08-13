@@ -666,6 +666,15 @@
   "@aiErrorExecutionFailed": {"description": "CSE-003/005 - rollback, no partial state, explicit retry."},
   "aiRetry": "Apply again",
   "@aiRetry": {"description": "Explicit retry after EXECUTION_FAILED (CSE-007)."},
+  "aiRequestAdjustment": "Adjust this week",
+  "@aiRequestAdjustment": {"description": "R5-05 adjustment proposal request (C37)."},
+  "aiOperationsHeader": "Proposed changes",
+  "@aiOperationsHeader": {"description": "Adjustment review section header (ASJ-014)."},
+  "aiOperationLabel": "{code, select, MOVE{Move} CANCEL{Cancel} REPLACE{Replace} ADD{Add} other{{code}}}",
+  "@aiOperationLabel": {
+    "description": "Adjustment operation kinds (C37 par. 3).",
+    "placeholders": {"code": {"type": "String"}}
+  },
   "checkinTitle": "Daily check-in",
   "@checkinTitle": {"description": "R5-01 daily check-in screen title (C33)."},
   "checkinOpenTooltip": "Daily check-in",

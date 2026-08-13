@@ -1,0 +1,8 @@
+{
+  "name": "invalid-missing-reason",
+  "description": "Operace bez vysvětlení je nevalidní (ASJ-002).",
+  "modelOutput": "{\"summary\":\"Silent change.\",\"operations\":[{\"operation\":\"CANCEL\",\"target\":{\"dayOffset\":0,\"title\":\"Full Body A\"}}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

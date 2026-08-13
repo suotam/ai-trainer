@@ -1,0 +1,8 @@
+{
+  "name": "invalid-unknown-operation",
+  "description": "Neznámá operace mimo MOVE/CANCEL/REPLACE/ADD je nevalidní — žádná oprava.",
+  "modelOutput": "{\"summary\":\"Delete everything.\",\"operations\":[{\"operation\":\"DELETE_ALL\",\"reason\":\"Cleanup.\",\"target\":{\"dayOffset\":0,\"title\":\"Full Body A\"}}]}",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

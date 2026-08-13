@@ -35,6 +35,9 @@ class AiProposal {
 
   bool get isPending => status == 'PROPOSED';
 
+  /// Adjustment návrh (C37) — payload nese operace místo plánu.
+  bool get isAdjustment => requestType == 'ADJUSTMENT_PROPOSAL';
+
   /// Po EXECUTION_FAILED je dovolen explicitní nový pokus (CSE-007).
   bool get canRetryExecution => status == 'EXECUTION_FAILED';
 }

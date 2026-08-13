@@ -1,0 +1,10 @@
+{
+  "name": "valid-add",
+  "description": "ADD s dayOffset; neznámá pole se kanonizací zahazují.",
+  "modelOutput": "{\"summary\":\"Add light recovery.\",\"confidence\":0.9,\"operations\":[{\"operation\":\"ADD\",\"reason\":\"Active recovery between sessions.\",\"priorityHint\":\"high\",\"workout\":{\"title\":\"Easy Mobility\",\"workoutType\":\"MOBILITY\",\"dayOffset\":4,\"plannedDurationMinutes\":25,\"intensityZone\":2}}]}",
+  "expected": {
+    "verdict": "VALID",
+    "operationCount": 1,
+    "mustNotContain": ["confidence", "priorityHint", "intensityZone"]
+  }
+}

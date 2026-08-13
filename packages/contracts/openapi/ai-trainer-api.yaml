@@ -1086,9 +1086,14 @@ components:
         context:
           type: object
           description: >
-            Minimalizovaný autorizovaný AIContext (C27) stavěný klientem
-            z lokálních R3 dat — by-value bez identifikátorů a poznámek;
+            Minimalizovaný autorizovaný AIContext (C27/C36) stavěný klientem
+            z lokálních dat — by-value bez identifikátorů a poznámek;
             server ho nečte, jen zprostředkuje modelu (AGW-014).
+        requestType:
+          type: string
+          enum: [PLAN_PROPOSAL, ADJUSTMENT_PROPOSAL]
+          default: PLAN_PROPOSAL
+          description: Typ AI požadavku (C37 §2) — jediný endpoint, typ v requestu.
     PlanProposalResponse:
       type: object
       required: [proposal, promptVersion, schemaVersion, modelId]

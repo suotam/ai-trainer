@@ -1,0 +1,8 @@
+{
+  "name": "invalid-free-text",
+  "description": "Adversariální: próza místo JSON — nikdy se neprovede (SOV-005).",
+  "modelOutput": "I suggest you move Monday's workout to Wednesday and skip the intervals. Rest well!",
+  "expected": {
+    "verdict": "INVALID"
+  }
+}

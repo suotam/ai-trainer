@@ -1,0 +1,9 @@
+{
+  "name": "valid-move-cancel",
+  "description": "Typická úprava: přesun a zrušení s důvody.",
+  "modelOutput": "{\"summary\":\"Lighter start of the week due to fatigue.\",\"operations\":[{\"operation\":\"MOVE\",\"reason\":\"Give one more recovery day.\",\"target\":{\"dayOffset\":0,\"title\":\"Full Body A\"},\"toDayOffset\":2},{\"operation\":\"CANCEL\",\"reason\":\"High fatigue reported today.\",\"target\":{\"dayOffset\":1,\"title\":\"Intervals\"}}]}",
+  "expected": {
+    "verdict": "VALID",
+    "operationCount": 2
+  }
+}

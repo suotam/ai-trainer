@@ -1,0 +1,9 @@
+{
+  "name": "valid-replace",
+  "description": "REPLACE: náhradní workout bez dayOffset — den dědí z targetu.",
+  "modelOutput": "{\"summary\":\"Gentler alternative for the sore shoulder.\",\"operations\":[{\"operation\":\"REPLACE\",\"reason\":\"Avoid overhead pressing with reported shoulder pain.\",\"target\":{\"dayOffset\":3,\"title\":\"Heavy Press\"},\"workout\":{\"title\":\"Lower Body Focus\",\"workoutType\":\"STRENGTH\",\"plannedDurationMinutes\":45,\"exercises\":[{\"title\":\"Squat\",\"sets\":3,\"repetitions\":8,\"weightKg\":60}]}}]}",
+  "expected": {
+    "verdict": "VALID",
+    "operationCount": 1
+  }
+}

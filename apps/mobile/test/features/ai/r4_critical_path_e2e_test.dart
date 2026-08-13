@@ -49,6 +49,7 @@ class _ScriptedAiApi implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async {
     calls++;
     return const PlanProposalResponse(
@@ -86,6 +87,7 @@ class _InvalidOutputAiApi implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async => const PlanProposalResponse(
     // Chybí reason — klientská re-validace to musí odmítnout (SOV-003).
     proposal: {
@@ -108,6 +110,7 @@ class _UnavailableAiApi implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async {
     calls++;
     throw const AiApiFailure(AiApiFailureKind.unavailable);

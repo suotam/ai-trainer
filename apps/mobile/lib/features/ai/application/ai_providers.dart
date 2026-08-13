@@ -126,6 +126,17 @@ class AiScreenController extends Notifier<AiScreenState> {
     };
   });
 
+  /// Žádost o úpravu týdne (R5-05, C37) — týž pipeline, jiný typ.
+  Future<void> requestAdjustment() => _run(() async {
+    final result = await ref.read(requestPlanProposalProvider)(
+      type: AiRequestType.adjustmentProposal,
+    );
+    return switch (result) {
+      ProposalCreated() => const AiDone(),
+      _ => AiRequestFailure(result),
+    };
+  });
+
   Future<void> decide(String proposalId, ProposalDecision decision) =>
       _run(() async {
         final result = await ref
@@ -133,14 +144,25 @@ class AiScreenController extends Notifier<AiScreenState> {
             .decide(proposalId, decision, now: ref.read(clockProvider)());
         return switch (result) {
           // Potvrzení = souhlas s provedením (C30 §2): execution následuje
-          // v témže uživatelském kroku.
+          // v témže uživatelském kroku. Potvrzený adjustment zůstává
+          // CONFIRMED do C38 (ASJ-009) — nikdy tichá změna.
           DecisionSaved(:final newStatus)
               when newStatus == proposalStatusConfirmed =>
-            await _executeNow(proposalId),
+            await _afterConfirmed(proposalId),
           DecisionSaved() => const AiDone(),
           _ => AiDecisionFailure(result),
         };
       });
+
+  Future<AiScreenState> _afterConfirmed(String proposalId) async {
+    final proposal = await ref
+        .read(aiProposalRepositoryProvider)
+        .proposalById(proposalId);
+    if (proposal != null && proposal.isAdjustment) {
+      return const AiDone();
+    }
+    return _executeNow(proposalId);
+  }
 
   /// Explicitní opakování po EXECUTION_FAILED (CSE-007).
   Future<void> executeProposal(String proposalId) =>

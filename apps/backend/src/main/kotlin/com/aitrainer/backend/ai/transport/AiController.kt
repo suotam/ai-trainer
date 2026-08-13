@@ -2,6 +2,7 @@ package com.aitrainer.backend.ai.transport
 
 import com.aitrainer.backend.ai.application.ProposePlan
 import com.aitrainer.backend.ai.application.ProposePlanResult
+import com.aitrainer.backend.ai.domain.AiRequestType
 import com.aitrainer.backend.auth.transport.AuthRateLimiter
 import com.aitrainer.backend.auth.transport.PrincipalResolver
 import com.aitrainer.backend.infrastructure.http.ApiException
@@ -21,6 +22,8 @@ import java.time.Duration
 
 data class PlanProposalRequestDto(
     val context: Map<String, Any?>? = null,
+    // C37 §2: jediný endpoint, typ v requestu; default plan proposal.
+    val requestType: String? = null,
 )
 
 data class PlanProposalResponseDto(
@@ -70,11 +73,18 @@ class AiController(
             aiRateWindow.toMillis(),
         )
         val context = request.context ?: throw invalidRequest()
+        // Neznámý typ = typované odmítnutí (C37 ASJ-006).
+        val type =
+            when (request.requestType) {
+                null, AiRequestType.PLAN_PROPOSAL.name -> AiRequestType.PLAN_PROPOSAL
+                AiRequestType.ADJUSTMENT_PROPOSAL.name -> AiRequestType.ADJUSTMENT_PROPOSAL
+                else -> throw invalidRequest()
+            }
         val contextJson = mapper.writeValueAsString(context)
         if (contextJson.length > MAX_CONTEXT_CHARS) {
             throw invalidRequest()
         }
-        return when (val result = proposePlan.propose(principal.accountId, contextJson)) {
+        return when (val result = proposePlan.propose(principal.accountId, contextJson, type)) {
             is ProposePlanResult.Proposed -> {
                 ResponseEntity
                     .ok()
