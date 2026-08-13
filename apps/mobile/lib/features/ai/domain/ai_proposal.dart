@@ -61,3 +61,30 @@ final class ProposalUnavailable extends RequestProposalResult {
 final class ProposalInvalidOutput extends RequestProposalResult {
   const ProposalInvalidOutput();
 }
+
+/// Rozhodnutí uživatele nad návrhem (C29 §3, APL-005).
+enum ProposalDecision { confirm, reject }
+
+/// Typovaný výsledek rozhodnutí (APL-004) — nikdy raw výjimka.
+sealed class DecideProposalResult {
+  const DecideProposalResult();
+}
+
+final class DecisionSaved extends DecideProposalResult {
+  const DecisionSaved(this.newStatus);
+  final String newStatus;
+}
+
+/// Potvrzení návrhu staršího 7 dní → EXPIRED (APL-007).
+final class DecisionExpired extends DecideProposalResult {
+  const DecisionExpired();
+}
+
+final class DecisionNotFound extends DecideProposalResult {
+  const DecisionNotFound();
+}
+
+/// Návrh není v rozhodnutelném stavu PROPOSED (APL-004/009).
+final class DecisionInvalidState extends DecideProposalResult {
+  const DecisionInvalidState();
+}

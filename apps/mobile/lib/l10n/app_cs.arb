@@ -264,5 +264,19 @@
   "activityNoSport": "Bez sportu",
   "activityFieldNote": "Poznámka",
   "activitySave": "Uložit",
-  "activityErrorValidation": "Zkontroluj zadané údaje a zkus to znovu."
+  "activityErrorValidation": "Zkontroluj zadané údaje a zkus to znovu.",
+  "aiTitle": "AI návrh plánu",
+  "aiOpenTooltip": "Otevřít AI návrh plánu",
+  "aiRequest": "Požádat o návrh plánu",
+  "aiEmpty": "Zatím žádné návrhy. Požádej AI o návrh tréninkového plánu podle svého profilu.",
+  "aiErrorSignIn": "Pro AI návrhy se přihlas k účtu.",
+  "aiErrorUnavailable": "AI služba je teď nedostupná. Aplikace funguje plně i bez ní.",
+  "aiErrorInvalidOutput": "AI vrátila nevalidní návrh. Nic se neuložilo — zkus to znovu, nebo plánuj ručně.",
+  "aiErrorExpired": "Tento návrh vypršel. Požádej o nový.",
+  "aiErrorDecision": "O tomto návrhu už nelze rozhodnout.",
+  "aiConfirm": "Přijmout návrh",
+  "aiReject": "Odmítnout",
+  "aiWorkoutsHeader": "Navržené workouty",
+  "aiDayLabel": "Den {offset}",
+  "aiProposalStatusLabel": "{status, select, PROPOSED{Čeká na rozhodnutí} CONFIRMED{Přijato} REJECTED{Odmítnuto} EXECUTED{Provedeno} EXECUTION_FAILED{Provedení selhalo} EXPIRED{Vypršelo} other{{status}}}"
 }

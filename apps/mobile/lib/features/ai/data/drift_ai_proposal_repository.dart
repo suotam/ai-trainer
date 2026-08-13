@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/ai_tables.dart';
 import '../../../core/database/tables/workout_tables.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
@@ -71,6 +72,53 @@ class DriftAiProposalRepository implements AiProposalRepository {
       _db.localAiProposals,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
     return row == null ? null : _toDomain(row);
+  }
+
+  static const _expiry = Duration(days: 7);
+
+  @override
+  Future<DecideProposalResult> decide(
+    String id,
+    ProposalDecision decision, {
+    required DateTime now,
+  }) {
+    return _db.transaction(() async {
+      final owner = await _currentOwnerId();
+      final row = await (_db.select(
+        _db.localAiProposals,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (row == null || row.ownerId != owner) {
+        return const DecisionNotFound();
+      }
+      if (row.status != proposalStatusProposed) {
+        return const DecisionInvalidState();
+      }
+      final nowMillis = now.toUtc().millisecondsSinceEpoch;
+      Future<void> setStatus(String status) =>
+          (_db.update(
+            _db.localAiProposals,
+          )..where((t) => t.id.equals(id))).write(
+            LocalAiProposalsCompanion(
+              status: Value(status),
+              decidedAt: Value(nowMillis),
+              rowVersion: Value(row.rowVersion + 1),
+            ),
+          );
+
+      // Expirace se vyhodnocuje při rozhodování (APL-007) — jen pro
+      // potvrzení; odmítnout lze i starý návrh (zachovaný stav).
+      if (decision == ProposalDecision.confirm &&
+          nowMillis - row.createdAt > _expiry.inMilliseconds) {
+        await setStatus(proposalStatusExpired);
+        return const DecisionExpired();
+      }
+      final newStatus = switch (decision) {
+        ProposalDecision.confirm => proposalStatusConfirmed,
+        ProposalDecision.reject => proposalStatusRejected,
+      };
+      await setStatus(newStatus);
+      return DecisionSaved(newStatus);
+    });
   }
 
   AiProposal _toDomain(LocalAiProposalRow row) => AiProposal(

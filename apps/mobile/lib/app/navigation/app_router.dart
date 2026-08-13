@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/activity/presentation/activity_screen.dart';
+import '../../features/ai/presentation/ai_proposals_screen.dart';
 import '../../features/auth/presentation/account_screen.dart';
 import '../../features/availability/presentation/availability_screen.dart';
 import '../../features/goals/presentation/goals_screen.dart';
@@ -91,6 +92,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.activityName,
         path: AppRoutes.activityPath,
         builder: (context, state) => const ActivityScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.aiProposalsName,
+        path: AppRoutes.aiProposalsPath,
+        builder: (context, state) => const AiProposalsScreen(),
       ),
       GoRoute(
         name: AppRoutes.startupName,
