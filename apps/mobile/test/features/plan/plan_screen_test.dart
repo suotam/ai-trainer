@@ -68,6 +68,42 @@ void main() {
     expect(find.text('Silový A'), findsOneWidget);
   });
 
+  testWidgets('zrušení workoutu z menu: stav Cancelled viditelný v plánu '
+      '(CAL-004/008)', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final database = createTestDatabase();
+    addTearDown(database.close);
+    await tester.pumpWidget(app(database));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(PlanScreen.createFieldKey), 'Plán');
+    await tester.tap(find.byKey(PlanScreen.createButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(PlanScreen.addWorkoutKey));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('workout_form_title')),
+      'Ke zrušení',
+    );
+    await tester.tap(find.byKey(const Key('workout_form_save')));
+    await tester.pumpAndSettle();
+
+    final menu = find.byWidgetPredicate(
+      (w) => w.key != null && w.key.toString().contains('plan_workout_menu'),
+    );
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel workout'));
+    await tester.pumpAndSettle();
+
+    // Zrušený zůstává v editoru plánu se stavem; menu už nenabízí operace.
+    expect(find.text('Ke zrušení'), findsOneWidget);
+    expect(find.textContaining('Cancelled'), findsOneWidget);
+    expect(menu, findsNothing);
+  });
+
   testWidgets('archivace plánu je stav: obrazovka nabídne vytvoření nového '
       'a archivovaný zůstává viditelný', (tester) async {
     final database = createTestDatabase();

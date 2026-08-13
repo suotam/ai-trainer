@@ -13470,6 +13470,608 @@ class LocalTrainingPlansCompanion
   }
 }
 
+class $LocalCalendarChangesTable extends LocalCalendarChanges
+    with TableInfo<$LocalCalendarChangesTable, LocalCalendarChangeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalCalendarChangesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workoutInstanceIdMeta = const VerificationMeta(
+    'workoutInstanceId',
+  );
+  @override
+  late final GeneratedColumn<String> workoutInstanceId =
+      GeneratedColumn<String>(
+        'workout_instance_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_workout_instances (id)',
+        ),
+      );
+  static const VerificationMeta _changeTypeMeta = const VerificationMeta(
+    'changeType',
+  );
+  @override
+  late final GeneratedColumn<String> changeType = GeneratedColumn<String>(
+    'change_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fromLocalDateMeta = const VerificationMeta(
+    'fromLocalDate',
+  );
+  @override
+  late final GeneratedColumn<String> fromLocalDate = GeneratedColumn<String>(
+    'from_local_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toLocalDateMeta = const VerificationMeta(
+    'toLocalDate',
+  );
+  @override
+  late final GeneratedColumn<String> toLocalDate = GeneratedColumn<String>(
+    'to_local_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _replacementInstanceIdMeta =
+      const VerificationMeta('replacementInstanceId');
+  @override
+  late final GeneratedColumn<String> replacementInstanceId =
+      GeneratedColumn<String>(
+        'replacement_instance_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_workout_instances (id)',
+        ),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(localAnonymousOwnerId),
+  );
+  static const VerificationMeta _syncStateMeta = const VerificationMeta(
+    'syncState',
+  );
+  @override
+  late final GeneratedColumn<String> syncState = GeneratedColumn<String>(
+    'sync_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(syncStateLocalOnly),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    workoutInstanceId,
+    changeType,
+    fromLocalDate,
+    toLocalDate,
+    replacementInstanceId,
+    createdAt,
+    ownerId,
+    syncState,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_calendar_changes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalCalendarChangeRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('workout_instance_id')) {
+      context.handle(
+        _workoutInstanceIdMeta,
+        workoutInstanceId.isAcceptableOrUnknown(
+          data['workout_instance_id']!,
+          _workoutInstanceIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_workoutInstanceIdMeta);
+    }
+    if (data.containsKey('change_type')) {
+      context.handle(
+        _changeTypeMeta,
+        changeType.isAcceptableOrUnknown(data['change_type']!, _changeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_changeTypeMeta);
+    }
+    if (data.containsKey('from_local_date')) {
+      context.handle(
+        _fromLocalDateMeta,
+        fromLocalDate.isAcceptableOrUnknown(
+          data['from_local_date']!,
+          _fromLocalDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('to_local_date')) {
+      context.handle(
+        _toLocalDateMeta,
+        toLocalDate.isAcceptableOrUnknown(
+          data['to_local_date']!,
+          _toLocalDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('replacement_instance_id')) {
+      context.handle(
+        _replacementInstanceIdMeta,
+        replacementInstanceId.isAcceptableOrUnknown(
+          data['replacement_instance_id']!,
+          _replacementInstanceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    }
+    if (data.containsKey('sync_state')) {
+      context.handle(
+        _syncStateMeta,
+        syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalCalendarChangeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalCalendarChangeRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      workoutInstanceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}workout_instance_id'],
+      )!,
+      changeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}change_type'],
+      )!,
+      fromLocalDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}from_local_date'],
+      ),
+      toLocalDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}to_local_date'],
+      ),
+      replacementInstanceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}replacement_instance_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      syncState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_state'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalCalendarChangesTable createAlias(String alias) {
+    return $LocalCalendarChangesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalCalendarChangeRow extends DataClass
+    implements Insertable<LocalCalendarChangeRow> {
+  final String id;
+  final String workoutInstanceId;
+  final String changeType;
+  final String? fromLocalDate;
+  final String? toLocalDate;
+  final String? replacementInstanceId;
+  final int createdAt;
+  final String ownerId;
+  final String syncState;
+  const LocalCalendarChangeRow({
+    required this.id,
+    required this.workoutInstanceId,
+    required this.changeType,
+    this.fromLocalDate,
+    this.toLocalDate,
+    this.replacementInstanceId,
+    required this.createdAt,
+    required this.ownerId,
+    required this.syncState,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['workout_instance_id'] = Variable<String>(workoutInstanceId);
+    map['change_type'] = Variable<String>(changeType);
+    if (!nullToAbsent || fromLocalDate != null) {
+      map['from_local_date'] = Variable<String>(fromLocalDate);
+    }
+    if (!nullToAbsent || toLocalDate != null) {
+      map['to_local_date'] = Variable<String>(toLocalDate);
+    }
+    if (!nullToAbsent || replacementInstanceId != null) {
+      map['replacement_instance_id'] = Variable<String>(replacementInstanceId);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['sync_state'] = Variable<String>(syncState);
+    return map;
+  }
+
+  LocalCalendarChangesCompanion toCompanion(bool nullToAbsent) {
+    return LocalCalendarChangesCompanion(
+      id: Value(id),
+      workoutInstanceId: Value(workoutInstanceId),
+      changeType: Value(changeType),
+      fromLocalDate: fromLocalDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fromLocalDate),
+      toLocalDate: toLocalDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toLocalDate),
+      replacementInstanceId: replacementInstanceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(replacementInstanceId),
+      createdAt: Value(createdAt),
+      ownerId: Value(ownerId),
+      syncState: Value(syncState),
+    );
+  }
+
+  factory LocalCalendarChangeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalCalendarChangeRow(
+      id: serializer.fromJson<String>(json['id']),
+      workoutInstanceId: serializer.fromJson<String>(json['workoutInstanceId']),
+      changeType: serializer.fromJson<String>(json['changeType']),
+      fromLocalDate: serializer.fromJson<String?>(json['fromLocalDate']),
+      toLocalDate: serializer.fromJson<String?>(json['toLocalDate']),
+      replacementInstanceId: serializer.fromJson<String?>(
+        json['replacementInstanceId'],
+      ),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      syncState: serializer.fromJson<String>(json['syncState']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'workoutInstanceId': serializer.toJson<String>(workoutInstanceId),
+      'changeType': serializer.toJson<String>(changeType),
+      'fromLocalDate': serializer.toJson<String?>(fromLocalDate),
+      'toLocalDate': serializer.toJson<String?>(toLocalDate),
+      'replacementInstanceId': serializer.toJson<String?>(
+        replacementInstanceId,
+      ),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'syncState': serializer.toJson<String>(syncState),
+    };
+  }
+
+  LocalCalendarChangeRow copyWith({
+    String? id,
+    String? workoutInstanceId,
+    String? changeType,
+    Value<String?> fromLocalDate = const Value.absent(),
+    Value<String?> toLocalDate = const Value.absent(),
+    Value<String?> replacementInstanceId = const Value.absent(),
+    int? createdAt,
+    String? ownerId,
+    String? syncState,
+  }) => LocalCalendarChangeRow(
+    id: id ?? this.id,
+    workoutInstanceId: workoutInstanceId ?? this.workoutInstanceId,
+    changeType: changeType ?? this.changeType,
+    fromLocalDate: fromLocalDate.present
+        ? fromLocalDate.value
+        : this.fromLocalDate,
+    toLocalDate: toLocalDate.present ? toLocalDate.value : this.toLocalDate,
+    replacementInstanceId: replacementInstanceId.present
+        ? replacementInstanceId.value
+        : this.replacementInstanceId,
+    createdAt: createdAt ?? this.createdAt,
+    ownerId: ownerId ?? this.ownerId,
+    syncState: syncState ?? this.syncState,
+  );
+  LocalCalendarChangeRow copyWithCompanion(LocalCalendarChangesCompanion data) {
+    return LocalCalendarChangeRow(
+      id: data.id.present ? data.id.value : this.id,
+      workoutInstanceId: data.workoutInstanceId.present
+          ? data.workoutInstanceId.value
+          : this.workoutInstanceId,
+      changeType: data.changeType.present
+          ? data.changeType.value
+          : this.changeType,
+      fromLocalDate: data.fromLocalDate.present
+          ? data.fromLocalDate.value
+          : this.fromLocalDate,
+      toLocalDate: data.toLocalDate.present
+          ? data.toLocalDate.value
+          : this.toLocalDate,
+      replacementInstanceId: data.replacementInstanceId.present
+          ? data.replacementInstanceId.value
+          : this.replacementInstanceId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      syncState: data.syncState.present ? data.syncState.value : this.syncState,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCalendarChangeRow(')
+          ..write('id: $id, ')
+          ..write('workoutInstanceId: $workoutInstanceId, ')
+          ..write('changeType: $changeType, ')
+          ..write('fromLocalDate: $fromLocalDate, ')
+          ..write('toLocalDate: $toLocalDate, ')
+          ..write('replacementInstanceId: $replacementInstanceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    workoutInstanceId,
+    changeType,
+    fromLocalDate,
+    toLocalDate,
+    replacementInstanceId,
+    createdAt,
+    ownerId,
+    syncState,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalCalendarChangeRow &&
+          other.id == this.id &&
+          other.workoutInstanceId == this.workoutInstanceId &&
+          other.changeType == this.changeType &&
+          other.fromLocalDate == this.fromLocalDate &&
+          other.toLocalDate == this.toLocalDate &&
+          other.replacementInstanceId == this.replacementInstanceId &&
+          other.createdAt == this.createdAt &&
+          other.ownerId == this.ownerId &&
+          other.syncState == this.syncState);
+}
+
+class LocalCalendarChangesCompanion
+    extends UpdateCompanion<LocalCalendarChangeRow> {
+  final Value<String> id;
+  final Value<String> workoutInstanceId;
+  final Value<String> changeType;
+  final Value<String?> fromLocalDate;
+  final Value<String?> toLocalDate;
+  final Value<String?> replacementInstanceId;
+  final Value<int> createdAt;
+  final Value<String> ownerId;
+  final Value<String> syncState;
+  final Value<int> rowid;
+  const LocalCalendarChangesCompanion({
+    this.id = const Value.absent(),
+    this.workoutInstanceId = const Value.absent(),
+    this.changeType = const Value.absent(),
+    this.fromLocalDate = const Value.absent(),
+    this.toLocalDate = const Value.absent(),
+    this.replacementInstanceId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalCalendarChangesCompanion.insert({
+    required String id,
+    required String workoutInstanceId,
+    required String changeType,
+    this.fromLocalDate = const Value.absent(),
+    this.toLocalDate = const Value.absent(),
+    this.replacementInstanceId = const Value.absent(),
+    required int createdAt,
+    this.ownerId = const Value.absent(),
+    this.syncState = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       workoutInstanceId = Value(workoutInstanceId),
+       changeType = Value(changeType),
+       createdAt = Value(createdAt);
+  static Insertable<LocalCalendarChangeRow> custom({
+    Expression<String>? id,
+    Expression<String>? workoutInstanceId,
+    Expression<String>? changeType,
+    Expression<String>? fromLocalDate,
+    Expression<String>? toLocalDate,
+    Expression<String>? replacementInstanceId,
+    Expression<int>? createdAt,
+    Expression<String>? ownerId,
+    Expression<String>? syncState,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (workoutInstanceId != null) 'workout_instance_id': workoutInstanceId,
+      if (changeType != null) 'change_type': changeType,
+      if (fromLocalDate != null) 'from_local_date': fromLocalDate,
+      if (toLocalDate != null) 'to_local_date': toLocalDate,
+      if (replacementInstanceId != null)
+        'replacement_instance_id': replacementInstanceId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (syncState != null) 'sync_state': syncState,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalCalendarChangesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? workoutInstanceId,
+    Value<String>? changeType,
+    Value<String?>? fromLocalDate,
+    Value<String?>? toLocalDate,
+    Value<String?>? replacementInstanceId,
+    Value<int>? createdAt,
+    Value<String>? ownerId,
+    Value<String>? syncState,
+    Value<int>? rowid,
+  }) {
+    return LocalCalendarChangesCompanion(
+      id: id ?? this.id,
+      workoutInstanceId: workoutInstanceId ?? this.workoutInstanceId,
+      changeType: changeType ?? this.changeType,
+      fromLocalDate: fromLocalDate ?? this.fromLocalDate,
+      toLocalDate: toLocalDate ?? this.toLocalDate,
+      replacementInstanceId:
+          replacementInstanceId ?? this.replacementInstanceId,
+      createdAt: createdAt ?? this.createdAt,
+      ownerId: ownerId ?? this.ownerId,
+      syncState: syncState ?? this.syncState,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (workoutInstanceId.present) {
+      map['workout_instance_id'] = Variable<String>(workoutInstanceId.value);
+    }
+    if (changeType.present) {
+      map['change_type'] = Variable<String>(changeType.value);
+    }
+    if (fromLocalDate.present) {
+      map['from_local_date'] = Variable<String>(fromLocalDate.value);
+    }
+    if (toLocalDate.present) {
+      map['to_local_date'] = Variable<String>(toLocalDate.value);
+    }
+    if (replacementInstanceId.present) {
+      map['replacement_instance_id'] = Variable<String>(
+        replacementInstanceId.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (syncState.present) {
+      map['sync_state'] = Variable<String>(syncState.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCalendarChangesCompanion(')
+          ..write('id: $id, ')
+          ..write('workoutInstanceId: $workoutInstanceId, ')
+          ..write('changeType: $changeType, ')
+          ..write('fromLocalDate: $fromLocalDate, ')
+          ..write('toLocalDate: $toLocalDate, ')
+          ..write('replacementInstanceId: $replacementInstanceId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('syncState: $syncState, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -13509,6 +14111,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $LocalTrainingPlansTable localTrainingPlans =
       $LocalTrainingPlansTable(this);
+  late final $LocalCalendarChangesTable localCalendarChanges =
+      $LocalCalendarChangesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13533,6 +14137,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localEquipmentItems,
     localConstraints,
     localTrainingPlans,
+    localCalendarChanges,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -22905,6 +23510,533 @@ typedef $$LocalTrainingPlansTableProcessedTableManager =
       LocalTrainingPlanRow,
       PrefetchHooks Function()
     >;
+typedef $$LocalCalendarChangesTableCreateCompanionBuilder =
+    LocalCalendarChangesCompanion Function({
+      required String id,
+      required String workoutInstanceId,
+      required String changeType,
+      Value<String?> fromLocalDate,
+      Value<String?> toLocalDate,
+      Value<String?> replacementInstanceId,
+      required int createdAt,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+typedef $$LocalCalendarChangesTableUpdateCompanionBuilder =
+    LocalCalendarChangesCompanion Function({
+      Value<String> id,
+      Value<String> workoutInstanceId,
+      Value<String> changeType,
+      Value<String?> fromLocalDate,
+      Value<String?> toLocalDate,
+      Value<String?> replacementInstanceId,
+      Value<int> createdAt,
+      Value<String> ownerId,
+      Value<String> syncState,
+      Value<int> rowid,
+    });
+
+final class $$LocalCalendarChangesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalCalendarChangesTable,
+          LocalCalendarChangeRow
+        > {
+  $$LocalCalendarChangesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LocalWorkoutInstancesTable _workoutInstanceIdTable(
+    _$AppDatabase db,
+  ) => db.localWorkoutInstances.createAlias(
+    'local_calendar_changes__workout_instance_id__local_workout_instances__id',
+  );
+
+  $$LocalWorkoutInstancesTableProcessedTableManager get workoutInstanceId {
+    final $_column = $_itemColumn<String>('workout_instance_id')!;
+
+    final manager = $$LocalWorkoutInstancesTableTableManager(
+      $_db,
+      $_db.localWorkoutInstances,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_workoutInstanceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $LocalWorkoutInstancesTable _replacementInstanceIdTable(
+    _$AppDatabase db,
+  ) => db.localWorkoutInstances.createAlias(
+    'local_calendar_changes__replacement_instance_id__local_workout_instances__id',
+  );
+
+  $$LocalWorkoutInstancesTableProcessedTableManager? get replacementInstanceId {
+    final $_column = $_itemColumn<String>('replacement_instance_id');
+    if ($_column == null) return null;
+    final manager = $$LocalWorkoutInstancesTableTableManager(
+      $_db,
+      $_db.localWorkoutInstances,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _replacementInstanceIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalCalendarChangesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalCalendarChangesTable> {
+  $$LocalCalendarChangesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get changeType => $composableBuilder(
+    column: $table.changeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fromLocalDate => $composableBuilder(
+    column: $table.fromLocalDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toLocalDate => $composableBuilder(
+    column: $table.toLocalDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LocalWorkoutInstancesTableFilterComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableFilterComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableFilterComposer get replacementInstanceId {
+    final $$LocalWorkoutInstancesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.replacementInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableFilterComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalCalendarChangesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalCalendarChangesTable> {
+  $$LocalCalendarChangesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get changeType => $composableBuilder(
+    column: $table.changeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fromLocalDate => $composableBuilder(
+    column: $table.fromLocalDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toLocalDate => $composableBuilder(
+    column: $table.toLocalDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncState => $composableBuilder(
+    column: $table.syncState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocalWorkoutInstancesTableOrderingComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableOrderingComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableOrderingComposer get replacementInstanceId {
+    final $$LocalWorkoutInstancesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.replacementInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableOrderingComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalCalendarChangesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalCalendarChangesTable> {
+  $$LocalCalendarChangesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get changeType => $composableBuilder(
+    column: $table.changeType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fromLocalDate => $composableBuilder(
+    column: $table.fromLocalDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get toLocalDate => $composableBuilder(
+    column: $table.toLocalDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get syncState =>
+      $composableBuilder(column: $table.syncState, builder: (column) => column);
+
+  $$LocalWorkoutInstancesTableAnnotationComposer get workoutInstanceId {
+    final $$LocalWorkoutInstancesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.workoutInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$LocalWorkoutInstancesTableAnnotationComposer get replacementInstanceId {
+    final $$LocalWorkoutInstancesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.replacementInstanceId,
+          referencedTable: $db.localWorkoutInstances,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalWorkoutInstancesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localWorkoutInstances,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalCalendarChangesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalCalendarChangesTable,
+          LocalCalendarChangeRow,
+          $$LocalCalendarChangesTableFilterComposer,
+          $$LocalCalendarChangesTableOrderingComposer,
+          $$LocalCalendarChangesTableAnnotationComposer,
+          $$LocalCalendarChangesTableCreateCompanionBuilder,
+          $$LocalCalendarChangesTableUpdateCompanionBuilder,
+          (LocalCalendarChangeRow, $$LocalCalendarChangesTableReferences),
+          LocalCalendarChangeRow,
+          PrefetchHooks Function({
+            bool workoutInstanceId,
+            bool replacementInstanceId,
+          })
+        > {
+  $$LocalCalendarChangesTableTableManager(
+    _$AppDatabase db,
+    $LocalCalendarChangesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalCalendarChangesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalCalendarChangesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalCalendarChangesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> workoutInstanceId = const Value.absent(),
+                Value<String> changeType = const Value.absent(),
+                Value<String?> fromLocalDate = const Value.absent(),
+                Value<String?> toLocalDate = const Value.absent(),
+                Value<String?> replacementInstanceId = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCalendarChangesCompanion(
+                id: id,
+                workoutInstanceId: workoutInstanceId,
+                changeType: changeType,
+                fromLocalDate: fromLocalDate,
+                toLocalDate: toLocalDate,
+                replacementInstanceId: replacementInstanceId,
+                createdAt: createdAt,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String workoutInstanceId,
+                required String changeType,
+                Value<String?> fromLocalDate = const Value.absent(),
+                Value<String?> toLocalDate = const Value.absent(),
+                Value<String?> replacementInstanceId = const Value.absent(),
+                required int createdAt,
+                Value<String> ownerId = const Value.absent(),
+                Value<String> syncState = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCalendarChangesCompanion.insert(
+                id: id,
+                workoutInstanceId: workoutInstanceId,
+                changeType: changeType,
+                fromLocalDate: fromLocalDate,
+                toLocalDate: toLocalDate,
+                replacementInstanceId: replacementInstanceId,
+                createdAt: createdAt,
+                ownerId: ownerId,
+                syncState: syncState,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LocalCalendarChangesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({workoutInstanceId = false, replacementInstanceId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (workoutInstanceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.workoutInstanceId,
+                                    referencedTable:
+                                        $$LocalCalendarChangesTableReferences
+                                            ._workoutInstanceIdTable(db),
+                                    referencedColumn:
+                                        $$LocalCalendarChangesTableReferences
+                                            ._workoutInstanceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (replacementInstanceId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.replacementInstanceId,
+                                    referencedTable:
+                                        $$LocalCalendarChangesTableReferences
+                                            ._replacementInstanceIdTable(db),
+                                    referencedColumn:
+                                        $$LocalCalendarChangesTableReferences
+                                            ._replacementInstanceIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$LocalCalendarChangesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalCalendarChangesTable,
+      LocalCalendarChangeRow,
+      $$LocalCalendarChangesTableFilterComposer,
+      $$LocalCalendarChangesTableOrderingComposer,
+      $$LocalCalendarChangesTableAnnotationComposer,
+      $$LocalCalendarChangesTableCreateCompanionBuilder,
+      $$LocalCalendarChangesTableUpdateCompanionBuilder,
+      (LocalCalendarChangeRow, $$LocalCalendarChangesTableReferences),
+      LocalCalendarChangeRow,
+      PrefetchHooks Function({
+        bool workoutInstanceId,
+        bool replacementInstanceId,
+      })
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -22953,4 +24085,6 @@ class $AppDatabaseManager {
       $$LocalConstraintsTableTableManager(_db, _db.localConstraints);
   $$LocalTrainingPlansTableTableManager get localTrainingPlans =>
       $$LocalTrainingPlansTableTableManager(_db, _db.localTrainingPlans);
+  $$LocalCalendarChangesTableTableManager get localCalendarChanges =>
+      $$LocalCalendarChangesTableTableManager(_db, _db.localCalendarChanges);
 }

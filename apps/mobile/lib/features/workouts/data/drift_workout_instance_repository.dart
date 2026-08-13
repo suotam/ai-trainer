@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/database/tables/calendar_tables.dart';
 import '../domain/workout_instance_repository.dart';
 import '../domain/workout_read_model.dart';
 import 'workout_row_mappers.dart';
@@ -22,7 +23,11 @@ class DriftWorkoutInstanceRepository implements WorkoutInstanceRepository {
   ) async {
     final query = _db.select(_db.localWorkoutInstances)
       ..where(
-        (t) => t.scheduledLocalDate.isBetweenValues(fromLocalDate, toLocalDate),
+        (t) =>
+            t.scheduledLocalDate.isBetweenValues(fromLocalDate, toLocalDate) &
+            // Zrušený workout není dnešní plán (C21 §7, CAL-008) —
+            // detail podle ID i editor plánu ho nadále zobrazují.
+            t.status.equals(instanceStatusCancelled).not(),
       )
       ..orderBy([
         (t) => OrderingTerm.asc(t.scheduledLocalDate),
