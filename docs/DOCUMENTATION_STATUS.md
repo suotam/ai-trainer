@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.55  
+**Verze:** 2.56  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -253,7 +253,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **Release 4 je uzavřen** (R4-08 mergnut, R4 Exit Review proveden; otevřené dluhy výše).
 
-**Přesný další kanonický krok:** Release 4 je uzavřen → dalším krokem je **naplánování Release 5** (kanonický R5 vertical-slice plán; kandidáti dle vision/roadmap: adaptace plánů podle skutečného výkonu, pull sync/obnova zařízení, splacení dluhů — živý provider smoke, DELETE sync). Plánování začíná až po samostatném pokynu.
+**R5 – Adaptive Daily Trainer Beta je naplánované, ale implementace nezačala.** Existuje kanonický R5 vertical-slice plán `docs/13-delivery/r5-vertical-slice-plan.md` (pořadí R5, blocking contract map **C33–C40**, evidence gates, beta baseline mapování /release scope §10/, R5 Exit Review a pravidla `R5P-001` až `R5P-015`). Definovaný R5 backlog: `R5-01` DailyCheckIn, `R5-02` Deterministic Safety Rules, `R5-03` Today Recommendation, `R5-04` Adjustment Context and Classification, `R5-05` Structured Adjustment Proposal, `R5-06` Adjustment ChangeSet Execution, `R5-07` Weekly Summary + Progress Explanation + Local Notifications, `R5-08` R5 Critical E2E + Beta Baseline + Exit Review. Základní zákony plánu: **safety pravidla jsou deterministický kód a AI jim nikdy nevelí** (konflikt = typovaný stav pro uživatele), medicínská hranice pain/recovery workflow poctivě označená (beta, konzervativní defaulty, review mimo inženýrský scope), **adaptace znovupoužívá celou R4 pipeline** (nový request typ `ADJUSTMENT_PROPOSAL`, verzovaný prompt/schéma, dvojí validace, AIProposal lifecycle, execution výhradně C20/C21 s provenance), check-in born ownable & syncable (R3M vzor, volný text nikdy do AI kontextu ani sync), doporučení/souhrny jako deterministické read modely, notifikace lokální opt-in a nikdy nejednají. Řízené podmínky: **živý provider smoke je podmínkou beta gate** (ne blocker slices), pull sync/obnova trvá mimo P0 (beta krok 10 v mezích push-only). **Žádný R5 slice není `READY`** — čeká se na blokující kontrakty (první: C33 – DailyCheckIn model & persistence).
+
+**Přesný další kanonický krok:** vytvoření blocking kontraktu **C33 – DailyCheckIn model & persistence** (`docs/06-domain/r5-daily-checkin-contract.md`) a poté implementace `R5-01 – DailyCheckIn`. Implementace smí začít až po samostatném pokynu.
 
 ---
 
@@ -438,10 +440,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Celé R4 (`R4-01` až `R4-08`, kontrakty C25–C32) je implementováno: AI gateway s fake/Anthropic providerem, minimalizovaný AIContext, strukturovaný návrh s dvojí validací, review s explicitním rozhodnutím, atomické provedení C20 cestami s provenance, safety hardening, eval release gate a kritická R4 E2E. Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **žádný R5 slice není `READY`** — čeká se na blokující kontrakty. Další kanonický krok:
 
 ```text
-Naplánování Release 5  (R5 vertical-slice plán)
+C33 – DailyCheckIn model & persistence kontrakt → R5-01 – DailyCheckIn
 ```
 
-Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R4 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
