@@ -21,11 +21,18 @@ sealed interface PlanProposalValidation {
 
 @Component
 class PlanProposalValidator {
+    companion object {
+        /** Obsahový limit raw výstupu modelu (C31 §5, AIS-008). */
+        private const val MAX_RAW_CHARS = 100_000
+    }
+
     private val mapper = JsonMapper.builder().build()
 
     private val workoutTypes = setOf("STRENGTH", "ENDURANCE", "MOBILITY", "TECHNIQUE", "GENERAL")
 
     fun validate(rawText: String): PlanProposalValidation {
+        // Delší výstup se ani neparsuje — nevalidní výstup (AIS-008).
+        if (rawText.length > MAX_RAW_CHARS) return PlanProposalValidation.Invalid
         val json = extractJson(rawText) ?: return PlanProposalValidation.Invalid
         val root =
             try {
