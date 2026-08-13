@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import 'tables/sports_tables.dart';
 import 'tables/workout_tables.dart';
 
 part 'app_database.g.dart';
@@ -24,17 +25,19 @@ part 'app_database.g.dart';
     LocalOutbox,
     LocalSyncedVersions,
     LocalSyncResolutions,
+    LocalUserSports,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 4 (R2-06): tabulka uzavřených conflict/rejection
-  /// rozhodnutí (C12 §5). Verze 3 (R2-05) přidala serverové verze synced
-  /// entit; obě migrace jsou aditivní a nedestruktivní; `v1 → v2` (R2-01)
-  /// zachovává všechna R1 data i aktivní session (C1 `MSM-005`, PDR-009).
+  /// Schema version 5 (R3-01, C16 §4): tabulka sportovního profilu
+  /// `local_user_sports` — aditivní, born ownable and syncable (R3M-004).
+  /// Verze 4 (R2-06) přidala conflict/rejection rozhodnutí, verze 3 (R2-05)
+  /// serverové verze synced entit; `v1 → v2` (R2-01) zachovává všechna R1
+  /// data i aktivní session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -103,6 +106,12 @@ class AppDatabase extends _$AppDatabase {
       // aditivní, žádná existující data se nemění.
       if (from < 4) {
         await m.createTable(localSyncResolutions);
+      }
+      // Migrace v4 → v5 (R3-01, C16 §5): jen nová tabulka sportovního
+      // profilu — aditivní, prázdná (R3M-008), žádná existující data se
+      // nemění.
+      if (from < 5) {
+        await m.createTable(localUserSports);
       }
     },
     beforeOpen: (details) async {

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/account_screen.dart';
+import '../../features/sports/presentation/sports_profile_screen.dart';
 import '../../features/workouts/presentation/active_session_screen.dart';
 import '../../features/workouts/presentation/completed_workout_detail_screen.dart';
 import '../../features/workouts/presentation/history_screen.dart';
@@ -61,6 +62,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.accountName,
         path: AppRoutes.accountPath,
         builder: (context, state) => const AccountScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.sportsProfileName,
+        path: AppRoutes.sportsProfilePath,
+        builder: (context, state) => const SportsProfileScreen(),
       ),
       GoRoute(
         name: AppRoutes.startupName,
