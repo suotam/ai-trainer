@@ -34,19 +34,27 @@ sealed interface ProposePlanResult {
 class ProposePlan(
     private val gateway: AiGateway,
     private val validator: PlanProposalValidator,
+    private val adjustmentValidator: AdjustmentProposalValidator,
     private val auditRecorder: AuditRecorder,
 ) {
     fun propose(
         accountId: UUID,
         contextJson: String,
+        type: AiRequestType = AiRequestType.PLAN_PROPOSAL,
     ): ProposePlanResult =
-        when (val generated = gateway.requestProposal(accountId, AiRequestType.PLAN_PROPOSAL, contextJson)) {
+        when (val generated = gateway.requestProposal(accountId, type, contextJson)) {
             is AiGatewayResult.Failed -> {
                 ProposePlanResult.Unavailable(generated.kind)
             }
 
             is AiGatewayResult.Generated -> {
-                when (val validation = validator.validate(generated.rawJson)) {
+                // Validátor podle typu (C37 §2).
+                val validation =
+                    when (type) {
+                        AiRequestType.PLAN_PROPOSAL -> validator.validate(generated.rawJson)
+                        AiRequestType.ADJUSTMENT_PROPOSAL -> adjustmentValidator.validate(generated.rawJson)
+                    }
+                when (validation) {
                     is PlanProposalValidation.Valid -> {
                         ProposePlanResult.Proposed(
                             canonical = validation.canonical,
@@ -63,7 +71,7 @@ class ProposePlan(
                                 action = "AiProposalFailed",
                                 outcome = AuditOutcome.REJECTED,
                                 principalAccountId = accountId,
-                                target = "${AiRequestType.PLAN_PROPOSAL.name}/${generated.promptVersion}",
+                                target = "${type.name}/${generated.promptVersion}",
                                 policyDecision = "INVALID_OUTPUT",
                             ),
                         )

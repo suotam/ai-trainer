@@ -1,5 +1,6 @@
 package com.aitrainer.backend.ai.data
 
+import com.aitrainer.backend.ai.domain.ADJUSTMENT_PROPOSAL_SCHEMA_VERSION
 import com.aitrainer.backend.ai.domain.AiFailureKind
 import com.aitrainer.backend.ai.domain.AiModelProvider
 import com.aitrainer.backend.ai.domain.AiModelResult
@@ -30,8 +31,26 @@ class FakeModelProvider : AiModelProvider {
         prompt: AiPrompt,
         contextJson: String,
         schemaVersion: String,
-    ): AiModelResult =
-        AiModelResult.Success(
+    ): AiModelResult {
+        // Deterministická fixture podle schema verze (C37): adjustment
+        // vrací kanonizovatelný seznam operací.
+        if (schemaVersion == ADJUSTMENT_PROPOSAL_SCHEMA_VERSION) {
+            return AiModelResult.Success(
+                rawJson =
+                    """
+                    {"summary":"Deterministic fake adjustment for $schemaVersion.",
+                     "operations":[
+                       {"operation":"MOVE","reason":"Fixture move reason",
+                        "target":{"dayOffset":0,"title":"Full Body A"},"toDayOffset":2},
+                       {"operation":"ADD","reason":"Fixture add reason",
+                        "workout":{"title":"Recovery Mobility","workoutType":"MOBILITY",
+                         "dayOffset":1,"plannedDurationMinutes":30}}
+                     ]}
+                    """.trimIndent(),
+                modelId = "fake-model",
+            )
+        }
+        return AiModelResult.Success(
             rawJson =
                 """
                 {"summary":"Deterministic fake proposal for $schemaVersion.",
@@ -46,6 +65,7 @@ class FakeModelProvider : AiModelProvider {
                 """.trimIndent(),
             modelId = "fake-model",
         )
+    }
 }
 
 /**
