@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.37  
+**Verze:** 2.38  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -167,7 +167,9 @@ R2-08 je poslední R2 slice, proto je proveden R2 Exit Review (VSP §13). Krité
 
 **R3 – Profile and Manual Planning je naplánované, ale implementace nezačala.** Existuje kanonický R3 vertical-slice plán `docs/13-delivery/r3-vertical-slice-plan.md` (pořadí R3, blocking contract map C16–C24, evidence gates, R3 Exit Review a pravidla `R3P-001` až `R3P-015`). Definovaný R3 backlog: `R3-01` Structured Sports Profile, `R3-02` Goals and Priorities, `R3-03` Availability, Equipment and Basic Constraints, `R3-04` Manual Training Plan and Internal Calendar, `R3-05` Calendar Operations (move/cancel/replace), `R3-06` Manual Activity and Basic Progress Statistics, `R3-07` R3 Sync Extension, `R3-08` R3 Critical E2E Evidence and Exit Review. R3 je celé local-first a bez AI (manual path, `RSR-005`); nové entity se rodí vlastnitelné a synchronizovatelné (R2-01 vzor) a synchronizují se existujícím R2 push mechanismem (aditivní rozšíření registru, C24). **Žádný R3 slice není `READY`** — všechny čekají na blokující kontrakty (C16–C24).
 
-**Přesný další kanonický krok:** vytvořit blokující kontrakty **C16 – R3 mobile schema migration** (`docs/12-data/r3-mobile-schema-migration.md`, Data Architecture) a **C17 – Structured sports profile** (`docs/06-domain/r3-sports-profile-contract.md`, Domain / sports-and-goals-model) → tím se `R3-01` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices. Implementace `R3-01` smí začít až po Ready kontrole a samostatném pokynu.
+**Vytvořené R3 kontrakty:** **C16 – R3 mobile schema migration** (`docs/12-data/r3-mobile-schema-migration.md`, Data Architecture, `R3M-001..015`) — evoluce mobilního schématu v R3 (verze 5+): dědí C1/`MSM-*`, verzování per slice, kontraktní přírůstky R3 tabulek, **born ownable and syncable** (owner/sync metadata od vzniku, owner stamping při zápisu, sync-state disciplína před rozšířením registru) a **attach coverage** — každá nová vlastnitelná tabulka je součástí C15 attach transakce od slice, který ji zavádí (zpřesnění plánu §9.7; R3-07 attach jen ověřuje). **C17 – Structured sports profile** (`docs/06-domain/r3-sports-profile-contract.md`, Domain / sports-and-goals-model + Mobile, `ASP-001..015`) — závazná P0 podmnožina sportovního profilu: aggregate `UserSport` s participation patternem (pattern ≠ kalendář, termíny vlastní C19/scheduling), minimální katalog 13 stabilních kódů sportů + custom sport, kódy rolí (`PRIMARY`…`SEASONAL`)/priorit (`CRITICAL`…`BACKGROUND`)/zkušeností (`BEGINNER`…`UNKNOWN`)/intenzity/prostředí, lifecycle `ACTIVE/PAUSED/ENDED` (konec je stav, ne mazání; nejvýše jeden ACTIVE PRIMARY; bez duplicit), neúplný profil validní (unknown ≠ zero), anonymní parita s attach pokrytím od R3-01. Oba contract-only.
+
+**Přesný další kanonický krok:** C16 a C17 existují → **`R3-01 – Structured Sports Profile` je `READY`**. Další krok je **implementace `R3-01`** (mobilní schema v5 dle C16, UserSport aggregate + participation pattern dle C17, UI profilu, rozšíření C15 attach o novou tabulku, persistence/migrační/attach testy). Implementace smí začít až po Ready kontrole a samostatném pokynu. Ostatní R3 slices čekají na své kontrakty (C18–C24).
 
 ---
 
@@ -352,12 +354,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`); **žádný R3 slice není `READY`**. Další kanonický krok:
+Release 1 i Release 2 jsou uzavřené (R1 i R2 Exit Review provedeny, viz §3; otevřený dluh R2 = emulátorová runtime evidence). Existuje kanonický R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog `R3-01` až `R3-08`, contract map C16–C24, `R3P-001..015`). Kontrakty **C16** a **C17** existují → **`R3-01` je `READY` (neimplementováno)**. Další kanonický krok:
 
 ```text
-C16 – R3 mobile schema migration contract   (docs/12-data/r3-mobile-schema-migration.md)
-C17 – Structured sports profile contract    (docs/06-domain/r3-sports-profile-contract.md)
-→ poté je R3-01 – Structured Sports Profile READY (implementace po samostatném pokynu)
+R3-01 – Structured Sports Profile  (implementace, dle C16 + C17)
 ```
 
-Před tvorbou kontraktů i implementací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Implementace `R3-01` smí začít až po samostatném pokynu; před ní je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a provést Ready kontrolu podle `r3-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
