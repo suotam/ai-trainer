@@ -160,6 +160,7 @@ DB drží kódy; lokalizované texty jsou prezentační vrstva (`ASP-011`).
 
 - UserSport se rodí s owner/sync metadaty; vlastníka razí zápis aktuálním lokálním vlastníkem (C16 §6.2).
 - Anonymní uživatel má plnohodnotný profil; **attach k účtu pokrývá UserSport od R3-01** (C16 `R3M-006`, C15 rozšíření v témže slice).
+- **Attach kolize (řízené pravidlo):** attach nesmí porušit ASP-003/ASP-004 účtu. Anonymní UserSport, jehož připojením by vznikl duplicitní ne-`ENDED` katalogový sport účtu nebo druhý `ACTIVE PRIMARY`, se **nepřipojí a zůstává anonymní** (deterministicky, idempotentně, bez mutace dat — výjimka z plného pokrytí C15, analogická seed exclusion LAM-006). Uživatel o data nepřichází; záznam se připojí při pozdějším attach, pokud kolize pomine.
 - Push na server začíná až s C24/R3-07; do té doby sync-state poctivě eviduje `LOCAL_ONLY`/`DIRTY` (`R3M-007`).
 
 ---
@@ -174,7 +175,7 @@ DB drží kódy; lokalizované texty jsou prezentační vrstva (`ASP-011`).
 - **ASP-006 — Pattern ≠ kalendář.** Participation pattern je součást UserSport a je popisný; termíny a dostupnost vlastní C19/scheduling.
 - **ASP-007 — Editovatelný current-state.** Úprava zvyšuje lokální verzi a přepíná `SYNCED→DIRTY`; nikdy nemění historická tréninková fakta.
 - **ASP-008 — Konec je stav, ne mazání.** `ENDED` zachovává záznam; hard delete není P0 operace.
-- **ASP-009 — Anonymní parita.** Anonymní profil je plnohodnotný; attach pokrývá UserSport od R3-01.
+- **ASP-009 — Anonymní parita.** Anonymní profil je plnohodnotný; attach pokrývá UserSport od R3-01. Kolizní záznamy (§8) zůstávají anonymní, nikdy se nemažou ani nemutují.
 - **ASP-010 — Neúplnost je validní.** Chybějící údaj je `UNKNOWN`/prázdný, ne vymyšlený default (`DAR-015`); žádný povinný úplný profil.
 - **ASP-011 — Kódy v DB, texty v prezentaci.** Perzistují se stabilní kódy; lokalizace je prezentační.
 - **ASP-012 — Offline first.** Vytvoření i úprava fungují bez sítě.
