@@ -16,6 +16,7 @@ class AiProposalsScreen extends ConsumerWidget {
   static const Key screenKey = Key('ai_proposals_screen');
   static const Key emptyKey = Key('ai_proposals_empty');
   static const Key requestButtonKey = Key('ai_request_button');
+  static const Key adjustmentButtonKey = Key('ai_request_adjustment');
   static const Key errorBannerKey = Key('ai_error');
 
   static Key tileKey(String id) => Key('ai_proposal_tile_$id');
@@ -28,7 +29,22 @@ class AiProposalsScreen extends ConsumerWidget {
 
     return Scaffold(
       key: screenKey,
-      appBar: AppBar(title: Text(l10n.aiTitle)),
+      appBar: AppBar(
+        title: Text(l10n.aiTitle),
+        actions: [
+          // Žádost o úpravu týdne (R5-05, C37) — týž pipeline, jiný typ.
+          IconButton(
+            key: adjustmentButtonKey,
+            icon: const Icon(Icons.tune),
+            tooltip: l10n.aiRequestAdjustment,
+            onPressed: state is AiWorking
+                ? null
+                : () => ref
+                      .read(aiScreenControllerProvider.notifier)
+                      .requestAdjustment(),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         key: requestButtonKey,
         onPressed: state is AiWorking
@@ -136,6 +152,8 @@ class _ProposalReviewSheet extends ConsumerWidget {
     }
     final workouts =
         (proposal.payload['workouts'] as List?)?.cast<Map>() ?? const [];
+    final operations =
+        (proposal.payload['operations'] as List?)?.cast<Map>() ?? const [];
 
     Future<void> decide(ProposalDecision decision) async {
       await ref
@@ -162,10 +180,20 @@ class _ProposalReviewSheet extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(proposal.summary),
           const SizedBox(height: 12),
+          // Adjustment (C37): operace s dopady a důvody (ASJ-014);
+          // plan proposal (C28): workouty s důvody.
           Text(
-            l10n.aiWorkoutsHeader,
+            proposal.isAdjustment
+                ? l10n.aiOperationsHeader
+                : l10n.aiWorkoutsHeader,
             style: Theme.of(context).textTheme.titleMedium,
           ),
+          for (final operation in operations)
+            ListTile(
+              dense: true,
+              title: Text(_operationTitle(l10n, operation)),
+              subtitle: Text('${operation['reason']}'),
+            ),
           for (final workout in workouts)
             ListTile(
               dense: true,
@@ -214,5 +242,26 @@ class _ProposalReviewSheet extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Lidský popis dopadu operace (ASJ-014): typ, cíl a kam.
+  String _operationTitle(AppLocalizations l10n, Map<Object?, Object?> op) {
+    final label = l10n.aiOperationLabel('${op['operation']}');
+    final target = op['target'] as Map?;
+    final workout = op['workout'] as Map?;
+    return switch (op['operation']) {
+      'MOVE' =>
+        '$label · ${target?['title']} '
+            '(${l10n.aiDayLabel((target?['dayOffset'] as int?) ?? 0)} → '
+            '${l10n.aiDayLabel((op['toDayOffset'] as int?) ?? 0)})',
+      'CANCEL' =>
+        '$label · ${target?['title']} '
+            '(${l10n.aiDayLabel((target?['dayOffset'] as int?) ?? 0)})',
+      'REPLACE' => '$label · ${target?['title']} → ${workout?['title']}',
+      'ADD' =>
+        '$label · ${workout?['title']} '
+            '(${l10n.aiDayLabel((workout?['dayOffset'] as int?) ?? 0)})',
+      _ => label,
+    };
   }
 }

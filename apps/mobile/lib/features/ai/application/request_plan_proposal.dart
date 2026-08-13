@@ -1,15 +1,17 @@
 import '../../auth/domain/auth_api_client.dart';
 import '../../auth/domain/secure_session_storage.dart';
+import '../data/adjustment_proposal_client_validator.dart';
 import '../data/http_ai_api_client.dart';
 import '../data/plan_proposal_client_validator.dart';
 import '../domain/ai_context.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
 
-/// R4-03 use case: kontext (C27) → AI API → klientská re-validace (C28
-/// SOV-003) → lokální `PROPOSED` návrh (C29). AI vyžaduje přihlášený účet
-/// (AGW-008); všechna selhání jsou typovaná (R4P-010) a nevalidní odpověď
-/// se nikdy nepersistuje (APL-002).
+/// R4-03/R5-05 use case: kontext (C27/C36) → AI API → klientská
+/// re-validace podle typu (C28/C37, SOV-003) → lokální `PROPOSED` návrh
+/// (C29 beze změny). AI vyžaduje přihlášený účet (AGW-008); všechna
+/// selhání jsou typovaná (R4P-010) a nevalidní odpověď se nikdy
+/// nepersistuje (APL-002).
 class RequestPlanProposal {
   const RequestPlanProposal({
     required this.storage,
@@ -27,19 +29,27 @@ class RequestPlanProposal {
   final String Function() newId;
   final DateTime Function() clock;
 
-  Future<RequestProposalResult> call() async {
+  Future<RequestProposalResult> call({
+    AiRequestType type = AiRequestType.planProposal,
+  }) async {
     final stored = await storage.read();
     if (stored == null) {
       return const ProposalSignInRequired();
     }
     final now = clock();
-    final context = await contextBuilder.buildPlanProposalContext(now: now);
+    final context = switch (type) {
+      AiRequestType.planProposal =>
+        await contextBuilder.buildPlanProposalContext(now: now),
+      AiRequestType.adjustmentProposal =>
+        await contextBuilder.buildAdjustmentContext(now: now),
+    };
 
     final PlanProposalResponse response;
     try {
       response = await apiClient.requestPlanProposal(
         accessToken: stored.accessToken,
         context: context.payload,
+        requestType: type.code,
       );
     } on AiApiFailure catch (failure) {
       return switch (failure.kind) {
@@ -50,8 +60,16 @@ class RequestPlanProposal {
       return const ProposalUnavailable();
     }
 
-    // Obrana do hloubky (SOV-003): klient validuje kanonický payload znovu.
-    final canonical = validatePlanProposalPayload(response.proposal);
+    // Obrana do hloubky (SOV-003): klient validuje kanonický payload
+    // znovu — validátor podle typu (C37 §4).
+    final canonical = switch (type) {
+      AiRequestType.planProposal => validatePlanProposalPayload(
+        response.proposal,
+      ),
+      AiRequestType.adjustmentProposal => validateAdjustmentProposalPayload(
+        response.proposal,
+      ),
+    };
     if (canonical == null) {
       return const ProposalInvalidOutput();
     }

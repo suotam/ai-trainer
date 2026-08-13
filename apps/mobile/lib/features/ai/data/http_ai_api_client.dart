@@ -31,11 +31,13 @@ class AiApiFailure implements Exception {
   final AiApiFailureKind kind;
 }
 
-/// Port AI API klienta (jediný AI endpoint, AGW-001).
+/// Port AI API klienta (jediný AI endpoint, AGW-001; typ v requestu
+/// dle C37 §2).
 abstract interface class AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   });
 }
 
@@ -57,6 +59,7 @@ class HttpAiApiClient implements AiApiClient {
   Future<PlanProposalResponse> requestPlanProposal({
     required String accessToken,
     required Map<String, Object?> context,
+    String requestType = 'PLAN_PROPOSAL',
   }) async {
     final url = baseUrl.replace(
       path: '${baseUrl.path}/api/v1/ai/plan-proposals',
@@ -71,7 +74,7 @@ class HttpAiApiClient implements AiApiClient {
               'Accept': 'application/json',
               'Authorization': 'Bearer $accessToken',
             },
-            body: jsonEncode({'context': context}),
+            body: jsonEncode({'context': context, 'requestType': requestType}),
           )
           .timeout(timeout);
     } on TimeoutException {
