@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.44  
+**Verze:** 2.45  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -122,6 +122,7 @@ docs/06-domain/r3-progress-statistics-contract.md
 docs/12-data/r3-sync-extension-contract.md
 docs/09-ai/r4-ai-gateway-contract.md
 docs/09-ai/r4-prompt-audit-contract.md
+docs/09-ai/r4-aicontext-contract.md
 ```
 
 - `r2-local-to-account-migration-contract.md` (**C15**, vlastník Data Architecture + Domain) vlastní připojení předpřihlašovacích anonymních dat k účtu: klasifikaci (uživatelská data ano; čistý seed ne; cizí účet nikdy), **lokální idempotentní attach** (přepis `owner_id` v jedné transakci, žádná změna ID/klíčů/hodnot — duplicitní ochranu zajišťují existující vrstvy C10/C11/C6), chování při odhlášení a druhém účtu na zařízení a invarianty `LAM-001` až `LAM-015`. Contract-only. Blokuje `R2-07`. **Tímto je kontraktní mapa R2 (C1–C15) kompletní.**
@@ -147,6 +148,8 @@ docs/09-ai/r4-prompt-audit-contract.md
 - `r4-ai-gateway-contract.md` (**C25**, vlastník Architecture + Backend; rozhodnutí providera je **ADR-012**) vlastní server-side AI gateway hranici: `AiModelProvider` abstrakci s typovanými selháními, první provider Anthropic Claude (model = konfigurace), klíče výhradně runtime server-side, fake provider jako default a jediná testovací cesta CI, timeouts bez auto-retry a invarianty `AGW-001` až `AGW-015`. Contract-only. Blokuje `R4-01`.
 
 - `r4-prompt-audit-contract.md` (**C26**, vlastník Backend + Security, rozšíření C14 vzoru) vlastní verzovaný prompt registry (immutable verze `{typ}-v{N}`, prompt bez uživatelských dat), povinnou trojici verzí v každém výsledku (prompt + schema + model) a AI audit události `AiProposalRequested/Generated/Failed` bez PII a obsahu, a invarianty `PAA-001` až `PAA-015`. Contract-only. Blokuje `R4-01`.
+
+- `r4-aicontext-contract.md` (**C27**, vlastník Domain / ai-and-change-model + Security + Mobile) vlastní klasifikaci AI požadavků (P0: `PLAN_PROPOSAL`) a **minimalizovaný autorizovaný AIContext**: co smí obsahovat (aktivní R3 data by-value + C23 agregáty), zakázaný obsah (žádná ID, poznámky, owner, secrets, detailní historie), bajtový determinismus, přiznaný ořez a invarianty `ACX-001` až `ACX-015`. Kontext staví klient lokálně. Contract-only. Blokuje `R4-02`.
 
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
@@ -190,7 +193,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r0-r1-vertical-slice-plan.md` vlastní pořadí implementace R0/R1 a `VSP-001` až `VSP-015`.
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
-- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **`R4-01` je implementován** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R4 slices čekají na své kontrakty (C27–C32).
+- `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **`R4-01` a `R4-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní R4 slices čekají na své kontrakty (C28–C32).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 - `coding-agent-guide.md` vlastní context-loading protocol, pracovní cyklus, commit discipline, evidence a `CAG-001` až `CAG-015`.
 
@@ -217,7 +220,7 @@ Startovní dokumentační minimum je dokončeno:
 8. ✅ R0/R1 vertical-slice implementation plan,
 9. ✅ coding-agent instructions a context-loading guide.
 
-`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** — Release 3 je uzavřen (schema v10, backend V5, sync všech R3 entit, kritická E2E evidence). Existuje R4 vertical-slice plán (backlog `R4-01` až `R4-08`, contract map C25–C32); **`R4-01` je implementován** (AI gateway, ADR-012). Dalším kanonickým krokem je **kontrakt C27** (→ `R4-02` READY), po samostatném pokynu.
+`R0-01` až `R0-07` jsou implementovány a R0 exit review je uzavřeno (viz `DOCUMENTATION_STATUS.md` §3). Z R1 jsou implementovány `R1-01` až `R1-08` — celé R1 je implementované a R1 Exit Review je proveden (viz `DOCUMENTATION_STATUS.md`). Release 1 je uzavřen. Existuje R2 vertical-slice plán (`docs/13-delivery/r2-vertical-slice-plan.md`) s backlogem `R2-01` až `R2-08`. **Celé R2 (`R2-01` až `R2-08`) je implementováno** (lokální ownership/sync metadata, backend account/auth baseline, mobile auth + secure session storage, AthleteProfile + registrace zařízení, první push sync, conflict/rejection resolution + revokace, local-to-account attach, kritická E2E evidence) a **R2 Exit Review je proveden** — Release 2 je uzavřen; viz `DOCUMENTATION_STATUS.md` §3 (otevřená zůstává řízená výjimka emulátorové runtime evidence). **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** — Release 3 je uzavřen (schema v10, backend V5, sync všech R3 entit, kritická E2E evidence). Existuje R4 vertical-slice plán (backlog `R4-01` až `R4-08`, contract map C25–C32); **`R4-01` a `R4-02` jsou implementovány** (AI gateway + AIContext builder). Dalším kanonickým krokem jsou **kontrakty C28 + C29** (→ `R4-03` READY), po samostatném pokynu.
 
 ---
 
@@ -405,13 +408,14 @@ R3 vertical-slice plán (`docs/13-delivery/r3-vertical-slice-plan.md`, backlog
 R3 Exit Review proveden a Release 3 uzavřen** (otevřené řízené výjimky:
 emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0).
 Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`,
-backlog `R4-01` až `R4-08`, contract map C25–C32). **`R4-01 – Backend AI Gateway
-Baseline` je implementován** (ADR-012, gateway s fake/Anthropic providerem,
-verzovaný prompt registry, AI audit bez obsahu). Další kanonický krok:
+backlog `R4-01` až `R4-08`, contract map C25–C32). **`R4-01` a `R4-02` jsou
+implementovány** (AI gateway s fake/Anthropic providerem, verzovaný prompt
+registry, AI audit bez obsahu; minimalizovaný deterministický AIContext
+builder na mobilu). Další kanonický krok:
 
 ```text
-C27 – AIContext & request classification contract  (docs/09-ai/r4-aicontext-contract.md)
-→ poté je R4-02 – AIContext and Request Classification READY
+C28 – Structured output schema & validation + C29 – AIProposal lifecycle
+→ poté je R4-03 – Structured Plan Proposal READY
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
