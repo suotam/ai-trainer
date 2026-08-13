@@ -57,9 +57,21 @@ class OpenApiContractValidationTest {
                 "/api/v1/devices",
                 "/api/v1/devices/{installationId}",
                 "/api/v1/sync/push",
+                "/api/v1/ai/plan-proposals",
             ),
             openApi.paths.keys,
         )
+    }
+
+    @Test
+    fun `ai plan proposal operace deklaruje kanonicke operationId, status codes a schemata (C28)`() {
+        val propose = assertNotNull(openApi.paths["/api/v1/ai/plan-proposals"]?.post)
+        assertEquals("requestPlanProposal", propose.operationId)
+        assertEquals(setOf("200", "400", "401", "500"), propose.responses.keys)
+
+        val schemas = assertNotNull(openApi.components.schemas)
+        assertNotNull(schemas["PlanProposalRequest"])
+        assertNotNull(schemas["PlanProposalResponse"])
     }
 
     @Test

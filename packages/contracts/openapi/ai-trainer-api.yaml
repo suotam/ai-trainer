@@ -609,6 +609,44 @@ paths:
           $ref: "#/components/responses/AuthUnauthorized"
         "500":
           $ref: "#/components/responses/AuthInternalError"
+  /api/v1/ai/plan-proposals:
+    post:
+      tags: [Ai]
+      operationId: requestPlanProposal
+      summary: Strukturovaný AI návrh plánu (R4-03, C28)
+      description: >
+        Jediný AI endpoint (AGW-001). Minimalizovaný AIContext (C27) →
+        gateway → model → deterministická validace proti verzovanému
+        schématu (C28). Nevalidní výstup modelu se nikdy nevrací jako
+        úspěch (AI_INVALID_OUTPUT); selhání providera je AI_UNAVAILABLE.
+        Návrh je pouze návrh — doménovou změnu provádí až potvrzený
+        ChangeSet (R4P-001).
+      security:
+        - accessSession: []
+      requestBody:
+        required: true
+        content:
+          application\json:
+            schema:
+              $ref: "#/components/schemas/PlanProposalRequest"
+      responses:
+        "200":
+          description: Validovaný kanonický návrh s trojicí verzí (PAA-005).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application\json:
+              schema:
+                $ref: "#/components/schemas/PlanProposalResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
 components:
   securitySchemes:
     accessSession:
@@ -1040,6 +1078,33 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SyncItemOutcome"
+    PlanProposalRequest:
+      type: object
+      required: [context]
+      additionalProperties: false
+      properties:
+        context:
+          type: object
+          description: >
+            Minimalizovaný autorizovaný AIContext (C27) stavěný klientem
+            z lokálních R3 dat — by-value bez identifikátorů a poznámek;
+            server ho nečte, jen zprostředkuje modelu (AGW-014).
+    PlanProposalResponse:
+      type: object
+      required: [proposal, promptVersion, schemaVersion, modelId]
+      additionalProperties: false
+      properties:
+        proposal:
+          type: object
+          description: >
+            Kanonický validovaný návrh dle `plan-proposal-schema-v1`
+            (C28 §2) — jediné, co smí pokračovat do review a execution.
+        promptVersion:
+          type: string
+        schemaVersion:
+          type: string
+        modelId:
+          type: string
     ErrorResponse:
       type: object
       required: [code, message, requestId, timestamp]
