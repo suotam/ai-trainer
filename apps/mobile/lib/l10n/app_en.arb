@@ -713,6 +713,13 @@
   },
   "safetyNotMedical": "Conservative, informational guidance only - not medical advice.",
   "@safetyNotMedical": {"description": "Medical boundary wording (SFR-008, R5P-003)."},
+  "todayRecoLabel": "{code, select, CHECK_IN_MISSING{How are you today? Fill in your check-in to get guidance.} CONSIDER_REST{Today's signals suggest considering rest.} CONSIDER_LIGHTER_DAY{Some signals suggest taking it easier today.} TRAIN_AS_PLANNED{No warning signals - train as planned.} NOTHING_PLANNED{No warning signals. Nothing is planned for today.} other{{code}}}",
+  "@todayRecoLabel": {
+    "description": "R5-03 day recommendation states (C35 par. 2); careful non-medical wording (TDR-007).",
+    "placeholders": {"code": {"type": "String"}}
+  },
+  "todayRecoCheckinCta": "Fill in check-in",
+  "@todayRecoCheckinCta": {"description": "CTA to check-in - navigation only, never an automatic action (TDR-004)."},
   "aiConfirm": "Accept proposal",
   "@aiConfirm": {"description": "Confirm proposal action (APL-005)."},
   "aiReject": "Reject",

@@ -296,6 +296,8 @@
   "safetyStateLabel": "{code, select, INSUFFICIENT_INFORMATION{Dnes zatím není check-in — vyplň ho a dostaneš vodítko.} SAFE_WITH_CURRENT_INFORMATION{Dnešní check-in nehlásí žádné varovné signály.} CAUTION{Některé signály naznačují dnes ubrat.} DO_NOT_RECOMMEND_ACTIVITY{Dnešní signály naznačují zvážit odpočinek.} other{{code}}}",
   "safetyFlagLabel": "{code, select, SEVERE_PAIN{Silná bolest} PAIN_REPORTED{Hlášená bolest} VERY_HIGH_FATIGUE{Velmi vysoká únava} HIGH_FATIGUE{Vysoká únava} LOW_ENERGY{Nízká energie} POOR_SLEEP{Špatný spánek} ACTIVE_CONSTRAINT{Aktivní omezení} other{{code}}}",
   "safetyNotMedical": "Konzervativní, pouze informativní vodítko — nejde o zdravotní posudek.",
+  "todayRecoLabel": "{code, select, CHECK_IN_MISSING{Jak se dnes cítíš? Vyplň check-in a dostaneš vodítko.} CONSIDER_REST{Dnešní signály naznačují zvážit odpočinek.} CONSIDER_LIGHTER_DAY{Některé signály naznačují dnes ubrat.} TRAIN_AS_PLANNED{Žádné varovné signály — trénuj podle plánu.} NOTHING_PLANNED{Žádné varovné signály. Na dnešek není nic naplánováno.} other{{code}}}",
+  "todayRecoCheckinCta": "Vyplnit check-in",
   "aiConfirm": "Přijmout návrh",
   "aiReject": "Odmítnout",
   "aiWorkoutsHeader": "Navržené workouty",
