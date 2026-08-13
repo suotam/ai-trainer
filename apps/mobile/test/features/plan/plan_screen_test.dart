@@ -1,0 +1,90 @@
+import 'package:ai_trainer_mobile/core/database/app_database.dart';
+import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+import 'package:ai_trainer_mobile/core/time/clock.dart';
+import 'package:ai_trainer_mobile/features/plan/presentation/plan_screen.dart';
+import 'package:ai_trainer_mobile/l10n/generated/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/workout_test_scope.dart';
+
+/// R3-04 widget testy ručního plánu: vytvoření plánu, přidání workoutu
+/// s cvikem, archivace (stav, ne mazání).
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final fixedNow = DateTime.utc(2026, 8, 14, 12);
+
+  Widget app(AppDatabase database) => ProviderScope(
+    overrides: [
+      appDatabaseProvider.overrideWithValue(database),
+      clockProvider.overrideWithValue(() => fixedNow),
+    ],
+    child: const MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: PlanScreen(),
+    ),
+  );
+
+  testWidgets('vytvoření plánu → přidání workoutu s cvikem → workout '
+      'v seznamu plánu', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final database = createTestDatabase();
+    addTearDown(database.close);
+    await tester.pumpWidget(app(database));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(PlanScreen.emptyKey), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(PlanScreen.createFieldKey),
+      'Můj první plán',
+    );
+    await tester.tap(find.byKey(PlanScreen.createButtonKey));
+    await tester.pumpAndSettle();
+
+    // Plán vytvořen — prázdný seznam workoutů.
+    expect(find.text('Můj první plán'), findsOneWidget);
+    expect(find.byKey(PlanScreen.workoutsEmptyKey), findsOneWidget);
+
+    // Přidat workout s jedním cvikem (datum je předvyplněné dneškem).
+    await tester.tap(find.byKey(PlanScreen.addWorkoutKey));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('workout_form_title')),
+      'Silový A',
+    );
+    await tester.tap(find.byKey(const Key('workout_form_add_exercise')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('exercise_name_0')), 'Dřep');
+    await tester.tap(find.byKey(const Key('workout_form_save')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(PlanScreen.workoutsEmptyKey), findsNothing);
+    expect(find.text('Silový A'), findsOneWidget);
+  });
+
+  testWidgets('archivace plánu je stav: obrazovka nabídne vytvoření nového '
+      'a archivovaný zůstává viditelný', (tester) async {
+    final database = createTestDatabase();
+    addTearDown(database.close);
+    await tester.pumpWidget(app(database));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(PlanScreen.createFieldKey), 'Starý plán');
+    await tester.tap(find.byKey(PlanScreen.createButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('plan_archive_action')));
+    await tester.pumpAndSettle();
+
+    // Zpět na create sekci; archivovaný plán je v seznamu (MPC-003).
+    expect(find.byKey(PlanScreen.emptyKey), findsOneWidget);
+    expect(find.text('Starý plán'), findsOneWidget);
+    expect(find.text('Archived'), findsOneWidget);
+  });
+}
