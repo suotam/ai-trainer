@@ -123,6 +123,10 @@ class AiProposalsScreen extends ConsumerWidget {
         AiDecisionFailure() => l10n.aiErrorDecision,
         AiExecutionFailure(result: ExecutionActivePlanConflict()) =>
           l10n.aiErrorExecutionConflict,
+        AiExecutionFailure(result: ExecutionTargetUnresolved()) =>
+          l10n.aiErrorExecutionTarget,
+        AiExecutionFailure(result: ExecutionSafetyConflict()) =>
+          l10n.aiErrorExecutionSafety,
         AiExecutionFailure() => l10n.aiErrorExecutionFailed,
         _ => null,
       };

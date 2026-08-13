@@ -30,12 +30,13 @@ abstract interface class AiProposalRepository {
     required DateTime now,
   });
 
-  /// Přechod CONFIRMED/EXECUTION_FAILED → EXECUTED s referencí plánu
-  /// (C30 CSE-005, APL-010). Vrací false při neplatném stavu/vlastníkovi —
-  /// volající (executor) pak celou transakci odvolá.
+  /// Přechod CONFIRMED/EXECUTION_FAILED → EXECUTED. U plan proposal
+  /// s referencí vzniklého plánu (C30 CSE-005, APL-010); u adjustmentu je
+  /// reference volitelná (C38 §5). Vrací false při neplatném
+  /// stavu/vlastníkovi — volající (executor) pak celou transakci odvolá.
   Future<bool> markExecuted(
     String id, {
-    required String executedPlanId,
+    String? executedPlanId,
     required DateTime now,
   });
 

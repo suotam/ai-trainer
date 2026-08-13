@@ -132,7 +132,7 @@ class DriftAiProposalRepository implements AiProposalRepository {
   @override
   Future<bool> markExecuted(
     String id, {
-    required String executedPlanId,
+    String? executedPlanId,
     required DateTime now,
   }) => _markExecution(
     id,

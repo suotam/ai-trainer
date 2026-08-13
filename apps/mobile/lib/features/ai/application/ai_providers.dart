@@ -50,12 +50,17 @@ final aiProposalRepositoryProvider = Provider<AiProposalRepository>(
   (ref) => DriftAiProposalRepository(ref.watch(appDatabaseProvider)),
 );
 
-/// Execution potvrzeného návrhu (C30): jediná cesta změny = C20 port.
+/// Execution potvrzeného návrhu (C30/C38): jediná cesta změny = C20/C21
+/// porty; adjustment navíc s deterministickou resolvací a safety vetem.
 final proposalExecutorProvider = Provider<ProposalExecutor>(
   (ref) => DriftProposalExecutor(
     ref.watch(appDatabaseProvider),
     ref.watch(trainingPlanRepositoryProvider),
     ref.watch(aiProposalRepositoryProvider),
+    ref.watch(calendarOperationsRepositoryProvider),
+    ref.watch(workoutInstanceRepositoryProvider),
+    ref.watch(dailyCheckInRepositoryProvider),
+    ref.watch(availabilityProfileRepositoryProvider),
   ),
 );
 
@@ -143,26 +148,15 @@ class AiScreenController extends Notifier<AiScreenState> {
             .read(aiProposalRepositoryProvider)
             .decide(proposalId, decision, now: ref.read(clockProvider)());
         return switch (result) {
-          // Potvrzení = souhlas s provedením (C30 §2): execution následuje
-          // v témže uživatelském kroku. Potvrzený adjustment zůstává
-          // CONFIRMED do C38 (ASJ-009) — nikdy tichá změna.
+          // Potvrzení = souhlas s provedením (C30 §2, C38 §2): execution
+          // následuje v témže uživatelském kroku pro oba typy.
           DecisionSaved(:final newStatus)
               when newStatus == proposalStatusConfirmed =>
-            await _afterConfirmed(proposalId),
+            await _executeNow(proposalId),
           DecisionSaved() => const AiDone(),
           _ => AiDecisionFailure(result),
         };
       });
-
-  Future<AiScreenState> _afterConfirmed(String proposalId) async {
-    final proposal = await ref
-        .read(aiProposalRepositoryProvider)
-        .proposalById(proposalId);
-    if (proposal != null && proposal.isAdjustment) {
-      return const AiDone();
-    }
-    return _executeNow(proposalId);
-  }
 
   /// Explicitní opakování po EXECUTION_FAILED (CSE-007).
   Future<void> executeProposal(String proposalId) =>
