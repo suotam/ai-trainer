@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.56  
+**Verze:** 2.57  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -255,7 +255,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **R5 – Adaptive Daily Trainer Beta je naplánované, ale implementace nezačala.** Existuje kanonický R5 vertical-slice plán `docs/13-delivery/r5-vertical-slice-plan.md` (pořadí R5, blocking contract map **C33–C40**, evidence gates, beta baseline mapování /release scope §10/, R5 Exit Review a pravidla `R5P-001` až `R5P-015`). Definovaný R5 backlog: `R5-01` DailyCheckIn, `R5-02` Deterministic Safety Rules, `R5-03` Today Recommendation, `R5-04` Adjustment Context and Classification, `R5-05` Structured Adjustment Proposal, `R5-06` Adjustment ChangeSet Execution, `R5-07` Weekly Summary + Progress Explanation + Local Notifications, `R5-08` R5 Critical E2E + Beta Baseline + Exit Review. Základní zákony plánu: **safety pravidla jsou deterministický kód a AI jim nikdy nevelí** (konflikt = typovaný stav pro uživatele), medicínská hranice pain/recovery workflow poctivě označená (beta, konzervativní defaulty, review mimo inženýrský scope), **adaptace znovupoužívá celou R4 pipeline** (nový request typ `ADJUSTMENT_PROPOSAL`, verzovaný prompt/schéma, dvojí validace, AIProposal lifecycle, execution výhradně C20/C21 s provenance), check-in born ownable & syncable (R3M vzor, volný text nikdy do AI kontextu ani sync), doporučení/souhrny jako deterministické read modely, notifikace lokální opt-in a nikdy nejednají. Řízené podmínky: **živý provider smoke je podmínkou beta gate** (ne blocker slices), pull sync/obnova trvá mimo P0 (beta krok 10 v mezích push-only). **Žádný R5 slice není `READY`** — čeká se na blokující kontrakty (první: C33 – DailyCheckIn model & persistence).
 
-**Přesný další kanonický krok:** vytvoření blocking kontraktu **C33 – DailyCheckIn model & persistence** (`docs/06-domain/r5-daily-checkin-contract.md`) a poté implementace `R5-01 – DailyCheckIn`. Implementace smí začít až po samostatném pokynu.
+`R5-01 – DailyCheckIn` je implementován (blocking kontrakt **C33 – DailyCheckIn model & persistence** /`docs/06-domain/r5-daily-checkin-contract.md`, `DCI-001..015`/ vznikl v témže cyklu). **P0 tvar** (vědomá podmnožina recovery modelu §5): škály 1–5 s definovaným významem — energie a únava povinné, spánek volitelný, **bolest vždy strukturovaně** level + stabilní kód oblasti (9 kódů, DCI-004); volný text jen jako **výhradně lokální poznámka** (DCI-006 — nikdy sync ani AI kontext, marker test). **Denní klíč (DCI-002):** nejvýše jeden záznam na den a vlastníka, vynucený repository v transakci (DB unique by kolidoval s C15 attach) — opakovaný zápis dne je editace téhož záznamu (`rowVersion+1`, `SYNCED → DIRTY`); žádné mazání v P0. **Born ownable & syncable (mobilní schema v13):** owner stamping při zápisu, attach s kolizí denního klíče (kolizní anonymní den zůstává anonymní, nikdy se nemaže), **sync typ `DAILY_CHECK_IN`** (C24 vzor: mobilní collection, backend registr, **Flyway V6** `synced_daily_check_in`, OpenAPI enum) — payload bez note. **UI:** obrazovka `/checkin` z Today (škálové chipy, oblast bolesti, lokální poznámka, historie) s beta označením „nejde o zdravotní doporučení" (R5P-003, DCI-014); check-in není nikdy povinný (DCI-001). Ověřeno **3 novými mobilními testy** (denní klíč/editace/DIRTY/validace vč. bolesti bez oblasti; attach kolize + sync payload bez note; widget flow vyplnění → uložení → historie → editace dne) — suite **312 testů**, analyze čistý; **1 novým backend testem** (push `DAILY_CHECK_IN` + replay idempotence) — suite **108/108** + ktlint, migrace V1–V6.
+
+**Přesný další kanonický krok:** `R5-01` je implementován → dalším krokem je vytvoření blocking kontraktu **C34 – Deterministic safety rules** (`docs/06-domain/r5-safety-rules-contract.md`) a poté implementace `R5-02 – Deterministic Safety Rules`. Implementace smí začít až po samostatném pokynu. Ostatní R5 slices čekají na své kontrakty (C35–C40).
 
 ---
 
@@ -440,10 +442,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **žádný R5 slice není `READY`** — čeká se na blokující kontrakty. Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` je implementován** (denní check-in: schema v13, backend V6, sync typ `DAILY_CHECK_IN`). Další kanonický krok:
 
 ```text
-C33 – DailyCheckIn model & persistence kontrakt → R5-01 – DailyCheckIn
+C34 – Deterministic safety rules kontrakt → R5-02 – Deterministic Safety Rules
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
