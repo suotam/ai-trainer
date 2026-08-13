@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.54  
+**Verze:** 2.55  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -151,6 +151,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 
 - `r5-safety-rules-contract.md` (**C34**, vlastník Domain / recovery-and-limitations-model §31–§33+§83 + Security) vlastní deterministickou P0 safety vrstvu: **čistá funkce** (dnešní check-in + aktivní C19 omezení → `SafetyAssessment` se stavy `INSUFFICIENT_INFORMATION`/`SAFE_WITH_CURRENT_INFORMATION`/`CAUTION`/`DO_NOT_RECOMMEND_ACTIVITY` a typovanými flags se zdrojem), tabulková konzervativní pravidla (silná bolest/únava 5 = STOP; bolest 1–3, únava 4, nízká energie, špatný spánek, aktivní omezení = CAUTION), **chybějící check-in ≠ OK**, žádná AI/persistence, klinické stavy mimo P0 do odborného review, opatrné formulace a invarianty `SFR-001` až `SFR-015`. Contract-only. Blokuje `R5-02`.
 
+- `r5-today-recommendation-contract.md` (**C35**, vlastník Domain + Mobile) vlastní deterministické doporučení dne: čistý read model mapující C34 safety stav + dnešní plán na P0 stavy (`CHECK_IN_MISSING` s CTA / `CONSIDER_REST` / `CONSIDER_LIGHTER_DAY` / `TRAIN_AS_PLANNED` / `NOTHING_PLANNED`), **jediný zdroj signálů = C34** (žádná vlastní pravidla), konzervativní přednost safety před plánem, důvody viditelné se zdrojem, doporučení nikdy nejedná, R1 Today beze změny a invarianty `TDR-001` až `TDR-015`. Contract-only. Blokuje `R5-03`.
+
 - `r4-ai-gateway-contract.md` (**C25**, vlastník Architecture + Backend; rozhodnutí providera je **ADR-012**) vlastní server-side AI gateway hranici: `AiModelProvider` abstrakci s typovanými selháními, první provider Anthropic Claude (model = konfigurace), klíče výhradně runtime server-side, fake provider jako default a jediná testovací cesta CI, timeouts bez auto-retry a invarianty `AGW-001` až `AGW-015`. Contract-only. Blokuje `R4-01`.
 
 - `r4-prompt-audit-contract.md` (**C26**, vlastník Backend + Security, rozšíření C14 vzoru) vlastní verzovaný prompt registry (immutable verze `{typ}-v{N}`, prompt bez uživatelských dat), povinnou trojici verzí v každém výsledku (prompt + schema + model) a AI audit události `AiProposalRequested/Generated/Failed` bez PII a obsahu, a invarianty `PAA-001` až `PAA-015`. Contract-only. Blokuje `R4-01`.
@@ -209,7 +211,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **`R5-01` a `R5-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C35–C40).
+- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **`R5-01` až `R5-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C36–C40).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 
 - `r4-eval-gate-contract.md` (**C32**, vlastník Quality + Domain) vlastní R4 eval release gate: **sdílený dataset `packages/contracts/eval/plan-proposal/*.json`** (jediný zdroj pro obě strany dvojí validace), deterministický harness bez živého providera v běžné CI suite (backend `EvalGateTest` + mobilní konzistence klientského validátoru), gate kritéria (100% shoda verdiktů, vysvětlitelnost `reason`, kanonizace `mustNotContain`, minimální velikost datasetu, žádný skip/retry), poctivě přiznaný scope (kontraktní vrstva, ne kvalita modelu — ta patří smoke evidenci plánu §12), postup rozšiřování a invarianty `EVG-001` až `EVG-015`. Contract-only. Blokuje `R4-07`. **Tímto je kontraktní mapa R4 (C25–C32) kompletní.**
@@ -432,13 +434,13 @@ implementováno, R4 Exit Review proveden a Release 4 uzavřen** (otevřené
 sync, DELETE a plán struktura mimo P0 — viz `DOCUMENTATION_STATUS.md` §3).
 Existuje kanonický R5 vertical-slice plán
 (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`,
-contract map C33–C40, `R5P-001..015`); **`R5-01` a `R5-02` jsou
+contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-03` jsou
 implementovány** (denní check-in — schema v13, backend V6, sync typ
-`DAILY_CHECK_IN`; deterministická safety pravidla s konzervativními
-defaulty). Další kanonický krok:
+`DAILY_CHECK_IN`; deterministická safety pravidla; doporučení dne na
+Today s důvody a CTA). Další kanonický krok:
 
 ```text
-C35 – Today recommendation kontrakt → R5-03 – Today Recommendation
+C36 – Adjustment context kontrakt → R5-04 – Adjustment Context and Classification
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.

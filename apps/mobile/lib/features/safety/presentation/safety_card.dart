@@ -41,7 +41,7 @@ class SafetyCard extends ConsumerWidget {
                 key: stateKey(result.state.code),
               ),
               for (final flag in result.flags)
-                Text('• ${_flagText(l10n, flag)}'),
+                Text('• ${safetyFlagText(l10n, flag)}'),
               const SizedBox(height: 4),
               Text(
                 l10n.safetyNotMedical,
@@ -53,16 +53,18 @@ class SafetyCard extends ConsumerWidget {
       ),
     );
   }
+}
 
-  String _flagText(AppLocalizations l10n, SafetyFlag flag) {
-    final label = l10n.safetyFlagLabel(flag.code);
-    if (flag.painAreaCode != null) {
-      return '$label: ${l10n.checkinPainAreaLabel(flag.painAreaCode!)} '
-          '(${flag.painLevel}/5)';
-    }
-    if (flag.constraintTitle != null) {
-      return '$label: ${flag.constraintTitle}';
-    }
-    return label;
+/// Lidský text flagu se zdrojem (SFR-005/006, TDR-006) — sdílí ho safety
+/// karta i Today doporučení.
+String safetyFlagText(AppLocalizations l10n, SafetyFlag flag) {
+  final label = l10n.safetyFlagLabel(flag.code);
+  if (flag.painAreaCode != null) {
+    return '$label: ${l10n.checkinPainAreaLabel(flag.painAreaCode!)} '
+        '(${flag.painLevel}/5)';
   }
+  if (flag.constraintTitle != null) {
+    return '$label: ${flag.constraintTitle}';
+  }
+  return label;
 }

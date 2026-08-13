@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../recommendation/presentation/today_recommendation_card.dart';
 import '../application/today_providers.dart';
 import '../domain/workout_read_model.dart';
 import 'workout_duration_format.dart';
@@ -100,18 +101,27 @@ class TodayScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: today.when(
-        loading: () =>
-            _Loading(message: l10n.todayLoading, keyValue: loadingKey),
-        error: (_, _) => _ErrorState(
-          message: l10n.todayError,
-          onRetry: () => refreshToday(ref),
-          stateKey: errorKey,
-          retryLabel: l10n.commonRetry,
-        ),
-        data: (workouts) => workouts.isEmpty
-            ? _Empty(message: l10n.todayEmpty)
-            : _TodayList(workouts: workouts),
+      body: Column(
+        children: [
+          // Deterministické doporučení dne (R5-03, C35) — aditivní blok,
+          // R1 stavy Today zůstávají nedotčené (TDR-011).
+          const TodayRecommendationCard(),
+          Expanded(
+            child: today.when(
+              loading: () =>
+                  _Loading(message: l10n.todayLoading, keyValue: loadingKey),
+              error: (_, _) => _ErrorState(
+                message: l10n.todayError,
+                onRetry: () => refreshToday(ref),
+                stateKey: errorKey,
+                retryLabel: l10n.commonRetry,
+              ),
+              data: (workouts) => workouts.isEmpty
+                  ? _Empty(message: l10n.todayEmpty)
+                  : _TodayList(workouts: workouts),
+            ),
+          ),
+        ],
       ),
     );
   }
