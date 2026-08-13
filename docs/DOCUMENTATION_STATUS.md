@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.46  
+**Verze:** 2.47  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -210,7 +210,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **Release 3 je uzavřen** (R3-08 mergnut, R3 Exit Review proveden; otevřené dluhy výše).
 
-**Přesný další kanonický krok:** R3 je uzavřen. Další práce začíná **plánováním Release 4 – AI Plan Proposal Slice** (release scope §8: AIContext, verzovaný prompt, provider abstraction, structured output, deterministická validace, AIProposal → potvrzení → ChangeSet; zakázané zkratky §8.3), analogicky R2/R3: release scope → vertical-slice plán → blocking kontrakty. Nový release plán vznikne až po samostatném pokynu.
+**R4 – AI Plan Proposal je naplánované, ale implementace nezačala.** Existuje kanonický R4 vertical-slice plán `docs/13-delivery/r4-vertical-slice-plan.md` (pořadí R4, blocking contract map **C25–C32**, evidence gates, R4 Exit Review a pravidla `R4P-001` až `R4P-015`). Definovaný R4 backlog: `R4-01` Backend AI Gateway Baseline, `R4-02` AIContext and Request Classification, `R4-03` Structured Plan Proposal, `R4-04` Proposal Review, `R4-05` ChangeSet Execution Boundary, `R4-06` AI Safety/Fallback/Abuse, `R4-07` Eval Dataset and Release Gate, `R4-08` R4 Critical E2E and Exit Review. Základní zákony plánu: **AI navrhuje, doména provádí** (jediná cesta změny = potvrzený ChangeSet přes existující C20/C21 operace), nevalidní strukturovaný výstup se nikdy neprovede, model nerozhoduje o autorizaci, provider za server-side abstrakcí (klíče nikdy na klientu/v repo), kontext staví klient minimalizovaně z lokálních R3 dat (C6 §8.4 beze změny), testy i eval gate běží deterministicky bez živého providera. **Žádný R4 slice není `READY`** — čeká se na blokující kontrakty (první: C25 – AI provider ADR + gateway, C26 – Prompt versioning & AI audit).
+
+**Přesný další kanonický krok:** vytvořit **C25** (ADR + `docs/09-ai/r4-ai-gateway-contract.md`) a **C26** (`docs/09-ai/r4-prompt-audit-contract.md`) → tím se `R4-01` stane `READY`. Tvorba kontraktů i implementace smí začít až po samostatném pokynu.
 
 ---
 
@@ -395,10 +397,12 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3; otevřené řízené výjimky: emulátorová runtime evidence, pull sync, DELETE a plán struktura mimo P0). Další kanonický krok:
+Release 1, 2 i 3 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R4 vertical-slice plán (`docs/13-delivery/r4-vertical-slice-plan.md`, backlog `R4-01` až `R4-08`, contract map C25–C32, `R4P-001..015`); **žádný R4 slice není `READY`**. Další kanonický krok:
 
 ```text
-Plánování Release 4 – AI Plan Proposal Slice  (release scope §8 → vertical-slice plán → blocking kontrakty)
+C25 – AI provider ADR + gateway contract   (docs/09-ai/r4-ai-gateway-contract.md + ADR)
+C26 – Prompt versioning & AI audit contract (docs/09-ai/r4-prompt-audit-contract.md)
+→ poté je R4-01 – Backend AI Gateway Baseline READY (implementace po samostatném pokynu)
 ```
 
-Plánování ani implementace R4 nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle delivery a coding-agent kontraktů.
+Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r4-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
