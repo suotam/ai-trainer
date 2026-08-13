@@ -57,3 +57,78 @@ final requestPlanProposalProvider = Provider<RequestPlanProposal>(
     clock: ref.watch(clockProvider),
   ),
 );
+
+/// UI stav AI obrazovky (R4-04): žádost i rozhodnutí, typované chyby.
+sealed class AiScreenState {
+  const AiScreenState();
+}
+
+class AiIdle extends AiScreenState {
+  const AiIdle();
+}
+
+class AiWorking extends AiScreenState {
+  const AiWorking();
+}
+
+class AiDone extends AiScreenState {
+  const AiDone();
+}
+
+class AiRequestFailure extends AiScreenState {
+  const AiRequestFailure(this.result);
+  final RequestProposalResult result;
+}
+
+class AiDecisionFailure extends AiScreenState {
+  const AiDecisionFailure(this.result);
+  final DecideProposalResult result;
+}
+
+/// Controller AI obrazovky: double-submit guard, typované chyby,
+/// invalidace read modelu; rozhodnutí výhradně explicitní akcí (APL-005).
+class AiScreenController extends Notifier<AiScreenState> {
+  bool _inFlight = false;
+
+  @override
+  AiScreenState build() => const AiIdle();
+
+  Future<void> requestProposal() => _run(() async {
+    final result = await ref.read(requestPlanProposalProvider)();
+    return switch (result) {
+      ProposalCreated() => const AiDone(),
+      _ => AiRequestFailure(result),
+    };
+  });
+
+  Future<void> decide(String proposalId, ProposalDecision decision) =>
+      _run(() async {
+        final result = await ref
+            .read(aiProposalRepositoryProvider)
+            .decide(proposalId, decision, now: ref.read(clockProvider)());
+        return switch (result) {
+          DecisionSaved() => const AiDone(),
+          _ => AiDecisionFailure(result),
+        };
+      });
+
+  Future<void> _run(Future<AiScreenState> Function() action) async {
+    if (_inFlight) {
+      return;
+    }
+    _inFlight = true;
+    state = const AiWorking();
+    try {
+      state = await action();
+    } catch (_) {
+      // Raw výjimka se nepropaguje do UI (R4P-010).
+      state = const AiRequestFailure(ProposalUnavailable());
+    } finally {
+      _inFlight = false;
+      ref.invalidate(aiProposalsProvider);
+    }
+  }
+}
+
+final aiScreenControllerProvider =
+    NotifierProvider<AiScreenController, AiScreenState>(AiScreenController.new);

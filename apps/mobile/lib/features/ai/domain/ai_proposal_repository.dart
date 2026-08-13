@@ -20,4 +20,13 @@ abstract interface class AiProposalRepository {
   Future<List<AiProposal>> proposalsForCurrentOwner();
 
   Future<AiProposal?> proposalById(String id);
+
+  /// Explicitní rozhodnutí uživatele (APL-005) — jen z PROPOSED;
+  /// potvrzení po 7 dnech → EXPIRED (APL-007). Odmítnutí je zachovaný
+  /// stav (APL-006).
+  Future<DecideProposalResult> decide(
+    String id,
+    ProposalDecision decision, {
+    required DateTime now,
+  });
 }

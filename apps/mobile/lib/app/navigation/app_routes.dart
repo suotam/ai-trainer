@@ -54,6 +54,10 @@ abstract final class AppRoutes {
   static const String activityName = 'activity';
   static const String activityPath = '/activity';
 
+  /// AI návrhy plánu (R4-04, C29) — volitelná online funkce.
+  static const String aiProposalsName = 'aiProposals';
+  static const String aiProposalsPath = '/ai';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';

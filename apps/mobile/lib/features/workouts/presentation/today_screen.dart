@@ -29,6 +29,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key availabilityActionKey = Key('today_availability_action');
   static const Key planActionKey = Key('today_plan_action');
   static const Key activityActionKey = Key('today_activity_action');
+  static const Key aiActionKey = Key('today_ai_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -42,6 +43,12 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.todayScreenTitle),
         actions: [
+          IconButton(
+            key: aiActionKey,
+            icon: const Icon(Icons.auto_awesome_outlined),
+            tooltip: l10n.aiOpenTooltip,
+            onPressed: () => context.push(AppRoutes.aiProposalsPath),
+          ),
           IconButton(
             key: planActionKey,
             icon: const Icon(Icons.edit_calendar_outlined),
