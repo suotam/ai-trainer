@@ -1,4 +1,4 @@
-﻿import 'package:ai_trainer_mobile/core/database/app_database.dart';
+import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 3', () async {
+  test('databaze vznikne od prazdneho stavu se schema verzi 4', () async {
     // R2-01 zvĂ˝Ĺˇil schema na verzi 2 (owner/sync metadata + outbox).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 3);
+    expect(version.data.values.first, 4);
 
     final tables = await db
         .customSelect(
@@ -95,6 +95,7 @@ void main() {
       'local_set_performances',
       'local_set_plans',
       'local_step_performances',
+      'local_sync_resolutions',
       'local_synced_versions',
       'local_workout_feedback',
       'local_workout_instances',

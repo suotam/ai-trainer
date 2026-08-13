@@ -9,6 +9,7 @@ import com.aitrainer.backend.auth.application.RefreshAuthSession
 import com.aitrainer.backend.auth.application.RefreshResult
 import com.aitrainer.backend.auth.application.RegisterAccount
 import com.aitrainer.backend.auth.application.RegisterAccountResult
+import com.aitrainer.backend.auth.application.RevokeAllSessions
 import com.aitrainer.backend.auth.domain.IssuedSession
 import com.aitrainer.backend.infrastructure.http.ApiException
 import jakarta.servlet.http.HttpServletRequest
@@ -38,6 +39,8 @@ class AuthController(
     private val refreshAuthSession: RefreshAuthSession,
     private val logoutCurrentSession: LogoutCurrentSession,
     private val accessSessionAuthenticator: AccessSessionAuthenticator,
+    private val revokeAllSessions: RevokeAllSessions,
+    private val principalResolver: PrincipalResolver,
     private val rateLimiter: AuthRateLimiter,
 ) {
     companion object {
@@ -167,6 +170,25 @@ class AuthController(
                 throw denial(result.reason)
             }
         }
+    }
+
+    /**
+     * Globální revokace — „odhlásit všude" (C13 §4, RVC-001). Revokuje
+     * všechny session účtu včetně volající; odpověď je poslední
+     * autorizovaná akce této session. Idempotentní (RVC-004).
+     */
+    @DeleteMapping("/sessions")
+    fun revokeAllSessions(
+        @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) authorization: String?,
+        httpRequest: HttpServletRequest,
+    ): ResponseEntity<Void> {
+        rateLimiter.enforce("revoke-all", clientKey(httpRequest))
+        val principal = principalResolver.require(authorization)
+        revokeAllSessions.revokeAll(principal.accountId)
+        return ResponseEntity
+            .noContent()
+            .cacheControl(CacheControl.noStore())
+            .build()
     }
 
     @GetMapping("/session")

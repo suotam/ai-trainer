@@ -1,4 +1,4 @@
-import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
+﻿import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
 import 'package:ai_trainer_mobile/features/auth/application/auth_providers.dart';
 import 'package:ai_trainer_mobile/features/auth/domain/auth_api_client.dart';
 import 'package:ai_trainer_mobile/features/auth/presentation/account_screen.dart';
@@ -16,12 +16,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_auth_boundaries.dart';
 
-/// Fake push sync API se sémantikou R2-05 backendu: CREATE úspěch s verzí 1,
-/// UPDATE inkrement; scriptovatelné odmítnutí per entita.
+/// Fake push sync API se sĂ©mantikou R2-05 backendu: CREATE ĂşspÄ›ch s verzĂ­ 1,
+/// UPDATE inkrement; scriptovatelnĂ© odmĂ­tnutĂ­ per entita.
 class FakeSyncApiClient implements SyncApiClient {
   bool offline = false;
 
-  /// entityId → výsledek (`VERSION_CONFLICT`, `PERMISSION_DENIED`, …).
+  /// entityId â†’ vĂ˝sledek (`VERSION_CONFLICT`, `PERMISSION_DENIED`, â€¦).
   final Map<String, String> scriptedResults = {};
   final Map<String, int> serverVersions = {};
   final List<List<SyncPushOperation>> pushedBatches = [];
@@ -61,7 +61,7 @@ class FakeSyncApiClient implements SyncApiClient {
   }
 }
 
-/// Deterministická identita instalace pro testy (bez lokální DB).
+/// DeterministickĂˇ identita instalace pro testy (bez lokĂˇlnĂ­ DB).
 class FakeInstallationIdentity implements InstallationIdentityRepository {
   FakeInstallationIdentity([this.installationId = 'fake-installation-1']);
 
@@ -75,7 +75,7 @@ class FakeInstallationIdentity implements InstallationIdentityRepository {
   }
 }
 
-/// Záznam jedné registrace zařízení přijaté fake serverem.
+/// ZĂˇznam jednĂ© registrace zaĹ™Ă­zenĂ­ pĹ™ijatĂ© fake serverem.
 typedef DeviceRegistration = ({
   String accessToken,
   String installationId,
@@ -110,8 +110,8 @@ class FakeDeviceApiClient implements DeviceApiClient {
   }
 }
 
-/// Fake profile API se sémantikou R2-04 backendu: idempotentní create podle
-/// profileId; jeden testovací účet.
+/// Fake profile API se sĂ©mantikou R2-04 backendu: idempotentnĂ­ create podle
+/// profileId; jeden testovacĂ­ ĂşÄŤet.
 class FakeProfileApiClient implements ProfileApiClient {
   bool offline = false;
   AthleteProfileView? current;
@@ -150,8 +150,8 @@ class FakeProfileApiClient implements ProfileApiClient {
   }
 }
 
-/// `ProviderContainer` s kompletními auth + device + profile fake hranicemi
-/// (R2-03/R2-04) — žádná síť, žádná reálná DB. Úklid je registrován.
+/// `ProviderContainer` s kompletnĂ­mi auth + device + profile fake hranicemi
+/// (R2-03/R2-04) â€” ĹľĂˇdnĂˇ sĂ­ĹĄ, ĹľĂˇdnĂˇ reĂˇlnĂˇ DB. Ăšklid je registrovĂˇn.
 ProviderContainer createR2AuthContainer({
   required InMemorySecureSessionStorage storage,
   required FakeAuthApiClient authApi,
@@ -177,7 +177,7 @@ ProviderContainer createR2AuthContainer({
         const DeviceMetadata(
           platform: 'ANDROID',
           appVersion: '1.0.0+1',
-          localSchemaVersion: '3',
+          localSchemaVersion: '4',
         ),
       ),
       profileApiClientProvider.overrideWithValue(
@@ -199,7 +199,7 @@ ProviderContainer createR2AuthContainer({
   return container;
 }
 
-/// Account obrazovka s kompletními fake hranicemi pro widget testy.
+/// Account obrazovka s kompletnĂ­mi fake hranicemi pro widget testy.
 Widget r2AccountApp({
   required InMemorySecureSessionStorage storage,
   required FakeAuthApiClient api,
@@ -221,7 +221,7 @@ Widget r2AccountApp({
       const DeviceMetadata(
         platform: 'ANDROID',
         appVersion: '1.0.0+1',
-        localSchemaVersion: '3',
+        localSchemaVersion: '4',
       ),
     ),
     profileApiClientProvider.overrideWithValue(

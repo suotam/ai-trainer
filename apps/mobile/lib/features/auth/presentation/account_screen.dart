@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../device/application/device_registrar.dart';
 import '../../profile/presentation/profile_section.dart';
+import '../../sync/application/conflict_resolution_service.dart';
 import '../../sync/application/local_sync_providers.dart';
 import '../../sync/domain/sync_push_models.dart';
+import '../../sync/presentation/sync_issues_section.dart';
 import '../application/auth_providers.dart';
 import '../domain/auth_results.dart';
 import '../domain/auth_session_state.dart';
@@ -31,6 +33,9 @@ class AccountScreen extends ConsumerStatefulWidget {
   static const Key verificationStatusKey = Key('account_verification_status');
   static const Key syncButtonKey = Key('account_sync_button');
   static const Key syncResultKey = Key('account_sync_result');
+  static const Key signOutEverywhereButtonKey = Key(
+    'account_sign_out_everywhere_button',
+  );
 
   @override
   ConsumerState<AccountScreen> createState() => _AccountScreenState();
@@ -132,12 +137,40 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     setState(() => _submitting = true);
     // Explicitní uživatelská akce — žádný background loop (SPC-015).
     final result = await ref.read(syncEngineProvider).pushPending();
+    ref.invalidate(unresolvedSyncItemsProvider);
     if (!mounted) {
       return;
     }
     setState(() {
       _submitting = false;
       _syncResult = result;
+    });
+  }
+
+  Future<void> _signOutEverywhere() async {
+    if (_submitting) {
+      return;
+    }
+    setState(() {
+      _submitting = true;
+      _failure = null;
+    });
+    // Globální revokace (C13): server-first; offline vrací typované
+    // selhání a stav se nemění.
+    final result = await ref
+        .read(authSessionManagerProvider.notifier)
+        .signOutEverywhere();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _submitting = false;
+      _failure = switch (result) {
+        AuthFlowSuccess() => null,
+        AuthFlowFailure() => result,
+      };
+      _verification = null;
+      _syncResult = null;
     });
   }
 
@@ -266,6 +299,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           const SizedBox(height: 24),
           const ProfileSection(),
           const SizedBox(height: 24),
+          const SyncIssuesSection(),
+          const SizedBox(height: 24),
           if (verification != null) ...[
             Text(
               _verificationMessage(l10n, verification),
@@ -297,6 +332,20 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             onPressed: _submitting ? null : _signOut,
             child: Text(l10n.accountSignOutButton),
           ),
+          const SizedBox(height: 8),
+          TextButton(
+            key: AccountScreen.signOutEverywhereButtonKey,
+            onPressed: _submitting ? null : _signOutEverywhere,
+            child: Text(l10n.accountSignOutEverywhereButton),
+          ),
+          if (_failure != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _failureMessage(l10n, _failure!),
+              key: AccountScreen.errorKey,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
         ],
       ),
     );

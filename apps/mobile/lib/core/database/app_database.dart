@@ -23,17 +23,18 @@ part 'app_database.g.dart';
     LocalAppState,
     LocalOutbox,
     LocalSyncedVersions,
+    LocalSyncResolutions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 3 (R2-05): tabulka serverových verzí synced entit
-  /// (C10 §10). Migrace `v2 → v3` je aditivní (jen nová tabulka) a
-  /// nedestruktivní; dřívější `v1 → v2` (R2-01) zachovává všechna R1 data
-  /// i aktivní session (C1 `MSM-005`, PDR-009).
+  /// Schema version 4 (R2-06): tabulka uzavřených conflict/rejection
+  /// rozhodnutí (C12 §5). Verze 3 (R2-05) přidala serverové verze synced
+  /// entit; obě migrace jsou aditivní a nedestruktivní; `v1 → v2` (R2-01)
+  /// zachovává všechna R1 data i aktivní session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -97,6 +98,11 @@ class AppDatabase extends _$AppDatabase {
       // verzí — aditivní, žádná existující data se nemění.
       if (from < 3) {
         await m.createTable(localSyncedVersions);
+      }
+      // Migrace v3 → v4 (R2-06, C12 §5): jen nová tabulka rozhodnutí —
+      // aditivní, žádná existující data se nemění.
+      if (from < 4) {
+        await m.createTable(localSyncResolutions);
       }
     },
     beforeOpen: (details) async {

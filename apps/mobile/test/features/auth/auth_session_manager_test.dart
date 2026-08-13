@@ -283,6 +283,58 @@ void main() {
     });
   });
 
+  group('signOutEverywhere (R2-06, C13)', () {
+    test('revokuje všechny session účtu na serveru a vyčistí lokální '
+        'materiál (RVC-001/008)', () async {
+      final storage = InMemorySecureSessionStorage();
+      final api = FakeAuthApiClient();
+      final container = createAuthContainer(storage: storage, api: api);
+      await container.read(authSessionManagerProvider.future);
+      await container
+          .read(authSessionManagerProvider.notifier)
+          .registerAccount(email: 'all@example.com', password: 'password-123');
+      final firstSessionId = storage.stored!.sessionId;
+      // Druhá session téhož účtu (jiné „zařízení").
+      await api.login(email: 'all@example.com', password: 'password-123');
+
+      final result = await container
+          .read(authSessionManagerProvider.notifier)
+          .signOutEverywhere();
+
+      expect(result, isA<AuthFlowSuccess>());
+      expect(storage.stored, isNull);
+      expect(
+        container.read(authSessionManagerProvider).value,
+        isA<AnonymousAuthState>(),
+      );
+      expect(api.sessionRevoked(firstSessionId), isTrue);
+      expect(api.sessionRevoked('session-2'), isTrue);
+    });
+
+    test('offline se globální revokace neprovede — typované selhání a stav '
+        'se nemění (poctivé chování)', () async {
+      final storage = InMemorySecureSessionStorage();
+      final api = FakeAuthApiClient();
+      final container = createAuthContainer(storage: storage, api: api);
+      await container.read(authSessionManagerProvider.future);
+      await container
+          .read(authSessionManagerProvider.notifier)
+          .registerAccount(email: 'off2@example.com', password: 'password-123');
+
+      api.offline = true;
+      final result = await container
+          .read(authSessionManagerProvider.notifier)
+          .signOutEverywhere();
+
+      expect((result as AuthFlowFailure).reason, AuthFlowFailureReason.network);
+      expect(storage.stored, isNotNull);
+      expect(
+        container.read(authSessionManagerProvider).value,
+        isA<AuthenticatedAuthState>(),
+      );
+    });
+  });
+
   group('verifySession (C7 §8)', () {
     test('aktivní session je serverem potvrzena', () async {
       final storage = InMemorySecureSessionStorage();

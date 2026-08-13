@@ -32,4 +32,19 @@ abstract interface class SyncSnapshotRepository {
 
   /// Nastaví stav outbox položky (`SYNCED`/`CONFLICT`/`BLOCKED`).
   Future<void> markOutboxStatus(String outboxId, String status);
+
+  /// Konfliktní/odmítnuté outbox položky bez uzavřeného rozhodnutí
+  /// (C12 §4/§6), s lidským popisem entity pro UI (CRC-011).
+  Future<List<UnresolvedSyncItem>> unresolvedItems(String ownerId);
+
+  /// Uzavře rozhodnutí o položce (`USE_LOCAL`/`CANCEL_LOCAL_CHANGE`,
+  /// C12 §5) — append-only záznam, žádné mazání dat (CRC-006). USE_LOCAL
+  /// rozhodnutí zvyšuje resolution-salt lokální revize entity, takže další
+  /// push je nová operace s novým idempotency klíčem (CRC-005) beze změny
+  /// doménových dat.
+  Future<void> recordResolution(
+    String outboxId,
+    String decision, {
+    required DateTime now,
+  });
 }

@@ -153,6 +153,30 @@ paths:
         "500":
           $ref: "#/components/responses/AuthInternalError"
   /api/v1/auth/sessions:
+    delete:
+      tags: [Auth]
+      operationId: revokeAllSessions
+      summary: Globální revokace — odhlásit všude (C13)
+      description: >
+        Revokuje všechny auth session účtu včetně volající (RVC-001/006);
+        odpověď je poslední autorizovaná akce této session. Idempotentní
+        (RVC-004). Ruší výhradně oprávnění, žádná data (RVC-005).
+      security:
+        - accessSession: []
+      responses:
+        "204":
+          description: Všechny session účtu revokovány (nebo už byly).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "429":
+          $ref: "#/components/responses/AuthRateLimited"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
     post:
       tags: [Auth]
       operationId: loginWithPassword
@@ -429,6 +453,38 @@ paths:
         "500":
           $ref: "#/components/responses/AuthInternalError"
   /api/v1/devices/{installationId}:
+    delete:
+      tags: [Device]
+      operationId: revokeDevice
+      summary: Revokace instalace (C13)
+      description: >
+        Revokuje registrovanou instalaci principala a všechny na ni vázané
+        auth session (RVC-002); revokovaná instalace nepushuje ani se tiše
+        nereaktivuje (DRC-013). Cizí a neexistující instalace jsou shodně
+        404 (RVC-003); opakování je idempotentní no-op (RVC-004).
+      security:
+        - accessSession: []
+      parameters:
+        - name: installationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Instalace revokována (nebo už byla).
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "404":
+          $ref: "#/components/responses/OwnedResourceNotFound"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
     put:
       tags: [Device]
       operationId: registerDevice

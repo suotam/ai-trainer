@@ -141,6 +141,39 @@ class JdbcAuthSessionRepository(
             .update()
     }
 
+    @Transactional
+    override fun revokeAllForAccount(
+        accountId: UUID,
+        now: Instant,
+    ): List<UUID> = revokeMatching("account_id = :accountId", mapOf("accountId" to accountId), now)
+
+    @Transactional
+    override fun revokeBoundToInstallation(
+        accountId: UUID,
+        installationId: UUID,
+        now: Instant,
+    ): List<UUID> =
+        revokeMatching(
+            "account_id = :accountId AND device_installation_id = :installationId",
+            mapOf("accountId" to accountId, "installationId" to installationId),
+            now,
+        )
+
+    private fun revokeMatching(
+        condition: String,
+        params: Map<String, Any>,
+        now: Instant,
+    ): List<UUID> {
+        var spec =
+            jdbc.sql(
+                "SELECT id FROM auth_session WHERE status = 'ACTIVE' AND $condition",
+            )
+        params.forEach { (name, value) -> spec = spec.param(name, value) }
+        val sessionIds = spec.query { rs, _ -> UUID.fromString(rs.getString("id")) }.list()
+        sessionIds.forEach { revokeSession(it, now) }
+        return sessionIds
+    }
+
     override fun bindDeviceInstallation(
         sessionId: UUID,
         accountId: UUID,

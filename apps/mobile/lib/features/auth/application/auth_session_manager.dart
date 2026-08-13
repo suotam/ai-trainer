@@ -138,6 +138,42 @@ class AuthSessionManager extends AsyncNotifier<AuthSessionState> {
     }
   }
 
+  /// „Odhlásit všude" (R2-06, C13): serverová globální revokace, po
+  /// úspěchu lokální vyčištění (TSS-009). Offline se globální revokace
+  /// provést nedá — vrací typované selhání a stav se nemění (poctivé:
+  /// ostatní zařízení by zůstala tiše přihlášená). `SESSION_REVOKED`
+  /// znamená, že revokace už proběhla jinde → lokální vyčištění proběhne.
+  Future<AuthFlowResult> signOutEverywhere() async {
+    final String? accessToken;
+    try {
+      accessToken = (await _storage.read())?.accessToken;
+    } on SecureSessionStorageException {
+      await _clearQuietly();
+      state = const AsyncData(AnonymousAuthState());
+      await _bindAnonymousQuietly();
+      return const AuthFlowSuccess();
+    }
+    if (accessToken == null) {
+      return const AuthFlowSuccess();
+    }
+    try {
+      await _api.revokeAllSessions(accessToken);
+    } on AuthApiFailure catch (failure) {
+      switch (failure.kind) {
+        case AuthApiFailureKind.sessionRevoked:
+        case AuthApiFailureKind.accessSessionExpired:
+          // Session už neplatí — pokračuje se lokálním vyčištěním.
+          break;
+        default:
+          return _flowFailure(failure);
+      }
+    }
+    await _clearQuietly();
+    state = const AsyncData(AnonymousAuthState());
+    await _bindAnonymousQuietly();
+    return const AuthFlowSuccess();
+  }
+
   Future<void> _bindAnonymousQuietly() async {
     try {
       await ref.read(localOwnerBindingProvider).bindAnonymous();

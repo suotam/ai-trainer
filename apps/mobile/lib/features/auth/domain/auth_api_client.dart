@@ -119,5 +119,9 @@ abstract interface class AuthApiClient {
   /// Ukončí aktuální session; opakovaný logout je no-op (C4 §10).
   Future<void> logout(String accessToken);
 
+  /// Globální revokace — „odhlásit všude" (C13 §4, RVC-001): revokuje
+  /// všechny session účtu včetně této. Idempotentní.
+  Future<void> revokeAllSessions(String accessToken);
+
   Future<AuthSessionContext> sessionContext(String accessToken);
 }

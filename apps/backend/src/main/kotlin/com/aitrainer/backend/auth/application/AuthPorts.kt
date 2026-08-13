@@ -92,6 +92,25 @@ interface AuthSessionRepository {
         accountId: UUID,
         installationId: UUID,
     )
+
+    /**
+     * Globální revokace (C13 §4, RVC-001): revokuje všechny aktivní session
+     * účtu včetně volající a vrací jejich ID pro audit. Idempotentní.
+     */
+    fun revokeAllForAccount(
+        accountId: UUID,
+        now: Instant,
+    ): List<UUID>
+
+    /**
+     * Revokuje všechny aktivní session vázané na instalaci (C13 §4/RVC-002)
+     * a vrací jejich ID pro audit. Idempotentní.
+     */
+    fun revokeBoundToInstallation(
+        accountId: UUID,
+        installationId: UUID,
+        now: Instant,
+    ): List<UUID>
 }
 
 /** Hash hesla; nikdy plaintext (SDM-010). `dummyHash` slouží timing-safe loginu. */

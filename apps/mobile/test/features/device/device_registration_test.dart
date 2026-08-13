@@ -90,7 +90,7 @@ void main() {
         final registration = deviceApi.registrations.single;
         expect(registration.installationId, equals('installation-42'));
         expect(registration.platform, equals('ANDROID'));
-        expect(registration.localSchemaVersion, equals('3'));
+        expect(registration.localSchemaVersion, equals('4'));
         expect(registration.accessToken, equals(storage.stored!.accessToken));
       },
     );
@@ -174,7 +174,7 @@ void main() {
 
       final metadata = container.read(deviceMetadataProvider);
 
-      expect(metadata.localSchemaVersion, equals('3'));
+      expect(metadata.localSchemaVersion, equals('4'));
       expect(metadata.appVersion, isNotEmpty);
     });
   });

@@ -74,6 +74,32 @@ class PlannedSyncEntity {
   final String stateEntityId;
 }
 
+/// Konfliktní nebo odmítnutá položka čekající na uživatelské rozhodnutí
+/// (C12 §4). `title` je lidský popis entity pro UI (CRC-011).
+class UnresolvedSyncItem {
+  const UnresolvedSyncItem({
+    required this.outboxId,
+    required this.entityType,
+    required this.entityId,
+    required this.stateEntityType,
+    required this.stateEntityId,
+    required this.isConflict,
+    required this.title,
+  });
+
+  final String outboxId;
+  final String entityType;
+  final String entityId;
+  final String stateEntityType;
+  final String stateEntityId;
+
+  /// `true` = VERSION_CONFLICT (USE_LOCAL povolen); `false` = rejection
+  /// (`BLOCKED` — jen CANCEL, CRC-008).
+  final bool isConflict;
+
+  final String title;
+}
+
 /// Výsledek běhu sync engine — typovaný, bez raw HTTP detailu.
 sealed class SyncRunResult {
   const SyncRunResult();

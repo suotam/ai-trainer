@@ -454,3 +454,24 @@ class LocalSyncedVersions extends Table {
   @override
   Set<Column<Object>> get primaryKey => {entityType, entityId};
 }
+
+/// R2-06: uzavřená rozhodnutí o konfliktních/odmítnutých outbox položkách
+/// (C12 §5). Outbox zůstává append-oriented log; rozhodnutí je samostatný
+/// záznam (`USE_LOCAL` / `CANCEL_LOCAL_CHANGE`), nikdy mazání dat.
+@DataClassName('LocalSyncResolutionRow')
+class LocalSyncResolutions extends Table {
+  @override
+  String get tableName => 'local_sync_resolutions';
+
+  TextColumn get outboxId => text()();
+  TextColumn get decision => text()();
+  IntColumn get resolvedAt => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {outboxId};
+
+  @override
+  List<String> get customConstraints => [
+    "CHECK (decision IN ('USE_LOCAL','CANCEL_LOCAL_CHANGE'))",
+  ];
+}

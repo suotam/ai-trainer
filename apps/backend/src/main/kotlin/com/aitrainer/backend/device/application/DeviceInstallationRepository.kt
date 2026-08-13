@@ -31,4 +31,11 @@ interface DeviceInstallationRepository {
         installationId: UUID,
         lastSyncAt: Instant,
     )
+
+    /** Revokuje instalaci (C13 §4, RVC-002); idempotentní. */
+    fun revoke(
+        accountId: UUID,
+        installationId: UUID,
+        now: Instant,
+    )
 }
