@@ -19,15 +19,18 @@ enum PullApplyOutcome {
 
 /// Sloupcová specifikace typu: payload klíč → sloupec (PMS-003 — payload
 /// jsou přesné sloupcové hodnoty z push strany, aplikace je inverz).
+/// `timestamps: false` pro tabulky bez updated_at (created_at nese payload).
 class _TypeSpec {
-  const _TypeSpec(this.table, this.fields);
+  const _TypeSpec(this.table, this.fields, {this.timestamps = true});
 
   final String table;
   final Map<String, String> fields;
+  final bool timestamps;
 }
 
-/// P0 scope (C42 §2): ploché root typy bez FK závislosti na workout
-/// hierarchii; rozšíření vlastní C43/C45 (PMS-007).
+/// Pull scope (C42 §2 + C43 §3): ploché root typy, workout instance se
+/// strukturou a závislé typy po prerekvizitách (WSS-010); R1 historie
+/// vlastní C45.
 const List<String> pullSupportedTypes = [
   'USER_SPORT',
   'GOAL',
@@ -36,6 +39,9 @@ const List<String> pullSupportedTypes = [
   'CONSTRAINT_ITEM',
   'TRAINING_PLAN',
   'DAILY_CHECK_IN',
+  'WORKOUT_INSTANCE',
+  'MANUAL_ACTIVITY',
+  'CALENDAR_CHANGE',
 ];
 
 const Map<String, _TypeSpec> _specs = {
@@ -105,6 +111,44 @@ const Map<String, _TypeSpec> _specs = {
     'painAreaCode': 'pain_area_code',
     'rowVersion': 'row_version',
   }),
+  // C43 §3: instance nese v payloadu created/updated časy původního
+  // zařízení — aplikují se beze změny (timestamps: false).
+  'WORKOUT_INSTANCE': _TypeSpec('local_workout_instances', {
+    'title': 'title',
+    'description': 'description',
+    'purpose': 'purpose',
+    'workoutType': 'workout_type',
+    'scheduledLocalDate': 'scheduled_local_date',
+    'scheduledStartAt': 'scheduled_start_at',
+    'timeZoneId': 'time_zone_id',
+    'plannedDurationSeconds': 'planned_duration_seconds',
+    'status': 'status',
+    'sourceType': 'source_type',
+    'sourceReference': 'source_reference',
+    'revisionNumber': 'revision_number',
+    'completedAt': 'completed_at',
+    'createdAt': 'created_at',
+    'updatedAt': 'updated_at',
+    'rowVersion': 'row_version',
+  }, timestamps: false),
+  'MANUAL_ACTIVITY': _TypeSpec('local_activities', {
+    'title': 'title',
+    'localDate': 'local_date',
+    'durationMinutes': 'duration_minutes',
+    'userSportId': 'user_sport_id',
+    'workoutInstanceId': 'workout_instance_id',
+    'note': 'note',
+    'source': 'source',
+    'rowVersion': 'row_version',
+  }),
+  'CALENDAR_CHANGE': _TypeSpec('local_calendar_changes', {
+    'workoutInstanceId': 'workout_instance_id',
+    'changeType': 'change_type',
+    'fromLocalDate': 'from_local_date',
+    'toLocalDate': 'to_local_date',
+    'replacementInstanceId': 'replacement_instance_id',
+    'createdAt': 'created_at',
+  }, timestamps: false),
 };
 
 /// Aplikace stažených změn dle merge matice C42 §3: server přepisuje jen
@@ -165,28 +209,36 @@ class DriftPullApplier {
 
     try {
       if (local == null) {
+        final metaColumns = spec.timestamps ? 'created_at, updated_at, ' : '';
+        final metaValues = spec.timestamps ? '?, ?, ' : '';
         await _db.customStatement(
           'INSERT INTO ${spec.table} '
-          '(id, owner_id, sync_state, created_at, updated_at, '
-          '${columns.join(', ')}) '
-          "VALUES (?, ?, 'SYNCED', ?, ?, "
+          '(id, owner_id, sync_state, $metaColumns${columns.join(', ')}) '
+          "VALUES (?, ?, 'SYNCED', $metaValues"
           '${List.filled(columns.length, '?').join(', ')})',
           [
             item.entityId,
             ownerId,
-            nowMillis,
-            nowMillis,
+            if (spec.timestamps) ...[nowMillis, nowMillis],
             ...values.map((v) => v.value),
           ],
         );
       } else {
+        final metaSet = spec.timestamps ? 'updated_at = ?, ' : '';
         await _db.customStatement(
           'UPDATE ${spec.table} SET '
-          "sync_state = 'SYNCED', updated_at = ?, "
+          "sync_state = 'SYNCED', $metaSet"
           '${columns.map((c) => '$c = ?').join(', ')} '
           'WHERE id = ?',
-          [nowMillis, ...values.map((v) => v.value), item.entityId],
+          [
+            if (spec.timestamps) nowMillis,
+            ...values.map((v) => v.value),
+            item.entityId,
+          ],
         );
+      }
+      if (item.entityType == 'WORKOUT_INSTANCE') {
+        await _rebuildStructure(item);
       }
     } catch (_) {
       // Typované selhání řádku (PMS-009) — žádný částečný zápis (statement
@@ -209,5 +261,47 @@ class DriftPullApplier {
     return local == null
         ? PullApplyOutcome.appliedNew
         : PullApplyOutcome.appliedUpdate;
+  }
+
+  /// Rekonstrukce struktury instance (C43 §3, WSS-004): celá a state-based
+  /// — smazat lokální sekce (kaskáda odstraní kroky/sety) a vložit ze
+  /// syrových sloupcových map. Chybějící `structure` = poctivý stav bez
+  /// dopočtů (WSS-008).
+  Future<void> _rebuildStructure(SyncPullItem item) async {
+    final structure = item.payload['structure'];
+    if (structure is! Map) {
+      return;
+    }
+    await _db.customStatement(
+      'DELETE FROM local_workout_sections WHERE workout_instance_id = ?',
+      [item.entityId],
+    );
+
+    Future<void> insertRaw(String table, Map row) async {
+      final columns = row.keys.cast<String>().toList();
+      await _db.customStatement(
+        'INSERT INTO $table (${columns.join(', ')}) '
+        'VALUES (${List.filled(columns.length, '?').join(', ')})',
+        [for (final column in columns) row[column]],
+      );
+    }
+
+    final sections = (structure['sections'] as List?) ?? const [];
+    for (final sectionRaw in sections.cast<Map>()) {
+      final section = Map<String, Object?>.from(sectionRaw)..remove('steps');
+      await insertRaw('local_workout_sections', section);
+      for (final stepRaw
+          in ((sectionRaw['steps'] as List?) ?? const []).cast<Map>()) {
+        final step = Map<String, Object?>.from(stepRaw)..remove('setPlans');
+        await insertRaw('local_workout_steps', step);
+        for (final setPlan
+            in ((stepRaw['setPlans'] as List?) ?? const []).cast<Map>()) {
+          await insertRaw(
+            'local_set_plans',
+            Map<String, Object?>.from(setPlan),
+          );
+        }
+      }
+    }
   }
 }
