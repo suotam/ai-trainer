@@ -137,15 +137,23 @@ class AnthropicModelProvider(
         }
     }
 
-    private fun parse(body: String): AiModelResult =
+    /**
+     * Odpověď může obsahovat více content bloků — model s aktivním
+     * reasoningem vrací nejdřív `thinking` blok(y) a až poté `text`
+     * (nalezeno živým smoke). Bere se první blok typu `text`; chybějící
+     * text = typované INVALID_RESPONSE.
+     */
+    internal fun parse(body: String): AiModelResult =
         try {
             val root = mapper.readTree(body)
+            val content = root.path("content")
             val text =
-                root
-                    .path("content")
-                    .path(0)
-                    .path("text")
-                    .asString()
+                (0 until content.size())
+                    .asSequence()
+                    .map { content.path(it) }
+                    .firstOrNull { it.path("type").asString() == "text" }
+                    ?.path("text")
+                    ?.asString()
             val modelId = root.path("model").asString()
             if (text.isNullOrBlank() || modelId.isNullOrBlank()) {
                 AiModelResult.Failure(AiFailureKind.INVALID_RESPONSE)

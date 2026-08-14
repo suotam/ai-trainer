@@ -1,4 +1,4 @@
-package com.aitrainer.backend.ai
+﻿package com.aitrainer.backend.ai
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
@@ -24,16 +24,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Integration testy R4-03 AI plan proposal endpointu (C28) nad skutečným
- * PostgreSQL s fake providerem (AGW-004): úspěch s trojicí verzí, auth
- * required, ohraničený kontext a audit bez obsahu.
+ * Integration testy R4-03 AI plan proposal endpointu (C28) nad skuteÄŤnĂ˝m
+ * PostgreSQL s fake providerem (AGW-004): ĂşspÄ›ch s trojicĂ­ verzĂ­, auth
+ * required, ohraniÄŤenĂ˝ kontext a audit bez obsahu.
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
         "aitrainer.auth.rate-limit.limit=100000",
-        // Per-account AI limit (C31 AIS-004) — malý, ať je 429 testovatelné;
-        // ostatní testy dělají max 1 AI volání per účet.
+        // Per-account AI limit (C31 AIS-004) â€” malĂ˝, aĹĄ je 429 testovatelnĂ©;
+        // ostatnĂ­ testy dÄ›lajĂ­ max 1 AI volĂˇnĂ­ per ĂşÄŤet.
         "aitrainer.ai.rate-limit.limit=3",
     ],
 )
@@ -96,14 +96,14 @@ class PlanProposalApiIntegrationTest {
 
         assertEquals(200, response.statusCode.value())
         val json = JsonPath.parse(response.body)
-        assertEquals("plan-proposal-v1", json.read("$.promptVersion"))
+        assertEquals("plan-proposal-v2", json.read("$.promptVersion"))
         assertEquals("plan-proposal-schema-v1", json.read("$.schemaVersion"))
         assertEquals("fake-model", json.read("$.modelId"))
-        // Fake provider fixture prošla validací (C28) a je kanonická.
+        // Fake provider fixture proĹˇla validacĂ­ (C28) a je kanonickĂˇ.
         assertTrue(json.read<List<Any>>("$.proposal.workouts").isNotEmpty())
         assertTrue(json.read<String>("$.proposal.summary").isNotBlank())
 
-        // Audit události bez obsahu kontextu (PAA-007/008).
+        // Audit udĂˇlosti bez obsahu kontextu (PAA-007/008).
         val actions =
             jdbc.queryForList(
                 "SELECT action FROM audit_event WHERE principal_account_id = ?::uuid ORDER BY occurred_at, action",
@@ -143,11 +143,11 @@ class PlanProposalApiIntegrationTest {
             )
         assertEquals(200, response.statusCode.value())
         val json = JsonPath.parse(response.body)
-        assertEquals("adjustment-proposal-v1", json.read("$.promptVersion"))
+        assertEquals("adjustment-proposal-v2", json.read("$.promptVersion"))
         assertEquals("adjustment-proposal-schema-v1", json.read("$.schemaVersion"))
         assertTrue(json.read<List<Any>>("$.proposal.operations").isNotEmpty())
 
-        // Neznámý typ = typované odmítnutí (ASJ-006).
+        // NeznĂˇmĂ˝ typ = typovanĂ© odmĂ­tnutĂ­ (ASJ-006).
         val unknown =
             exchange(
                 HttpMethod.POST,
@@ -183,7 +183,7 @@ class PlanProposalApiIntegrationTest {
         assertEquals("RATE_LIMITED", JsonPath.parse(limited.body).read("$.code"))
         assertTrue(limited.headers.containsHeader("Retry-After"))
 
-        // Nezávislý účet limit nesdílí (klíč je účet, AIS-004).
+        // NezĂˇvislĂ˝ ĂşÄŤet limit nesdĂ­lĂ­ (klĂ­ÄŤ je ĂşÄŤet, AIS-004).
         val (_, otherToken) = registerAccount()
         val other =
             exchange(
@@ -216,13 +216,13 @@ class PlanProposalApiIntegrationTest {
                 rootLogger.detachAppender(appender)
             }
 
-        // Chování endpointu se nemění: běžný validovaný výsledek (AIS-006).
+        // ChovĂˇnĂ­ endpointu se nemÄ›nĂ­: bÄ›ĹľnĂ˝ validovanĂ˝ vĂ˝sledek (AIS-006).
         assertEquals(200, response.statusCode.value())
         val json = JsonPath.parse(response.body)
         assertEquals("Fake Weekly Plan", json.read("$.proposal.planTitle"))
-        assertTrue(!response.body!!.contains(injectionMarker), "výstup nese injektovaný obsah")
+        assertTrue(!response.body!!.contains(injectionMarker), "vĂ˝stup nese injektovanĂ˝ obsah")
 
-        // Redakce (AIS-009): marker není v zachycených lozích ani auditech.
+        // Redakce (AIS-009): marker nenĂ­ v zachycenĂ˝ch lozĂ­ch ani auditech.
         val leaked = appender.list.filter { it.formattedMessage?.contains(injectionMarker) == true }
         assertTrue(leaked.isEmpty(), "log nese obsah kontextu: $leaked")
         val auditDump =

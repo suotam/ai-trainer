@@ -1,4 +1,4 @@
-package com.aitrainer.backend.ai
+﻿package com.aitrainer.backend.ai
 
 import com.aitrainer.backend.ai.application.AiGateway
 import com.aitrainer.backend.ai.application.AiGatewayResult
@@ -19,9 +19,9 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
- * R4-01 unit testy AI gateway (C25/C26): trojice verzí v úspěchu (PAA-005),
- * typovaná selhání (AGW-005), audit události bez obsahu (PAA-007/008/010)
- * a deterministický fake provider (AGW-004).
+ * R4-01 unit testy AI gateway (C25/C26): trojice verzĂ­ v ĂşspÄ›chu (PAA-005),
+ * typovanĂˇ selhĂˇnĂ­ (AGW-005), audit udĂˇlosti bez obsahu (PAA-007/008/010)
+ * a deterministickĂ˝ fake provider (AGW-004).
  */
 class AiGatewayTest {
     private class RecordingAudit : AuditRecorder {
@@ -57,14 +57,14 @@ class AiGatewayTest {
         val result = gateway.requestProposal(accountId, AiRequestType.PLAN_PROPOSAL, secretContext)
 
         val generated = assertIs<AiGatewayResult.Generated>(result)
-        assertEquals("plan-proposal-v1", generated.promptVersion)
+        assertEquals("plan-proposal-v2", generated.promptVersion)
         assertEquals("plan-proposal-schema-v1", generated.schemaVersion)
         assertEquals("fake-model", generated.modelId)
 
         assertEquals(listOf("AiProposalRequested", "AiProposalGenerated"), audit.entries.map { it.action })
         assertTrue(audit.entries.all { it.outcome == AuditOutcome.SUCCESS })
         assertTrue(audit.entries.all { it.principalAccountId == accountId })
-        // Audit bez obsahu (PAA-008): žádné pole nenese kontext.
+        // Audit bez obsahu (PAA-008): ĹľĂˇdnĂ© pole nenese kontext.
         audit.entries.forEach { entry ->
             listOf(entry.action, entry.target.orEmpty(), entry.policyDecision.orEmpty()).forEach {
                 assertTrue(!it.contains("SENSITIVE-CONTEXT"), "audit nese obsah kontextu: $it")
@@ -90,12 +90,14 @@ class AiGatewayTest {
     @Test
     fun `prompt registry je verzovany a stabilni`() {
         val prompt = PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL)
-        assertEquals("plan-proposal-v1", prompt.id)
+        assertEquals("plan-proposal-v2", prompt.id)
         assertTrue(prompt.template.isNotBlank())
-        // Stabilita (PAA-002/003): opakované čtení vrací identický artefakt.
+        // Stabilita (PAA-002/003): opakovanĂ© ÄŤtenĂ­ vracĂ­ identickĂ˝ artefakt.
         assertEquals(prompt, PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL))
-        // Prompt bez uživatelských dat (PAA-004) — šablona neobsahuje placeholdery kontextu.
-        assertTrue(!prompt.template.contains("{"), "šablona nesmí interpolovat kontext")
+        // Prompt bez uĹľivatelskĂ˝ch dat (PAA-004) â€” Ĺˇablona neobsahuje placeholdery
+        // kontextu (v2 legitimnÄ› obsahuje literĂˇlnĂ­ JSON tvar vĂ˝stupu).
+        assertTrue(!prompt.template.contains("\${"), "Ĺˇablona nesmĂ­ interpolovat kontext")
+        assertTrue(!prompt.template.contains("{{"), "Ĺˇablona nesmĂ­ interpolovat kontext")
     }
 
     @Test
@@ -110,18 +112,19 @@ class AiGatewayTest {
         val result = gateway.requestProposal(accountId, AiRequestType.ADJUSTMENT_PROPOSAL, secretContext)
 
         val generated = assertIs<AiGatewayResult.Generated>(result)
-        assertEquals("adjustment-proposal-v1", generated.promptVersion)
+        assertEquals("adjustment-proposal-v2", generated.promptVersion)
         assertEquals("adjustment-proposal-schema-v1", generated.schemaVersion)
-        assertTrue(audit.entries.all { it.target.orEmpty().contains("adjustment-proposal-v1") })
+        assertTrue(audit.entries.all { it.target.orEmpty().contains("adjustment-proposal-v2") })
 
-        // Registry: nová verze je immutable artefakt bez uživatelských dat
+        // Registry: novĂˇ verze je immutable artefakt bez uĹľivatelskĂ˝ch dat
         // (PAA-002/003/004) a bez interpolace kontextu.
         val prompt = PromptRegistry.promptFor(AiRequestType.ADJUSTMENT_PROPOSAL)
-        assertEquals("adjustment-proposal-v1", prompt.id)
+        assertEquals("adjustment-proposal-v2", prompt.id)
         assertEquals(prompt, PromptRegistry.promptFor(AiRequestType.ADJUSTMENT_PROPOSAL))
-        assertTrue(!prompt.template.contains("{"), "šablona nesmí interpolovat kontext")
-        // Plan-proposal verze zůstává nedotčená (aditivní rozšíření).
-        assertEquals("plan-proposal-v1", PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL).id)
+        assertTrue(!prompt.template.contains("\${"), "Ĺˇablona nesmĂ­ interpolovat kontext")
+        assertTrue(!prompt.template.contains("{{"), "Ĺˇablona nesmĂ­ interpolovat kontext")
+        // Plan-proposal verze zĹŻstĂˇvĂˇ nedotÄŤenĂˇ (aditivnĂ­ rozĹˇĂ­Ĺ™enĂ­).
+        assertEquals("plan-proposal-v2", PromptRegistry.promptFor(AiRequestType.PLAN_PROPOSAL).id)
     }
 
     @Test
