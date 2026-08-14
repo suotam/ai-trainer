@@ -62,6 +62,10 @@ abstract final class AppRoutes {
   static const String checkInName = 'checkIn';
   static const String checkInPath = '/checkin';
 
+  /// Týdenní souhrn + připomínky (R5-07, C39/C40) — offline-first.
+  static const String summaryName = 'summary';
+  static const String summaryPath = '/summary';
+
   /// Technická R0 úvodní obrazovka (backend smoke flow); už není domov.
   static const String startupName = 'startup';
   static const String startupPath = '/startup';

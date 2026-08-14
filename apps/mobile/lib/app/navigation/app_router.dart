@@ -9,6 +9,7 @@ import '../../features/checkin/presentation/checkin_screen.dart';
 import '../../features/goals/presentation/goals_screen.dart';
 import '../../features/plan/presentation/plan_screen.dart';
 import '../../features/sports/presentation/sports_profile_screen.dart';
+import '../../features/summary/presentation/weekly_summary_screen.dart';
 import '../../features/workouts/presentation/active_session_screen.dart';
 import '../../features/workouts/presentation/completed_workout_detail_screen.dart';
 import '../../features/workouts/presentation/history_screen.dart';
@@ -103,6 +104,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.checkInName,
         path: AppRoutes.checkInPath,
         builder: (context, state) => const CheckInScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.summaryName,
+        path: AppRoutes.summaryPath,
+        builder: (context, state) => const WeeklySummaryScreen(),
       ),
       GoRoute(
         name: AppRoutes.startupName,

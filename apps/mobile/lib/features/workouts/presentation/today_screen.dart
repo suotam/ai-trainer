@@ -32,6 +32,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key activityActionKey = Key('today_activity_action');
   static const Key aiActionKey = Key('today_ai_action');
   static const Key checkInActionKey = Key('today_checkin_action');
+  static const Key summaryActionKey = Key('today_summary_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -80,6 +81,12 @@ class TodayScreen extends ConsumerWidget {
             icon: const Icon(Icons.event_available_outlined),
             tooltip: l10n.availabilityOpenTooltip,
             onPressed: () => context.push(AppRoutes.availabilityPath),
+          ),
+          IconButton(
+            key: summaryActionKey,
+            icon: const Icon(Icons.summarize_outlined),
+            tooltip: l10n.summaryOpenTooltip,
+            onPressed: () => context.push(AppRoutes.summaryPath),
           ),
           IconButton(
             key: activityActionKey,
