@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.60  
+**Verze:** 2.61  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -220,6 +220,8 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r2-vertical-slice-plan.md` vlastní pořadí implementace R2 (`R2-01` až `R2-08`), R2 blocking contract map, evidence gates, R2 Exit Review a `R2P-001` až `R2P-015`. **Celé R2 (`R2-01` až `R2-08`) je implementováno a R2 Exit Review je proveden** (viz `DOCUMENTATION_STATUS.md` §3; otevřená zůstává jen řízená výjimka emulátorové runtime evidence).
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
+
+- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **Žádný R6 slice není `READY`** — čeká se na kontrakty (první: C41 – Pull sync protocol).
 
 - `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
@@ -448,10 +450,13 @@ contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit
 Review proveden a Release 5 uzavřen** (otevřené řízené výjimky: živý
 provider smoke /beta gate — beta interní/, platformní doručení notifikací,
 pull sync a bezpečná obnova /beta krok 10/, emulátorová runtime evidence
-— viz `DOCUMENTATION_STATUS.md` §3). Další kanonický krok:
+— viz `DOCUMENTATION_STATUS.md` §3). Existuje kanonický R6 vertical-slice
+plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až
+`R6-06`, contract map C41–C45, `R6P-001..015`); **žádný R6 slice není
+`READY`**. Další kanonický krok:
 
 ```text
-Naplánování Release 6  (R6 vertical-slice plán)
+C41 – Pull sync protocol kontrakt → R6-01 – Pull Sync Protocol and Server Endpoint
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
