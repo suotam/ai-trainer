@@ -1,0 +1,9 @@
+{
+    "name":  "live-smoke-adjustment-sonnet5",
+    "description":  "Zachycený reálný výstup claude-sonnet-5 ze živého provider smoke (2026-08-14, C32 §5) — konzervativní úpravy při safety CAUTION.",
+    "modelOutput":  "{\"summary\":\"Bezpečnostní stav CAUTION kvůli vysoké únavě a nízké energii (dnešní energie 2/5, únava 4/5, 7denní průměry potvrzují trend). Proto snižuji intenzitu dnešního těžkého dřepu na lehčí techniku, přesouvám intervalový běh na den s lepší regenerací a odlehčuji sobotní Full Body, aby se zabránilo přetížení. Žádné navýšení objemu není navrženo.\",\"operations\":[{\"operation\":\"REPLACE\",\"target\":{\"dayOffset\":0,\"title\":\"Těžký dřep\"},\"workout\":{\"title\":\"Lehký technický dřep\",\"workoutType\":\"STRENGTH\",\"plannedDurationMinutes\":45,\"exercises\":[{\"title\":\"Dřep s činkou\",\"sets\":3,\"repetitions\":5,\"weightKg\":60}]},\"reason\":\"Vysoká únava (4/5) a nízká energie (2/5) indikují potřebu snížit zátěž; nahrazuji těžký dřep lehčí technickou variantou se sníženým objemem a váhou.\"},{\"operation\":\"MOVE\",\"target\":{\"dayOffset\":2,\"title\":\"Intervalový běh\"},\"toDayOffset\":4,\"reason\":\"Přesun intervalového tréninku o dva dny později dává tělu více času na regeneraci před další intenzivní zátěží, což je vhodné vzhledem k aktuálnímu bezpečnostnímu stavu CAUTION.\"},{\"operation\":\"REPLACE\",\"target\":{\"dayOffset\":5,\"title\":\"Full Body B\"},\"workout\":{\"title\":\"Lehký Full Body (regenerace)\",\"workoutType\":\"STRENGTH\",\"plannedDurationMinutes\":40,\"exercises\":[{\"title\":\"Goblet dřep\",\"sets\":3,\"repetitions\":10,\"weightKg\":20},{\"title\":\"Bench press lehký\",\"sets\":3,\"repetitions\":8,\"weightKg\":40}]},\"reason\":\"Vzhledem k přetrvávající vysoké únavě v týdnu snižuji objem a intenzitu sobotního tréninku, aby se předešlo přetrénování.\"}]}",
+    "expected":  {
+                     "verdict":  "VALID",
+                     "operationCount":  3
+                 }
+}
