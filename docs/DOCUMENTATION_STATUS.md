@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.70  
+**Verze:** 2.71  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -311,7 +311,29 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R6-05 – New Device Restore Flow` je implementován (blocking kontrakt **C45 – Device restore** /`docs/06-domain/r6-restore-contract.md`, `DRS-001..015`/ vznikl v témže cyklu) — **beta krok 10 (obnova na novém zařízení) je splněn deterministicky; kontraktní mapa R6 (C41–C45) je kompletní**. **Restore = orchestrace C41–C44, žádný import mechanismus** (DRS-001): plný pull existujícím merge enginem od prázdných kurzorů. **Pull scope rozšířen na všech 15 registrových typů** vč. R1 historie v FK pořadí (session → step/set performance → feedback → summary po instancích; DRS-011) — applier speci dostaly příznaky `timestamps: false` (payload nese původní časy zařízení) a `owned: false` (children bez owner/sync sloupců — tranzitivní vlastnictví přes session). **UI:** `RestoreSection` na Account obrazovce — explicitní akce přihlášeného uživatele (DRS-002), typované stavy (Idle/Running/Completed s počty/FailedAnonymous/FailedUnavailable, DRS-009), po dokončení invalidace read modelů (DRS-012); **poctivé hranice přiznává text v UI** (DRS-007): AI návrhy, reminder nastavení, kurzory/outbox a rozpracovaný běh se neobnovují. **Přerušitelnost + idempotence přes kurzory** (DRS-003 — žádný wizard stav); lokální anonymní data koexistují a nikdy nejsou tiše smazána (DRS-005); tombstonovaný řádek se neobnoví (DTS-006); kolize dvou ACTIVE plánů přiznaná — řeší uživatel archivací (DRS-013). Ověřeno **2 novými testy** (plná obnova device A → server → prázdná device B: plán + instance se strukturou + dokončená session s aktivitním summary + check-in, počty tabulek, historie i Today read model vidí obnovený workout /beta krok 10/, druhý běh no-op, tombstone se neobnovil, lokální check-in přežil; přerušení uprostřed delegujícím fake API → typovaná nedostupnost s persistovanými kurzory → dokončení bez duplicit → třetí běh čistý no-op) — mobile suite **342 testů**, analyze čistý; backend beze změny (**120/120**).
 
-**Přesný další kanonický krok:** `R6-05` je implementován → dalším krokem je `R6-06 – R6 Critical End-to-End Evidence and Exit Review` (bez nového kontraktu): deterministický E2E „zařízení A → push vč. struktury a delete → zařízení B → restore → identická doménová pravda → R1 tok na obnoveném workoutu → idempotence oběma směry", doložení beta baseline kroku 10 a R6 Exit Review dle plánu §13. Implementace smí začít až po samostatném pokynu.
+`R6-06 – R6 Critical End-to-End Evidence and Exit Review` je implementován (bez nového kontraktu — E2E + Exit Review nad C41–C45). **Kritická R6 E2E** (`r6_critical_path_e2e_test.dart`, deterministická, dvě reálné SQLite DB proti témuž fake serveru se sdíleným stavem — úspěšný push se stává pull pravdou vč. tombstonů, R6P-013): zařízení A (owner účtu) vytvoří plán se **dvěma workouty vč. struktury** (C20 cviky), availability pravidla, check-in a **dokončený běh s aktivitním summary** → **push 1** vše doručí (bez konfliktů, pending 0) → lokální zpětvzetí pravidla → **push 2 doručí DELETE tombstone** → push idempotence (třetí běh nemá co odeslat, žádný batch). Zařízení B (čistá instalace + owner binding) → **restore pullem** → **identická doménová pravda řádek po řádku** (9 tabulek: plány, instance, sekce, kroky, set plány, availability, check-iny, sessions, summaries; smazané pravidlo chybí na obou — tombstone se neoživil) → historie čte obnovenou pravdu (beta krok 10) → **R1 flow: start session nad rekonstruovanou strukturou** → idempotence oběma směry: opakovaný pull na B no-op; první pull na A od prázdných kurzorů = **nadbytečná, ale idempotentní aplikace** (invariant 9 — pravda A se nezměnila, opakovaný pull už čistý no-op); push B po obnově odesílá **výhradně novou lokální pravdu** (nová session + jí mutovaná instance), nikdy obnovená nezměněná data. Mobile suite **343 testů**, analyze čistý; backend beze změny (**120/120**).
+
+## R6 Exit Review (dle `r6-vertical-slice-plan.md` §13)
+
+- **pull protokol kontraktní: cursor/batch/ownership/idempotence proti reálnému PostgreSQL** — R6-01 (4 Testcontainers testy: fidelity, stránkování, anti-IDOR, typované chyby).
+- **merge nikdy tiše nepřepsal lokální LOCAL_ONLY/DIRTY** — R6-02 merge matice + konfliktní větve; DIRTY přežití testováno i v tombstone matici (R6-04) a E2E (`conflictSkipped` 0 při čisté obnově).
+- **struktura workoutů synchronizuje oběma směry; obnovený workout drží R1 flow** — R6-03 byte-ekvivalence + R6-06 E2E start session; **SXC-010 splacen**.
+- **DELETE se propaguje tombstony a nic se neoživuje** — R6-04 (server tombstone s verzí, replay, matice) + R6-05/06 (restore bez oživlých záznamů); **SXC-011 splacen**.
+- **restore na čistém zařízení obnoví úplnou doménovou pravdu, je přerušitelný a idempotentní** — R6-05 (přerušení + dokončení bez duplicit) + R6-06 (identita pravdy po tabulkách).
+- **beta baseline krok 10 („bezpečná obnova") doložen E2E** — restore vč. struktury a historie, read modely čtou obnovenou pravdu.
+- **R1–R5 kritické E2E zelené; R6 E2E deterministicky prochází** — všech šest kritických E2E v téže suite; lokálně mobil **343/343** + analyze, backend **120/120** + ktlint; CI na main se ověří po merge.
+- **beta gate podmínky (§5.3) znovu poctivě evidovány — NESPLNĚNY, beta zůstává interní**: živý provider smoke (R4 dluh, vyžaduje API klíč), platformní doručení notifikací (C40 NTF-007 no-op gate) a emulátorová runtime evidence (bez SDK; rozšířit o R6 krok obnovy na druhé instalaci) — podmínky zveřejnění bety, ne slices.
+- **žádný známý blocker ani critical defect** — řízené výjimky níže.
+
+**Otevřené řízené výjimky po R6 (poctivě přiznané):**
+1. **Živý provider smoke** (beta gate) — beta interní, dokud neproběhne; postup v R4 Exit Review trvá.
+2. **Platformní doručení notifikací** (C40 NTF-007) — adapter, permission flow a on-device evidence patří k emulátorovému dluhu.
+3. **Emulátorová runtime evidence** (R2→R6) — bez SDK; on-device průchod R1–R6 flow vč. obnovy.
+4. Přenesené menší dluhy trvají (distribuovaný rate limiter, JSONB promoce, aktivní čas, feeling kanonizace, tombstone scope nad rámec `AVAILABILITY_RULE`) a nejsou beta blocker.
+
+**Release 6 je uzavřen** (R6-01 až R6-06 mergnuty, R6 Exit Review proveden; beta baseline kroky 1–10 doloženy deterministicky — **beta zůstává interní do splnění beta gate podmínek**).
+
+**Přesný další kanonický krok:** Release 6 je uzavřen → dalším krokem je **naplánování Release 7** (nebo splnění beta gate podmínek, jakmile budou externí zdroje — API klíč, Android SDK). Plánování ani implementace nezačíná bez samostatného pokynu.
 
 ---
 
@@ -496,10 +518,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní); **`R6-01` až `R6-05` jsou implementovány** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení přes všech 15 typů vč. historie — beta krok 10). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky — **beta zůstává interní** do splnění beta gate podmínek: živý provider smoke, platformní notifikace, emulátorová evidence). Další kanonický krok:
 
 ```text
-R6-06 – R6 Critical End-to-End Evidence and Exit Review
+Naplánování Release 7 (po samostatném pokynu),
+nebo splnění beta gate podmínek při dostupných externích zdrojích
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
