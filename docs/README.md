@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.67  
+**Verze:** 2.68  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -466,14 +466,17 @@ plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až
 implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull
 endpoint s kurzory; merge engine; struktura workoutů oběma směry; delete
 tombstones — SXC-010 i SXC-011 splaceny; obnova nového zařízení; kritická
-R6 E2E — beta baseline kroky 1–10 doloženy deterministicky). **Beta
-zůstává interní** do splnění beta gate podmínek (živý provider smoke,
-platformní doručení notifikací, emulátorová runtime evidence — vyžadují
-externí zdroje). Další kanonický krok:
+R6 E2E — beta baseline kroky 1–10 doloženy deterministicky). **Živý
+provider smoke je splacen** (2026-08-14, reálný `claude-sonnet-5`, oba
+request typy přes produkční validaci; 2 defekty nalezeny a opraveny,
+prompty v2, eval dataset rozšířen — viz `DOCUMENTATION_STATUS.md` §3).
+**Beta zůstává interní** do splnění zbývajících beta gate podmínek
+(platformní doručení notifikací, emulátorová runtime evidence — vyžadují
+Android SDK/zařízení). Další kanonický krok:
 
 ```text
 Naplánování Release 7 (po samostatném pokynu),
-nebo splnění beta gate podmínek při dostupných externích zdrojích
+nebo splacení zbývajících beta gate podmínek (Android SDK/zařízení)
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.

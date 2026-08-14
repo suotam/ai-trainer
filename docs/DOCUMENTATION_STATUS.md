@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.71  
+**Verze:** 2.72  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -326,14 +326,24 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 - **žádný známý blocker ani critical defect** — řízené výjimky níže.
 
 **Otevřené řízené výjimky po R6 (poctivě přiznané):**
-1. **Živý provider smoke** (beta gate) — beta interní, dokud neproběhne; postup v R4 Exit Review trvá.
+1. **Živý provider smoke** — ~~beta gate dluh~~ **SPLACEN 2026-08-14** (viz sekce níže).
 2. **Platformní doručení notifikací** (C40 NTF-007) — adapter, permission flow a on-device evidence patří k emulátorovému dluhu.
 3. **Emulátorová runtime evidence** (R2→R6) — bez SDK; on-device průchod R1–R6 flow vč. obnovy.
 4. Přenesené menší dluhy trvají (distribuovaný rate limiter, JSONB promoce, aktivní čas, feeling kanonizace, tombstone scope nad rámec `AVAILABILITY_RULE`) a nejsou beta blocker.
 
 **Release 6 je uzavřen** (R6-01 až R6-06 mergnuty, R6 Exit Review proveden; beta baseline kroky 1–10 doloženy deterministicky — **beta zůstává interní do splnění beta gate podmínek**).
 
-**Přesný další kanonický krok:** Release 6 je uzavřen → dalším krokem je **naplánování Release 7** (nebo splnění beta gate podmínek, jakmile budou externí zdroje — API klíč, Android SDK). Plánování ani implementace nezačíná bez samostatného pokynu.
+## Beta gate: živý provider smoke — PROVEDEN A SPLACEN (2026-08-14)
+
+**Živý provider smoke proběhl proti reálnému Anthropic API** (`claude-sonnet-5`) postupem z R4 Exit Review: opt-in `LiveProviderSmokeTest` (výhradně `AITRAINER_LIVE_SMOKE=1` — běžná suite a CI zůstávají deterministické bez sítě, EVG-002/006; klíč jen runtime konfigurace, AGW-003) volá produkční `AnthropicModelProvider` s registrovými prompty a reprezentativním C27/C36 kontextem; výstup prochází produkční C28/C37 validací. **Oba request typy prošly**: PLAN_PROPOSAL (plán 8 workoutů přes 2 týdny respektující omezení „citlivé koleno" — bezpečná hloubka dřepu, prevence, konzervativní objem dle statistiky dokončování) i ADJUSTMENT_PROPOSAL (při únavě 4/5 a safety CAUTION konzervativní REPLACE na lehčí varianty + MOVE později — **žádná přidaná zátěž**, v souladu s ADX-005 postojem).
+
+**Smoke odhalil a opravil dva reálné defekty** (přesně k tomu je):
+1. **Provider parse četl slepě `content[0].text`** — model s aktivním reasoningem vrací `thinking` blok před `text` blokem → typované `INVALID_RESPONSE` u každé netriviální odpovědi. Oprava: první blok typu `text`; deterministický regres `AnthropicResponseParseTest` (4 testy, bez sítě).
+2. **Model dostával jen identifikátor schématu, ne jeho tvar** — vymyslel si vlastní strukturu a dvojí validace ho (správně) odmítla. Oprava dle kontraktu: **nové immutable prompt verze `plan-proposal-v2` / `adjustment-proposal-v2`** (PAA-002/003) s přesným literálním tvarem výstupu; interpolační guard testu zpřesněn na skutečné placeholder markery.
+
+**Eval dataset rozšířen o zachycené reálné výstupy** (C32 §5): `live-smoke-plan-sonnet5.json` a `live-smoke-adjustment-sonnet5.json` — oba harnessy (backend `EvalGateTest` i mobilní konzistence) nad nimi prochází. Evidence běhu v `apps/backend/build/live-smoke/`. Suite po smoke: backend **126 testů** (2 skipped = opt-in smoke bez flagu), mobil **343 testů**.
+
+**Přesný další kanonický krok:** Release 6 je uzavřen a živý smoke splacen → dalším krokem je **naplánování Release 7**, nebo splacení zbývajících beta gate podmínek (platformní notifikace + emulátorová evidence — vyžadují Android SDK/zařízení). Plánování ani implementace nezačíná bez samostatného pokynu.
 
 ---
 
@@ -518,11 +528,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky — **beta zůstává interní** do splnění beta gate podmínek: živý provider smoke, platformní notifikace, emulátorová evidence). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky). **Živý provider smoke je splacen (2026-08-14** — oba request typy proti reálnému `claude-sonnet-5` prošly produkční validací; 2 reálné defekty nalezeny a opraveny, prompty v2, eval dataset rozšířen o reálné výstupy; viz §3). **Beta zůstává interní** do splnění zbývajících beta gate podmínek: platformní doručení notifikací a emulátorová runtime evidence (vyžadují Android SDK/zařízení). Další kanonický krok:
 
 ```text
 Naplánování Release 7 (po samostatném pokynu),
-nebo splnění beta gate podmínek při dostupných externích zdrojích
+nebo splacení zbývajících beta gate podmínek (Android SDK/zařízení)
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
