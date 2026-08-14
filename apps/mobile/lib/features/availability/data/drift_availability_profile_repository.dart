@@ -121,14 +121,49 @@ class DriftAvailabilityProfileRepository
   Future<AvailabilityWriteResult> removeDay(String dayOfWeek) {
     return _db.transaction(() async {
       final owner = await _currentOwnerId();
-      final removed =
-          await (_db.delete(_db.localAvailabilityRules)..where(
+      final rows =
+          await (_db.select(_db.localAvailabilityRules)..where(
                 (t) => t.ownerId.equals(owner) & t.dayOfWeek.equals(dayOfWeek),
               ))
-              .go();
-      return removed == 0
-          ? const AvailabilityWriteNotFound()
-          : AvailabilityWriteSaved(dayOfWeek);
+              .get();
+      if (rows.isEmpty) {
+        return const AvailabilityWriteNotFound();
+      }
+      // Zpětvzetí řádku, který server zná → DELETE záměr atomicky se
+      // smazáním (C44 §3, DTS-007); LOCAL_ONLY bez verze se maže jen
+      // lokálně (DTS-008).
+      for (final row in rows) {
+        final version = await _db
+            .customSelect(
+              'SELECT server_version FROM local_synced_versions '
+              "WHERE entity_type = 'AVAILABILITY_RULE' AND entity_id = ?",
+              variables: [Variable.withString(row.id)],
+            )
+            .getSingleOrNull();
+        if (version != null) {
+          final serverVersion = version.data['server_version'];
+          await _db.customStatement(
+            'INSERT OR IGNORE INTO local_outbox '
+            '(id, owner_id, entity_type, entity_id, operation_type, '
+            'idempotency_key, sequence, status, created_at) '
+            "VALUES (?, ?, 'AVAILABILITY_RULE', ?, 'DELETE', ?, "
+            '(SELECT COALESCE(MAX(sequence), 0) + 1 FROM local_outbox), '
+            "'PENDING', ?)",
+            [
+              'delete-${row.id}-v$serverVersion',
+              owner,
+              row.id,
+              'DELETE:AVAILABILITY_RULE:${row.id}:v$serverVersion',
+              DateTime.now().toUtc().millisecondsSinceEpoch,
+            ],
+          );
+        }
+      }
+      await (_db.delete(_db.localAvailabilityRules)..where(
+            (t) => t.ownerId.equals(owner) & t.dayOfWeek.equals(dayOfWeek),
+          ))
+          .go();
+      return AvailabilityWriteSaved(dayOfWeek);
     });
   }
 

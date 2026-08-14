@@ -33,6 +33,10 @@ abstract interface class SyncSnapshotRepository {
   /// Nastaví stav outbox položky (`SYNCED`/`CONFLICT`/`BLOCKED`).
   Future<void> markOutboxStatus(String outboxId, String status);
 
+  /// PENDING DELETE záměry vlastníka (C44 §3) — vznikají atomicky se
+  /// smazáním lokálního řádku, který server znal (DTS-007).
+  Future<List<PendingDeleteOperation>> pendingDeleteOperations(String ownerId);
+
   /// Konfliktní/odmítnuté outbox položky bez uzavřeného rozhodnutí
   /// (C12 §4/§6), s lidským popisem entity pro UI (CRC-011).
   Future<List<UnresolvedSyncItem>> unresolvedItems(String ownerId);
