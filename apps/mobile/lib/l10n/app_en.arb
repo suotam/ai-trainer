@@ -771,6 +771,21 @@
   "@reminderCheckIn": {"description": "Opt-in check-in reminder, fixed P0 time (NTF-011)."},
   "reminderWorkout": "Today's workout reminder (17:00)",
   "@reminderWorkout": {"description": "Opt-in workout reminder, fixed P0 time (NTF-011)."},
+  "restoreHeader": "Restore from server",
+  "@restoreHeader": {"description": "R6-05 restore section header (C45)."},
+  "restoreNote": "Downloads your account data to this device: profile, plans with workout structure, history, check-ins. Local unsent changes are never overwritten. AI proposals and reminder settings stay per device.",
+  "@restoreNote": {"description": "Honest restore scope boundary (DRS-005/007)."},
+  "restoreAction": "Restore data",
+  "@restoreAction": {"description": "Explicit restore/pull action (DRS-002)."},
+  "restoreCompleted": "Restore finished: {applied} items applied, {skipped} left for review.",
+  "@restoreCompleted": {
+    "description": "Typed completion with honest counts (DRS-009).",
+    "placeholders": {"applied": {"type": "int"}, "skipped": {"type": "int"}}
+  },
+  "restoreSignInRequired": "Sign in first to restore your data.",
+  "@restoreSignInRequired": {"description": "Typed anonymous state (DRS-002)."},
+  "restoreUnavailable": "The server is unavailable right now. Nothing was changed - try again later.",
+  "@restoreUnavailable": {"description": "Typed unavailability, no auto-retry (DRS-009)."},
   "todayRecoLabel": "{code, select, CHECK_IN_MISSING{How are you today? Fill in your check-in to get guidance.} CONSIDER_REST{Today's signals suggest considering rest.} CONSIDER_LIGHTER_DAY{Some signals suggest taking it easier today.} TRAIN_AS_PLANNED{No warning signals - train as planned.} NOTHING_PLANNED{No warning signals. Nothing is planned for today.} other{{code}}}",
   "@todayRecoLabel": {
     "description": "R5-03 day recommendation states (C35 par. 2); careful non-medical wording (TDR-007).",

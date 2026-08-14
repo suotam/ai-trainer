@@ -154,6 +154,7 @@ void main() {
     );
     expect(find.byKey(AccountScreen.signedInKey), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(AccountScreen.signOutButtonKey));
     await tester.tap(find.byKey(AccountScreen.signOutButtonKey));
     await tester.pumpAndSettle();
 
@@ -275,6 +276,7 @@ void main() {
     );
     api.revokeSession(storage.stored!.sessionId);
 
+    await tester.ensureVisible(find.byKey(AccountScreen.verifyButtonKey));
     await tester.tap(find.byKey(AccountScreen.verifyButtonKey));
     await tester.pumpAndSettle();
 
