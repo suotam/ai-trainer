@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.62  
+**Verze:** 2.63  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -267,7 +267,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-06 – Adjustment ChangeSet Execution` je implementován (blocking kontrakt **C38 – Adjustment execution** /`docs/09-ai/r5-adjustment-execution-contract.md`, `AJE-001..015`/ vznikl v témže cyklu). **Jediné místo, kde se AI úprava stává doménovou změnou** — výhradně C21 operacemi (move/cancel/replace) a C20 `addWorkout` do jediného ACTIVE plánu; C21 guardy (dokončený/zahájený workout) platí i pro AI (AJE-002). **Deterministická resolvace targetů (AJE-004):** by-value target → instance s přesnou shodou datum+title; 0 i >1 kandidátů = typované `TargetUnresolved` — nikdy odhad; **dny relativní k lokálnímu datu vzniku návrhu** (týden, který model viděl v C36 kontextu, AJE-006). **Safety veto (AJE-005, R5P-001):** aktuální C34 STOP stav deterministicky blokuje zátěž přidávající operace (ADD/REPLACE) před jakoukoli změnou — typovaný `SafetyConflict`; konzervativní směr (MOVE/CANCEL) veto nemá; AI veto nikdy neobchází. **Atomicita (AJE-003):** všechny operace + přechod stavu v jedné transakci, selhání = rollback všeho (test dokazuje odvolání už provedeného MOVE) + `EXECUTION_FAILED` s explicitním retry. **Potvrzení = souhlas s provedením** (C38 §2 — controller nyní provádí oba typy v témže kroku; tím se naplnilo ASJ-009). `EXECUTED` adjustment nese referenci ACTIVE plánu jen při ADD obsahu (jinak evidence = C21 append-only kalendářní evidence + návrh sám); typované chyby mají vlastní UI texty (target nesedí / safety radí odpočinek). Ověřeno **4 novými testy** (happy path všech 4 operací s datumy, evidencí, referencí a terminalitou; rollback nezvěstného targetu vč. odvolání MOVE; safety veto ADD + průchod CANCEL při STOP; doménové odmítnutí dokončeného workoutu) + aktualizovaný R5-05 widget test (potvrzení → Applied s provedenými operacemi) — mobile suite **328 testů**, analyze čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R5-06` je implementován → dalším krokem je vytvoření blocking kontraktů **C39 – Weekly summary & progress explanation** a **C40 – Local notifications baseline** a poté implementace `R5-07`. Implementace smí začít až po samostatném pokynu. Poté zbývá `R5-08` (E2E + beta baseline + Exit Review).
+`R5-07 – Weekly Summary, Progress Explanation and Local Notifications` je implementován (blocking kontrakty **C39 – Weekly summary & progress explanation** /`docs/06-domain/r5-weekly-summary-contract.md`, `WKS-001..015`/ a **C40 – Local notifications baseline** /`docs/08-mobile/r5-notifications-contract.md`, `NTF-001..015`/ vznikly v témže cyklu — **kontraktní mapa R5 C33–C40 je kompletní**). **Týdenní souhrn (C39):** deterministický read model — okna 7+7 dní končící dnes (WKS-007), tréninková čísla **výhradně z C23** `statisticsForPeriod` (WKS-002), check-in agregáty bez volných textů (počet, průměry na 1 desetinu, dny s bolestí), **vysvětlení progresu jako typovaný stav** z faktů dokončených workoutů obou oken (`NO_DATA`/`IMPROVING`/`STEADY`/`SLOWING` — žádné predikce, opatrné formulace WKS-005), poctivé prázdné stavy („—" bez plánu, prázdná check-in sekce, NO_DATA); obrazovka `/summary` z Today. **Lokální připomínky (C40):** opt-in přepínače (default vypnuto, NTF-002) pro denní check-in (08:00) a dnešní workout (17:00) s fixními P0 časy; **deterministický denní reminder plán** (čistá funkce — check-in připomínka jen bez dnešního check-inu, workout jen s neproběhlým READY workoutem, NTF-003/004); **připomínka nikdy nejedná** (NTF-001); jediná cesta k platformě = port `NotificationGate` s P0 **no-op hranicí — registrace pluginu, permission flow a on-device doručení jsou přiznaný platformní dluh** (NTF-007, poctivě označeno i v UI); device-local nastavení v app state bez sync (NTF-008). Ověřeno **3 novými testy** (mapovací matice vysvětlení + deterministické agregáty; matice reminder plánu vč. fixních časů + persistence přepínačů; widget: fakta, NO_DATA vysvětlení, poctivý prázdný check-in stav, opt-in přepínač s persistencí) — mobile suite **331 testů**, analyze čistý; backend beze změny.
+
+**Přesný další kanonický krok:** `R5-07` je implementován → dalším krokem je `R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review` (deterministický E2E: check-in → safety → doporučení → žádost o úpravu /fake provider/ → review → potvrzení → provedené operace → sync; plus odmítnutí, safety konflikt a fallback větve; mapování beta baseline scénáře release scope §10 a R5 Exit Review dle plánu §13). Implementace smí začít až po samostatném pokynu.
 
 ---
 
@@ -452,10 +454,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40, `R5P-001..015`); **`R5-01` až `R5-06` jsou implementovány** (denní check-in, safety pravidla, doporučení dne a celý adjustment cyklus vč. atomického provedení se safety vetem). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní); **`R5-01` až `R5-07` jsou implementovány** (denní check-in, safety pravidla, doporučení dne, celý adjustment cyklus, týdenní souhrn + opt-in připomínky). Další kanonický krok:
 
 ```text
-C39 + C40 kontrakty → R5-07 – Weekly Summary, Progress Explanation and Local Notifications
+R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
