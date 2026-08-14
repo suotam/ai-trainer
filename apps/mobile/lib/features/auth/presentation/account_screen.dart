@@ -9,6 +9,7 @@ import '../../profile/presentation/profile_section.dart';
 import '../../sync/application/conflict_resolution_service.dart';
 import '../../sync/application/local_sync_providers.dart';
 import '../../sync/domain/sync_push_models.dart';
+import '../../sync/presentation/restore_section.dart';
 import '../../sync/presentation/sync_issues_section.dart';
 import '../application/auth_providers.dart';
 import '../domain/auth_results.dart';
@@ -300,6 +301,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           const ProfileSection(),
           const SizedBox(height: 24),
           const SyncIssuesSection(),
+          const SizedBox(height: 24),
+          // Obnova dat ze serveru (R6-05, C45) — restore i běžný manuální
+          // pull je táž explicitní akce (DRS-001/002).
+          const RestoreSection(),
           const SizedBox(height: 24),
           if (verification != null) ...[
             Text(

@@ -22,18 +22,26 @@ enum PullApplyOutcome {
 
 /// Sloupcová specifikace typu: payload klíč → sloupec (PMS-003 — payload
 /// jsou přesné sloupcové hodnoty z push strany, aplikace je inverz).
-/// `timestamps: false` pro tabulky bez updated_at (created_at nese payload).
+/// `timestamps: false` pro tabulky bez lokálních meta časů (nese payload);
+/// `owned: false` pro children bez owner/sync sloupců (tranzitivní
+/// vlastnictví přes session, C2/DRS-011).
 class _TypeSpec {
-  const _TypeSpec(this.table, this.fields, {this.timestamps = true});
+  const _TypeSpec(
+    this.table,
+    this.fields, {
+    this.timestamps = true,
+    this.owned = true,
+  });
 
   final String table;
   final Map<String, String> fields;
   final bool timestamps;
+  final bool owned;
 }
 
-/// Pull scope (C42 §2 + C43 §3): ploché root typy, workout instance se
-/// strukturou a závislé typy po prerekvizitách (WSS-010); R1 historie
-/// vlastní C45.
+/// Pull scope (C42 §2 + C43 §3 + C45 §2): všech 15 registrových typů
+/// v pořadí FK prerekvizit — ploché roots, instance se strukturou,
+/// R1 historie, závislé typy.
 const List<String> pullSupportedTypes = [
   'USER_SPORT',
   'GOAL',
@@ -43,6 +51,11 @@ const List<String> pullSupportedTypes = [
   'TRAINING_PLAN',
   'DAILY_CHECK_IN',
   'WORKOUT_INSTANCE',
+  'WORKOUT_SESSION',
+  'STEP_PERFORMANCE',
+  'SET_PERFORMANCE',
+  'WORKOUT_FEEDBACK',
+  'ACTIVITY_SUMMARY',
   'MANUAL_ACTIVITY',
   'CALENDAR_CHANGE',
 ];
@@ -134,6 +147,88 @@ const Map<String, _TypeSpec> _specs = {
     'updatedAt': 'updated_at',
     'rowVersion': 'row_version',
   }, timestamps: false),
+  // C45 §2: R1 historie — payloady nesou původní časy zařízení.
+  'WORKOUT_SESSION': _TypeSpec('local_workout_sessions', {
+    'workoutInstanceId': 'workout_instance_id',
+    'instanceRevisionNumber': 'instance_revision_number',
+    'status': 'status',
+    'startedAt': 'started_at',
+    'lastResumedAt': 'last_resumed_at',
+    'pausedAt': 'paused_at',
+    'completedAt': 'completed_at',
+    'activeStepId': 'active_step_id',
+    'elapsedActiveSeconds': 'elapsed_active_seconds',
+    'notes': 'notes',
+    'createdAt': 'created_at',
+    'updatedAt': 'updated_at',
+    'rowVersion': 'row_version',
+  }, timestamps: false),
+  'STEP_PERFORMANCE': _TypeSpec(
+    'local_step_performances',
+    {
+      'workoutSessionId': 'workout_session_id',
+      'workoutStepId': 'workout_step_id',
+      'status': 'status',
+      'startedAt': 'started_at',
+      'completedAt': 'completed_at',
+      'actualRepetitions': 'actual_repetitions',
+      'actualDurationSeconds': 'actual_duration_seconds',
+      'actualDistanceMeters': 'actual_distance_meters',
+      'actualWeightKg': 'actual_weight_kg',
+      'perceivedExertion': 'perceived_exertion',
+      'notes': 'notes',
+      'updatedAt': 'updated_at',
+      'rowVersion': 'row_version',
+    },
+    timestamps: false,
+    owned: false,
+  ),
+  'SET_PERFORMANCE': _TypeSpec(
+    'local_set_performances',
+    {
+      'stepPerformanceId': 'step_performance_id',
+      'setPlanId': 'set_plan_id',
+      'position': 'position',
+      'status': 'status',
+      'actualRepetitions': 'actual_repetitions',
+      'actualWeightKg': 'actual_weight_kg',
+      'actualDurationSeconds': 'actual_duration_seconds',
+      'actualRpe': 'actual_rpe',
+      'completedAt': 'completed_at',
+      'notes': 'notes',
+      'updatedAt': 'updated_at',
+      'rowVersion': 'row_version',
+    },
+    timestamps: false,
+    owned: false,
+  ),
+  'WORKOUT_FEEDBACK': _TypeSpec(
+    'local_workout_feedback',
+    {
+      'workoutSessionId': 'workout_session_id',
+      'overallEffort': 'overall_effort',
+      'feeling': 'feeling',
+      'painReported': 'pain_reported',
+      'notes': 'notes',
+      'createdAt': 'created_at',
+      'updatedAt': 'updated_at',
+    },
+    timestamps: false,
+    owned: false,
+  ),
+  'ACTIVITY_SUMMARY': _TypeSpec('local_activity_summaries', {
+    'workoutInstanceId': 'workout_instance_id',
+    'workoutSessionId': 'workout_session_id',
+    'titleSnapshot': 'title_snapshot',
+    'workoutType': 'workout_type',
+    'startedAt': 'started_at',
+    'completedAt': 'completed_at',
+    'activeDurationSeconds': 'active_duration_seconds',
+    'completedStepCount': 'completed_step_count',
+    'totalStepCount': 'total_step_count',
+    'overallEffort': 'overall_effort',
+    'createdAt': 'created_at',
+  }, timestamps: false),
   'MANUAL_ACTIVITY': _TypeSpec('local_activities', {
     'title': 'title',
     'localDate': 'local_date',
@@ -182,9 +277,13 @@ class DriftPullApplier {
                 .getSingleOrNull())
             ?.serverVersion;
 
+    // Children bez owner/sync sloupců jsou vlastněny tranzitivně (DRS-011)
+    // — chovají se jako SYNCED (lokální DIRTY koncept na nich neexistuje).
     final local = await _db
         .customSelect(
-          'SELECT sync_state FROM ${spec.table} WHERE id = ?',
+          spec.owned
+              ? 'SELECT sync_state FROM ${spec.table} WHERE id = ?'
+              : "SELECT 'SYNCED' AS sync_state FROM ${spec.table} WHERE id = ?",
           variables: [Variable.withString(item.entityId)],
         )
         .getSingleOrNull();
@@ -226,25 +325,28 @@ class DriftPullApplier {
 
     try {
       if (local == null) {
+        final ownerColumns = spec.owned ? 'owner_id, sync_state, ' : '';
+        final ownerValues = spec.owned ? "?, 'SYNCED', " : '';
         final metaColumns = spec.timestamps ? 'created_at, updated_at, ' : '';
         final metaValues = spec.timestamps ? '?, ?, ' : '';
         await _db.customStatement(
           'INSERT INTO ${spec.table} '
-          '(id, owner_id, sync_state, $metaColumns${columns.join(', ')}) '
-          "VALUES (?, ?, 'SYNCED', $metaValues"
+          '(id, $ownerColumns$metaColumns${columns.join(', ')}) '
+          'VALUES (?, $ownerValues$metaValues'
           '${List.filled(columns.length, '?').join(', ')})',
           [
             item.entityId,
-            ownerId,
+            if (spec.owned) ownerId,
             if (spec.timestamps) ...[nowMillis, nowMillis],
             ...values.map((v) => v.value),
           ],
         );
       } else {
+        final ownerSet = spec.owned ? "sync_state = 'SYNCED', " : '';
         final metaSet = spec.timestamps ? 'updated_at = ?, ' : '';
         await _db.customStatement(
           'UPDATE ${spec.table} SET '
-          "sync_state = 'SYNCED', $metaSet"
+          '$ownerSet$metaSet'
           '${columns.map((c) => '$c = ?').join(', ')} '
           'WHERE id = ?',
           [
