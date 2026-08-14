@@ -57,6 +57,7 @@ class OpenApiContractValidationTest {
                 "/api/v1/devices",
                 "/api/v1/devices/{installationId}",
                 "/api/v1/sync/push",
+                "/api/v1/sync/pull",
                 "/api/v1/ai/plan-proposals",
             ),
             openApi.paths.keys,

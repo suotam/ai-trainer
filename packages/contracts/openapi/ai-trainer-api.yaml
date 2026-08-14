@@ -609,6 +609,44 @@ paths:
           $ref: "#/components/responses/AuthUnauthorized"
         "500":
           $ref: "#/components/responses/AuthInternalError"
+  /api/v1/sync/pull:
+    post:
+      tags: [Sync]
+      operationId: pullSyncChanges
+      summary: Pull změn vlastního účtu od kurzoru per typ (R6-01, C41)
+      description: >
+        Druhý směr sync mechanismu: server vydá změny entit vlastního účtu
+        od neprůhledného kurzoru per typ (PSP-004), deterministicky řazené
+        a stránkované (cap 200, PSP-007). Payload se vydává přesně jak byl
+        přijat — server ho nevykládá (PSP-003). Overlap je dovolen, mezera
+        nikdy (PSP-005); aplikaci vlastní klient (C42). Push sémantika se
+        nemění (PSP-001).
+      security:
+        - accessSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncPullRequest"
+      responses:
+        "200":
+          description: Změny od kurzorů + nové kurzory per typ.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControlNoStore"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncPullResponse"
+        "400":
+          $ref: "#/components/responses/AuthBadRequest"
+        "401":
+          $ref: "#/components/responses/AuthUnauthorized"
+        "500":
+          $ref: "#/components/responses/AuthInternalError"
   /api/v1/ai/plan-proposals:
     post:
       tags: [Ai]
@@ -1078,6 +1116,66 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SyncItemOutcome"
+    SyncPullCursor:
+      type: object
+      required: [entityType]
+      additionalProperties: false
+      properties:
+        entityType:
+          type: string
+          enum: [WORKOUT_INSTANCE, WORKOUT_SESSION, STEP_PERFORMANCE, SET_PERFORMANCE, WORKOUT_FEEDBACK, ACTIVITY_SUMMARY, USER_SPORT, GOAL, AVAILABILITY_RULE, EQUIPMENT_ITEM, CONSTRAINT_ITEM, TRAINING_PLAN, CALENDAR_CHANGE, MANUAL_ACTIVITY, DAILY_CHECK_IN]
+        cursor:
+          type: string
+          nullable: true
+          description: Neprůhledný token vydaný serverem (PSP-004); chybějící = od začátku.
+    SyncPullRequest:
+      type: object
+      required: [installationId, cursors]
+      additionalProperties: false
+      properties:
+        installationId:
+          type: string
+          format: uuid
+        cursors:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/SyncPullCursor"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+    SyncPullItem:
+      type: object
+      required: [entityType, entityId, serverVersion, payload]
+      additionalProperties: false
+      properties:
+        entityType:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        serverVersion:
+          type: integer
+          format: int64
+        payload:
+          type: object
+          description: Přesně uložený payload — server nevykládá (PSP-003).
+    SyncPullResponse:
+      type: object
+      required: [items, cursors, hasMore]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncPullItem"
+        cursors:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncPullCursor"
+        hasMore:
+          type: boolean
     PlanProposalRequest:
       type: object
       required: [context]
