@@ -382,6 +382,8 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
       'TRAINING_PLAN' => 'local_training_plans',
       'CALENDAR_CHANGE' => 'local_calendar_changes',
       'MANUAL_ACTIVITY' => 'local_activities',
+      // R5 root (C33 §4).
+      'DAILY_CHECK_IN' => 'local_daily_check_ins',
       _ => throw ArgumentError('Not an aggregate root: $entityType'),
     };
     await _db.customStatement('UPDATE $table SET sync_state = ? WHERE id = ?', [
