@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.63  
+**Verze:** 2.64  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -269,7 +269,37 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R5-07 – Weekly Summary, Progress Explanation and Local Notifications` je implementován (blocking kontrakty **C39 – Weekly summary & progress explanation** /`docs/06-domain/r5-weekly-summary-contract.md`, `WKS-001..015`/ a **C40 – Local notifications baseline** /`docs/08-mobile/r5-notifications-contract.md`, `NTF-001..015`/ vznikly v témže cyklu — **kontraktní mapa R5 C33–C40 je kompletní**). **Týdenní souhrn (C39):** deterministický read model — okna 7+7 dní končící dnes (WKS-007), tréninková čísla **výhradně z C23** `statisticsForPeriod` (WKS-002), check-in agregáty bez volných textů (počet, průměry na 1 desetinu, dny s bolestí), **vysvětlení progresu jako typovaný stav** z faktů dokončených workoutů obou oken (`NO_DATA`/`IMPROVING`/`STEADY`/`SLOWING` — žádné predikce, opatrné formulace WKS-005), poctivé prázdné stavy („—" bez plánu, prázdná check-in sekce, NO_DATA); obrazovka `/summary` z Today. **Lokální připomínky (C40):** opt-in přepínače (default vypnuto, NTF-002) pro denní check-in (08:00) a dnešní workout (17:00) s fixními P0 časy; **deterministický denní reminder plán** (čistá funkce — check-in připomínka jen bez dnešního check-inu, workout jen s neproběhlým READY workoutem, NTF-003/004); **připomínka nikdy nejedná** (NTF-001); jediná cesta k platformě = port `NotificationGate` s P0 **no-op hranicí — registrace pluginu, permission flow a on-device doručení jsou přiznaný platformní dluh** (NTF-007, poctivě označeno i v UI); device-local nastavení v app state bez sync (NTF-008). Ověřeno **3 novými testy** (mapovací matice vysvětlení + deterministické agregáty; matice reminder plánu vč. fixních časů + persistence přepínačů; widget: fakta, NO_DATA vysvětlení, poctivý prázdný check-in stav, opt-in přepínač s persistencí) — mobile suite **331 testů**, analyze čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R5-07` je implementován → dalším krokem je `R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review` (deterministický E2E: check-in → safety → doporučení → žádost o úpravu /fake provider/ → review → potvrzení → provedené operace → sync; plus odmítnutí, safety konflikt a fallback větve; mapování beta baseline scénáře release scope §10 a R5 Exit Review dle plánu §13). Implementace smí začít až po samostatném pokynu.
+`R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review` je implementován. **Kritická R5 E2E** (`r5_critical_path_e2e_test.dart`, deterministická nad skutečnou SQLite, fake jen síť/AI API/storage/clock): účet + profil + ruční týden → **denní check-in (únava 4) → deterministická safety → doporučení dne `CONSIDER_LIGHTER_DAY` s viditelnými důvody** → žádost o AI úpravu (validovaný `PROPOSED` s adjustment trojicí verzí) → **odmítnutí jako viditelný zachovaný stav** → **potvrzení = atomické provedení C21 cestami** (MOVE+CANCEL, workout skutečně na novém dni) → týdenní souhrn (check-in agregáty) + reminder relevance (dnešní check-in existuje → check-in připomínka se neplánuje) → **push existujícím mechanismem** (`DAILY_CHECK_IN`, `TRAINING_PLAN`, `WORKOUT_INSTANCE`, `CALENDAR_CHANGE`, …; návrhy mimo sync) + replay no-op. Druhý test kryje **negativní větve**: safety veto (STOP check-in → ADD blokován typovaným `SafetyConflict` beze změn, doporučení `CONSIDER_REST`) a nedostupnou AI (typovaná, jediné volání, manuální cesty vč. doporučení dál fungují). **E2E odhalila a opravila reálný defekt** z R5-01: `DAILY_CHECK_IN` chyběl v `markRootSyncState` mapování — push by selhal při potvrzování výsledků; opraveno v témže slice (hodnota celku nad izolovanými unit testy).
+
+## R5 Exit Review (dle `r5-vertical-slice-plan.md` §13)
+
+- **check-in strukturovaný, denně editovatelný, vlastněný a synchronizovaný; žádná PII navíc** — R5-01 testy (denní klíč, attach kolize, payload bez note) + E2E push.
+- **safety deterministická, konzervativní, tabulkově testovaná, nezávislá na AI/síti** — R5-02 matice 14 případů; SFR-004 „chybějící check-in ≠ OK".
+- **Today doporučení poctivý deterministický read model s typovanými stavy** — R5-03 matice + widget testy; R1 Today nedotčené.
+- **adjustment drží celý R4 zákon** — R5-04/05: minimalizovaný kontext (marker testy), dvojí validace (tvarová tabulka), potvrzení povinné, odmítnutí viditelné; eval gate rozšířen o adjustment cases.
+- **potvrzený adjustment atomicky přes C20/C21 s provenance; safety konflikt typovaný** — R5-06 testy (rollback vč. odvolání MOVE, veto, doménové odmítnutí) + E2E větve.
+- **týdenní souhrn a vysvětlení progresu deterministické read modely** — R5-07 (čísla výhradně C23, typované vysvětlení z faktů).
+- **notifikace lokální, opt-in, nikdy nejednají** — R5-07 (deterministický plán, relevance, no-op gate); platformní doručení = přiznaný dluh níže.
+- **eval gate rozšířen o adjustment a prochází** — R5-05 (sdílený adresář, oba harnessy, minima hlídaná).
+- **R1–R4 kritické E2E zelené; R5 E2E deterministicky prochází; CI zelené** — všech pět kritických E2E v téže suite; lokálně mobil **333/333** + analyze, backend **114/114** + ktlint; CI na main se ověří po merge.
+- **beta baseline scénář (release scope §10) doložen krok po kroku** — viz mapování níže.
+- **živý provider smoke** — **NEPROVEDEN** (R4 dluh trvá) → **beta zůstává interní** s přiznaným dluhem (beta gate podmínka plánu §12).
+- **medicínská hranice poctivě označená** — beta texty v check-inu, safety kartě i připomínkách; review mimo inženýrský scope.
+- **žádný známý blocker ani critical defect** — defekt nalezený E2E opraven v témže slice; řízené výjimky níže.
+
+**Beta baseline scénář (release scope §10) — mapování:**
+1. přihlášení — R2 (E2E registrace/attach) ✔; 2. profil a cíl — R3 ✔; 3. AI návrh plánu — R4 ✔; 4. kontrola a potvrzení — R4 ✔; 5. plán v Today/kalendáři — R4→R1 ✔; 6. workout offline — R1 ✔; 7. pozdější synchronizace — R2 push ✔ (pull mimo P0); 8. oznámení změny/únavy — R5 check-in ✔; 9. AI nový potvrditelný návrh — R5 adjustment ✔; 10. historie a vysvětlení ✔, **bezpečná obnova = otevřený dluh** (pull sync/restore — kandidát R6).
+
+**Otevřené řízené výjimky (poctivě přiznané):**
+1. **Živý provider smoke** (R4 dluh, beta gate) — beta je interní, dokud smoke neproběhne; postup v R4 Exit Review trvá.
+2. **Platformní doručení notifikací** (C40 NTF-007) — no-op gate; adapter, permission flow a on-device evidence patří k emulátorovému dluhu.
+3. **Pull sync / bezpečná obnova zařízení** — beta krok 10 nesplněn v části obnovy; kandidát R6.
+4. **Emulátorová runtime evidence** (R2→R5) — bez SDK; rozšířit o R5 kroky (check-in → doporučení → úprava → provedení).
+5. Přenesené dluhy R2–R4 trvají (DELETE, plán struktura sync, distribuovaný rate limiter, aktivní čas, …) a nejsou R5 blocker.
+
+**Release 5 je uzavřen** (R5-08 mergnut, R5 Exit Review proveden; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
+
+**Přesný další kanonický krok:** Release 5 je uzavřen → dalším krokem je **naplánování Release 6** (kandidáti: pull sync a bezpečná obnova zařízení /beta krok 10/, splacení beta gate dluhů — živý provider smoke, platformní notifikace, emulátorová evidence; případně rozšíření adaptace). Plánování začíná až po samostatném pokynu.
 
 ---
 
@@ -454,10 +484,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní); **`R5-01` až `R5-07` jsou implementovány** (denní check-in, safety pravidla, doporučení dne, celý adjustment cyklus, týdenní souhrn + opt-in připomínky). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Další kanonický krok:
 
 ```text
-R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review
+Naplánování Release 6  (R6 vertical-slice plán)
 ```
 
-Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a Ready stav podle `r5-vertical-slice-plan.md`, `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
+Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

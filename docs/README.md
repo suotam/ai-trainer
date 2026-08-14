@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.59  
+**Verze:** 2.60  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -221,7 +221,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **`R5-01` až `R5-07` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3) — kontraktní mapa R5 (C33–C40) je kompletní; zbývá `R5-08` (E2E + beta baseline + Exit Review).
+- `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
 
 - `r4-eval-gate-contract.md` (**C32**, vlastník Quality + Domain) vlastní R4 eval release gate: **sdílený dataset `packages/contracts/eval/plan-proposal/*.json`** (jediný zdroj pro obě strany dvojí validace), deterministický harness bez živého providera v běžné CI suite (backend `EvalGateTest` + mobilní konzistence klientského validátoru), gate kritéria (100% shoda verdiktů, vysvětlitelnost `reason`, kanonizace `mustNotContain`, minimální velikost datasetu, žádný skip/retry), poctivě přiznaný scope (kontraktní vrstva, ne kvalita modelu — ta patří smoke evidenci plánu §12), postup rozšiřování a invarianty `EVG-001` až `EVG-015`. Contract-only. Blokuje `R4-07`. **Tímto je kontraktní mapa R4 (C25–C32) kompletní.**
@@ -444,14 +444,14 @@ implementováno, R4 Exit Review proveden a Release 4 uzavřen** (otevřené
 sync, DELETE a plán struktura mimo P0 — viz `DOCUMENTATION_STATUS.md` §3).
 Existuje kanonický R5 vertical-slice plán
 (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`,
-contract map C33–C40 — kompletní). **`R5-01` až `R5-07` jsou
-implementovány** (denní check-in — schema v13, backend V6; deterministická
-safety pravidla; doporučení dne; celý adjustment cyklus vč. atomického
-provedení se safety vetem; týdenní souhrn s vysvětlením progresu a opt-in
-lokální připomínky s přiznaným platformním dluhem). Další kanonický krok:
+contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit
+Review proveden a Release 5 uzavřen** (otevřené řízené výjimky: živý
+provider smoke /beta gate — beta interní/, platformní doručení notifikací,
+pull sync a bezpečná obnova /beta krok 10/, emulátorová runtime evidence
+— viz `DOCUMENTATION_STATUS.md` §3). Další kanonický krok:
 
 ```text
-R5-08 – R5 Critical End-to-End Evidence, Beta Baseline and Exit Review
+Naplánování Release 6  (R6 vertical-slice plán)
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
