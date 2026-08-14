@@ -46,6 +46,43 @@ abstract interface class SyncApiClient {
     required String installationId,
     required List<SyncPushOperation> operations,
   });
+
+  /// Pull změn od kurzorů per typ (R6-01, C41 §2). Kurzor je neprůhledný
+  /// server token (PSP-004); null = od začátku.
+  Future<SyncPullResponse> pull({
+    required String accessToken,
+    required String installationId,
+    required Map<String, String?> cursors,
+    int? limit,
+  });
+}
+
+/// Jedna stažená změna (C41 §2) — payload jsou přesné sloupcové hodnoty
+/// z push strany (PMS-003).
+class SyncPullItem {
+  const SyncPullItem({
+    required this.entityType,
+    required this.entityId,
+    required this.serverVersion,
+    required this.payload,
+  });
+
+  final String entityType;
+  final String entityId;
+  final int serverVersion;
+  final Map<String, Object?> payload;
+}
+
+class SyncPullResponse {
+  const SyncPullResponse({
+    required this.items,
+    required this.cursors,
+    required this.hasMore,
+  });
+
+  final List<SyncPullItem> items;
+  final Map<String, String?> cursors;
+  final bool hasMore;
 }
 
 /// Jedna entita připravená k push (state-based, C10 §5.3), v deterministickém

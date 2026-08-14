@@ -84,4 +84,71 @@ class HttpSyncApiClient implements SyncApiClient {
     }
     throw const AuthApiFailure(AuthApiFailureKind.server);
   }
+
+  @override
+  Future<SyncPullResponse> pull({
+    required String accessToken,
+    required String installationId,
+    required Map<String, String?> cursors,
+    int? limit,
+  }) async {
+    final url = baseUrl.replace(path: '${baseUrl.path}/api/v1/sync/pull');
+    final http.Response response;
+    try {
+      response = await httpClient
+          .post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode({
+              'installationId': installationId,
+              'cursors': [
+                for (final entry in cursors.entries)
+                  {'entityType': entry.key, 'cursor': entry.value},
+              ],
+              'limit': ?limit,
+            }),
+          )
+          .timeout(timeout);
+    } on TimeoutException {
+      throw const AuthApiFailure(AuthApiFailureKind.network);
+    } catch (_) {
+      throw const AuthApiFailure(AuthApiFailureKind.network);
+    }
+    if (response.statusCode != 200) {
+      throw failureForResponse(response);
+    }
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, Object?>) {
+        final items = decoded['items'];
+        final cursorList = decoded['cursors'];
+        final hasMore = decoded['hasMore'];
+        if (items is List && cursorList is List && hasMore is bool) {
+          return SyncPullResponse(
+            items: [
+              for (final item in items.cast<Map<String, Object?>>())
+                SyncPullItem(
+                  entityType: item['entityType']! as String,
+                  entityId: item['entityId']! as String,
+                  serverVersion: (item['serverVersion']! as num).toInt(),
+                  payload: (item['payload']! as Map).cast<String, Object?>(),
+                ),
+            ],
+            cursors: {
+              for (final cursor in cursorList.cast<Map<String, Object?>>())
+                cursor['entityType']! as String: cursor['cursor'] as String?,
+            },
+            hasMore: hasMore,
+          );
+        }
+      }
+    } on FormatException {
+      // spadne do server failure níže
+    }
+    throw const AuthApiFailure(AuthApiFailureKind.server);
+  }
 }
