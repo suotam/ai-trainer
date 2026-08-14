@@ -60,6 +60,7 @@ data class SyncPullItemDto(
     val entityId: String,
     val serverVersion: Long,
     val payload: Map<String, Any?>,
+    val deleted: Boolean,
 )
 
 data class SyncPullResponseDto(
@@ -175,6 +176,7 @@ class SyncController(
                                 entityId = it.entityId,
                                 serverVersion = it.serverVersion,
                                 payload = it.payload,
+                                deleted = it.deleted,
                             )
                         },
                     cursors =

@@ -31,6 +31,16 @@ interface SyncedEntityRepository {
         sourceInstallationId: UUID,
         now: Instant,
     ): Long
+
+    /**
+     * Tombstone (R6-04, C44): `deleted = true` + inkrement verze; řádek se
+     * nikdy fyzicky nemaže (DTS-001). Vrací novou verzi.
+     */
+    fun markDeleted(
+        type: SyncEntityType,
+        entityId: UUID,
+        now: Instant,
+    ): Long
 }
 
 /** Uložený replay záznam (C11 §5); result reference = entityId + serverVersion. */

@@ -1058,8 +1058,8 @@ components:
           description: Deterministické pořadí per zařízení (LSM-012, SPC-003).
         operationType:
           type: string
-          enum: [CREATE_ENTITY, UPDATE_ENTITY]
-          description: R2-05 podmnožina SyncOperationType (C10 §5.1).
+          enum: [CREATE_ENTITY, UPDATE_ENTITY, DELETE_ENTITY]
+          description: Podmnožina SyncOperationType (C10 §5.1; DELETE_ENTITY od R6-04, C44 — P0 scope AVAILABILITY_RULE).
         entityType:
           type: string
           enum: [WORKOUT_INSTANCE, WORKOUT_SESSION, STEP_PERFORMANCE, SET_PERFORMANCE, WORKOUT_FEEDBACK, ACTIVITY_SUMMARY, USER_SPORT, GOAL, AVAILABILITY_RULE, EQUIPMENT_ITEM, CONSTRAINT_ITEM, TRAINING_PLAN, CALENDAR_CHANGE, MANUAL_ACTIVITY, DAILY_CHECK_IN]
@@ -1147,7 +1147,7 @@ components:
           maximum: 200
     SyncPullItem:
       type: object
-      required: [entityType, entityId, serverVersion, payload]
+      required: [entityType, entityId, serverVersion, payload, deleted]
       additionalProperties: false
       properties:
         entityType:
@@ -1161,6 +1161,9 @@ components:
         payload:
           type: object
           description: Přesně uložený payload — server nevykládá (PSP-003).
+        deleted:
+          type: boolean
+          description: Tombstone příznak (C44, DTS) — klient aplikuje smazání idempotentně, lokální nepushnutou pravdu nikdy tiše.
     SyncPullResponse:
       type: object
       required: [items, cursors, hasMore]
