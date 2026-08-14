@@ -16,6 +16,7 @@ import '../domain/local_owner_binding.dart';
 import '../domain/local_sync_metadata_repository.dart';
 import '../domain/sync_push_models.dart';
 import '../domain/sync_snapshot_repository.dart';
+import 'pull_engine.dart';
 import 'sync_engine.dart';
 
 /// Composition sync-metadata vrstvy (R2-01). Presentation ani ostatní
@@ -65,5 +66,16 @@ final syncEngineProvider = Provider<SyncEngine>(
     ref.watch(syncSnapshotRepositoryProvider),
     ref.watch(syncApiClientProvider),
     ref.watch(clockProvider),
+  ),
+);
+
+/// Pull engine (R6-02, C42) — explicitní běh, kurzory per typ, merge dle
+/// C42 matice; push chování se nemění (PMS-014).
+final pullEngineProvider = Provider<PullEngine>(
+  (ref) => PullEngine(
+    ref.watch(appDatabaseProvider),
+    ref.watch(secureSessionStorageProvider),
+    ref.watch(installationIdentityProvider),
+    ref.watch(syncApiClientProvider),
   ),
 );

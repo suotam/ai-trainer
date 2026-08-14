@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.66  
+**Verze:** 2.67  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -303,7 +303,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R6-01 – Pull Sync Protocol and Server Endpoint` je implementován (blocking kontrakt **C41 – Pull sync protocol** /`docs/07-backend/r6-pull-sync-contract.md`, `PSP-001..015`/ vznikl v témže cyklu). **Endpoint `POST /api/v1/sync/pull`**: autentizovaný klient dostane změny entit **výhradně vlastního účtu** (PSP-002, C8) od **neprůhledného kurzoru per typ** (PSP-004 — server-owned formát z `updated_at`+id, klient token jen ukládá a vrací; nevalidní token = typované 400), deterministicky řazené (PSP-006), stránkované s cap 200 a poctivým `hasMore` (PSP-007). Klíčové vlastnosti: **overlap dovolen, mezera nikdy** (PSP-005), payload se vydává přesně jak byl přijat — server nevykládá (PSP-003, C6 §8.4), pull nemění stav (PSP-008), typy výhradně z registru vč. `DAILY_CHECK_IN` (PSP-009), audit jen s počty (PSP-013), item tvar tombstone-ready pro C44 (PSP-010). **Push sémantika C10/C11 nedotčena** (PSP-001). OpenAPI rozšířeno (path + 4 schémata) + contract test path set. Ověřeno **4 novými Testcontainers testy** (pull od prázdného kurzoru s payload fidelity + kurzor advance idempotence + viditelnost UPDATE se zvýšenou verzí; stránkování limit/hasMore s konvergencí; ownership izolace cizího účtu; neznámý typ, nevalidní kurzor a 401) — backend suite **118/118** + ktlint; mobil beze změny.
 
-**Přesný další kanonický krok:** `R6-01` je implementován → dalším krokem je vytvoření blocking kontraktu **C42 – Pull merge semantics** (`docs/06-domain/r6-pull-merge-contract.md`) a poté implementace `R6-02 – Mobile Pull Engine and Merge Semantics`. Implementace smí začít až po samostatném pokynu. Ostatní R6 slices čekají na své kontrakty (C43–C45).
+`R6-02 – Mobile Pull Engine and Merge Semantics` je implementován (blocking kontrakt **C42 – Pull merge semantics** /`docs/06-domain/r6-pull-merge-contract.md`, `PMS-001..015`/ vznikl v témže cyklu). **Merge je jediné místo, kde server stav vstupuje do lokální DB** — merge matice (C42 §3): neexistující řádek → INSERT ze sloupcových hodnot payloadu se `SYNCED` a ownerem účtu; `SYNCED` + vyšší server verze → UPDATE s evidencí verze; verze ≤ známá → no-op (idempotence, overlap z C41 bezpečný); **`LOCAL_ONLY`/`DIRTY` nikdy tiše** (PMS-001) — typovaný `conflictSkipped`, řešení = existující C12 push flow; selhání řádku (chybějící FK prerekvizita) = typovaný `skippedDependency` bez pádu běhu (PMS-009). **P0 scope 7 plochých root typů** (PMS-007 — sport/cíl/dostupnost/vybavení/omezení/plán/check-in; workout hierarchie, aktivity a kalendářní změny referencují instance → vlastní C43/C45). **`PullEngine`**: explicitní běh jen přihlášený, kurzory per typ (neprůhledné C41 tokeny) v lokálním app state, batch aplikace + posun kurzorů v jedné transakci (PMS-010 — přerušení = nanejvýš opakovaná idempotentní aplikace), `hasMore` smyčka s bezpečnostním stropem, typované výsledky (`PullRunCompleted` s počty / `PullSkippedAnonymous` / `PullUnavailable`); evidence verzí v `local_synced_versions` je společný zdroj pro push `expectedServerVersion` i pull no-op (PMS-006). API port rozšířen o `pull` (HTTP klient + fake se sdíleným server stavem a stránkováním). Ověřeno **3 novými testy** (merge matice všech větví vč. DIRTY beze změny dat a dependency skipu; engine s kurzory, stránkováním přes strop batch limitu, druhý běh no-op a plnohodnotností obnovených řádků; anonymní skip + nedostupnost bez posunu kurzorů) — mobile suite **336 testů**, analyze čistý; backend beze změny (**118/118**).
+
+**Přesný další kanonický krok:** `R6-02` je implementován → dalším krokem je vytvoření blocking kontraktu **C43 – Workout structure sync** (`docs/12-data/r6-structure-sync-contract.md`) a poté implementace `R6-03 – Workout Structure Sync`. Implementace smí začít až po samostatném pokynu. Ostatní R6 slices čekají na své kontrakty (C44–C45).
 
 ---
 
@@ -488,10 +490,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **`R6-01` je implementován** (pull endpoint s kurzory, stránkováním a ownership). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **`R6-01` a `R6-02` jsou implementovány** (pull endpoint + mobilní merge engine). Další kanonický krok:
 
 ```text
-C42 – Pull merge semantics kontrakt → R6-02 – Mobile Pull Engine and Merge Semantics
+C43 – Workout structure sync kontrakt → R6-03 – Workout Structure Sync
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
