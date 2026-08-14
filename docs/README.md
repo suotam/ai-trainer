@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.61  
+**Verze:** 2.62  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -173,6 +173,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 
 - `r4-changeset-execution-contract.md` (**C30**, vlastník Domain / ai-and-change-model + Mobile) vlastní provedení potvrzeného návrhu: **jediná cesta změny = C20 operace** (doménová pravidla vč. MPC-002 platí beze změny), mapování `dayOffset` → lokální datum provedení, atomicitu s rollbackem (žádný částečný stav), provenance `origin = AI_PROPOSAL` + `executedPlanId` referenci, typovaná selhání s explicitním retry a invarianty `CSE-001` až `CSE-015`. Contract-only. Blokuje `R4-05`.
 
+- `r6-pull-sync-contract.md` (**C41**, vlastník Domain / sync-and-offline-model + Backend) vlastní pull protokol: jediný endpoint `POST /api/v1/sync/pull` s **neprůhledným kurzorem per typ** (server-owned formát, klient jen ukládá/vrací), deterministické řazení a stránkování (cap 200, `hasMore`), **overlap dovolen — mezera nikdy**, payload beze změny (C6 §8.4), ownership přísně (C8), pull bez side-effects, audit jen s počty, tombstone-ready tvar a invarianty `PSP-001` až `PSP-015`. Push sémantika C10/C11 nedotčena. Contract-only. Blokuje `R6-01`.
+
 - `r2-sync-protocol-contract.md` (**C10**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2-05 push sync protokol: tvar push operace (mapování na outbox položku), `ORDERED_OPERATIONS` batch podle deterministického `sequence`, per-item výsledky (`SUCCESS`/`ALREADY_APPLIED`/`VERSION_CONFLICT`/`VALIDATION_FAILED`/`PERMISSION_DENIED`/`DEPENDENCY_FAILED`), **potvrzení výhradně po serverovém commitu**, optimistic concurrency přes `expectedServerVersion`, R2-05 podmnožinu typů (`CREATE_ENTITY`/`UPDATE_ENTITY`) a entit, a invarianty `SPC-001` až `SPC-015`. Pull sync je mimo P0. Contract-only. Blokuje `R2-05`.
 
 - `r2-idempotency-contract.md` (**C11**, vlastník Domain / sync-and-offline-model + Backend) vlastní R2 replay protokol: IdempotencyRecord (klíč+účet, requestHash bez secrets, výsledková reference, expirace), `ALREADY_APPLIED` bez vedlejších efektů, „stejný klíč, jiný payload = chyba", atomicitu záznamu s efektem, souběh a invarianty `IDC-001` až `IDC-015`. Jednotný protokol pro registraci účtu (R2-02) i sync (R2-05). Contract-only. Blokuje `R2-05`.
@@ -221,7 +223,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **Žádný R6 slice není `READY`** — čeká se na kontrakty (první: C41 – Pull sync protocol).
+- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **`R6-01` je implementován** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C42–C45).
 
 - `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
@@ -452,11 +454,12 @@ provider smoke /beta gate — beta interní/, platformní doručení notifikací
 pull sync a bezpečná obnova /beta krok 10/, emulátorová runtime evidence
 — viz `DOCUMENTATION_STATUS.md` §3). Existuje kanonický R6 vertical-slice
 plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až
-`R6-06`, contract map C41–C45, `R6P-001..015`); **žádný R6 slice není
-`READY`**. Další kanonický krok:
+`R6-06`, contract map C41–C45, `R6P-001..015`); **`R6-01` je
+implementován** (pull endpoint s kurzory, stránkováním a ownership).
+Další kanonický krok:
 
 ```text
-C41 – Pull sync protocol kontrakt → R6-01 – Pull Sync Protocol and Server Endpoint
+C42 – Pull merge semantics kontrakt → R6-02 – Mobile Pull Engine and Merge Semantics
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.

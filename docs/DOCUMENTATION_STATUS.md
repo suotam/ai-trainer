@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.65  
+**Verze:** 2.66  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -301,7 +301,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **R6 – Beta Readiness je naplánované, ale implementace nezačala.** Existuje kanonický R6 vertical-slice plán `docs/13-delivery/r6-vertical-slice-plan.md` (pořadí R6, blocking contract map **C41–C45**, evidence gates, R6 Exit Review a pravidla `R6P-001` až `R6P-015`). Scope je odvozen výhradně z beta baseline mezer a R5 dluhů (R6P-015): `R6-01` Pull Sync Protocol and Server Endpoint, `R6-02` Mobile Pull Engine and Merge Semantics, `R6-03` Workout Structure Sync (splacení SXC-010), `R6-04` Delete Tombstones (splacení SXC-011), `R6-05` New Device Restore Flow (beta krok 10), `R6-06` R6 Critical E2E + Exit Review. Základní zákony plánu: **lokální nepushnutá pravda se nikdy tiše neztrácí** (pull konflikt = C12 explicitní rozhodnutí), idempotence oběma směry (restore přerušitelný a opakovatelný), push sémantika C10/C11 beze změny, server payloady nevykládá (C6 §8.4), tombstone ≠ mazání historie, restore = orchestrace existujících mechanismů (žádný import kanál), žádné nové produktové funkce. **Beta gate podmínky** (živý provider smoke, platformní doručení notifikací, emulátorová evidence) vyžadují externí zdroje a jsou podmínkami zveřejnění bety, ne slices. **Žádný R6 slice není `READY`** — čeká se na blokující kontrakty (první: C41 – Pull sync protocol).
 
-**Přesný další kanonický krok:** vytvoření blocking kontraktu **C41 – Pull sync protocol** (`docs/07-backend/r6-pull-sync-contract.md`) a poté implementace `R6-01 – Pull Sync Protocol and Server Endpoint`. Implementace smí začít až po samostatném pokynu.
+`R6-01 – Pull Sync Protocol and Server Endpoint` je implementován (blocking kontrakt **C41 – Pull sync protocol** /`docs/07-backend/r6-pull-sync-contract.md`, `PSP-001..015`/ vznikl v témže cyklu). **Endpoint `POST /api/v1/sync/pull`**: autentizovaný klient dostane změny entit **výhradně vlastního účtu** (PSP-002, C8) od **neprůhledného kurzoru per typ** (PSP-004 — server-owned formát z `updated_at`+id, klient token jen ukládá a vrací; nevalidní token = typované 400), deterministicky řazené (PSP-006), stránkované s cap 200 a poctivým `hasMore` (PSP-007). Klíčové vlastnosti: **overlap dovolen, mezera nikdy** (PSP-005), payload se vydává přesně jak byl přijat — server nevykládá (PSP-003, C6 §8.4), pull nemění stav (PSP-008), typy výhradně z registru vč. `DAILY_CHECK_IN` (PSP-009), audit jen s počty (PSP-013), item tvar tombstone-ready pro C44 (PSP-010). **Push sémantika C10/C11 nedotčena** (PSP-001). OpenAPI rozšířeno (path + 4 schémata) + contract test path set. Ověřeno **4 novými Testcontainers testy** (pull od prázdného kurzoru s payload fidelity + kurzor advance idempotence + viditelnost UPDATE se zvýšenou verzí; stránkování limit/hasMore s konvergencí; ownership izolace cizího účtu; neznámý typ, nevalidní kurzor a 401) — backend suite **118/118** + ktlint; mobil beze změny.
+
+**Přesný další kanonický krok:** `R6-01` je implementován → dalším krokem je vytvoření blocking kontraktu **C42 – Pull merge semantics** (`docs/06-domain/r6-pull-merge-contract.md`) a poté implementace `R6-02 – Mobile Pull Engine and Merge Semantics`. Implementace smí začít až po samostatném pokynu. Ostatní R6 slices čekají na své kontrakty (C43–C45).
 
 ---
 
@@ -486,10 +488,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **žádný R6 slice není `READY`**. Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **`R6-01` je implementován** (pull endpoint s kurzory, stránkováním a ownership). Další kanonický krok:
 
 ```text
-C41 – Pull sync protocol kontrakt → R6-01 – Pull Sync Protocol and Server Endpoint
+C42 – Pull merge semantics kontrakt → R6-02 – Mobile Pull Engine and Merge Semantics
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
