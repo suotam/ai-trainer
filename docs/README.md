@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.66  
+**Verze:** 2.67  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -231,7 +231,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **`R6-01` až `R6-05` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3; SXC-010 i SXC-011 splaceny, obnova nového zařízení doložena deterministicky); zbývá `R6-06` – R6 Critical E2E and Exit Review.
+- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (viz `DOCUMENTATION_STATUS.md` §3; SXC-010 i SXC-011 splaceny, beta baseline kroky 1–10 doloženy deterministicky — beta zůstává interní do splnění beta gate podmínek).
 
 - `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
@@ -462,16 +462,20 @@ provider smoke /beta gate — beta interní/, platformní doručení notifikací
 pull sync a bezpečná obnova /beta krok 10/, emulátorová runtime evidence
 — viz `DOCUMENTATION_STATUS.md` §3). Existuje kanonický R6 vertical-slice
 plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až
-`R6-06`, contract map C41–C45 — kompletní, `R6P-001..015`); **`R6-01` až
-`R6-05` jsou implementovány** (pull endpoint s kurzory; merge engine;
-struktura workoutů oběma směry; delete tombstones — SXC-010 i SXC-011
-splaceny; obnova nového zařízení přes všech 15 typů vč. historie). Další
-kanonický krok:
+`R6-06`, contract map C41–C45 — kompletní, `R6P-001..015`). **Celé R6 je
+implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull
+endpoint s kurzory; merge engine; struktura workoutů oběma směry; delete
+tombstones — SXC-010 i SXC-011 splaceny; obnova nového zařízení; kritická
+R6 E2E — beta baseline kroky 1–10 doloženy deterministicky). **Beta
+zůstává interní** do splnění beta gate podmínek (živý provider smoke,
+platformní doručení notifikací, emulátorová runtime evidence — vyžadují
+externí zdroje). Další kanonický krok:
 
 ```text
-R6-06 – R6 Critical End-to-End Evidence and Exit Review
+Naplánování Release 7 (po samostatném pokynu),
+nebo splnění beta gate podmínek při dostupných externích zdrojích
 ```
 
-Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
+Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
