@@ -136,6 +136,7 @@ class HttpSyncApiClient implements SyncApiClient {
                   entityId: item['entityId']! as String,
                   serverVersion: (item['serverVersion']! as num).toInt(),
                   payload: (item['payload']! as Map).cast<String, Object?>(),
+                  deleted: item['deleted'] == true,
                 ),
             ],
             cursors: {

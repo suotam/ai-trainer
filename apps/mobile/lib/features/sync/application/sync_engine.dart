@@ -46,7 +46,9 @@ class SyncEngine {
     final installationId = await _installationIdentity.ensureInstallationId();
 
     final planned = await _snapshot.collectPendingEntities(accountId);
-    if (planned.isEmpty) {
+    // PENDING DELETE záměry (C44 §3) — řádky už lokálně neexistují.
+    final pendingDeletes = await _snapshot.pendingDeleteOperations(accountId);
+    if (planned.isEmpty && pendingDeletes.isEmpty) {
       return const SyncRunCompleted(
         synced: 0,
         conflicts: 0,
@@ -85,7 +87,7 @@ class SyncEngine {
       entries[entry.id] = entry;
       plannedByOperationId[entry.id] = entity;
     }
-    if (entries.isEmpty) {
+    if (entries.isEmpty && pendingDeletes.isEmpty) {
       return const SyncRunCompleted(
         synced: 0,
         conflicts: 0,
@@ -121,6 +123,26 @@ class SyncEngine {
         ),
       );
     }
+    // DELETE operace (C44 §3, DTS-009): bez payloadu, s očekávanou verzí.
+    final deleteOperationIds = <String>{};
+    for (final delete in pendingDeletes) {
+      deleteOperationIds.add(delete.outboxId);
+      operations.add(
+        SyncPushOperation(
+          operationId: delete.outboxId,
+          idempotencyKey: delete.idempotencyKey,
+          sequence: delete.sequence,
+          operationType: 'DELETE_ENTITY',
+          entityType: delete.entityType,
+          entityId: delete.entityId,
+          payload: const {},
+          expectedServerVersion: await _snapshot.serverVersion(
+            delete.entityType,
+            delete.entityId,
+          ),
+        ),
+      );
+    }
 
     final List<SyncItemOutcome> outcomes;
     try {
@@ -143,6 +165,25 @@ class SyncEngine {
     for (final outcome in outcomes) {
       final entity = plannedByOperationId[outcome.operationId];
       if (entity == null) {
+        if (deleteOperationIds.contains(outcome.operationId)) {
+          // DELETE výsledek (C44 §3): žádný root sync_state — řádek už
+          // lokálně neexistuje; jen stav záměru.
+          switch (outcome.result) {
+            case 'SUCCESS':
+            case 'ALREADY_APPLIED':
+              synced += 1;
+              await _snapshot.markOutboxStatus(outcome.operationId, 'SYNCED');
+            case 'VERSION_CONFLICT':
+              conflicts += 1;
+              await _snapshot.markOutboxStatus(outcome.operationId, 'CONFLICT');
+            case 'VALIDATION_FAILED':
+            case 'PERMISSION_DENIED':
+              rejected += 1;
+              await _snapshot.markOutboxStatus(outcome.operationId, 'BLOCKED');
+            default:
+              pending += 1;
+          }
+        }
         continue;
       }
       final rootKey = '${entity.stateEntityType}:${entity.stateEntityId}';

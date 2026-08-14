@@ -57,6 +57,24 @@ abstract interface class SyncApiClient {
   });
 }
 
+/// PENDING DELETE záměr z outboxu (C44 §3) — řádek už lokálně neexistuje,
+/// operace nese jen identitu a stabilní idempotency key.
+class PendingDeleteOperation {
+  const PendingDeleteOperation({
+    required this.outboxId,
+    required this.entityType,
+    required this.entityId,
+    required this.idempotencyKey,
+    required this.sequence,
+  });
+
+  final String outboxId;
+  final String entityType;
+  final String entityId;
+  final String idempotencyKey;
+  final int sequence;
+}
+
 /// Jedna stažená změna (C41 §2) — payload jsou přesné sloupcové hodnoty
 /// z push strany (PMS-003).
 class SyncPullItem {
@@ -65,12 +83,16 @@ class SyncPullItem {
     required this.entityId,
     required this.serverVersion,
     required this.payload,
+    this.deleted = false,
   });
 
   final String entityType;
   final String entityId;
   final int serverVersion;
   final Map<String, Object?> payload;
+
+  /// Tombstone příznak (C44, PSP-010).
+  final bool deleted;
 }
 
 class SyncPullResponse {

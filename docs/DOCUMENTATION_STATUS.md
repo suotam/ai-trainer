@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.68  
+**Verze:** 2.69  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -307,7 +307,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R6-03 – Workout Structure Sync` je implementován (blocking kontrakt **C43 – Workout structure sync** /`docs/12-data/r6-structure-sync-contract.md`, `WSS-001..015`/ vznikl v témže cyklu) — **dluh SXC-010 je splacen**. **Push:** `WORKOUT_INSTANCE` payload nese pole `structure` (sekce → kroky → set plány) jako **syrové sloupcové mapy** deterministicky řazené dle position/id (WSS-002/005) — aplikace je přesný inverz bez field-driftu; žádné nové serverové tabulky, server payload dál nevykládá (C6 §8.4). **Pull:** applier rozšířen o `WORKOUT_INSTANCE` (C42 merge matice platí na root — DIRTY instance nikdy tiše), rekonstrukce struktury **celá a atomická** (smazat sekce s kaskádou, vložit z payloadu; client ID zachována — WSS-004/006), instance nese původní časy zařízení (timestamps z payloadu); **chybějící `structure`** (data pushnutá před C43) = poctivý stav bez dopočtů (WSS-008). Pull scope rozšířen o závislé typy `MANUAL_ACTIVITY` a `CALENDAR_CHANGE` (po prerekvizitách, WSS-010; kalendářní evidence bez updated_at řešena per-spec meta). Ověřeno **2 novými testy** (push struktura s řazením a raw mapami → round-trip na druhou DB s **byte-ekvivalentní** strukturou → idempotence → aplikace kalendářní změny → **R1 start session na obnoveném workoutu**; chybějící struktura poctivě bez sekcí) — mobile suite **338 testů**, analyze čistý; backend beze změny (payload neprůhledný).
 
-**Přesný další kanonický krok:** `R6-03` je implementován → dalším krokem je vytvoření blocking kontraktu **C44 – Delete tombstones** (`docs/06-domain/r6-delete-sync-contract.md`) a poté implementace `R6-04 – Delete Tombstones`. Implementace smí začít až po samostatném pokynu. `R6-05` čeká na C45.
+`R6-04 – Delete Tombstones` je implementován (blocking kontrakt **C44 – Delete tombstones** /`docs/06-domain/r6-delete-sync-contract.md`, `DTS-001..015`/ vznikl v témže cyklu) — **dluh SXC-011 je splacen; oba C24 sync dluhy jsou uzavřeny**. **Tombstone = evidovaný fakt smazání, ne mazání historie** (DTS-001): server řádek zůstává s payloadem, jen nese `deleted = true` + navýšenou verzi (Flyway **V7** aditivní sloupec; P0 scope výhradně `AVAILABILITY_RULE` — jediné lokální tvrdé zpětvzetí; ostatní entity archivují stavem). **Push:** nový `DELETE_ENTITY` typ s optimistic concurrency jako UPDATE (mismatch = VERSION_CONFLICT), bez payloadu, replay ALREADY_APPLIED; mimo scope/neexistující/cizí = typovaná odmítnutí. **Lokálně:** zpětvzetí serverem známého řádku zapíše DELETE záměr do outboxu **atomicky se smazáním** (stabilní idempotency key s verzí, DTS-007); LOCAL_ONLY řádek se maže jen lokálně (server se o neexistujícím nedozví, DTS-008); push engine PENDING DELETE záměry odesílá v batchi a uzavírá per výsledek. **Pull:** item nese `deleted: true` (naplnění PSP-010); aplikace tombstonu: SYNCED řádek smazán + evidence verze, **DIRTY/LOCAL_ONLY nikdy tiše** (typovaný konflikt, DTS-005), absent = jen evidence verze — **žádné oživení** (DTS-006, restore tombstonovaný řádek nevytvoří); idempotentní. Ověřeno **2 novými backend testy** (tombstone s payloadem a verzí 2, replay, pull deleted:true; konflikt verze/cizí účet/neexistující/mimo scope) — suite **120/120** + ktlint, migrace V1–V7; **2 novými mobilními testy** (záměr atomicky vs. LOCAL_ONLY bez záměru + push dispatch DELETE_ENTITY s prázdným payloadem a uzavřením záměru; pull tombstone matice vč. DIRTY přežití a idempotence) — suite **340 testů**, analyze čistý.
+
+**Přesný další kanonický krok:** `R6-04` je implementován → dalším krokem je vytvoření blocking kontraktu **C45 – Device restore** (`docs/06-domain/r6-restore-contract.md`) a poté implementace `R6-05 – New Device Restore Flow`. Implementace smí začít až po samostatném pokynu. Poté zbývá `R6-06` (E2E + Exit Review).
 
 ---
 
@@ -492,10 +494,10 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **`R6-01` až `R6-03` jsou implementovány** (pull endpoint, merge engine, struktura workoutů — SXC-010 splacen). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45); **`R6-01` až `R6-04` jsou implementovány** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny). Další kanonický krok:
 
 ```text
-C44 – Delete tombstones kontrakt → R6-04 – Delete Tombstones
+C45 – Device restore kontrakt → R6-05 – New Device Restore Flow
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

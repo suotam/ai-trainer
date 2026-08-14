@@ -5,6 +5,7 @@ import com.aitrainer.backend.auth.application.AuditOutcome
 import com.aitrainer.backend.auth.application.AuditRecorder
 import com.aitrainer.backend.infrastructure.http.ApiException
 import com.aitrainer.backend.sync.domain.SyncEntityType
+import com.aitrainer.backend.sync.domain.tombstoneScopedTypes
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Service
@@ -25,6 +26,8 @@ data class SyncPullItem(
     val entityId: String,
     val serverVersion: Long,
     val payload: Map<String, Any?>,
+    // Tombstone příznak (C44 §2, PSP-010) — mimo scoped typy vždy false.
+    val deleted: Boolean = false,
 )
 
 data class SyncPullResult(
@@ -55,6 +58,7 @@ class ProcessSyncPull(
         val serverVersion: Long,
         val payloadJson: String,
         val updatedAt: Instant,
+        val deleted: Boolean,
     )
 
     fun pull(
@@ -90,6 +94,7 @@ class ProcessSyncPull(
                         entityId = row.id,
                         serverVersion = row.serverVersion,
                         payload = readPayload(row.payloadJson),
+                        deleted = row.deleted,
                     )
             }
             if (emitted.isNotEmpty()) {
@@ -123,11 +128,14 @@ class ProcessSyncPull(
             } else {
                 "AND (updated_at > :cursorTs OR (updated_at = :cursorTs AND id::text > :cursorId))"
             }
+        // Tombstone sloupec existuje jen na scoped tabulkách (C44 §2).
+        val deletedColumn =
+            if (type in tombstoneScopedTypes) "deleted" else "false AS deleted"
         var spec =
             jdbc
                 .sql(
                     """
-                    SELECT id, server_version, payload::text AS payload, updated_at
+                    SELECT id, server_version, payload::text AS payload, updated_at, $deletedColumn
                     FROM ${type.tableName}
                     WHERE account_id = :accountId $predicate
                     ORDER BY updated_at, id::text
@@ -148,6 +156,7 @@ class ProcessSyncPull(
                     serverVersion = rs.getLong("server_version"),
                     payloadJson = rs.getString("payload"),
                     updatedAt = rs.getTimestamp("updated_at").toInstant(),
+                    deleted = rs.getBoolean("deleted"),
                 )
             }.list()
     }

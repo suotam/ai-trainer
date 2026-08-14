@@ -97,6 +97,30 @@ class JdbcSyncedEntityRepository(
             .query(Long::class.java)
             .single()
     }
+
+    override fun markDeleted(
+        type: SyncEntityType,
+        entityId: UUID,
+        now: Instant,
+    ): Long {
+        jdbc
+            .sql(
+                """
+                UPDATE ${type.tableName}
+                SET deleted = true,
+                    server_version = server_version + 1,
+                    updated_at = :now
+                WHERE id = :id
+                """.trimIndent(),
+            ).param("now", Timestamp.from(now))
+            .param("id", entityId)
+            .update()
+        return jdbc
+            .sql("SELECT server_version FROM ${type.tableName} WHERE id = :id")
+            .param("id", entityId)
+            .query(Long::class.java)
+            .single()
+    }
 }
 
 /** JDBC perzistence replay záznamů (C6 §8.5, C11 §5). */

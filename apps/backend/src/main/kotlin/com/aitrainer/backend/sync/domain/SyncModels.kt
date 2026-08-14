@@ -58,11 +58,15 @@ enum class SyncEntityType(
             }
 }
 
-/** R2-05 podmnožina `SyncOperationType` (C10 §5.1). */
+/** Podmnožina `SyncOperationType` (C10 §5.1; DELETE_ENTITY od R6-04, C44 §2). */
 enum class SyncOperationKind {
     CREATE_ENTITY,
     UPDATE_ENTITY,
+    DELETE_ENTITY,
 }
+
+/** P0 scope tombstonů (C44 §2, DTS-002) — rozšíření jen kontraktem. */
+val tombstoneScopedTypes: Set<SyncEntityType> = setOf(SyncEntityType.AVAILABILITY_RULE)
 
 /** R2-05 podmnožina `SyncResult` (C10 §7). */
 enum class SyncItemResult {

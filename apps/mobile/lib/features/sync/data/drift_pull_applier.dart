@@ -7,6 +7,9 @@ import '../domain/sync_push_models.dart';
 enum PullApplyOutcome {
   appliedNew,
   appliedUpdate,
+
+  /// Tombstone aplikován — lokální SYNCED řádek smazán (C44 §3).
+  appliedDelete,
   noOp,
 
   /// Lokální LOCAL_ONLY/DIRTY — nikdy tiše (PMS-001); řešení = C12 push flow.
@@ -189,12 +192,26 @@ class DriftPullApplier {
     if (local != null) {
       final syncState = local.data['sync_state']! as String;
       if (syncState != 'SYNCED') {
-        // Nikdy tiše (PMS-001); řešení = existující C12 push flow.
+        // Nikdy tiše (PMS-001/DTS-005); řešení = existující C12 push flow.
         return PullApplyOutcome.conflictSkipped;
       }
       if (knownVersion != null && item.serverVersion <= knownVersion) {
         return PullApplyOutcome.noOp;
       }
+    }
+
+    // Tombstone (C44 §3): SYNCED řádek smazat, neexistující jen evidovat
+    // verzi — žádné oživení (DTS-006); idempotentní (DTS-004).
+    if (item.deleted) {
+      if (local != null) {
+        await _db.customStatement('DELETE FROM ${spec.table} WHERE id = ?', [
+          item.entityId,
+        ]);
+      }
+      await _storeVersion(item, nowMillis);
+      return local != null
+          ? PullApplyOutcome.appliedDelete
+          : PullApplyOutcome.noOp;
     }
 
     final columns = <String>[];
@@ -248,20 +265,22 @@ class DriftPullApplier {
 
     // Evidence server verze (PMS-006) — zdroj expectedServerVersion pro
     // push i no-op rozhodnutí dalšího pullu.
-    await _db
-        .into(_db.localSyncedVersions)
-        .insertOnConflictUpdate(
-          LocalSyncedVersionsCompanion.insert(
-            entityType: item.entityType,
-            entityId: item.entityId,
-            serverVersion: item.serverVersion,
-            updatedAt: nowMillis,
-          ),
-        );
+    await _storeVersion(item, nowMillis);
     return local == null
         ? PullApplyOutcome.appliedNew
         : PullApplyOutcome.appliedUpdate;
   }
+
+  Future<void> _storeVersion(SyncPullItem item, int nowMillis) => _db
+      .into(_db.localSyncedVersions)
+      .insertOnConflictUpdate(
+        LocalSyncedVersionsCompanion.insert(
+          entityType: item.entityType,
+          entityId: item.entityId,
+          serverVersion: item.serverVersion,
+          updatedAt: nowMillis,
+        ),
+      );
 
   /// Rekonstrukce struktury instance (C43 §3, WSS-004): celá a state-based
   /// — smazat lokální sekce (kaskáda odstraní kroky/sety) a vložit ze

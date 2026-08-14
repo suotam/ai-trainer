@@ -11,6 +11,7 @@ import com.aitrainer.backend.sync.domain.SyncItemOutcome
 import com.aitrainer.backend.sync.domain.SyncItemResult
 import com.aitrainer.backend.sync.domain.SyncOperationKind
 import com.aitrainer.backend.sync.domain.SyncedEntityRow
+import com.aitrainer.backend.sync.domain.tombstoneScopedTypes
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import tools.jackson.databind.SerializationFeature
@@ -174,7 +175,55 @@ class ProcessSyncPush(
             SyncOperationKind.UPDATE_ENTITY -> {
                 processUpdate(accountId, installationId, operation, entityType, entityId, payloadJson, requestHash, existing)
             }
+
+            SyncOperationKind.DELETE_ENTITY -> {
+                processDelete(accountId, operation, entityType, entityId, requestHash, existing)
+            }
         }
+    }
+
+    /**
+     * Tombstone (R6-04, C44 §2): `deleted = true` + verze + updated_at —
+     * řádek se nikdy fyzicky nemaže (DTS-001). Optimistic concurrency jako
+     * UPDATE (DTS-003); mimo P0 scope typované odmítnutí (DTS-002).
+     */
+    private fun processDelete(
+        accountId: UUID,
+        operation: SyncPushOperation,
+        entityType: SyncEntityType,
+        entityId: UUID,
+        requestHash: String,
+        existing: SyncedEntityRow?,
+    ): SyncItemOutcome {
+        if (entityType !in tombstoneScopedTypes) {
+            return rejected(accountId, operation, "DELETE_NOT_SUPPORTED")
+        }
+        if (existing == null) {
+            return rejected(accountId, operation, "DELETE_TARGET_MISSING")
+        }
+        if (existing.accountId != accountId) {
+            return denied(accountId, operation, entityType, entityId)
+        }
+        if (operation.expectedServerVersion != existing.serverVersion) {
+            audit("SyncConflictDetected", AuditOutcome.CONFLICT, accountId, entityType, entityId, "VERSION_MISMATCH")
+            return SyncItemOutcome(operation.operationId, SyncItemResult.VERSION_CONFLICT, existing.serverVersion)
+        }
+        val now = clock.instant()
+        val newVersion = entityRepository.markDeleted(entityType, entityId, now)
+        idempotencyRepository.insert(
+            SyncIdempotencyRecord(
+                idempotencyKey = operation.idempotencyKey,
+                accountId = accountId,
+                requestHash = requestHash,
+                resultEntityId = entityId,
+                resultServerVersion = newVersion,
+            ),
+            operationType = "${SyncOperationKind.DELETE_ENTITY.name}:${entityType.name}",
+            now = now,
+            expiresAt = now.plus(IDEMPOTENCY_RETENTION),
+        )
+        audit("SyncOperationApplied", AuditOutcome.SUCCESS, accountId, entityType, entityId, "DELETED")
+        return SyncItemOutcome(operation.operationId, SyncItemResult.SUCCESS, newVersion)
     }
 
     private fun processCreate(

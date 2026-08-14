@@ -398,6 +398,30 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
   }
 
   @override
+  Future<List<PendingDeleteOperation>> pendingDeleteOperations(
+    String ownerId,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          "SELECT id, entity_type, entity_id, idempotency_key, sequence "
+          "FROM local_outbox WHERE owner_id = ? AND operation_type = 'DELETE' "
+          "AND status = 'PENDING' ORDER BY sequence",
+          variables: [Variable.withString(ownerId)],
+        )
+        .get();
+    return [
+      for (final row in rows)
+        PendingDeleteOperation(
+          outboxId: row.data['id']! as String,
+          entityType: row.data['entity_type']! as String,
+          entityId: row.data['entity_id']! as String,
+          idempotencyKey: row.data['idempotency_key']! as String,
+          sequence: row.data['sequence']! as int,
+        ),
+    ];
+  }
+
+  @override
   Future<void> markOutboxStatus(String outboxId, String status) async {
     await (_db.update(_db.localOutbox)..where((t) => t.id.equals(outboxId)))
         .write(LocalOutboxCompanion(status: Value(status)));

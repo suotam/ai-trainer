@@ -89,6 +89,7 @@ class PullEngine {
           switch (await applier.apply(accountId, item, now: now)) {
             case PullApplyOutcome.appliedNew:
             case PullApplyOutcome.appliedUpdate:
+            case PullApplyOutcome.appliedDelete:
               applied++;
             case PullApplyOutcome.conflictSkipped:
               conflicts++;
