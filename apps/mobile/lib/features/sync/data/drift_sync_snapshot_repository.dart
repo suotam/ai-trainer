@@ -36,7 +36,12 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
         PlannedSyncEntity(
           entityType: 'WORKOUT_INSTANCE',
           entityId: row.id,
-          payload: _instancePayload(row),
+          payload: {
+            ..._instancePayload(row),
+            // Struktura uvnitř instance payloadu (C43 §2, WSS-001) —
+            // splacení SXC-010.
+            'structure': await _structureFor(row.id),
+          },
           localRevision: _withSalt(
             salts,
             'WORKOUT_INSTANCE',
@@ -549,6 +554,50 @@ class DriftSyncSnapshotRepository implements SyncSnapshotRepository {
         }
         return await instanceTitle(session.workoutInstanceId) ?? entityId;
     }
+  }
+
+  /// Struktura instance jako syrové sloupcové mapy (C43 §2, WSS-002/005):
+  /// deterministicky řazené, aplikace je inverz bez field-driftu.
+  Future<Map<String, Object?>> _structureFor(String instanceId) async {
+    Future<List<Map<String, Object?>>> rows(
+      String sql,
+      String parentId,
+    ) async => [
+      for (final row
+          in await _db
+              .customSelect(sql, variables: [Variable.withString(parentId)])
+              .get())
+        Map<String, Object?>.from(row.data),
+    ];
+
+    final sections = await rows(
+      'SELECT * FROM local_workout_sections WHERE workout_instance_id = ? '
+      'ORDER BY position, id',
+      instanceId,
+    );
+    return {
+      'sections': [
+        for (final section in sections)
+          {
+            ...section,
+            'steps': [
+              for (final step in await rows(
+                'SELECT * FROM local_workout_steps WHERE section_id = ? '
+                    'ORDER BY position, id',
+                '${section['id']}',
+              ))
+                {
+                  ...step,
+                  'setPlans': await rows(
+                    'SELECT * FROM local_set_plans WHERE workout_step_id = ? '
+                        'ORDER BY position, id',
+                    '${step['id']}',
+                  ),
+                },
+            ],
+          },
+      ],
+    };
   }
 
   Map<String, Object?> _instancePayload(LocalWorkoutInstanceRow row) => {

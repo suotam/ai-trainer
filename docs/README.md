@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.63  
+**Verze:** 2.64  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -197,6 +197,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 
 - `r2-audit-event-contract.md` (**C14**, vlastník Domain / domain-events + Security) vlastní seznam auditovaných auth a sync kritických událostí R2, tvar audit záznamu (principal/action/target/outcome/čas/correlation/policy) a pravidla bez citlivého payloadu; invarianty `AEC-001` až `AEC-015`. Contract-only. **Auth část** (Done, blokovala `R2-02`) i **sync část** (Done ve v0.2 — `SyncOperationApplied/Rejected`, `SyncConflictDetected`, `AuthorizationDenied`, `IdempotentReplayReturned`; blokuje `R2-05`).
 
+- `r6-structure-sync-contract.md` (**C43**, vlastník Data Architecture + Backend + Mobile) vlastní splacení **SXC-010**: struktura workoutu (sekce → kroky → set plány) cestuje **uvnitř instance payloadu** jako syrové sloupcové mapy (žádné nové serverové tabulky, C6 §8.4 trvá), pull ji rekonstruuje **celou a atomicky** (C42 matice platí na root — DIRTY instance nikdy tiše), client ID se zachovávají, chybějící struktura je poctivý stav bez dopočtů, pull scope rozšířen o `WORKOUT_INSTANCE`/`MANUAL_ACTIVITY`/`CALENDAR_CHANGE` a invarianty `WSS-001` až `WSS-015`. Contract-only. Blokuje `R6-03`.
+
 - `r2-server-data-model.md` (**C6**, vlastník Data Architecture) vlastní serverový (PostgreSQL) datový model R2: baseline tabulky account/auth/session, ownership sloupce, **server-vs-client ID** politiku (client-generated ID se zachovává), Flyway append-only migrační pravidla, **rozšíření §8.1–§8.3 (profil/device, R2-04)** i **§8.4–§8.5 (synced entity se `server_version` a rozšířený idempotency_record, R2-05)** a invarianty `SDM-001` až `SDM-015`. Contract-only, bez DDL/Flyway/ORM. Blokuje `R2-02`; rozšíření blokují `R2-04`/`R2-05`.
 
 - `initial-architecture-decisions.md` obsahuje mimo `ADR-001` až `ADR-010` (R0/R1) také **`ADR-011` – R2 authentication provider strategy** (**C5**, vlastník Architecture): rozhoduje strategii auth provideru pro R2 (first-party backend session authority + provider-neutral `AuthenticationIdentity` adaptér; konkrétní externí federated provider odložen). Blokuje `R2-02` (spolu s C3/C4/C6/C14).
@@ -225,7 +227,7 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r3-vertical-slice-plan.md` vlastní pořadí implementace R3 (`R3-01` až `R3-08`), R3 blocking contract map (C16–C24), evidence gates, R3 Exit Review a `R3P-001` až `R3P-015`. **Celé R3 (`R3-01` až `R3-08`) je implementováno a R3 Exit Review proveden** (viz `DOCUMENTATION_STATUS.md` §3) — Release 3 je uzavřen.
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
-- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **`R6-01` a `R6-02` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3); ostatní slices čekají na kontrakty (C43–C45).
+- `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **`R6-01` až `R6-03` jsou implementovány** (viz `DOCUMENTATION_STATUS.md` §3; SXC-010 splacen); ostatní slices čekají na kontrakty (C44–C45).
 
 - `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
@@ -456,13 +458,13 @@ provider smoke /beta gate — beta interní/, platformní doručení notifikací
 pull sync a bezpečná obnova /beta krok 10/, emulátorová runtime evidence
 — viz `DOCUMENTATION_STATUS.md` §3). Existuje kanonický R6 vertical-slice
 plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až
-`R6-06`, contract map C41–C45, `R6P-001..015`); **`R6-01` a `R6-02` jsou
-implementovány** (pull endpoint s kurzory; mobilní pull engine s merge
-maticí — lokální nepushnutá pravda se nikdy tiše neztrácí). Další
+`R6-06`, contract map C41–C45, `R6P-001..015`); **`R6-01` až `R6-03` jsou
+implementovány** (pull endpoint s kurzory; mobilní merge engine; struktura
+workoutů v instance payloadu oběma směry — SXC-010 splacen). Další
 kanonický krok:
 
 ```text
-C43 – Workout structure sync kontrakt → R6-03 – Workout Structure Sync
+C44 – Delete tombstones kontrakt → R6-04 – Delete Tombstones
 ```
 
 Tvorba kontraktů ani implementace R4 nezačíná bez samostatného pokynu.
