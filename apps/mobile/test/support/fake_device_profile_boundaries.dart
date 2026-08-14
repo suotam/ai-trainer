@@ -21,6 +21,47 @@ import 'fake_auth_boundaries.dart';
 class FakeSyncApiClient implements SyncApiClient {
   bool offline = false;
 
+  /// Server stav pro pull (R6-01 fake): položky per typ v pořadí vzniku;
+  /// kurzor = počet už vydaných položek daného typu (neprůhledný token).
+  final Map<String, List<SyncPullItem>> pullServerItems = {};
+
+  /// Volitelný limit velikosti pull odpovědi (stránkování testy).
+  int? pullBatchLimit;
+  int pullCalls = 0;
+
+  @override
+  Future<SyncPullResponse> pull({
+    required String accessToken,
+    required String installationId,
+    required Map<String, String?> cursors,
+    int? limit,
+  }) async {
+    if (offline) {
+      throw const AuthApiFailure(AuthApiFailureKind.network);
+    }
+    pullCalls++;
+    final cap = pullBatchLimit ?? limit ?? 200;
+    final items = <SyncPullItem>[];
+    final nextCursors = <String, String?>{};
+    var hasMore = false;
+    for (final entry in cursors.entries) {
+      final available = pullServerItems[entry.key] ?? const [];
+      final consumed = int.tryParse(entry.value ?? '') ?? 0;
+      final remaining = available.skip(consumed).toList();
+      final emit = remaining.take(cap - items.length).toList();
+      items.addAll(emit);
+      if (remaining.length > emit.length) {
+        hasMore = true;
+      }
+      nextCursors[entry.key] = '${consumed + emit.length}';
+    }
+    return SyncPullResponse(
+      items: items,
+      cursors: nextCursors,
+      hasMore: hasMore,
+    );
+  }
+
   /// entityId â†’ vĂ˝sledek (`VERSION_CONFLICT`, `PERMISSION_DENIED`, â€¦).
   final Map<String, String> scriptedResults = {};
   final Map<String, int> serverVersions = {};
