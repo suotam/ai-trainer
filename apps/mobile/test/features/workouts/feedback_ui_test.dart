@@ -1,4 +1,6 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+import 'package:ai_trainer_mobile/features/chat/presentation/chat_screen.dart';
 import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../support/fake_workout_repositories.dart';
+import '../../support/workout_test_scope.dart';
 
 void main() {
   final session = buildSessionSnapshot(id: 'ses-1', workoutInstanceId: 'wi1');
@@ -25,47 +28,52 @@ void main() {
   Widget appWith({
     required FakeWorkoutCompletionRepository completion,
     FakeWorkoutHistoryRepository? history,
-  }) => ProviderScope(
-    overrides: [
-      r1SeedRepositoryProvider.overrideWithValue(
-        FakeSeedRepository([SeedResult.applied]),
-      ),
-      workoutSessionRepositoryProvider.overrideWithValue(
-        FakeWorkoutSessionRepository(sessionsById: {'ses-1': session}),
-      ),
-      workoutInstanceRepositoryProvider.overrideWithValue(
-        FakeWorkoutInstanceRepository(
-          detailsById: {'wi1': buildDetail(id: 'wi1')},
+  }) {
+    final db = createTestDatabase();
+    addTearDown(db.close);
+    return ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        r1SeedRepositoryProvider.overrideWithValue(
+          FakeSeedRepository([SeedResult.applied]),
         ),
-      ),
-      workoutPerformanceRepositoryProvider.overrideWithValue(
-        FakeWorkoutPerformanceRepository(
-          tracker: buildTracker(
-            sessionId: 'ses-1',
-            sets: const [
-              TrackerSet(
-                setPerformanceId: 'setp-1',
-                position: 0,
-                status: SetPerformanceStatus.completed,
-                plannedRepetitions: 8,
-                plannedWeightKg: 16,
-                actualRepetitions: 9,
-              ),
-            ],
+        workoutSessionRepositoryProvider.overrideWithValue(
+          FakeWorkoutSessionRepository(sessionsById: {'ses-1': session}),
+        ),
+        workoutInstanceRepositoryProvider.overrideWithValue(
+          FakeWorkoutInstanceRepository(
+            detailsById: {'wi1': buildDetail(id: 'wi1')},
           ),
         ),
-      ),
-      workoutCompletionRepositoryProvider.overrideWithValue(completion),
-      workoutHistoryRepositoryProvider.overrideWithValue(
-        history ?? FakeWorkoutHistoryRepository(),
-      ),
-    ],
-    child: const AiTrainerApp(),
-  );
+        workoutPerformanceRepositoryProvider.overrideWithValue(
+          FakeWorkoutPerformanceRepository(
+            tracker: buildTracker(
+              sessionId: 'ses-1',
+              sets: const [
+                TrackerSet(
+                  setPerformanceId: 'setp-1',
+                  position: 0,
+                  status: SetPerformanceStatus.completed,
+                  plannedRepetitions: 8,
+                  plannedWeightKg: 16,
+                  actualRepetitions: 9,
+                ),
+              ],
+            ),
+          ),
+        ),
+        workoutCompletionRepositoryProvider.overrideWithValue(completion),
+        workoutHistoryRepositoryProvider.overrideWithValue(
+          history ?? FakeWorkoutHistoryRepository(),
+        ),
+      ],
+      child: const AiTrainerApp(),
+    );
+  }
 
   Future<void> openSession(WidgetTester tester) async {
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(AppRoutes.activeSessionLocation('ses-1'));
     await tester.pumpAndSettle();
   }
@@ -178,7 +186,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(AppRoutes.completedWorkoutLocation('ses-1'));
     await tester.pumpAndSettle();
 
@@ -201,7 +209,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(AppRoutes.completedWorkoutLocation('ses-1'));
     await tester.pumpAndSettle();
 

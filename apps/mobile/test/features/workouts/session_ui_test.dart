@@ -1,4 +1,6 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+import 'package:ai_trainer_mobile/features/chat/presentation/chat_screen.dart';
 import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../support/fake_workout_repositories.dart';
+import '../../support/workout_test_scope.dart';
 
 void main() {
   Future<void> pumpAt(
@@ -21,9 +24,12 @@ void main() {
     required FakeWorkoutInstanceRepository workouts,
     required FakeWorkoutSessionRepository sessions,
   }) async {
+    final db = createTestDatabase();
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          appDatabaseProvider.overrideWithValue(db),
           r1SeedRepositoryProvider.overrideWithValue(
             FakeSeedRepository([SeedResult.applied]),
           ),
@@ -37,7 +43,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(location);
     await tester.pumpAndSettle();
   }

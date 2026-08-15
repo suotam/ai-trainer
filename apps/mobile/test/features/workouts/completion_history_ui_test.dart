@@ -1,4 +1,6 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+import 'package:ai_trainer_mobile/features/chat/presentation/chat_screen.dart';
 import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
@@ -19,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../support/fake_workout_repositories.dart';
+import '../../support/workout_test_scope.dart';
 
 void main() {
   final session = buildSessionSnapshot(id: 'ses-1', workoutInstanceId: 'wi1');
@@ -27,49 +30,55 @@ void main() {
     required FakeWorkoutCompletionRepository completion,
     FakeWorkoutHistoryRepository? history,
     FakeWorkoutPerformanceRepository? performance,
-  }) => ProviderScope(
-    overrides: [
-      r1SeedRepositoryProvider.overrideWithValue(
-        FakeSeedRepository([SeedResult.applied]),
-      ),
-      workoutSessionRepositoryProvider.overrideWithValue(
-        FakeWorkoutSessionRepository(sessionsById: {'ses-1': session}),
-      ),
-      workoutInstanceRepositoryProvider.overrideWithValue(
-        FakeWorkoutInstanceRepository(
-          detailsById: {'wi1': buildDetail(id: 'wi1')},
+  }) {
+    // Chat je domov (R7-05) - persistence nad in-memory DB.
+    final db = createTestDatabase();
+    addTearDown(db.close);
+    return ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        r1SeedRepositoryProvider.overrideWithValue(
+          FakeSeedRepository([SeedResult.applied]),
         ),
-      ),
-      workoutPerformanceRepositoryProvider.overrideWithValue(
-        performance ??
-            FakeWorkoutPerformanceRepository(
-              tracker: buildTracker(
-                sessionId: 'ses-1',
-                sets: const [
-                  TrackerSet(
-                    setPerformanceId: 'setp-1',
-                    position: 0,
-                    status: SetPerformanceStatus.completed,
-                    plannedRepetitions: 8,
-                    plannedWeightKg: 16,
-                    actualRepetitions: 9,
-                    actualWeightKg: 17.5,
-                  ),
-                ],
+        workoutSessionRepositoryProvider.overrideWithValue(
+          FakeWorkoutSessionRepository(sessionsById: {'ses-1': session}),
+        ),
+        workoutInstanceRepositoryProvider.overrideWithValue(
+          FakeWorkoutInstanceRepository(
+            detailsById: {'wi1': buildDetail(id: 'wi1')},
+          ),
+        ),
+        workoutPerformanceRepositoryProvider.overrideWithValue(
+          performance ??
+              FakeWorkoutPerformanceRepository(
+                tracker: buildTracker(
+                  sessionId: 'ses-1',
+                  sets: const [
+                    TrackerSet(
+                      setPerformanceId: 'setp-1',
+                      position: 0,
+                      status: SetPerformanceStatus.completed,
+                      plannedRepetitions: 8,
+                      plannedWeightKg: 16,
+                      actualRepetitions: 9,
+                      actualWeightKg: 17.5,
+                    ),
+                  ],
+                ),
               ),
-            ),
-      ),
-      workoutCompletionRepositoryProvider.overrideWithValue(completion),
-      workoutHistoryRepositoryProvider.overrideWithValue(
-        history ?? FakeWorkoutHistoryRepository(),
-      ),
-    ],
-    child: const AiTrainerApp(),
-  );
+        ),
+        workoutCompletionRepositoryProvider.overrideWithValue(completion),
+        workoutHistoryRepositoryProvider.overrideWithValue(
+          history ?? FakeWorkoutHistoryRepository(),
+        ),
+      ],
+      child: const AiTrainerApp(),
+    );
+  }
 
   Future<void> openSession(WidgetTester tester) async {
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(AppRoutes.activeSessionLocation('ses-1'));
     await tester.pumpAndSettle();
   }
@@ -156,7 +165,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(TodayScreen.screenKey));
+    final context = tester.element(find.byKey(ChatScreen.screenKey));
     GoRouter.of(context).go(AppRoutes.historyPath);
     await tester.pumpAndSettle();
 
@@ -176,7 +185,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Vstup do historie z Today.
+    // Vstup do historie z domova pres Today (chat je domov, CQC-009).
+    final home = tester.element(find.byKey(ChatScreen.screenKey));
+    GoRouter.of(home).go(AppRoutes.todayPath);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(TodayScreen.historyActionKey));
     await tester.pumpAndSettle();
     expect(find.byKey(HistoryScreen.listKey), findsOneWidget);
