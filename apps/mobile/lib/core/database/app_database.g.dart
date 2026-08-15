@@ -17280,6 +17280,575 @@ class LocalChatMessagesCompanion extends UpdateCompanion<LocalChatMessageRow> {
   }
 }
 
+class $LocalChatActionsTable extends LocalChatActions
+    with TableInfo<$LocalChatActionsTable, LocalChatActionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalChatActionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageIdMeta = const VerificationMeta(
+    'messageId',
+  );
+  @override
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+    'message_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES local_chat_messages (id)',
+    ),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadJsonMeta = const VerificationMeta(
+    'payloadJson',
+  );
+  @override
+  late final GeneratedColumn<String> payloadJson = GeneratedColumn<String>(
+    'payload_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(chatActionProposed),
+  );
+  static const VerificationMeta _errorMeta = const VerificationMeta('error');
+  @override
+  late final GeneratedColumn<String> error = GeneratedColumn<String>(
+    'error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  @override
+  late final GeneratedColumn<int> decidedAt = GeneratedColumn<int>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    messageId,
+    position,
+    kind,
+    payloadJson,
+    status,
+    error,
+    createdAt,
+    decidedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_chat_actions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalChatActionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(
+        _messageIdMeta,
+        messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('payload_json')) {
+      context.handle(
+        _payloadJsonMeta,
+        payloadJson.isAcceptableOrUnknown(
+          data['payload_json']!,
+          _payloadJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadJsonMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('error')) {
+      context.handle(
+        _errorMeta,
+        error.isAcceptableOrUnknown(data['error']!, _errorMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalChatActionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalChatActionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      payloadJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload_json'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      error: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}decided_at'],
+      ),
+    );
+  }
+
+  @override
+  $LocalChatActionsTable createAlias(String alias) {
+    return $LocalChatActionsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalChatActionRow extends DataClass
+    implements Insertable<LocalChatActionRow> {
+  final String id;
+  final String messageId;
+  final int position;
+
+  /// Druh akce (C48 §3 tvarová tabulka).
+  final String kind;
+
+  /// Kanonický validovaný payload (CHA-003).
+  final String payloadJson;
+  final String status;
+
+  /// Typovaný důvod selhání provedení (CHA-007).
+  final String? error;
+  final int createdAt;
+  final int? decidedAt;
+  const LocalChatActionRow({
+    required this.id,
+    required this.messageId,
+    required this.position,
+    required this.kind,
+    required this.payloadJson,
+    required this.status,
+    this.error,
+    required this.createdAt,
+    this.decidedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['message_id'] = Variable<String>(messageId);
+    map['position'] = Variable<int>(position);
+    map['kind'] = Variable<String>(kind);
+    map['payload_json'] = Variable<String>(payloadJson);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || error != null) {
+      map['error'] = Variable<String>(error);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<int>(decidedAt);
+    }
+    return map;
+  }
+
+  LocalChatActionsCompanion toCompanion(bool nullToAbsent) {
+    return LocalChatActionsCompanion(
+      id: Value(id),
+      messageId: Value(messageId),
+      position: Value(position),
+      kind: Value(kind),
+      payloadJson: Value(payloadJson),
+      status: Value(status),
+      error: error == null && nullToAbsent
+          ? const Value.absent()
+          : Value(error),
+      createdAt: Value(createdAt),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+    );
+  }
+
+  factory LocalChatActionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalChatActionRow(
+      id: serializer.fromJson<String>(json['id']),
+      messageId: serializer.fromJson<String>(json['messageId']),
+      position: serializer.fromJson<int>(json['position']),
+      kind: serializer.fromJson<String>(json['kind']),
+      payloadJson: serializer.fromJson<String>(json['payloadJson']),
+      status: serializer.fromJson<String>(json['status']),
+      error: serializer.fromJson<String?>(json['error']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      decidedAt: serializer.fromJson<int?>(json['decidedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'messageId': serializer.toJson<String>(messageId),
+      'position': serializer.toJson<int>(position),
+      'kind': serializer.toJson<String>(kind),
+      'payloadJson': serializer.toJson<String>(payloadJson),
+      'status': serializer.toJson<String>(status),
+      'error': serializer.toJson<String?>(error),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'decidedAt': serializer.toJson<int?>(decidedAt),
+    };
+  }
+
+  LocalChatActionRow copyWith({
+    String? id,
+    String? messageId,
+    int? position,
+    String? kind,
+    String? payloadJson,
+    String? status,
+    Value<String?> error = const Value.absent(),
+    int? createdAt,
+    Value<int?> decidedAt = const Value.absent(),
+  }) => LocalChatActionRow(
+    id: id ?? this.id,
+    messageId: messageId ?? this.messageId,
+    position: position ?? this.position,
+    kind: kind ?? this.kind,
+    payloadJson: payloadJson ?? this.payloadJson,
+    status: status ?? this.status,
+    error: error.present ? error.value : this.error,
+    createdAt: createdAt ?? this.createdAt,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+  );
+  LocalChatActionRow copyWithCompanion(LocalChatActionsCompanion data) {
+    return LocalChatActionRow(
+      id: data.id.present ? data.id.value : this.id,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      position: data.position.present ? data.position.value : this.position,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      payloadJson: data.payloadJson.present
+          ? data.payloadJson.value
+          : this.payloadJson,
+      status: data.status.present ? data.status.value : this.status,
+      error: data.error.present ? data.error.value : this.error,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalChatActionRow(')
+          ..write('id: $id, ')
+          ..write('messageId: $messageId, ')
+          ..write('position: $position, ')
+          ..write('kind: $kind, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('status: $status, ')
+          ..write('error: $error, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    messageId,
+    position,
+    kind,
+    payloadJson,
+    status,
+    error,
+    createdAt,
+    decidedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalChatActionRow &&
+          other.id == this.id &&
+          other.messageId == this.messageId &&
+          other.position == this.position &&
+          other.kind == this.kind &&
+          other.payloadJson == this.payloadJson &&
+          other.status == this.status &&
+          other.error == this.error &&
+          other.createdAt == this.createdAt &&
+          other.decidedAt == this.decidedAt);
+}
+
+class LocalChatActionsCompanion extends UpdateCompanion<LocalChatActionRow> {
+  final Value<String> id;
+  final Value<String> messageId;
+  final Value<int> position;
+  final Value<String> kind;
+  final Value<String> payloadJson;
+  final Value<String> status;
+  final Value<String?> error;
+  final Value<int> createdAt;
+  final Value<int?> decidedAt;
+  final Value<int> rowid;
+  const LocalChatActionsCompanion({
+    this.id = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.position = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.payloadJson = const Value.absent(),
+    this.status = const Value.absent(),
+    this.error = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalChatActionsCompanion.insert({
+    required String id,
+    required String messageId,
+    required int position,
+    required String kind,
+    required String payloadJson,
+    this.status = const Value.absent(),
+    this.error = const Value.absent(),
+    required int createdAt,
+    this.decidedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       messageId = Value(messageId),
+       position = Value(position),
+       kind = Value(kind),
+       payloadJson = Value(payloadJson),
+       createdAt = Value(createdAt);
+  static Insertable<LocalChatActionRow> custom({
+    Expression<String>? id,
+    Expression<String>? messageId,
+    Expression<int>? position,
+    Expression<String>? kind,
+    Expression<String>? payloadJson,
+    Expression<String>? status,
+    Expression<String>? error,
+    Expression<int>? createdAt,
+    Expression<int>? decidedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messageId != null) 'message_id': messageId,
+      if (position != null) 'position': position,
+      if (kind != null) 'kind': kind,
+      if (payloadJson != null) 'payload_json': payloadJson,
+      if (status != null) 'status': status,
+      if (error != null) 'error': error,
+      if (createdAt != null) 'created_at': createdAt,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalChatActionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? messageId,
+    Value<int>? position,
+    Value<String>? kind,
+    Value<String>? payloadJson,
+    Value<String>? status,
+    Value<String?>? error,
+    Value<int>? createdAt,
+    Value<int?>? decidedAt,
+    Value<int>? rowid,
+  }) {
+    return LocalChatActionsCompanion(
+      id: id ?? this.id,
+      messageId: messageId ?? this.messageId,
+      position: position ?? this.position,
+      kind: kind ?? this.kind,
+      payloadJson: payloadJson ?? this.payloadJson,
+      status: status ?? this.status,
+      error: error ?? this.error,
+      createdAt: createdAt ?? this.createdAt,
+      decidedAt: decidedAt ?? this.decidedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (payloadJson.present) {
+      map['payload_json'] = Variable<String>(payloadJson.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (error.present) {
+      map['error'] = Variable<String>(error.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<int>(decidedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalChatActionsCompanion(')
+          ..write('id: $id, ')
+          ..write('messageId: $messageId, ')
+          ..write('position: $position, ')
+          ..write('kind: $kind, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('status: $status, ')
+          ..write('error: $error, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -17333,6 +17902,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalChatConversationsTable(this);
   late final $LocalChatMessagesTable localChatMessages =
       $LocalChatMessagesTable(this);
+  late final $LocalChatActionsTable localChatActions = $LocalChatActionsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -17363,6 +17935,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localDailyCheckIns,
     localChatConversations,
     localChatMessages,
+    localChatActions,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -29171,6 +29744,26 @@ final class $$LocalChatMessagesTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$LocalChatActionsTable, List<LocalChatActionRow>>
+  _localChatActionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.localChatActions,
+    aliasName: 'local_chat_messages__id__local_chat_actions__message_id',
+  );
+
+  $$LocalChatActionsTableProcessedTableManager get localChatActionsRefs {
+    final manager = $$LocalChatActionsTableTableManager(
+      $_db,
+      $_db.localChatActions,
+    ).filter((f) => f.messageId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _localChatActionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$LocalChatMessagesTableFilterComposer
@@ -29239,6 +29832,31 @@ class $$LocalChatMessagesTableFilterComposer
               ),
         );
     return composer;
+  }
+
+  Expression<bool> localChatActionsRefs(
+    Expression<bool> Function($$LocalChatActionsTableFilterComposer f) f,
+  ) {
+    final $$LocalChatActionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localChatActions,
+      getReferencedColumn: (t) => t.messageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalChatActionsTableFilterComposer(
+            $db: $db,
+            $table: $db.localChatActions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -29364,6 +29982,31 @@ class $$LocalChatMessagesTableAnnotationComposer
         );
     return composer;
   }
+
+  Expression<T> localChatActionsRefs<T extends Object>(
+    Expression<T> Function($$LocalChatActionsTableAnnotationComposer a) f,
+  ) {
+    final $$LocalChatActionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.localChatActions,
+      getReferencedColumn: (t) => t.messageId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalChatActionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localChatActions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocalChatMessagesTableTableManager
@@ -29379,7 +30022,10 @@ class $$LocalChatMessagesTableTableManager
           $$LocalChatMessagesTableUpdateCompanionBuilder,
           (LocalChatMessageRow, $$LocalChatMessagesTableReferences),
           LocalChatMessageRow,
-          PrefetchHooks Function({bool conversationId})
+          PrefetchHooks Function({
+            bool conversationId,
+            bool localChatActionsRefs,
+          })
         > {
   $$LocalChatMessagesTableTableManager(
     _$AppDatabase db,
@@ -29449,7 +30095,442 @@ class $$LocalChatMessagesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({conversationId = false}) {
+          prefetchHooksCallback:
+              ({conversationId = false, localChatActionsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (localChatActionsRefs) db.localChatActions,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (conversationId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.conversationId,
+                                    referencedTable:
+                                        $$LocalChatMessagesTableReferences
+                                            ._conversationIdTable(db),
+                                    referencedColumn:
+                                        $$LocalChatMessagesTableReferences
+                                            ._conversationIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (localChatActionsRefs)
+                        await $_getPrefetchedData<
+                          LocalChatMessageRow,
+                          $LocalChatMessagesTable,
+                          LocalChatActionRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LocalChatMessagesTableReferences
+                              ._localChatActionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LocalChatMessagesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).localChatActionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.messageId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$LocalChatMessagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalChatMessagesTable,
+      LocalChatMessageRow,
+      $$LocalChatMessagesTableFilterComposer,
+      $$LocalChatMessagesTableOrderingComposer,
+      $$LocalChatMessagesTableAnnotationComposer,
+      $$LocalChatMessagesTableCreateCompanionBuilder,
+      $$LocalChatMessagesTableUpdateCompanionBuilder,
+      (LocalChatMessageRow, $$LocalChatMessagesTableReferences),
+      LocalChatMessageRow,
+      PrefetchHooks Function({bool conversationId, bool localChatActionsRefs})
+    >;
+typedef $$LocalChatActionsTableCreateCompanionBuilder =
+    LocalChatActionsCompanion Function({
+      required String id,
+      required String messageId,
+      required int position,
+      required String kind,
+      required String payloadJson,
+      Value<String> status,
+      Value<String?> error,
+      required int createdAt,
+      Value<int?> decidedAt,
+      Value<int> rowid,
+    });
+typedef $$LocalChatActionsTableUpdateCompanionBuilder =
+    LocalChatActionsCompanion Function({
+      Value<String> id,
+      Value<String> messageId,
+      Value<int> position,
+      Value<String> kind,
+      Value<String> payloadJson,
+      Value<String> status,
+      Value<String?> error,
+      Value<int> createdAt,
+      Value<int?> decidedAt,
+      Value<int> rowid,
+    });
+
+final class $$LocalChatActionsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalChatActionsTable,
+          LocalChatActionRow
+        > {
+  $$LocalChatActionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LocalChatMessagesTable _messageIdTable(_$AppDatabase db) => db
+      .localChatMessages
+      .createAlias('local_chat_actions__message_id__local_chat_messages__id');
+
+  $$LocalChatMessagesTableProcessedTableManager get messageId {
+    final $_column = $_itemColumn<String>('message_id')!;
+
+    final manager = $$LocalChatMessagesTableTableManager(
+      $_db,
+      $_db.localChatMessages,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_messageIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalChatActionsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalChatActionsTable> {
+  $$LocalChatActionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get error => $composableBuilder(
+    column: $table.error,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LocalChatMessagesTableFilterComposer get messageId {
+    final $$LocalChatMessagesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messageId,
+      referencedTable: $db.localChatMessages,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalChatMessagesTableFilterComposer(
+            $db: $db,
+            $table: $db.localChatMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalChatActionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalChatActionsTable> {
+  $$LocalChatActionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get error => $composableBuilder(
+    column: $table.error,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocalChatMessagesTableOrderingComposer get messageId {
+    final $$LocalChatMessagesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.messageId,
+      referencedTable: $db.localChatMessages,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalChatMessagesTableOrderingComposer(
+            $db: $db,
+            $table: $db.localChatMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalChatActionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalChatActionsTable> {
+  $$LocalChatActionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get error =>
+      $composableBuilder(column: $table.error, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  $$LocalChatMessagesTableAnnotationComposer get messageId {
+    final $$LocalChatMessagesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.messageId,
+          referencedTable: $db.localChatMessages,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalChatMessagesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localChatMessages,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalChatActionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalChatActionsTable,
+          LocalChatActionRow,
+          $$LocalChatActionsTableFilterComposer,
+          $$LocalChatActionsTableOrderingComposer,
+          $$LocalChatActionsTableAnnotationComposer,
+          $$LocalChatActionsTableCreateCompanionBuilder,
+          $$LocalChatActionsTableUpdateCompanionBuilder,
+          (LocalChatActionRow, $$LocalChatActionsTableReferences),
+          LocalChatActionRow,
+          PrefetchHooks Function({bool messageId})
+        > {
+  $$LocalChatActionsTableTableManager(
+    _$AppDatabase db,
+    $LocalChatActionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalChatActionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalChatActionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalChatActionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> messageId = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> payloadJson = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> error = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int?> decidedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalChatActionsCompanion(
+                id: id,
+                messageId: messageId,
+                position: position,
+                kind: kind,
+                payloadJson: payloadJson,
+                status: status,
+                error: error,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String messageId,
+                required int position,
+                required String kind,
+                required String payloadJson,
+                Value<String> status = const Value.absent(),
+                Value<String?> error = const Value.absent(),
+                required int createdAt,
+                Value<int?> decidedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalChatActionsCompanion.insert(
+                id: id,
+                messageId: messageId,
+                position: position,
+                kind: kind,
+                payloadJson: payloadJson,
+                status: status,
+                error: error,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LocalChatActionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({messageId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -29469,17 +30550,17 @@ class $$LocalChatMessagesTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (conversationId) {
+                    if (messageId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.conversationId,
+                                currentColumn: table.messageId,
                                 referencedTable:
-                                    $$LocalChatMessagesTableReferences
-                                        ._conversationIdTable(db),
+                                    $$LocalChatActionsTableReferences
+                                        ._messageIdTable(db),
                                 referencedColumn:
-                                    $$LocalChatMessagesTableReferences
-                                        ._conversationIdTable(db)
+                                    $$LocalChatActionsTableReferences
+                                        ._messageIdTable(db)
                                         .id,
                               )
                               as T;
@@ -29496,19 +30577,19 @@ class $$LocalChatMessagesTableTableManager
       );
 }
 
-typedef $$LocalChatMessagesTableProcessedTableManager =
+typedef $$LocalChatActionsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $LocalChatMessagesTable,
-      LocalChatMessageRow,
-      $$LocalChatMessagesTableFilterComposer,
-      $$LocalChatMessagesTableOrderingComposer,
-      $$LocalChatMessagesTableAnnotationComposer,
-      $$LocalChatMessagesTableCreateCompanionBuilder,
-      $$LocalChatMessagesTableUpdateCompanionBuilder,
-      (LocalChatMessageRow, $$LocalChatMessagesTableReferences),
-      LocalChatMessageRow,
-      PrefetchHooks Function({bool conversationId})
+      $LocalChatActionsTable,
+      LocalChatActionRow,
+      $$LocalChatActionsTableFilterComposer,
+      $$LocalChatActionsTableOrderingComposer,
+      $$LocalChatActionsTableAnnotationComposer,
+      $$LocalChatActionsTableCreateCompanionBuilder,
+      $$LocalChatActionsTableUpdateCompanionBuilder,
+      (LocalChatActionRow, $$LocalChatActionsTableReferences),
+      LocalChatActionRow,
+      PrefetchHooks Function({bool messageId})
     >;
 
 class $AppDatabaseManager {
@@ -29573,4 +30654,6 @@ class $AppDatabaseManager {
       );
   $$LocalChatMessagesTableTableManager get localChatMessages =>
       $$LocalChatMessagesTableTableManager(_db, _db.localChatMessages);
+  $$LocalChatActionsTableTableManager get localChatActions =>
+      $$LocalChatActionsTableTableManager(_db, _db.localChatActions);
 }

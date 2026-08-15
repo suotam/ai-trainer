@@ -45,14 +45,17 @@ part 'app_database.g.dart';
     LocalDailyCheckIns,
     LocalChatConversations,
     LocalChatMessages,
+    LocalChatActions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 14 (R7-02, C47 §2): chat tabulky
-  /// `local_chat_conversations` + `local_chat_messages` (device-local,
-  /// CHC-001). Verze 13 (R5-01, C33 §3) přidala tabulku denního check-inu
+  /// Schema version 15 (R7-03, C48 §4): tabulka `local_chat_actions`
+  /// (device-local akce chatu). Verze 14 (R7-02, C47 §2) přidala chat
+  /// tabulky `local_chat_conversations` + `local_chat_messages`
+  /// (device-local, CHC-001). Verze 13 (R5-01, C33 §3) přidala tabulku
+  /// denního check-inu
   /// `local_daily_check_ins`. Verze 12 (R4-05) přidala provenance plánu,
   /// verze 11 (R4-03, C29 §2) tabulku AI návrhů
   /// `local_ai_proposals`. Verze 10 (R3-06) přidala ruční aktivity,
@@ -63,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
   /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -189,6 +192,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 14) {
         await m.createTable(localChatConversations);
         await m.createTable(localChatMessages);
+      }
+      // Migrace v14 → v15 (R7-03, C48 §4): akce chatu — aditivní, prázdná
+      // (CHA-015).
+      if (from < 15) {
+        await m.createTable(localChatActions);
       }
     },
     beforeOpen: (details) async {

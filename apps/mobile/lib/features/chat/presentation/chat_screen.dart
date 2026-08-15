@@ -188,7 +188,16 @@ class _MessageBubble extends ConsumerWidget {
         ],
       );
     } else {
-      content = Text(message.content);
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message.content),
+          // Navržené akce (C48): potvrditelné karty — efekt vzniká až
+          // potvrzením (CHA-005/006); rozhodnutí je trvale viditelné.
+          for (final action in message.actions) _ActionCard(action: action),
+        ],
+      );
     }
 
     return Align(
@@ -218,4 +227,103 @@ class _MessageBubble extends ConsumerWidget {
         'invalidOutput' => l10n.aiErrorInvalidOutput,
         _ => l10n.chatFailed,
       };
+}
+
+/// Karta navržené akce (C48 §4): druh + shrnutí polí + rozhodnutí per
+/// akce výhradně explicitním tapem (CHA-005).
+class _ActionCard extends ConsumerWidget {
+  const _ActionCard({required this.action});
+
+  final ChatAction action;
+
+  static Key confirmKey(String actionId) =>
+      Key('chat_action_confirm_$actionId');
+  static Key rejectKey(String actionId) => Key('chat_action_reject_$actionId');
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final controller = ref.read(chatControllerProvider.notifier);
+    final busy = ref.watch(chatControllerProvider);
+
+    return Card(
+      key: Key('chat_action_${action.id}'),
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_kindLabel(l10n), style: theme.textTheme.labelLarge),
+            const SizedBox(height: 4),
+            Text(_summary(), style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            switch (action.status) {
+              'PROPOSED' => Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  FilledButton(
+                    key: confirmKey(action.id),
+                    onPressed: busy
+                        ? null
+                        : () => controller.confirmAction(action.id),
+                    child: Text(l10n.chatActionConfirm),
+                  ),
+                  OutlinedButton(
+                    key: rejectKey(action.id),
+                    onPressed: busy
+                        ? null
+                        : () => controller.rejectAction(action.id),
+                    child: Text(l10n.chatActionReject),
+                  ),
+                ],
+              ),
+              'APPLIED' => Text(
+                l10n.chatActionApplied,
+                style: TextStyle(color: theme.colorScheme.primary),
+              ),
+              'REJECTED' => Text(l10n.chatActionRejected),
+              // FAILED: poctivý stav + explicitní nový pokus (CHA-007).
+              _ => Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.chatActionFailed,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                  ),
+                  TextButton(
+                    key: confirmKey(action.id),
+                    onPressed: busy
+                        ? null
+                        : () => controller.confirmAction(action.id),
+                    child: Text(l10n.chatRetry),
+                  ),
+                ],
+              ),
+            },
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _kindLabel(AppLocalizations l10n) => switch (action.kind) {
+    'UPSERT_SPORT' => l10n.chatActionSport,
+    'ADD_GOAL' => l10n.chatActionGoal,
+    'SET_AVAILABILITY' => l10n.chatActionAvailability,
+    _ => l10n.chatActionConstraint,
+  };
+
+  /// Shrnutí polí akce — přesné hodnoty, žádná interpretace.
+  String _summary() {
+    final p = action.payload;
+    final parts = [
+      for (final entry in p.entries)
+        if (entry.key != 'action') '${entry.value}',
+    ];
+    return parts.join(' · ');
+  }
 }

@@ -1,5 +1,36 @@
 import 'package:flutter/foundation.dart';
 
+/// Akce navržená chatem (C48 §4) — device-local evidence s rozhodnutím.
+@immutable
+class ChatAction {
+  const ChatAction({
+    required this.id,
+    required this.messageId,
+    required this.position,
+    required this.kind,
+    required this.payload,
+    required this.status,
+    this.error,
+  });
+
+  final String id;
+  final String messageId;
+  final int position;
+
+  /// `UPSERT_SPORT` / `ADD_GOAL` / `SET_AVAILABILITY` / `ADD_CONSTRAINT`.
+  final String kind;
+
+  /// Kanonický validovaný payload (CHA-003).
+  final Map<String, Object?> payload;
+
+  /// `PROPOSED` / `APPLIED` / `REJECTED` / `FAILED` (C48 §4).
+  final String status;
+  final String? error;
+
+  bool get isProposed => status == 'PROPOSED';
+  bool get isFailed => status == 'FAILED';
+}
+
 /// Zpráva konverzace (C47 §2) — read model pro UI i okno do modelu.
 @immutable
 class ChatMessage {
@@ -11,6 +42,7 @@ class ChatMessage {
     required this.status,
     required this.position,
     this.errorKind,
+    this.actions = const [],
   });
 
   final String id;
@@ -26,6 +58,9 @@ class ChatMessage {
 
   /// Typovaný důvod selhání (CHC-010) — kód `AiApiFailureKind`/`network`.
   final String? errorKind;
+
+  /// Akce navržené touto zprávou (C48) — jen u asistentských COMPLETED.
+  final List<ChatAction> actions;
 
   bool get isUser => role == 'USER';
   bool get isFailed => status == 'FAILED';
@@ -83,5 +118,23 @@ abstract interface class ChatRepository {
   Future<List<ChatMessage>> windowBefore(
     String assistantMessageId, {
     int limit = 20,
+  });
+
+  /// Uloží kanonické akce k asistentské zprávě jako PROPOSED (CHA-006/008).
+  Future<void> addActions(
+    String messageId,
+    List<Map<String, Object?>> canonicalActions, {
+    required String Function() newId,
+    required DateTime now,
+  });
+
+  Future<ChatAction?> actionById(String actionId);
+
+  /// Rozhodnutí/výsledek akce (C48 §4): APPLIED / REJECTED / FAILED(+error).
+  Future<void> setActionStatus(
+    String actionId, {
+    required String status,
+    String? error,
+    required DateTime now,
   });
 }
