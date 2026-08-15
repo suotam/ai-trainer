@@ -8,9 +8,14 @@ import '../../ai/application/ai_providers.dart';
 import '../../ai/data/anthropic_direct_client.dart';
 import '../../ai/data/http_ai_api_client.dart';
 import '../../auth/domain/auth_api_client.dart';
+import '../../availability/application/availability_providers.dart';
+import '../../goals/application/goals_providers.dart';
+import '../../sports/application/sports_profile_providers.dart';
+import '../data/chat_reply_validator.dart';
 import '../data/drift_chat_repository.dart';
 import '../domain/chat_ai_client.dart';
 import '../domain/chat_models.dart';
+import 'chat_action_executor.dart';
 
 /// Composition chat vrstvy (R7-02, C47). Jediná cesta k modelu = BYOK
 /// adapter (BYK-004); konverzace jsou device-local (CHC-001).
@@ -43,6 +48,15 @@ final activeChatConversationProvider = FutureProvider<String>(
         newId: ref.watch(idGeneratorProvider).newId,
         now: ref.watch(clockProvider)(),
       ),
+);
+
+/// Provedení potvrzených akcí výhradně existujícími repos (CHA-001).
+final chatActionExecutorProvider = Provider<ChatActionExecutor>(
+  (ref) => ChatActionExecutor(
+    ref.watch(userSportRepositoryProvider),
+    ref.watch(goalRepositoryProvider),
+    ref.watch(availabilityProfileRepositoryProvider),
+  ),
 );
 
 final chatMessagesProvider = FutureProvider<List<ChatMessage>>((ref) async {
@@ -122,7 +136,7 @@ class ChatController extends Notifier<bool> {
         .read(aiContextBuilderProvider)
         .buildPlanProposalContext(now: now);
     try {
-      final reply = await ref
+      final raw = await ref
           .read(chatAiClientProvider)
           .chat(
             turns: [
@@ -131,7 +145,26 @@ class ChatController extends Notifier<bool> {
             ],
             profileContext: context.payload,
           );
-      await repo.completeAssistant(assistantId, content: reply, now: now);
+      // Striktní validace tvaru s akcemi (C48 §2, CHA-003) — nevalidní
+      // celek = typované selhání s retry, nikdy částečné přijetí.
+      final reply = validateChatReply(raw);
+      if (reply == null) {
+        await repo.failAssistant(
+          assistantId,
+          errorKind: 'invalidOutput',
+          now: now,
+        );
+        return;
+      }
+      await repo.completeAssistant(assistantId, content: reply.text, now: now);
+      if (reply.actions.isNotEmpty) {
+        await repo.addActions(
+          assistantId,
+          reply.actions,
+          newId: ref.read(idGeneratorProvider).newId,
+          now: now,
+        );
+      }
     } on AiApiFailure catch (failure) {
       await repo.failAssistant(
         assistantId,
@@ -144,6 +177,65 @@ class ChatController extends Notifier<bool> {
       // Raw výjimka se nepropaguje do UI (CHC-010).
       await repo.failAssistant(assistantId, errorKind: 'network', now: now);
     }
+  }
+
+  /// Potvrzení akce = provedení existujícími repos v témže kroku
+  /// (C48 §4, CHA-005/006); výsledek je trvale viditelný stav.
+  Future<void> confirmAction(String actionId) async {
+    if (_inFlight) {
+      return;
+    }
+    await _run(() async {
+      final repo = ref.read(chatRepositoryProvider);
+      final action = await repo.actionById(actionId);
+      if (action == null || !(action.isProposed || action.isFailed)) {
+        return;
+      }
+      final now = ref.read(clockProvider)();
+      final result = await ref
+          .read(chatActionExecutorProvider)
+          .apply(
+            action.payload,
+            newId: ref.read(idGeneratorProvider).newId,
+            now: now,
+          );
+      switch (result) {
+        case ChatActionApplied():
+          await repo.setActionStatus(actionId, status: 'APPLIED', now: now);
+          // Profil je okamžitě vidět v obrazovkách (CHA-012).
+          ref
+            ..invalidate(userSportsProvider)
+            ..invalidate(goalsProvider)
+            ..invalidate(availabilityWeekProvider)
+            ..invalidate(constraintsProvider);
+        case ChatActionRejectedByDomain(:final reason):
+          await repo.setActionStatus(
+            actionId,
+            status: 'FAILED',
+            error: reason,
+            now: now,
+          );
+      }
+    });
+  }
+
+  /// Odmítnutí akce — viditelný trvalý stav (CHA-005/008).
+  Future<void> rejectAction(String actionId) async {
+    if (_inFlight) {
+      return;
+    }
+    await _run(() async {
+      final repo = ref.read(chatRepositoryProvider);
+      final action = await repo.actionById(actionId);
+      if (action == null || !action.isProposed) {
+        return;
+      }
+      await repo.setActionStatus(
+        actionId,
+        status: 'REJECTED',
+        now: ref.read(clockProvider)(),
+      );
+    });
   }
 
   Future<void> _run(Future<void> Function() action) async {

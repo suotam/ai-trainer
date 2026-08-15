@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
@@ -58,7 +60,36 @@ class DriftChatRepository implements ChatRepository {
               ..where((t) => t.conversationId.equals(conversationId))
               ..orderBy([(t) => OrderingTerm.asc(t.position)]))
             .get();
-    return [for (final row in rows) _toModel(row)];
+    if (rows.isEmpty) {
+      return const [];
+    }
+    // Akce zpráv (C48) jedním dotazem, seskupené k message_id.
+    final actionRows =
+        await (_db.select(_db.localChatActions)
+              ..where((t) => t.messageId.isIn([for (final r in rows) r.id]))
+              ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+            .get();
+    final actionsByMessage = <String, List<ChatAction>>{};
+    for (final row in actionRows) {
+      actionsByMessage
+          .putIfAbsent(row.messageId, () => [])
+          .add(
+            ChatAction(
+              id: row.id,
+              messageId: row.messageId,
+              position: row.position,
+              kind: row.kind,
+              payload: (jsonDecode(row.payloadJson) as Map)
+                  .cast<String, Object?>(),
+              status: row.status,
+              error: row.error,
+            ),
+          );
+    }
+    return [
+      for (final row in rows)
+        _toModel(row, actions: actionsByMessage[row.id] ?? const []),
+    ];
   }
 
   @override
@@ -197,7 +228,73 @@ class DriftChatRepository implements ChatRepository {
     );
   }
 
-  ChatMessage _toModel(LocalChatMessageRow row) => ChatMessage(
+  @override
+  Future<void> addActions(
+    String messageId,
+    List<Map<String, Object?>> canonicalActions, {
+    required String Function() newId,
+    required DateTime now,
+  }) async {
+    await _db.transaction(() async {
+      for (var i = 0; i < canonicalActions.length; i++) {
+        final action = canonicalActions[i];
+        await _db
+            .into(_db.localChatActions)
+            .insert(
+              LocalChatActionsCompanion.insert(
+                id: newId(),
+                messageId: messageId,
+                position: i,
+                kind: action['action']! as String,
+                payloadJson: jsonEncode(action),
+                createdAt: now.millisecondsSinceEpoch,
+              ),
+            );
+      }
+    });
+  }
+
+  @override
+  Future<ChatAction?> actionById(String actionId) async {
+    final row = await (_db.select(
+      _db.localChatActions,
+    )..where((t) => t.id.equals(actionId))).getSingleOrNull();
+    if (row == null) {
+      return null;
+    }
+    return ChatAction(
+      id: row.id,
+      messageId: row.messageId,
+      position: row.position,
+      kind: row.kind,
+      payload: (jsonDecode(row.payloadJson) as Map).cast<String, Object?>(),
+      status: row.status,
+      error: row.error,
+    );
+  }
+
+  @override
+  Future<void> setActionStatus(
+    String actionId, {
+    required String status,
+    String? error,
+    required DateTime now,
+  }) async {
+    await (_db.update(
+      _db.localChatActions,
+    )..where((t) => t.id.equals(actionId))).write(
+      LocalChatActionsCompanion(
+        status: Value(status),
+        error: Value(error),
+        decidedAt: Value(now.millisecondsSinceEpoch),
+      ),
+    );
+  }
+
+  ChatMessage _toModel(
+    LocalChatMessageRow row, {
+    List<ChatAction> actions = const [],
+  }) => ChatMessage(
     id: row.id,
     conversationId: row.conversationId,
     role: row.role,
@@ -205,5 +302,6 @@ class DriftChatRepository implements ChatRepository {
     status: row.status,
     position: row.position,
     errorKind: row.errorKind,
+    actions: actions,
   );
 }

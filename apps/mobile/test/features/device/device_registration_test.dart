@@ -174,7 +174,7 @@ void main() {
 
       final metadata = container.read(deviceMetadataProvider);
 
-      expect(metadata.localSchemaVersion, equals('14'));
+      expect(metadata.localSchemaVersion, equals('15'));
       expect(metadata.appVersion, isNotEmpty);
     });
   });

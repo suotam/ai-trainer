@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.71  
+**Verze:** 2.72  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -176,6 +176,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 - `r6-pull-sync-contract.md` (**C41**, vlastník Domain / sync-and-offline-model + Backend) vlastní pull protokol: jediný endpoint `POST /api/v1/sync/pull` s **neprůhledným kurzorem per typ** (server-owned formát, klient jen ukládá/vrací), deterministické řazení a stránkování (cap 200, `hasMore`), **overlap dovolen — mezera nikdy**, payload beze změny (C6 §8.4), ownership přísně (C8), pull bez side-effects, audit jen s počty, tombstone-ready tvar a invarianty `PSP-001` až `PSP-015`. Push sémantika C10/C11 nedotčena. Contract-only. Blokuje `R6-01`.
 
 - `r6-pull-merge-contract.md` (**C42**, vlastník Domain / sync-and-offline-model + Mobile) vlastní klientskou merge sémantiku pullu: **merge matice** (neexistující → INSERT se SYNCED a ownerem účtu; SYNCED + vyšší verze → UPDATE; verze ≤ známá → no-op; **LOCAL_ONLY/DIRTY nikdy tiše** — typovaný konflikt řešený existující C12 push cestou), per-item izolaci selhání (dependency skip), kurzory per typ persistované s posunem až po aplikaci, P0 scope 7 plochých root typů (workout hierarchie vlastní C43/C45) a invarianty `PMS-001` až `PMS-015`. Contract-only. Blokuje `R6-02`.
+
+- `r7-chat-action-contract.md` (**C48**, vlastník Domain + Security + Mobile) vlastní akční protokol chatu: prompt **chat-v2** s výstupem `{"reply","actions"}` (`chat-action-schema-v1`), **tvarová tabulka 4 akcí profilu** (UPSERT_SPORT s deterministickou resolvací existujícího sportu, ADD_GOAL, SET_AVAILABILITY, ADD_CONSTRAINT — enumy přesně C17/C18/C19), striktní validace s kanonizací (nevalidní celek nikdy částečně), **rozhodnutí per akce výhradně explicitním tapem** (PROPOSED→APPLIED/REJECTED/FAILED, schema v15, append-only evidence), provedení výhradně existujícími repos a invarianty `CHA-001` až `CHA-015`. Blokuje `R7-03`.
 
 - `r7-chat-conversation-contract.md` (**C47**, vlastník Domain + Mobile) vlastní konverzační nosič chatu: lokální persistence konverzací a zpráv (mobilní schema **v14**, device-local bez sync — CHC-001), role a typované stavy zpráv (PENDING nepřežívá restart jako čekání — překlopení na FAILED s explicitním retry, CHC-004/005), **okno kontextu do modelu** (chat-v1 prompt + C27 base kontext + posledních 20 SENT/COMPLETED zpráv — PII hranice CHC-006), **chat v R7-02 nemá žádnou write cestu** (volný text ≠ příkaz, akce vlastní C48) a invarianty `CHC-001` až `CHC-015`. Blokuje `R7-02`.
 
@@ -484,14 +486,14 @@ naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
 až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
 jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
 evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
-**`R7-01` a `R7-02` jsou implementovány** (C46/ADR-013: BYOK klíč v secure
-storage + přímý Anthropic adapter — AI bez serveru a účtu; C47: chat
-konverzace s lokální persistencí /schema v14/, typované stavy s explicitním
-retry, okno kontextu s PII hranicí — chat zatím jen radí, akce přijdou
-s C48). Další kanonický krok:
+**`R7-01` až `R7-03` jsou implementovány** (C46/ADR-013: BYOK klíč + přímý
+Anthropic adapter — AI bez serveru a účtu; C47: chat konverzace /schema
+v14/; C48: **chat nastavuje profil potvrzenými akcemi** — sporty, cíle,
+dostupnost, omezení přes existující repos, rozhodnutí per akce, schema
+v15). Další kanonický krok:
 
 ```text
-C48 – Chat action protokol → R7-03 – Chat-Driven Profile Setup
+C49 – Chat planning orchestrace → R7-04 – Chat-Driven Planning and Adjustments
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.

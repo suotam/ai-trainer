@@ -97,12 +97,12 @@ void main() {
       addTearDown(db.close);
       await db.customSelect('SELECT 1').get(); // vynutĂ­ otevĹ™enĂ­ + migraci
 
-      // Schema version je aktuální (v14 od R7-02).
+      // Schema version je aktuální (v15 od R7-03).
       final ver = await db
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 14);
+      expect(ver, 15);
 
       // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>
