@@ -21,7 +21,6 @@ import '../../support/workout_test_scope.dart';
 class _ScriptedAiApi implements AiApiClient {
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) async => const PlanProposalResponse(

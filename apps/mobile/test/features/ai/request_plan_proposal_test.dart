@@ -4,7 +4,6 @@ import 'package:ai_trainer_mobile/features/ai/data/drift_ai_proposal_repository.
 import 'package:ai_trainer_mobile/features/ai/data/http_ai_api_client.dart';
 import 'package:ai_trainer_mobile/features/ai/data/plan_proposal_client_validator.dart';
 import 'package:ai_trainer_mobile/features/ai/domain/ai_proposal.dart';
-import 'package:ai_trainer_mobile/features/auth/domain/stored_auth_session.dart';
 import 'package:ai_trainer_mobile/features/activity/data/drift_activity_repository.dart';
 import 'package:ai_trainer_mobile/features/availability/data/drift_availability_profile_repository.dart';
 import 'package:ai_trainer_mobile/features/checkin/data/drift_daily_check_in_repository.dart';
@@ -13,7 +12,6 @@ import 'package:ai_trainer_mobile/features/sports/data/drift_user_sport_reposito
 import 'package:ai_trainer_mobile/features/workouts/data/drift_workout_instance_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../support/fake_auth_boundaries.dart';
 import '../../support/workout_test_scope.dart';
 
 /// R4-03 testy use case + klientské validace + persistence návrhu
@@ -27,7 +25,6 @@ class _FakeAiApiClient implements AiApiClient {
 
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) {
@@ -68,25 +65,11 @@ void main() {
   ({RequestPlanProposal useCase, DriftAiProposalRepository repo}) harness(
     db, {
     required AiApiClient api,
-    bool signedIn = true,
   }) {
-    final storage = InMemorySecureSessionStorage();
-    if (signedIn) {
-      // Minimální uložená session — use case čte jen accessToken.
-      storage.stored = StoredAuthSession(
-        accountId: 'account-1',
-        sessionId: 'session-1',
-        accessToken: 'access-token',
-        accessExpiresAt: now.add(const Duration(minutes: 15)),
-        refreshToken: 'refresh-token',
-        refreshExpiresAt: now.add(const Duration(days: 30)),
-      );
-    }
     final repo = DriftAiProposalRepository(db);
     var seq = 0;
     return (
       useCase: RequestPlanProposal(
-        storage: storage,
         contextBuilder: DriftAiContextBuilder(
           DriftUserSportRepository(db),
           DriftGoalRepository(db),
@@ -144,15 +127,16 @@ void main() {
   });
 
   test(
-    'anonymní stav je typovaný SignInRequired bez volání API (AGW-008)',
+    'chybějící klíč je typovaný KeyMissing bez persistence (BYK-010, C46 §4)',
     () async {
       final db = createTestDatabase();
       addTearDown(db.close);
-      final api = _FakeAiApiClient(() async => response(validProposal));
-      final h = harness(db, api: api, signedIn: false);
+      final api = _FakeAiApiClient(
+        () async => throw const AiApiFailure(AiApiFailureKind.keyMissing),
+      );
+      final h = harness(db, api: api);
 
-      expect(await h.useCase(), isA<ProposalSignInRequired>());
-      expect(api.calls, 0);
+      expect(await h.useCase(), isA<ProposalKeyMissing>());
       expect(await h.repo.proposalsForCurrentOwner(), isEmpty);
     },
   );
