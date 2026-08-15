@@ -38,3 +38,6 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+# Lokalni dev konfigurace s runtime klicem (nikdy do gitu)
+local-dev.yaml
