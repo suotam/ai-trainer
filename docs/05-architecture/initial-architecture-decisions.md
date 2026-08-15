@@ -600,6 +600,10 @@ R2 autentizace MUSÍ používat backend jako first-party autoritu aplikační se
 
 R4 AI volání MUSÍ probíhat výhradně server-side přes AI gateway za provider abstrakcí (`AiModelProvider`). Prvním podporovaným providerem je **Anthropic (Claude, Messages API)**; konkrétní model je konfigurační hodnota, ne kód. Provider klíče NESMÍ existovat na klientu ani v repozitáři (výhradně runtime konfigurace serveru). Testy a CI MUSÍ běžet deterministicky proti fake provideru — živý provider NESMÍ být podmínkou žádného gate. Výměna providera je nové rozhodnutí za touž abstrakcí, ne přepis volajícího kódu. (C25, `docs/09-ai/r4-ai-gateway-contract.md`)
 
+## ADR-013
+
+R7 zavádí **osobní režim (local-first BYOK)** jako primární provozní režim aplikace: AI volání SMÍ probíhat přímo z mobilního klienta na Anthropic API s **API klíčem vlastníka aplikace**, uloženým výhradně v platformním secure storage (C7 vzor). Tím se pro osobní režim **superseduje serverová výhrada ADR-012** („klíče nesmí existovat na klientu") — klíč vlastníka na jeho vlastním zařízení není klíč aplikace. Bezpečnostní invarianty ADR-012 se přenášejí beze změny: klíč NESMÍ existovat v repozitáři, Drift/SQLite, preferencích, log výstupu, chybových hláškách ani záloze; volání MUSÍ mít bounded timeout, typovaná selhání a obsahové limity (C31); testy a CI MUSÍ běžet deterministicky proti fake providerům — živý provider NESMÍ být podmínkou žádného gate. Backend AI gateway (C25) zůstává dormantní alternativou pro budoucí serverový režim; není podmínkou žádného R7 flow. (C46, `docs/08-mobile/r7-byok-provider-contract.md`)
+
 ---
 
 # 17. Připravenost a další krok
