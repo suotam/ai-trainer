@@ -47,7 +47,6 @@ class _ScriptedAiApi implements AiApiClient {
 
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) async {
@@ -85,7 +84,6 @@ class _ScriptedAiApi implements AiApiClient {
 class _InvalidOutputAiApi implements AiApiClient {
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) async => const PlanProposalResponse(
@@ -108,7 +106,6 @@ class _UnavailableAiApi implements AiApiClient {
 
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) async {

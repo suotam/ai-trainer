@@ -1,5 +1,4 @@
 import '../../auth/domain/auth_api_client.dart';
-import '../../auth/domain/secure_session_storage.dart';
 import '../data/adjustment_proposal_client_validator.dart';
 import '../data/http_ai_api_client.dart';
 import '../data/plan_proposal_client_validator.dart';
@@ -7,14 +6,14 @@ import '../domain/ai_context.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
 
-/// R4-03/R5-05 use case: kontext (C27/C36) → AI API → klientská
-/// re-validace podle typu (C28/C37, SOV-003) → lokální `PROPOSED` návrh
-/// (C29 beze změny). AI vyžaduje přihlášený účet (AGW-008); všechna
-/// selhání jsou typovaná (R4P-010) a nevalidní odpověď se nikdy
-/// nepersistuje (APL-002).
+/// R4-03/R5-05/R7-01 use case: kontext (C27/C36) → AI klient → klientská
+/// validace podle typu (C28/C37 — v osobním režimu jediná a proto
+/// nekompromisní, BYK-007) → lokální `PROPOSED` návrh (C29 beze změny).
+/// Osobní režim (C46) účet nevyžaduje — stavy klíče jsou typované
+/// (BYK-010); všechna selhání typovaná (R4P-010) a nevalidní odpověď se
+/// nikdy nepersistuje (APL-002).
 class RequestPlanProposal {
   const RequestPlanProposal({
-    required this.storage,
     required this.contextBuilder,
     required this.apiClient,
     required this.proposals,
@@ -22,7 +21,6 @@ class RequestPlanProposal {
     required this.clock,
   });
 
-  final SecureSessionStorage storage;
   final AiContextBuilder contextBuilder;
   final AiApiClient apiClient;
   final AiProposalRepository proposals;
@@ -32,10 +30,6 @@ class RequestPlanProposal {
   Future<RequestProposalResult> call({
     AiRequestType type = AiRequestType.planProposal,
   }) async {
-    final stored = await storage.read();
-    if (stored == null) {
-      return const ProposalSignInRequired();
-    }
     final now = clock();
     final context = switch (type) {
       AiRequestType.planProposal =>
@@ -47,7 +41,6 @@ class RequestPlanProposal {
     final PlanProposalResponse response;
     try {
       response = await apiClient.requestPlanProposal(
-        accessToken: stored.accessToken,
         context: context.payload,
         requestType: type.code,
       );
@@ -55,6 +48,9 @@ class RequestPlanProposal {
       return switch (failure.kind) {
         AiApiFailureKind.unavailable => const ProposalUnavailable(),
         AiApiFailureKind.invalidOutput => const ProposalInvalidOutput(),
+        AiApiFailureKind.keyMissing => const ProposalKeyMissing(),
+        AiApiFailureKind.invalidKey => const ProposalKeyInvalid(),
+        AiApiFailureKind.noCredit => const ProposalNoCredit(),
       };
     } on AuthApiFailure {
       return const ProposalUnavailable();

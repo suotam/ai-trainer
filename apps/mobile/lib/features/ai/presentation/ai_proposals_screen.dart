@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/ai_providers.dart';
 import '../domain/ai_proposal.dart';
@@ -18,6 +20,7 @@ class AiProposalsScreen extends ConsumerWidget {
   static const Key requestButtonKey = Key('ai_request_button');
   static const Key adjustmentButtonKey = Key('ai_request_adjustment');
   static const Key errorBannerKey = Key('ai_error');
+  static const Key keySettingsActionKey = Key('ai_key_settings_action');
 
   static Key tileKey(String id) => Key('ai_proposal_tile_$id');
 
@@ -42,6 +45,13 @@ class AiProposalsScreen extends ConsumerWidget {
                 : () => ref
                       .read(aiScreenControllerProvider.notifier)
                       .requestAdjustment(),
+          ),
+          // Správa BYOK klíče (R7-01, C46) — osobní režim.
+          IconButton(
+            key: keySettingsActionKey,
+            icon: const Icon(Icons.key_outlined),
+            tooltip: l10n.byokTitle,
+            onPressed: () => context.push(AppRoutes.aiKeyPath),
           ),
         ],
       ),
@@ -112,24 +122,27 @@ class AiProposalsScreen extends ConsumerWidget {
     );
   }
 
-  String? _failureText(AppLocalizations l10n, AiScreenState state) =>
-      switch (state) {
-        AiRequestFailure(result: ProposalSignInRequired()) =>
-          l10n.aiErrorSignIn,
-        AiRequestFailure(result: ProposalInvalidOutput()) =>
-          l10n.aiErrorInvalidOutput,
-        AiRequestFailure() => l10n.aiErrorUnavailable,
-        AiDecisionFailure(result: DecisionExpired()) => l10n.aiErrorExpired,
-        AiDecisionFailure() => l10n.aiErrorDecision,
-        AiExecutionFailure(result: ExecutionActivePlanConflict()) =>
-          l10n.aiErrorExecutionConflict,
-        AiExecutionFailure(result: ExecutionTargetUnresolved()) =>
-          l10n.aiErrorExecutionTarget,
-        AiExecutionFailure(result: ExecutionSafetyConflict()) =>
-          l10n.aiErrorExecutionSafety,
-        AiExecutionFailure() => l10n.aiErrorExecutionFailed,
-        _ => null,
-      };
+  String? _failureText(
+    AppLocalizations l10n,
+    AiScreenState state,
+  ) => switch (state) {
+    AiRequestFailure(result: ProposalKeyMissing()) => l10n.aiErrorKeyMissing,
+    AiRequestFailure(result: ProposalKeyInvalid()) => l10n.aiErrorKeyInvalid,
+    AiRequestFailure(result: ProposalNoCredit()) => l10n.aiErrorNoCredit,
+    AiRequestFailure(result: ProposalInvalidOutput()) =>
+      l10n.aiErrorInvalidOutput,
+    AiRequestFailure() => l10n.aiErrorUnavailable,
+    AiDecisionFailure(result: DecisionExpired()) => l10n.aiErrorExpired,
+    AiDecisionFailure() => l10n.aiErrorDecision,
+    AiExecutionFailure(result: ExecutionActivePlanConflict()) =>
+      l10n.aiErrorExecutionConflict,
+    AiExecutionFailure(result: ExecutionTargetUnresolved()) =>
+      l10n.aiErrorExecutionTarget,
+    AiExecutionFailure(result: ExecutionSafetyConflict()) =>
+      l10n.aiErrorExecutionSafety,
+    AiExecutionFailure() => l10n.aiErrorExecutionFailed,
+    _ => null,
+  };
 }
 
 /// Review návrhu: summary, workouty s důvody a dopady (den, typ, cviky) a

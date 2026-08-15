@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.73  
+**Verze:** 2.74  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -349,7 +349,9 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **R7 – Personal Chat Trainer je naplánované, implementace nezačala.** Vlastník produktu potvrdil pivot (2026-08-15): osobní aplikace na jednom telefonu, **chat jako primární rozhraní** (profil, cíle, dostupnost i plánování konverzačně), **local-first bez vlastního serveru** — AI přímo z telefonu s vlastním klíčem (BYOK v secure storage), tréninky v kalendáři, rychlé odklikávání, statistiky. Existuje kanonický plán `docs/13-delivery/r7-vertical-slice-plan.md` (backlog `R7-01` až `R7-06`, blocking contract map **C46–C50**, `R7P-001..015`). Základní zákony: **AI navrhuje, doména provádí** trvá (chat = vstupní vrstva, každá změna jen potvrzenou akcí přes existující operace), klíč nikdy neopustí secure storage, deterministické jádro nedegraduje, offline trenér funguje i bez klíče, backend dormantní (R1–R6 suite zůstávají zelené). Řízené výjimky: bez zálohy do R8 (vědomé riziko), platformní notifikace trvají mimo P0. **Žádný R7 slice není `READY`** — čeká se na kontrakty (první: C46 – ADR-013 + BYOK provider).
 
-**Přesný další kanonický krok:** vytvořit blocking kontrakt **C46 – ADR-013 Local-first BYOK** (`docs/08-mobile/r7-byok-provider-contract.md` + ADR zápis) a poté implementovat `R7-01 – Local AI Provider and BYOK Key Management`. Implementace smí začít až po samostatném pokynu.
+`R7-01 – Local AI Provider and BYOK Key Management` je implementován (blocking kontrakt **C46 – BYOK provider** /`docs/08-mobile/r7-byok-provider-contract.md`, `BYK-001..015`/ + **ADR-013** vznikly v témže cyklu) — **AI funkce už nepotřebují server, PC ani účet; stačí telefon a vlastní klíč**. **Klíč (BYOK):** port `ByokKeyStore` + platformní secure storage adaptér (`aitrainer.ai.byok.v1`; nikdy DB/log/záloha — BYK-001); UI správy klíče `/ai/key` (zadání s obscure polem, **maska s posledními 4 znaky — nikdy celý klíč** /BYK-002/, smazání, **explicitní ověření** minimálním requestem s typovanými výsledky /BYK-012/). **Přímý adapter:** `AnthropicDirectClient` implementuje existující port `AiApiClient` (pipeline C27→C28/C37→C29 beze změny) — klientský registr promptů v2 (identické se serverovými, BYK-005), thinking-block parse + fence extrakce (BYK-006, poučení ze smoke), typovaná selhání vč. stavů klíče (`keyMissing`/`invalidKey`/`noCredit` — BYK-008/010), limity C31 (BYK-009), klíč výhradně v `x-api-key` headeru (BYK-003). **Gating:** sign-in požadavek AGW-008 nahrazen stavem klíče — `ProposalKeyMissing/KeyInvalid/NoCredit` s poctivou hláškou a odkazem na správu klíče; port `AiApiClient` už nenese accessToken (credential si opatřuje implementace); backend `HttpAiApiClient` dormantní (C46 §6). Ověřeno **9 novými testy** (adapter: klíč jen v headeru + prompt v2 + trojice verzí, thinking/fence parse, matice typovaných selhání, verify vč. bounded nákladu, žádné volání bez klíče, maska; widget: uložení→maska→smazání, prázdný vstup, verify výsledek) + úprava request flow testů — mobile suite **352 testů**, analyze čistý; backend beze změny.
+
+**Přesný další kanonický krok:** vytvořit blocking kontrakt **C47 – Chat conversation model** (`docs/06-domain/r7-chat-conversation-contract.md`) a poté implementovat `R7-02 – Chat Conversation Model and UI`. Implementace smí začít až po samostatném pokynu.
 
 ---
 

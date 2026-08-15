@@ -58,6 +58,10 @@ abstract final class AppRoutes {
   static const String aiProposalsName = 'aiProposals';
   static const String aiProposalsPath = '/ai';
 
+  /// Správa BYOK klíče (R7-01, C46) — osobní režim.
+  static const String aiKeyName = 'aiKey';
+  static const String aiKeyPath = '/ai/key';
+
   /// Denní check-in (R5-01, C33) — offline-first, nikdy povinný (DCI-001).
   static const String checkInName = 'checkIn';
   static const String checkInPath = '/checkin';

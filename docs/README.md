@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.69  
+**Verze:** 2.70  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -176,6 +176,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 - `r6-pull-sync-contract.md` (**C41**, vlastník Domain / sync-and-offline-model + Backend) vlastní pull protokol: jediný endpoint `POST /api/v1/sync/pull` s **neprůhledným kurzorem per typ** (server-owned formát, klient jen ukládá/vrací), deterministické řazení a stránkování (cap 200, `hasMore`), **overlap dovolen — mezera nikdy**, payload beze změny (C6 §8.4), ownership přísně (C8), pull bez side-effects, audit jen s počty, tombstone-ready tvar a invarianty `PSP-001` až `PSP-015`. Push sémantika C10/C11 nedotčena. Contract-only. Blokuje `R6-01`.
 
 - `r6-pull-merge-contract.md` (**C42**, vlastník Domain / sync-and-offline-model + Mobile) vlastní klientskou merge sémantiku pullu: **merge matice** (neexistující → INSERT se SYNCED a ownerem účtu; SYNCED + vyšší verze → UPDATE; verze ≤ známá → no-op; **LOCAL_ONLY/DIRTY nikdy tiše** — typovaný konflikt řešený existující C12 push cestou), per-item izolaci selhání (dependency skip), kurzory per typ persistované s posunem až po aplikaci, P0 scope 7 plochých root typů (workout hierarchie vlastní C43/C45) a invarianty `PMS-001` až `PMS-015`. Contract-only. Blokuje `R6-02`.
+
+- `r7-byok-provider-contract.md` (**C46**, vlastník Architecture + Security + Mobile, spolu s **ADR-013**) vlastní osobní režim (local-first BYOK): klíč vlastníka výhradně v platformním secure storage (`ByokKeyStore`, nikdy DB/log/záloha/git — BYK-001..003), **přímý mobilní Anthropic adapter jako jediná cesta k modelu** (BYK-004; klientský registr promptů v2, thinking-block parse, fence extrakce, typovaná selhání vč. stavů klíče, limity C31), AI bez účtu (`ProposalKeyMissing` nahrazuje sign-in gating), explicitní ověření klíče s bounded nákladem, dormantní backend gateway a invarianty `BYK-001` až `BYK-015`. Blokuje `R7-01`.
 
 - `r6-restore-contract.md` (**C45**, vlastník Domain / sync-and-offline-model + Mobile + Product) vlastní obnovu nového zařízení (beta krok 10): **restore = orchestrace C41–C44, žádný import mechanismus** — plný pull existujícím merge enginem; pull scope rozšířen na **všech 15 registrových typů včetně R1 historie** (session → step/set performance → feedback → summary v FK pořadí), explicitní akce přihlášeného uživatele z Account obrazovky, **přerušitelnost + idempotence přes kurzory** (žádný wizard stav), poctivé hranice obnovy (AI návrhy, reminder nastavení, kurzory/outbox a rozpracovaný běh se **neobnovují** — přiznáno v UI), koexistence s lokálními anonymními daty (nikdy tiše nesmazána), kolize dvou ACTIVE plánů přiznaná (řeší uživatel archivací) a invarianty `DRS-001` až `DRS-015`. Contract-only. Blokuje `R6-05`. **Tímto je kontraktní mapa R6 (C41–C45) kompletní.**
 
@@ -480,10 +482,12 @@ naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
 až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
 jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
 evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
-Další kanonický krok:
+**`R7-01` je implementován** (C46/ADR-013: BYOK klíč v secure storage,
+přímý Anthropic adapter na mobilu, správa klíče v UI — AI už nepotřebuje
+server ani účet). Další kanonický krok:
 
 ```text
-C46 – ADR-013 + BYOK provider kontrakt → R7-01 – Local AI Provider and BYOK Key Management
+C47 – Chat conversation kontrakt → R7-02 – Chat Conversation Model and UI
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.

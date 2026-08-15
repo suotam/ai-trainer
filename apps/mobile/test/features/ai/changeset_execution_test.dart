@@ -1,4 +1,4 @@
-﻿import 'package:ai_trainer_mobile/core/database/app_database.dart';
+import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:ai_trainer_mobile/core/database/database_provider.dart';
 import 'package:ai_trainer_mobile/core/database/tables/workout_tables.dart';
 import 'package:ai_trainer_mobile/core/time/clock.dart';
@@ -32,7 +32,6 @@ import '../../support/workout_test_scope.dart';
 class _ScriptedAiApi implements AiApiClient {
   @override
   Future<PlanProposalResponse> requestPlanProposal({
-    required String accessToken,
     required Map<String, Object?> context,
     String requestType = 'PLAN_PROPOSAL',
   }) async => const PlanProposalResponse(

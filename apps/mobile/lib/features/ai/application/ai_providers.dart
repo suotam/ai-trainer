@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-import '../../../app/configuration/app_environment.dart';
 import '../../../core/database/database_provider.dart';
 import '../../../core/ids/id_generator.dart';
 import '../../../core/time/clock.dart';
 import '../../../core/database/tables/ai_tables.dart';
 import '../../activity/application/activity_providers.dart';
-import '../../auth/application/auth_providers.dart';
 import '../../availability/application/availability_providers.dart';
 import '../../checkin/application/checkin_providers.dart';
 import '../../goals/application/goals_providers.dart';
@@ -15,18 +13,22 @@ import '../../plan/application/plan_providers.dart';
 import '../../sports/application/sports_profile_providers.dart';
 import '../../workouts/application/today_providers.dart';
 import '../../workouts/application/workout_providers.dart';
+import '../data/anthropic_direct_client.dart';
 import '../data/drift_ai_context_builder.dart';
 import '../data/drift_ai_proposal_repository.dart';
 import '../data/drift_proposal_executor.dart';
+import '../data/flutter_byok_key_store.dart';
 import '../data/http_ai_api_client.dart';
 import '../domain/ai_context.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
+import '../domain/byok_key_store.dart';
 import '../domain/proposal_executor.dart';
 import 'request_plan_proposal.dart';
 
-/// Composition AI vrstvy (R4-02/03, C27–C29). Builder je čistě lokální
-/// (ACX-014); jediný AI endpoint jde přes backend (AGW-001).
+/// Composition AI vrstvy (R4-02/03 + R7-01, C27–C29 + C46). Builder je
+/// čistě lokální (ACX-014); jediná cesta k modelu = přímý BYOK adapter
+/// (BYK-004, ADR-013).
 final aiContextBuilderProvider = Provider<AiContextBuilder>(
   (ref) => DriftAiContextBuilder(
     ref.watch(userSportRepositoryProvider),
@@ -38,13 +40,19 @@ final aiContextBuilderProvider = Provider<AiContextBuilder>(
   ),
 );
 
-final aiApiClientProvider = Provider<AiApiClient>((ref) {
-  final environment = ref.watch(appEnvironmentProvider);
-  return HttpAiApiClient(
-    baseUrl: environment.backendBaseUrl,
+/// Secure storage klíče vlastníka (C46 §2, BYK-001).
+final byokKeyStoreProvider = Provider<ByokKeyStore>(
+  (ref) => FlutterByokKeyStore(),
+);
+
+/// Osobní režim (ADR-013): jediná cesta k modelu = přímý Anthropic
+/// adapter (BYK-004). Backendová cesta ([HttpAiApiClient]) je dormantní.
+final aiApiClientProvider = Provider<AiApiClient>(
+  (ref) => AnthropicDirectClient(
+    keyStore: ref.watch(byokKeyStoreProvider),
     httpClient: http.Client(),
-  );
-});
+  ),
+);
 
 final aiProposalRepositoryProvider = Provider<AiProposalRepository>(
   (ref) => DriftAiProposalRepository(ref.watch(appDatabaseProvider)),
@@ -72,7 +80,6 @@ final aiProposalsProvider = FutureProvider<List<AiProposal>>(
 
 final requestPlanProposalProvider = Provider<RequestPlanProposal>(
   (ref) => RequestPlanProposal(
-    storage: ref.watch(secureSessionStorageProvider),
     contextBuilder: ref.watch(aiContextBuilderProvider),
     apiClient: ref.watch(aiApiClientProvider),
     proposals: ref.watch(aiProposalRepositoryProvider),
