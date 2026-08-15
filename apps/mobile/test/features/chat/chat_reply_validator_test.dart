@@ -120,6 +120,35 @@ void main() {
     expect(validateChatReply('Jen text bez struktury.'), isNull);
   });
 
+  test('REQUEST akce: validní bez polí, kombinace s profilem OK, dvě '
+      'REQUEST = nevalidní celek (C49 CHP-002)', () {
+    final valid = validateChatReply(
+      jsonEncode({
+        'reply': 'Připravím návrh.',
+        'actions': [
+          {'action': 'ADD_CONSTRAINT', 'title': 'Koleno'},
+          {'action': 'REQUEST_PLAN', 'extra': 'ignored'},
+        ],
+      }),
+    )!;
+    expect(valid.actions, hasLength(2));
+    // Kanonizace: REQUEST bez polí (neznámá pole zahazuje).
+    expect(valid.actions[1], {'action': 'REQUEST_PLAN'});
+
+    expect(
+      validateChatReply(
+        jsonEncode({
+          'reply': 'r',
+          'actions': [
+            {'action': 'REQUEST_PLAN'},
+            {'action': 'REQUEST_ADJUSTMENT'},
+          ],
+        }),
+      ),
+      isNull,
+    );
+  });
+
   test('hraniční hodnoty: rozsahy intů a datum cíle', () {
     expect(
       validateChatReply(
