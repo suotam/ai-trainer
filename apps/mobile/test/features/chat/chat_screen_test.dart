@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:ai_trainer_mobile/core/database/database_provider.dart';
 import 'package:ai_trainer_mobile/features/ai/application/ai_providers.dart';
 import 'package:ai_trainer_mobile/features/ai/data/http_ai_api_client.dart';

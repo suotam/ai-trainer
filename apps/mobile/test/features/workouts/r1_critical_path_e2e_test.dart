@@ -1,4 +1,7 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
+import 'package:ai_trainer_mobile/features/chat/presentation/chat_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:ai_trainer_mobile/core/database/database_provider.dart';
 import 'package:ai_trainer_mobile/core/ids/id_generator.dart';
@@ -65,8 +68,12 @@ void main() {
       await tester.pumpWidget(app());
       await settle(tester);
 
-      // 1–2. Startup gate → Today s dnešním demo workoutem (ze seedu).
-      expect(find.byKey(TodayScreen.screenKey), findsOneWidget);
+      // 1–2. Startup gate → domov (chat, CQC-009) → Today s demo workoutem.
+      expect(find.byKey(ChatScreen.screenKey), findsOneWidget);
+      GoRouter.of(
+        tester.element(find.byKey(ChatScreen.screenKey)),
+      ).go(AppRoutes.todayPath);
+      await settle(tester);
       expect(
         find.byKey(TodayScreen.cardKey('demo-w1-instance')),
         findsOneWidget,
@@ -141,6 +148,10 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpWidget(app());
+      await settle(tester);
+      GoRouter.of(
+        tester.element(find.byKey(ChatScreen.screenKey)),
+      ).go(AppRoutes.todayPath);
       await settle(tester);
       await tester.tap(find.byKey(TodayScreen.historyActionKey));
       await settle(tester);

@@ -35,6 +35,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key summaryActionKey = Key('today_summary_action');
   static const Key moreActionsKey = Key('today_more_actions');
   static const Key chatActionKey = Key('today_chat_action');
+  static const Key calendarActionKey = Key('today_calendar_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -48,8 +49,7 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.todayScreenTitle),
         actions: [
-          // Chat s trenérem (R7-02/04) — první akce; domovem se stane
-          // s přestavbou navigace v R7-05.
+          // Chat je domov (R7-05, CQC-009); Today zůstává plnohodnotný.
           IconButton(
             key: chatActionKey,
             icon: const Icon(Icons.chat_bubble_outline),
@@ -87,6 +87,15 @@ class TodayScreen extends ConsumerWidget {
             icon: const Icon(Icons.more_vert),
             onSelected: (path) => context.push(path),
             itemBuilder: (context) => [
+              // Kalendář v menu (lišta drží šířku telefonu — nález 1).
+              PopupMenuItem(
+                key: calendarActionKey,
+                value: AppRoutes.calendarPath,
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_month_outlined),
+                  title: Text(l10n.calendarOpenTooltip),
+                ),
+              ),
               PopupMenuItem(
                 key: accountActionKey,
                 value: AppRoutes.accountPath,

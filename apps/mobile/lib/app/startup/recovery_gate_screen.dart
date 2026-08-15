@@ -41,7 +41,9 @@ class _RecoveryGateScreenState extends ConsumerState<RecoveryGateScreen> {
       return;
     }
     final String? destination = switch (result) {
-      NoActiveSessionRecovery() => AppRoutes.todayPath,
+      // Chat je domov (R7-05, C50 §5 CQC-009); zákon aktivní session
+      // trvá beze změny — obnova má přednost níže.
+      NoActiveSessionRecovery() => AppRoutes.chatPath,
       ActiveSessionRecovered(:final session) => AppRoutes.activeSessionLocation(
         session.id,
       ),

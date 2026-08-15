@@ -1,5 +1,8 @@
 import 'package:ai_trainer_mobile/app/bootstrap/ai_trainer_app.dart';
+import 'package:ai_trainer_mobile/app/navigation/app_routes.dart';
 import 'package:ai_trainer_mobile/app/startup/recovery_gate_screen.dart';
+import 'package:ai_trainer_mobile/core/database/database_provider.dart';
+import 'package:ai_trainer_mobile/features/chat/presentation/chat_screen.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
@@ -9,30 +12,44 @@ import 'package:ai_trainer_mobile/features/workouts/presentation/workout_detail_
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../support/fake_workout_repositories.dart';
+import '../../support/workout_test_scope.dart';
 
 void main() {
   // Startup recovery gate (R1-05) je initial route. Bez aktivní session
-  // recovery vyhodnotí NoActiveSession a přejde na Today.
+  // recovery vyhodnotí NoActiveSession a přejde na domov (chat, CQC-009);
+  // Today zůstává plnohodnotný a testuje se navigací z domova.
   Widget appWith({
     required R1SeedRepository seed,
     required FakeWorkoutInstanceRepository repository,
-  }) => ProviderScope(
-    overrides: [
-      r1SeedRepositoryProvider.overrideWithValue(seed),
-      workoutInstanceRepositoryProvider.overrideWithValue(repository),
-      workoutSessionRepositoryProvider.overrideWithValue(
-        FakeWorkoutSessionRepository(),
-      ),
-      workoutPerformanceRepositoryProvider.overrideWithValue(
-        FakeWorkoutPerformanceRepository(),
-      ),
-    ],
-    child: const AiTrainerApp(),
-  );
+  }) {
+    final db = createTestDatabase();
+    addTearDown(db.close);
+    return ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        r1SeedRepositoryProvider.overrideWithValue(seed),
+        workoutInstanceRepositoryProvider.overrideWithValue(repository),
+        workoutSessionRepositoryProvider.overrideWithValue(
+          FakeWorkoutSessionRepository(),
+        ),
+        workoutPerformanceRepositoryProvider.overrideWithValue(
+          FakeWorkoutPerformanceRepository(),
+        ),
+      ],
+      child: const AiTrainerApp(),
+    );
+  }
 
   FakeSeedRepository okSeed() => FakeSeedRepository([SeedResult.applied]);
+
+  Future<void> goToday(WidgetTester tester) async {
+    final home = tester.element(find.byKey(ChatScreen.screenKey));
+    GoRouter.of(home).go(AppRoutes.todayPath);
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('startup recovery loading stav, UI nezamrzá', (tester) async {
     final hangingSeed = HangingSeedRepository();
@@ -42,14 +59,15 @@ void main() {
     await tester.pump();
 
     // Startup recovery gate (R1-05) je initial route; dokud bootstrap běží,
-    // zobrazuje konečný recovery loading, nikoli krátce Today.
+    // zobrazuje konečný recovery loading, nikoli krátce domov.
     expect(find.byKey(RecoveryGateScreen.loadingKey), findsOneWidget);
-    expect(find.byKey(TodayScreen.screenKey), findsNothing);
+    expect(find.byKey(ChatScreen.screenKey), findsNothing);
 
-    // Dokončit seed → recovery vyhodnotí NoActiveSession → Today.
+    // Dokončit seed → recovery vyhodnotí NoActiveSession → domov → Today.
     hangingSeed.complete();
     await tester.pumpAndSettle();
     expect(find.byKey(RecoveryGateScreen.loadingKey), findsNothing);
+    await goToday(tester);
     expect(find.byKey(TodayScreen.emptyKey), findsOneWidget);
   });
 
@@ -63,6 +81,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await goToday(tester);
 
     expect(find.byKey(TodayScreen.listKey), findsOneWidget);
     expect(find.byKey(TodayScreen.cardKey('wi1')), findsOneWidget);
@@ -77,6 +96,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await goToday(tester);
 
     expect(find.byKey(TodayScreen.emptyKey), findsOneWidget);
     expect(find.byKey(TodayScreen.listKey), findsNothing);
@@ -97,10 +117,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Selhání otevření/seedu DB zachytí startup recovery gate (R1-05),
-      // ne Today — bezpečná zpráva + Retry, žádný raw detail.
+      // ne domov — bezpečná zpráva + Retry, žádný raw detail.
       expect(find.byKey(RecoveryGateScreen.fallbackKey), findsOneWidget);
       expect(find.byKey(RecoveryGateScreen.retryButtonKey), findsOneWidget);
-      expect(find.byKey(TodayScreen.screenKey), findsNothing);
+      expect(find.byKey(ChatScreen.screenKey), findsNothing);
       expect(find.textContaining('internal seed failure'), findsNothing);
       expect(find.textContaining('StateError'), findsNothing);
       expect(find.textContaining('Exception'), findsNothing);
@@ -122,7 +142,8 @@ void main() {
     await tester.tap(find.byKey(RecoveryGateScreen.retryButtonKey));
     await tester.pumpAndSettle();
 
-    // Recovery vyhodnotí NoActiveSession → Today s daty.
+    // Recovery vyhodnotí NoActiveSession → domov → Today s daty.
+    await goToday(tester);
     expect(find.byKey(TodayScreen.listKey), findsOneWidget);
   });
 
@@ -137,6 +158,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await goToday(tester);
 
     await tester.tap(find.byKey(TodayScreen.cardKey('wi1')));
     await tester.pumpAndSettle();
@@ -156,6 +178,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await goToday(tester);
 
     // Název workoutu je vystaven jako sémantický label (karta merge-uje
     // title + subtitle do jednoho tap-able uzlu).
