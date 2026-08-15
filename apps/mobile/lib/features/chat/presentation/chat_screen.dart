@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../ai/application/ai_providers.dart';
+import '../../ai/domain/ai_proposal.dart';
 import '../application/chat_providers.dart';
 import '../domain/chat_models.dart';
 
@@ -246,6 +248,33 @@ class _ActionCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final controller = ref.read(chatControllerProvider.notifier);
     final busy = ref.watch(chatControllerProvider);
+    final isRequest =
+        action.kind == 'REQUEST_PLAN' || action.kind == 'REQUEST_ADJUSTMENT';
+
+    // REQUEST akce (C49 §3): úspěch = karta návrhu z C29 úložiště
+    // (CHP-001/009); selhání níže standardní FAILED větví s retry.
+    if (isRequest && action.status == 'APPLIED') {
+      final proposalId = action.payload['proposalId'];
+      return proposalId is String
+          ? _ProposalCard(proposalId: proposalId)
+          : const SizedBox.shrink();
+    }
+    if (isRequest && action.status == 'PROPOSED') {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox.square(
+              dimension: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: 8),
+            Text(l10n.chatPreparingProposal),
+          ],
+        ),
+      );
+    }
 
     return Card(
       key: Key('chat_action_${action.id}'),
@@ -314,6 +343,8 @@ class _ActionCard extends ConsumerWidget {
     'UPSERT_SPORT' => l10n.chatActionSport,
     'ADD_GOAL' => l10n.chatActionGoal,
     'SET_AVAILABILITY' => l10n.chatActionAvailability,
+    'REQUEST_PLAN' => l10n.chatActionPlan,
+    'REQUEST_ADJUSTMENT' => l10n.chatActionAdjustment,
     _ => l10n.chatActionConstraint,
   };
 
@@ -325,5 +356,115 @@ class _ActionCard extends ConsumerWidget {
         if (entry.key != 'action') '${entry.value}',
     ];
     return parts.join(' · ');
+  }
+}
+
+/// Karta návrhu plánu/úpravy v konverzaci (C49 §3): čte výhradně C29
+/// úložiště (CHP-001/009); rozhodnutí = táž C29 operace jako na AI
+/// obrazovce (CHP-007) — potvrzení provádí C30/C38 se safety vetem.
+class _ProposalCard extends ConsumerWidget {
+  const _ProposalCard({required this.proposalId});
+
+  final String proposalId;
+
+  static Key confirmKey(String id) => Key('chat_proposal_confirm_$id');
+  static Key rejectKey(String id) => Key('chat_proposal_reject_$id');
+  static Key retryKey(String id) => Key('chat_proposal_retry_$id');
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final busy = ref.watch(chatControllerProvider);
+    final proposal = ref
+        .watch(aiProposalsProvider)
+        .value
+        ?.where((p) => p.id == proposalId)
+        .firstOrNull;
+    if (proposal == null) {
+      return const SizedBox.shrink();
+    }
+    final workouts =
+        (proposal.payload['workouts'] as List?)?.cast<Map>() ?? const [];
+    final operations =
+        (proposal.payload['operations'] as List?)?.cast<Map>() ?? const [];
+    final decide = ref.read(aiScreenControllerProvider.notifier);
+
+    return Card(
+      key: Key('chat_proposal_$proposalId'),
+      margin: const EdgeInsets.only(top: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              (proposal.payload['planTitle'] as String?) ??
+                  (proposal.isAdjustment
+                      ? l10n.chatActionAdjustment
+                      : l10n.chatActionPlan),
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.aiProposalStatusLabel(proposal.status),
+              style: theme.textTheme.labelSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(proposal.summary, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            for (final workout in workouts)
+              Text(
+                '${l10n.aiDayLabel((workout['dayOffset'] as int?) ?? 0)} · '
+                '${workout['title']} — ${workout['reason']}',
+                style: theme.textTheme.bodySmall,
+              ),
+            for (final operation in operations)
+              Text(
+                '${l10n.aiOperationLabel('${operation['operation']}')} — '
+                '${operation['reason']}',
+                style: theme.textTheme.bodySmall,
+              ),
+            const SizedBox(height: 8),
+            if (proposal.isPending)
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  FilledButton(
+                    key: confirmKey(proposalId),
+                    onPressed: busy
+                        ? null
+                        : () => decide.decide(
+                            proposalId,
+                            ProposalDecision.confirm,
+                          ),
+                    child: Text(l10n.aiConfirm),
+                  ),
+                  OutlinedButton(
+                    key: rejectKey(proposalId),
+                    onPressed: busy
+                        ? null
+                        : () => decide.decide(
+                            proposalId,
+                            ProposalDecision.reject,
+                          ),
+                    child: Text(l10n.aiReject),
+                  ),
+                ],
+              ),
+            // Po selhání provedení jen explicitní nový pokus (CSE-007).
+            if (proposal.canRetryExecution)
+              TextButton(
+                key: retryKey(proposalId),
+                onPressed: busy
+                    ? null
+                    : () => decide.executeProposal(proposalId),
+                child: Text(l10n.aiRetry),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }

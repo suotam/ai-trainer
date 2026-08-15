@@ -48,8 +48,8 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.todayScreenTitle),
         actions: [
-          // Chat s trenérem (R7-02) — první akce; domovem se stane, až
-          // umí jednat (R7-04).
+          // Chat s trenérem (R7-02/04) — první akce; domovem se stane
+          // s přestavbou navigace v R7-05.
           IconButton(
             key: chatActionKey,
             icon: const Icon(Icons.chat_bubble_outline),

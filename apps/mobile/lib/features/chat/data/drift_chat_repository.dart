@@ -229,20 +229,23 @@ class DriftChatRepository implements ChatRepository {
   }
 
   @override
-  Future<void> addActions(
+  Future<List<String>> addActions(
     String messageId,
     List<Map<String, Object?>> canonicalActions, {
     required String Function() newId,
     required DateTime now,
   }) async {
-    await _db.transaction(() async {
+    return _db.transaction(() async {
+      final ids = <String>[];
       for (var i = 0; i < canonicalActions.length; i++) {
         final action = canonicalActions[i];
+        final id = newId();
+        ids.add(id);
         await _db
             .into(_db.localChatActions)
             .insert(
               LocalChatActionsCompanion.insert(
-                id: newId(),
+                id: id,
                 messageId: messageId,
                 position: i,
                 kind: action['action']! as String,
@@ -251,6 +254,7 @@ class DriftChatRepository implements ChatRepository {
               ),
             );
       }
+      return ids;
     });
   }
 
@@ -278,6 +282,7 @@ class DriftChatRepository implements ChatRepository {
     String actionId, {
     required String status,
     String? error,
+    Map<String, Object?>? payload,
     required DateTime now,
   }) async {
     await (_db.update(
@@ -286,6 +291,9 @@ class DriftChatRepository implements ChatRepository {
       LocalChatActionsCompanion(
         status: Value(status),
         error: Value(error),
+        payloadJson: payload == null
+            ? const Value.absent()
+            : Value(jsonEncode(payload)),
         decidedAt: Value(now.millisecondsSinceEpoch),
       ),
     );

@@ -120,8 +120,9 @@ abstract interface class ChatRepository {
     int limit = 20,
   });
 
-  /// Uloží kanonické akce k asistentské zprávě jako PROPOSED (CHA-006/008).
-  Future<void> addActions(
+  /// Uloží kanonické akce k asistentské zprávě jako PROPOSED (CHA-006/008);
+  /// vrací id vytvořených akcí v pořadí.
+  Future<List<String>> addActions(
     String messageId,
     List<Map<String, Object?>> canonicalActions, {
     required String Function() newId,
@@ -131,10 +132,13 @@ abstract interface class ChatRepository {
   Future<ChatAction?> actionById(String actionId);
 
   /// Rozhodnutí/výsledek akce (C48 §4): APPLIED / REJECTED / FAILED(+error).
+  /// [payload] volitelně nahrazuje kanonický payload (C49 §3 — REQUEST
+  /// akce si po úspěchu ukládá `proposalId`).
   Future<void> setActionStatus(
     String actionId, {
     required String status,
     String? error,
+    Map<String, Object?>? payload,
     required DateTime now,
   });
 }

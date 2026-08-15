@@ -89,6 +89,7 @@ ChatReply? validateChatReply(String raw) {
     return null;
   }
   final actions = <Map<String, Object?>>[];
+  var requestCount = 0;
   for (final node in actionsNode) {
     if (node is! Map<String, Object?>) {
       return null;
@@ -97,7 +98,15 @@ ChatReply? validateChatReply(String raw) {
     if (canonical == null) {
       return null;
     }
+    if (canonical['action'] == 'REQUEST_PLAN' ||
+        canonical['action'] == 'REQUEST_ADJUSTMENT') {
+      requestCount++;
+    }
     actions.add(canonical);
+  }
+  // Nejvýše jedna REQUEST akce na odpověď (C49 CHP-002) — bounded práce.
+  if (requestCount > 1) {
+    return null;
   }
   return ChatReply(text: reply, actions: actions);
 }
@@ -108,6 +117,9 @@ Map<String, Object?>? _validateAction(Map<String, Object?> node) =>
       'ADD_GOAL' => _validateAddGoal(node),
       'SET_AVAILABILITY' => _validateSetAvailability(node),
       'ADD_CONSTRAINT' => _validateAddConstraint(node),
+      // REQUEST akce (C49 §2): bez polí — spouští existující pipeline.
+      'REQUEST_PLAN' => const {'action': 'REQUEST_PLAN'},
+      'REQUEST_ADJUSTMENT' => const {'action': 'REQUEST_ADJUSTMENT'},
       _ => null,
     };
 
