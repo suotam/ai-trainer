@@ -7,6 +7,7 @@ import '../../features/chat/presentation/chat_screen.dart';
 import '../../features/ai/presentation/ai_proposals_screen.dart';
 import '../../features/auth/presentation/account_screen.dart';
 import '../../features/availability/presentation/availability_screen.dart';
+import '../../features/calendar/presentation/calendar_screen.dart';
 import '../../features/checkin/presentation/checkin_screen.dart';
 import '../../features/goals/presentation/goals_screen.dart';
 import '../../features/plan/presentation/plan_screen.dart';
@@ -111,6 +112,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: AppRoutes.chatName,
         path: AppRoutes.chatPath,
         builder: (context, state) => const ChatScreen(),
+      ),
+      GoRoute(
+        name: AppRoutes.calendarName,
+        path: AppRoutes.calendarPath,
+        builder: (context, state) => const CalendarScreen(),
       ),
       GoRoute(
         name: AppRoutes.checkInName,

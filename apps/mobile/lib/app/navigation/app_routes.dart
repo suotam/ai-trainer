@@ -58,6 +58,10 @@ abstract final class AppRoutes {
   static const String aiProposalsName = 'aiProposals';
   static const String aiProposalsPath = '/ai';
 
+  /// Kalendář tréninků (R7-05, C50) — read model nad C16.
+  static const String calendarName = 'calendar';
+  static const String calendarPath = '/calendar';
+
   /// Chat s trenérem (R7-02, C47) — konverzační rozhraní.
   static const String chatName = 'chat';
   static const String chatPath = '/chat';

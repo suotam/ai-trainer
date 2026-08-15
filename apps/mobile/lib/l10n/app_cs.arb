@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "cs",
   "appTitle": "AI Trainer",
   "startupScreenTitle": "AI Trainer",
@@ -298,6 +298,15 @@
   "chatActionApplied": "Zapsáno do profilu.",
   "chatActionRejected": "Odmítnuto.",
   "chatActionFailed": "Změnu se nepodařilo provést.",
+  "calendarTitle": "Kalendář",
+  "calendarOpenTooltip": "Kalendář tréninků",
+  "todayOpenTooltip": "Dnes",
+  "calendarEmptyDay": "V tento den žádný trénink.",
+  "calendarWorkoutStatus": "{status, select, READY{Naplánováno} IN_PROGRESS{Probíhá} COMPLETED{Dokončeno} PARTIALLY_COMPLETED{Dokončeno bez měření} CANCELLED{Zrušeno} other{{status}}}",
+  "quickCompleteButton": "Splněno",
+  "quickCompleteDone": "Trénink odkliknut jako splněný — bez měřených kroků a času.",
+  "quickCompleteBlocked": "Právě běží jiný trénink.",
+  "quickCompleteFailed": "Trénink se nepodařilo dokončit.",
   "chatActionPlan": "Návrh plánu",
   "chatActionAdjustment": "Úprava týdne",
   "chatPreparingProposal": "Připravuji návrh…",

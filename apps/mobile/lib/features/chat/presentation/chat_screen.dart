@@ -61,6 +61,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: Text(l10n.chatTitle),
         actions: [
+          // Denní smyčka (R7-05, C50 §5): kalendář a Today na jeden tap.
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            tooltip: l10n.calendarOpenTooltip,
+            onPressed: () => context.push(AppRoutes.calendarPath),
+          ),
+          IconButton(
+            icon: const Icon(Icons.today_outlined),
+            tooltip: l10n.todayOpenTooltip,
+            onPressed: () => context.push(AppRoutes.todayPath),
+          ),
           IconButton(
             key: ChatScreen.newConversationKey,
             icon: const Icon(Icons.add_comment_outlined),
