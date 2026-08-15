@@ -34,6 +34,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key checkInActionKey = Key('today_checkin_action');
   static const Key summaryActionKey = Key('today_summary_action');
   static const Key moreActionsKey = Key('today_more_actions');
+  static const Key chatActionKey = Key('today_chat_action');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -47,6 +48,14 @@ class TodayScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.todayScreenTitle),
         actions: [
+          // Chat s trenérem (R7-02) — první akce; domovem se stane, až
+          // umí jednat (R7-04).
+          IconButton(
+            key: chatActionKey,
+            icon: const Icon(Icons.chat_bubble_outline),
+            tooltip: l10n.chatOpenTooltip,
+            onPressed: () => context.push(AppRoutes.chatPath),
+          ),
           IconButton(
             key: checkInActionKey,
             icon: const Icon(Icons.monitor_heart_outlined),

@@ -58,6 +58,10 @@ abstract final class AppRoutes {
   static const String aiProposalsName = 'aiProposals';
   static const String aiProposalsPath = '/ai';
 
+  /// Chat s trenérem (R7-02, C47) — konverzační rozhraní.
+  static const String chatName = 'chat';
+  static const String chatPath = '/chat';
+
   /// Správa BYOK klíče (R7-01, C46) — osobní režim.
   static const String aiKeyName = 'aiKey';
   static const String aiKeyPath = '/ai/key';

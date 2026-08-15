@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 13', () async {
-    // R5-01 zvýšil schema na verzi 13 (denní check-in, C33 §3).
+  test('databaze vznikne od prazdneho stavu se schema verzi 14', () async {
+    // R7-02 zvýšil schema na verzi 14 (chat, C47 §2).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 13);
+    expect(version.data.values.first, 14);
 
     final tables = await db
         .customSelect(
@@ -95,6 +95,8 @@ void main() {
       'local_app_state',
       'local_availability_rules',
       'local_calendar_changes',
+      'local_chat_conversations',
+      'local_chat_messages',
       'local_constraints',
       'local_daily_check_ins',
       'local_equipment_items',
