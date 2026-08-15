@@ -33,6 +33,7 @@ class TodayScreen extends ConsumerWidget {
   static const Key aiActionKey = Key('today_ai_action');
   static const Key checkInActionKey = Key('today_checkin_action');
   static const Key summaryActionKey = Key('today_summary_action');
+  static const Key moreActionsKey = Key('today_more_actions');
 
   static Key cardKey(String workoutId) => Key('today_workout_card_$workoutId');
 
@@ -65,46 +66,67 @@ class TodayScreen extends ConsumerWidget {
             onPressed: () => context.push(AppRoutes.planPath),
           ),
           IconButton(
-            key: sportsActionKey,
-            icon: const Icon(Icons.sports_gymnastics),
-            tooltip: l10n.sportsOpenTooltip,
-            onPressed: () => context.push(AppRoutes.sportsProfilePath),
-          ),
-          IconButton(
-            key: goalsActionKey,
-            icon: const Icon(Icons.flag_outlined),
-            tooltip: l10n.goalsOpenTooltip,
-            onPressed: () => context.push(AppRoutes.goalsPath),
-          ),
-          IconButton(
-            key: availabilityActionKey,
-            icon: const Icon(Icons.event_available_outlined),
-            tooltip: l10n.availabilityOpenTooltip,
-            onPressed: () => context.push(AppRoutes.availabilityPath),
-          ),
-          IconButton(
-            key: summaryActionKey,
-            icon: const Icon(Icons.summarize_outlined),
-            tooltip: l10n.summaryOpenTooltip,
-            onPressed: () => context.push(AppRoutes.summaryPath),
-          ),
-          IconButton(
-            key: activityActionKey,
-            icon: const Icon(Icons.insights_outlined),
-            tooltip: l10n.activityOpenTooltip,
-            onPressed: () => context.push(AppRoutes.activityPath),
-          ),
-          IconButton(
             key: historyActionKey,
             icon: const Icon(Icons.history),
             tooltip: l10n.historyOpenTooltip,
             onPressed: () => context.push(AppRoutes.historyPath),
           ),
-          IconButton(
-            key: accountActionKey,
-            icon: const Icon(Icons.account_circle_outlined),
-            tooltip: l10n.accountOpenTooltip,
-            onPressed: () => context.push(AppRoutes.accountPath),
+          // Na šířku telefonu se všech 10 akcí nevejde (on-device nález) —
+          // méně frekventované cíle žijí v overflow menu.
+          PopupMenuButton<String>(
+            key: moreActionsKey,
+            icon: const Icon(Icons.more_vert),
+            onSelected: (path) => context.push(path),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                key: accountActionKey,
+                value: AppRoutes.accountPath,
+                child: ListTile(
+                  leading: const Icon(Icons.account_circle_outlined),
+                  title: Text(l10n.accountOpenTooltip),
+                ),
+              ),
+              PopupMenuItem(
+                key: sportsActionKey,
+                value: AppRoutes.sportsProfilePath,
+                child: ListTile(
+                  leading: const Icon(Icons.sports_gymnastics),
+                  title: Text(l10n.sportsOpenTooltip),
+                ),
+              ),
+              PopupMenuItem(
+                key: goalsActionKey,
+                value: AppRoutes.goalsPath,
+                child: ListTile(
+                  leading: const Icon(Icons.flag_outlined),
+                  title: Text(l10n.goalsOpenTooltip),
+                ),
+              ),
+              PopupMenuItem(
+                key: availabilityActionKey,
+                value: AppRoutes.availabilityPath,
+                child: ListTile(
+                  leading: const Icon(Icons.event_available_outlined),
+                  title: Text(l10n.availabilityOpenTooltip),
+                ),
+              ),
+              PopupMenuItem(
+                key: summaryActionKey,
+                value: AppRoutes.summaryPath,
+                child: ListTile(
+                  leading: const Icon(Icons.summarize_outlined),
+                  title: Text(l10n.summaryOpenTooltip),
+                ),
+              ),
+              PopupMenuItem(
+                key: activityActionKey,
+                value: AppRoutes.activityPath,
+                child: ListTile(
+                  leading: const Icon(Icons.insights_outlined),
+                  title: Text(l10n.activityOpenTooltip),
+                ),
+              ),
+            ],
           ),
         ],
       ),

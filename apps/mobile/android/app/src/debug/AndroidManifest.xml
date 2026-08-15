@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug-only: povoluje http:// k lokálnímu dev backendu přes
+         adb reverse (localhost). Release buildy zůstávají bez cleartextu. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>
