@@ -17,7 +17,7 @@ import '../../support/workout_test_scope.dart';
 class _ScriptedChatClient implements ChatAiClient {
   _ScriptedChatClient(this._behavior);
 
-  Future<String> Function() _behavior;
+  final Future<String> Function() _behavior;
   int calls = 0;
 
   @override
@@ -68,7 +68,9 @@ void main() {
       '(CHC-003)', (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
-    final client = _ScriptedChatClient(() async => 'Trénuj zlehka.');
+    final client = _ScriptedChatClient(
+      () async => '{"reply":"Trénuj zlehka."}',
+    );
 
     await tester.pumpWidget(app(db: db, client: client));
     await tester.pumpAndSettle();
@@ -93,7 +95,7 @@ void main() {
       if (fail) {
         throw Exception('síť');
       }
-      return 'Už to jde.';
+      return '{"reply":"Už to jde."}';
     });
 
     await tester.pumpWidget(app(db: db, client: client));
@@ -117,11 +119,56 @@ void main() {
     expect(client.calls, 2);
   });
 
+  testWidgets('akce z chatu: karta → potvrzení provede repos a stav je '
+      'trvale viditelný; odmítnutí bez efektu (C48 CHA-001/005/006)', (
+    tester,
+  ) async {
+    final db = createTestDatabase();
+    addTearDown(db.close);
+    final client = _ScriptedChatClient(
+      () async =>
+          '{"reply":"Navrhuji zapsat omezení a dostupnost.","actions":['
+          '{"action":"ADD_CONSTRAINT","title":"Citlivé koleno"},'
+          '{"action":"SET_AVAILABILITY","dayOfWeek":"TUE","level":"AVAILABLE"}'
+          ']}',
+    );
+    await tester.pumpWidget(app(db: db, client: client));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(ChatScreen.inputKey), 'Bolí mě koleno');
+    await tester.tap(find.byKey(ChatScreen.sendButtonKey));
+    await tester.pumpAndSettle();
+
+    // Karty navržených akcí; před potvrzením žádný efekt (CHA-006).
+    expect(find.text('Potvrdit'), findsNWidgets(2));
+    Future<int> constraints() async =>
+        (await db
+                    .customSelect('SELECT COUNT(*) AS c FROM local_constraints')
+                    .getSingle())
+                .data['c']
+            as int;
+    expect(await constraints(), 0);
+
+    // Potvrzení první akce (omezení) → provedeno repos (CHA-001).
+    await tester.tap(find.text('Potvrdit').first);
+    await tester.pumpAndSettle();
+    expect(await constraints(), 1);
+    expect(find.text('Zapsáno do profilu.'), findsOneWidget);
+
+    // Odmítnutí druhé akce → viditelný trvalý stav, žádný efekt.
+    await tester.tap(find.text('Odmítnout'));
+    await tester.pumpAndSettle();
+    expect(find.text('Odmítnuto.'), findsOneWidget);
+    final rules = await db
+        .customSelect('SELECT COUNT(*) AS c FROM local_availability_rules')
+        .getSingle();
+    expect(rules.data['c'], 0);
+  });
+
   testWidgets('bez klíče je viditelný banner s odkazem na správu klíče '
       '(CHC-009)', (tester) async {
     final db = createTestDatabase();
     addTearDown(db.close);
-    final client = _ScriptedChatClient(() async => 'x');
+    final client = _ScriptedChatClient(() async => '{"reply":"x"}');
 
     await tester.pumpWidget(app(db: db, client: client, storedKey: null));
     await tester.pumpAndSettle();
