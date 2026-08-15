@@ -53,9 +53,21 @@ final class ProposalCreated extends RequestProposalResult {
   final String proposalId;
 }
 
-/// AI vyžaduje přihlášený účet (AGW-008) — anonymní stav je typovaný.
-final class ProposalSignInRequired extends RequestProposalResult {
-  const ProposalSignInRequired();
+/// Chybí API klíč (osobní režim, C46 §4 BYK-010; nahrazuje dřívější
+/// sign-in gating AGW-008 — osobní režim účet nevyžaduje) — poctivý stav
+/// s odkazem na správu klíče, nikdy tiché selhání.
+final class ProposalKeyMissing extends RequestProposalResult {
+  const ProposalKeyMissing();
+}
+
+/// Klíč byl odmítnut providerem (401) — typovaný stav (BYK-008).
+final class ProposalKeyInvalid extends RequestProposalResult {
+  const ProposalKeyInvalid();
+}
+
+/// Účet u providera nemá kredit — typovaný stav (BYK-008).
+final class ProposalNoCredit extends RequestProposalResult {
+  const ProposalNoCredit();
 }
 
 /// Síť/AI služba nedostupná — bezpečný fallback (R4P-010).
