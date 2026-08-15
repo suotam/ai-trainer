@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.72  
+**Verze:** 2.73  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -343,7 +343,13 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **Eval dataset rozšířen o zachycené reálné výstupy** (C32 §5): `live-smoke-plan-sonnet5.json` a `live-smoke-adjustment-sonnet5.json` — oba harnessy (backend `EvalGateTest` i mobilní konzistence) nad nimi prochází. Evidence běhu v `apps/backend/build/live-smoke/`. Suite po smoke: backend **126 testů** (2 skipped = opt-in smoke bez flagu), mobil **343 testů**.
 
-**Přesný další kanonický krok:** Release 6 je uzavřen a živý smoke splacen → dalším krokem je **naplánování Release 7**, nebo splacení zbývajících beta gate podmínek (platformní notifikace + emulátorová evidence — vyžadují Android SDK/zařízení). Plánování ani implementace nezačíná bez samostatného pokynu.
+## On-device evidence začala (2026-08-15) a produktový pivot R7
+
+**Aplikace poprvé běží na skutečném zařízení** (Pixel 9a, Android 17): debug APK nainstalován, backend lokálně (port 8081, PostgreSQL v Dockeru na 5544 — porty 8080/5432/5433 na stroji vlastní jiné procesy), spojení telefon→PC přes `adb reverse`, živý AI provider. **On-device nález 1 opraven v témže cyklu**: Today lišta s 10 ikonami přetékala šířku telefonu (ikona účtu mimo displej) — méně frekventované cíle přesunuty do overflow menu (suite 343/343 zelená). Debug manifest povoluje cleartext jen pro dev; `apps/backend/local-dev.yaml` s runtime klíčem je v `.gitignore`.
+
+**R7 – Personal Chat Trainer je naplánované, implementace nezačala.** Vlastník produktu potvrdil pivot (2026-08-15): osobní aplikace na jednom telefonu, **chat jako primární rozhraní** (profil, cíle, dostupnost i plánování konverzačně), **local-first bez vlastního serveru** — AI přímo z telefonu s vlastním klíčem (BYOK v secure storage), tréninky v kalendáři, rychlé odklikávání, statistiky. Existuje kanonický plán `docs/13-delivery/r7-vertical-slice-plan.md` (backlog `R7-01` až `R7-06`, blocking contract map **C46–C50**, `R7P-001..015`). Základní zákony: **AI navrhuje, doména provádí** trvá (chat = vstupní vrstva, každá změna jen potvrzenou akcí přes existující operace), klíč nikdy neopustí secure storage, deterministické jádro nedegraduje, offline trenér funguje i bez klíče, backend dormantní (R1–R6 suite zůstávají zelené). Řízené výjimky: bez zálohy do R8 (vědomé riziko), platformní notifikace trvají mimo P0. **Žádný R7 slice není `READY`** — čeká se na kontrakty (první: C46 – ADR-013 + BYOK provider).
+
+**Přesný další kanonický krok:** vytvořit blocking kontrakt **C46 – ADR-013 Local-first BYOK** (`docs/08-mobile/r7-byok-provider-contract.md` + ADR zápis) a poté implementovat `R7-01 – Local AI Provider and BYOK Key Management`. Implementace smí začít až po samostatném pokynu.
 
 ---
 

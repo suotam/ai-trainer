@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.68  
+**Verze:** 2.69  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -220,6 +220,7 @@ docs/13-delivery/r0-r1-vertical-slice-plan.md
 docs/13-delivery/r2-vertical-slice-plan.md
 docs/13-delivery/r3-vertical-slice-plan.md
 docs/13-delivery/r4-vertical-slice-plan.md
+docs/13-delivery/r7-vertical-slice-plan.md
 docs/14-quality/test-strategy.md
 docs/15-coding-agent/coding-agent-guide.md
 ```
@@ -232,6 +233,8 @@ docs/15-coding-agent/coding-agent-guide.md
 - `r4-vertical-slice-plan.md` vlastní pořadí implementace R4 (`R4-01` až `R4-08`), R4 blocking contract map (C25–C32), evidence gates, R4 Exit Review a `R4P-001` až `R4P-015`. Základní zákon: **AI navrhuje, doména provádí** — jediná cesta změny je potvrzený ChangeSet přes existující R3 operace. **Celé R4 (`R4-01` až `R4-08`) je implementováno a Release 4 uzavřen** (R4 Exit Review viz `DOCUMENTATION_STATUS.md` §3; otevřený dluh: živý provider smoke).
 
 - `r6-vertical-slice-plan.md` vlastní pořadí implementace R6 – Beta Readiness (`R6-01` až `R6-06`), R6 blocking contract map (**C41–C45**), evidence gates, R6 Exit Review a `R6P-001` až `R6P-015`. Scope odvozen výhradně z beta baseline mezer a R5 dluhů: pull sync protokol, merge sémantika (lokální nepushnutá pravda se nikdy tiše neztrácí), sync struktury workoutů (SXC-010), delete tombstones (SXC-011) a obnova nového zařízení (beta krok 10). Beta gate podmínky (živý smoke, platformní notifikace, emulátor) jsou podmínky zveřejnění, ne slices. **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (viz `DOCUMENTATION_STATUS.md` §3; SXC-010 i SXC-011 splaceny, beta baseline kroky 1–10 doloženy deterministicky — beta zůstává interní do splnění beta gate podmínek).
+
+- `r7-vertical-slice-plan.md` vlastní pořadí implementace **R7 – Personal Chat Trainer** (`R7-01` až `R7-06`), R7 blocking contract map (**C46–C50**), evidence gates, R7 Exit Review a `R7P-001..015`. Produktový pivot potvrzený vlastníkem (2026-08-15): osobní aplikace na jednom telefonu, chat jako primární rozhraní, local-first s BYOK (vlastní Anthropic klíč v secure storage, AI přímo z telefonu), kalendář + rychlé dokončení + statistiky; backend dormantní. Základní zákon trvá: **AI navrhuje, doména provádí** — chat je vstupní vrstva s výhradně potvrzenými akcemi. **Žádný R7 slice není `READY`** (čeká C46).
 
 - `r5-vertical-slice-plan.md` vlastní pořadí implementace R5 – Adaptive Daily Trainer Beta (`R5-01` až `R5-08`), R5 blocking contract map (**C33–C40**), evidence gates, beta baseline mapování (release scope §10), R5 Exit Review a `R5P-001` až `R5P-015`. Základní zákony: **safety je deterministická a AI jí nikdy nevelí**, medicínská hranice poctivě označená, adaptace znovupoužívá R4 pipeline (nový request typ = kontrakt), execution výhradně C20/C21, notifikace nikdy nejednají. **Celé R5 (`R5-01` až `R5-08`) je implementováno a Release 5 uzavřen** (R5 Exit Review viz `DOCUMENTATION_STATUS.md` §3; beta baseline doložena s výjimkou obnovy a živého smoke — beta interní).
 - `test-strategy.md` vlastní test levels, quality gates a `QTR-001` až `QTR-015`.
@@ -472,11 +475,15 @@ request typy přes produkční validaci; 2 defekty nalezeny a opraveny,
 prompty v2, eval dataset rozšířen — viz `DOCUMENTATION_STATUS.md` §3).
 **Beta zůstává interní** do splnění zbývajících beta gate podmínek
 (platformní doručení notifikací, emulátorová runtime evidence — vyžadují
-Android SDK/zařízení). Další kanonický krok:
+Android SDK/zařízení). **Produktový pivot R7 – Personal Chat Trainer je
+naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
+až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
+jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
+evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
+Další kanonický krok:
 
 ```text
-Naplánování Release 7 (po samostatném pokynu),
-nebo splacení zbývajících beta gate podmínek (Android SDK/zařízení)
+C46 – ADR-013 + BYOK provider kontrakt → R7-01 – Local AI Provider and BYOK Key Management
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.
