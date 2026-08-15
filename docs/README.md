@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.73  
+**Verze:** 2.74  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -176,6 +176,8 @@ docs/09-ai/r4-proposal-lifecycle-contract.md
 - `r6-pull-sync-contract.md` (**C41**, vlastník Domain / sync-and-offline-model + Backend) vlastní pull protokol: jediný endpoint `POST /api/v1/sync/pull` s **neprůhledným kurzorem per typ** (server-owned formát, klient jen ukládá/vrací), deterministické řazení a stránkování (cap 200, `hasMore`), **overlap dovolen — mezera nikdy**, payload beze změny (C6 §8.4), ownership přísně (C8), pull bez side-effects, audit jen s počty, tombstone-ready tvar a invarianty `PSP-001` až `PSP-015`. Push sémantika C10/C11 nedotčena. Contract-only. Blokuje `R6-01`.
 
 - `r6-pull-merge-contract.md` (**C42**, vlastník Domain / sync-and-offline-model + Mobile) vlastní klientskou merge sémantiku pullu: **merge matice** (neexistující → INSERT se SYNCED a ownerem účtu; SYNCED + vyšší verze → UPDATE; verze ≤ známá → no-op; **LOCAL_ONLY/DIRTY nikdy tiše** — typovaný konflikt řešený existující C12 push cestou), per-item izolaci selhání (dependency skip), kurzory per typ persistované s posunem až po aplikaci, P0 scope 7 plochých root typů (workout hierarchie vlastní C43/C45) a invarianty `PMS-001` až `PMS-015`. Contract-only. Blokuje `R6-02`.
+
+- `r7-calendar-quickcomplete-contract.md` (**C50**, vlastník Domain + Product + Mobile) vlastní denní smyčku: **kalendářní read model** nad C16 (měsíční mřížka, lokální data, poctivé stavy — žádné dopočty), **rychlé dokončení výhradně existujícími C22 operacemi** (start + okamžité dokončení; žádné vymyšlené metriky — instance končí dle C22 `PARTIALLY_COMPLETED` „dokončeno bez měření", typované výsledky, převzetí aktivní session téže instance), statistiky výhradně C23/C39, **chat jako domov** (recovery gate → /chat; zákon aktivní session R1-05 beze změny) a invarianty `CQC-001` až `CQC-012`. Blokuje `R7-05`.
 
 - `r7-chat-planning-contract.md` (**C49**, vlastník Domain + Mobile) vlastní napojení chatu na plánování: prompt **chat-v3** s REQUEST akcemi (`REQUEST_PLAN`/`REQUEST_ADJUSTMENT`, **nejvýše jedna na odpověď** — bounded 2 volání modelu na zadání), REQUEST spouští **výhradně existující pipeline** C27→C28/C37→C29 (AIProposal jediný nosič, CHP-001), karta návrhu v konverzaci čte C29 úložiště a **rozhodnutí v chatu = táž C29 operace** jako na AI obrazovce (potvrzení = C30/C38 provedení se safety vetem), typovaná selhání s explicitním retry a invarianty `CHP-001` až `CHP-010`. Blokuje `R7-04`.
 
@@ -488,14 +490,13 @@ naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
 až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
 jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
 evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
-**`R7-01` až `R7-04` jsou implementovány** (C46/ADR-013: BYOK; C47: chat
-konverzace; C48: profil potvrzenými akcemi; C49: **plánování přes chat**
-— „postav mi týden"/„uber mi" → existující pipeline → karta návrhu
-v konverzaci → potvrzení = provedení se safety vetem). Další kanonický
+**`R7-01` až `R7-05` jsou implementovány** (C46: BYOK; C47: chat; C48:
+profil akcemi; C49: plánování přes chat; C50: **kalendář + rychlé
+dokončení + chat jako domov** — denní smyčka kompletní). Další kanonický
 krok:
 
 ```text
-C50 – Calendar & quick-complete kontrakt → R7-05 – Calendar View, Quick Complete and Stats Surfacing
+R7-06 – R7 Critical End-to-End Evidence and Exit Review
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.
