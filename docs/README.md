@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.74  
+**Verze:** 2.75  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-14
@@ -490,13 +490,15 @@ naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
 až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
 jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
 evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
-**`R7-01` až `R7-05` jsou implementovány** (C46: BYOK; C47: chat; C48:
-profil akcemi; C49: plánování přes chat; C50: **kalendář + rychlé
-dokončení + chat jako domov** — denní smyčka kompletní). Další kanonický
+**Celé R7 (`R7-01` až `R7-06`) je implementováno a R7 Exit Review sepsán**
+(C46: BYOK; C47: chat; C48: profil akcemi; C49: plánování přes chat;
+C50: kalendář + quick-complete + chat jako domov; R7-06: kritická E2E —
+mobil 377/377). **Release 7 se formálně uzavře dokončením on-device
+průchodu na Pixel 9a** (viz `DOCUMENTATION_STATUS.md` §3). Další kanonický
 krok:
 
 ```text
-R7-06 – R7 Critical End-to-End Evidence and Exit Review
+On-device průchod R7 → uzavření Release 7 → naplánování Release 8 (po pokynu)
 ```
 
 Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.

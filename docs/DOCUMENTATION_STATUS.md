@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.78  
+**Verze:** 2.79  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -359,7 +359,21 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 `R7-05 – Calendar View, Quick Complete and Stats Surfacing` je implementován (blocking kontrakt **C50 – Calendar & quick-complete** /`docs/06-domain/r7-calendar-quickcomplete-contract.md`, `CQC-001..012`/ vznikl v témže cyklu) — **denní smyčka vlastníka je kompletní a chat je domov aplikace**. **Kalendář** (`/calendar`): čistý read model nad C16 (CQC-001) — měsíční mřížka MON–SUN s deterministickými hranicemi (CQC-002), výběr dne se seznamem, poctivé stavy, tap → existující detail (mutace výhradně C21/C22 cestami — CQC-008); odkazy na C23 aktivitu a C39 souhrn (CQC-007). **Rychlé dokončení**: výhradně existující C22 operace v témže kroku (start + `completeWorkout` — CQC-003); **žádné vymyšlené metriky** (CQC-004): žádné performance řádky, summary 0 kroků/0 s a instance končí dle C22 pravidel `PARTIALLY_COMPLETED` — UI poctivě „Dokončeno bez měření"; typované výsledky (CQC-005), aktivní session téže instance se převezme — nikdy druhá (CQC-006), cizí blokuje; okamžitá invalidace read modelů (CQC-010). **Chat jako domov** (CQC-009): recovery gate bez aktivní session → `/chat` (zákon obnovy aktivní session R1-05 beze změny); chat lišta má kalendář + Today; Today plnohodnotný (kalendář v overflow — lišta drží šířku telefonu, nález 1). Ověřeno **6 novými testy** (quick-complete: poctivá evidence + historie; převzetí/blokace/not-found matice; kalendář: mřížka + výběr dne + quick-complete propis + zmizení tlačítka; navigace měsíců) + **aktualizace 6 souborů testů na chat domov** (recovery gate 7 testů, app bootstrap, today/session/feedback/completion UI, R1 E2E — vše přes navigaci z domova, R1 zákon nedotčen) — mobile suite **376 testů**, analyze čistý; backend beze změny.
 
-**Přesný další kanonický krok:** `R7-06 – R7 Critical End-to-End Evidence and Exit Review` (bez nového kontraktu): deterministický E2E „prázdná aplikace → profil chatem (potvrzené akce) → plán chatem → potvrzení → kalendář → quick-complete i plná session → statistiky/souhrn" + R7 Exit Review dle plánu §13. Implementace smí začít až po samostatném pokynu.
+`R7-06 – R7 Critical End-to-End Evidence and Exit Review` je implementován (bez nového kontraktu — E2E + Exit Review nad C46–C50). **Kritická R7 E2E** (`r7_critical_path_e2e_test.dart`, deterministická nad skutečnou SQLite, fake chat klient i fake proposal pipeline — CHP-010/BYK-013): **prázdná aplikace → chat je domov** (poctivý prázdný stav) → „hraju florbal 2× týdně, chci zhubnout, mám čas v úterý, bolí mě koleno" → **4 potvrditelné akce → potvrzení → profil v DB** (před potvrzením žádný efekt) → „postav mi týden" → REQUEST_PLAN → pipeline (1 volání) → **karta návrhu z C29 → před potvrzením žádný plán → potvrzení vytvoří plán + 2 instance** → kalendář → **quick-complete** „Silový A" (poctivě: 0 měřených kroků, žádné performance řádky) → **plná R1 session** na „Mobilita B" z kalendáře (detail → start → dokončení → historie) → **statistiky C23 drží obě dokončení** (completedCount 2) → bounded volání modelu (2 chat + 1 pipeline na 2 zadání, CHP-006) + PII marker kontextu. Mobile suite **377 testů**, analyze čistý; backend beze změny.
+
+## R7 Exit Review (dle `r7-vertical-slice-plan.md` §13)
+
+- **klíč prokazatelně jen v secure storage a správa funguje** — R7-01 marker/widget testy (nikdy DB/log; maska; smazání; ověření bounded) ✔; on-device správa klíče ověřena uživatelem na Pixel 9a (uložení + „Klíč funguje") ✔.
+- **chat vede celý tok „profil → plán → kalendář → dokončení → statistiky" jen přes potvrzené akce a existující operace** — R7 E2E výše ✔.
+- **nevalidní výstupy modelu typovaně odmítnuté; safety veto drží i z chatu** — C48 validátor matice (nevalidní celek bez částečného přijetí), C49 (provedení výhradně C30/C38 se safety vetem — R5-06 veto testy platí i pro chat cestu) ✔.
+- **bez klíče/bez sítě plnohodnotný offline trenér** — no-key stavy (chat banner, AI hlášky), R1–R6 suite bez klíče i sítě ✔.
+- **kalendář a quick-complete konzistentní se statistikami, žádné vymyšlené metriky** — R7-05 testy + E2E (PARTIALLY_COMPLETED poctivě, C23 čísla) ✔.
+- **R1–R6 kritické E2E zelené; R7 E2E prochází** — všech sedm kritických E2E v téže suite; mobil **377/377** + analyze, backend **126/126** (2 skipped opt-in smoke) ✔.
+- **on-device průchod hlavního toku s reálným klíčem** — **PROBÍHÁ**: BYOK klíč a reálné AI volání už na Pixel 9a ověřeny (R7-01); průchod chat → profil → plán → kalendář → dokončení na zařízení proběhne bezprostředně (APK připraven); nálezy se evidují a uzavřou v témže cyklu. **Do dokončení průchodu zůstává Release 7 formálně otevřený.**
+- **řízené výjimky znovu evidovány**: bez zálohy do R8 (ztráta telefonu = ztráta dat — vědomé riziko vlastníka; kandidát R8 export/import), platformní notifikace (C40) mimo P0, streaming/hlas/OS kalendář/multi-provider mimo scope, backend dormantní (R1–R6 suite drží zelené).
+- **žádný známý blocker ani critical defect** — on-device nálezy 1 (Today lišta) a 2 (tlačítka karty) opraveny v témže cyklu.
+
+**Přesný další kanonický krok:** dokončit **on-device průchod R7 toku na Pixel 9a** (s vlastníkem, reálný klíč) → uzavřít Release 7 → poté naplánování Release 8 (kandidáti: záloha export/import, platformní notifikace, streaming odpovědí, OS kalendář). Plánování nezačíná bez samostatného pokynu.
 
 ---
 
