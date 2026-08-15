@@ -7,6 +7,8 @@ import '../../../core/time/clock.dart';
 import '../../ai/application/ai_providers.dart';
 import '../../ai/data/anthropic_direct_client.dart';
 import '../../ai/data/http_ai_api_client.dart';
+import '../../ai/domain/ai_context.dart';
+import '../../ai/domain/ai_proposal.dart';
 import '../../auth/domain/auth_api_client.dart';
 import '../../availability/application/availability_providers.dart';
 import '../../goals/application/goals_providers.dart';
@@ -158,12 +160,21 @@ class ChatController extends Notifier<bool> {
       }
       await repo.completeAssistant(assistantId, content: reply.text, now: now);
       if (reply.actions.isNotEmpty) {
-        await repo.addActions(
+        final actionIds = await repo.addActions(
           assistantId,
           reply.actions,
           newId: ref.read(idGeneratorProvider).newId,
           now: now,
         );
+        // REQUEST akce (C49 §2): spuštění existující pipeline v témže
+        // kroku — nejvýše jedna (CHP-002), návrh čeká na C29 potvrzení.
+        for (var i = 0; i < reply.actions.length; i++) {
+          final kind = reply.actions[i]['action'];
+          if (kind == 'REQUEST_PLAN' || kind == 'REQUEST_ADJUSTMENT') {
+            ref.invalidate(chatMessagesProvider);
+            await _runProposalPipeline(actionIds[i], kind! as String);
+          }
+        }
       }
     } on AiApiFailure catch (failure) {
       await repo.failAssistant(
@@ -179,8 +190,66 @@ class ChatController extends Notifier<bool> {
     }
   }
 
+  /// Spuštění existující proposal pipeline pro REQUEST akci (C49 §3,
+  /// CHP-003/005): úspěch = APPLIED s proposalId, selhání typované FAILED.
+  Future<void> _runProposalPipeline(String actionId, String kind) async {
+    final repo = ref.read(chatRepositoryProvider);
+    final now = ref.read(clockProvider)();
+    final result = await ref.read(requestPlanProposalProvider)(
+      type: kind == 'REQUEST_ADJUSTMENT'
+          ? AiRequestType.adjustmentProposal
+          : AiRequestType.planProposal,
+    );
+    switch (result) {
+      case ProposalCreated(:final proposalId):
+        await repo.setActionStatus(
+          actionId,
+          status: 'APPLIED',
+          payload: {'action': kind, 'proposalId': proposalId},
+          now: now,
+        );
+        ref.invalidate(aiProposalsProvider);
+      case ProposalKeyMissing():
+        await repo.setActionStatus(
+          actionId,
+          status: 'FAILED',
+          error: 'keyMissing',
+          now: now,
+        );
+      case ProposalKeyInvalid():
+        await repo.setActionStatus(
+          actionId,
+          status: 'FAILED',
+          error: 'invalidKey',
+          now: now,
+        );
+      case ProposalNoCredit():
+        await repo.setActionStatus(
+          actionId,
+          status: 'FAILED',
+          error: 'noCredit',
+          now: now,
+        );
+      case ProposalInvalidOutput():
+        await repo.setActionStatus(
+          actionId,
+          status: 'FAILED',
+          error: 'invalidOutput',
+          now: now,
+        );
+      case ProposalUnavailable():
+        await repo.setActionStatus(
+          actionId,
+          status: 'FAILED',
+          error: 'network',
+          now: now,
+        );
+    }
+  }
+
   /// Potvrzení akce = provedení existujícími repos v témže kroku
   /// (C48 §4, CHA-005/006); výsledek je trvale viditelný stav.
+  /// REQUEST akce: retry pipeline po FAILED (CHP-005).
   Future<void> confirmAction(String actionId) async {
     if (_inFlight) {
       return;
@@ -189,6 +258,11 @@ class ChatController extends Notifier<bool> {
       final repo = ref.read(chatRepositoryProvider);
       final action = await repo.actionById(actionId);
       if (action == null || !(action.isProposed || action.isFailed)) {
+        return;
+      }
+      if (action.kind == 'REQUEST_PLAN' ||
+          action.kind == 'REQUEST_ADJUSTMENT') {
+        await _runProposalPipeline(action.id, action.kind);
         return;
       }
       final now = ref.read(clockProvider)();
