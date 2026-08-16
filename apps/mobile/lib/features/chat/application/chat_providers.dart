@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -151,6 +152,12 @@ class ChatController extends Notifier<bool> {
       // celek = typované selhání s retry, nikdy částečné přijetí.
       final reply = validateChatReply(raw);
       if (reply == null) {
+        if (kDebugMode) {
+          debugPrint(
+            '[aitrainer/chat] validateChatReply=null raw(${raw.length})='
+            '${raw.substring(0, raw.length < 600 ? raw.length : 600)}',
+          );
+        }
         await repo.failAssistant(
           assistantId,
           errorKind: 'invalidOutput',
