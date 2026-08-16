@@ -110,7 +110,10 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
     }
     final response = await _post(key, {
       'model': model,
-      'max_tokens': 1024,
+      // Plný bounded rozpočet (BYK-009): reasoning modely čerpají
+      // z max_tokens i thinking — 1024 usekávalo JSON odpovědi
+      // (on-device nález 3).
+      'max_tokens': _maxTokens,
       'system': chatPrompt.template,
       'messages': [
         {
