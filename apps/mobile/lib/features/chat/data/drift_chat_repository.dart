@@ -60,10 +60,16 @@ class DriftChatRepository implements ChatRepository {
               ..where((t) => t.conversationId.equals(conversationId))
               ..orderBy([(t) => OrderingTerm.asc(t.position)]))
             .get();
+    return _withActions(rows);
+  }
+
+  /// Akce zpráv (C48) jedním dotazem, seskupené k message_id.
+  Future<List<ChatMessage>> _withActions(
+    List<LocalChatMessageRow> rows,
+  ) async {
     if (rows.isEmpty) {
       return const [];
     }
-    // Akce zpráv (C48) jedním dotazem, seskupené k message_id.
     final actionRows =
         await (_db.select(_db.localChatActions)
               ..where((t) => t.messageId.isIn([for (final r in rows) r.id]))
@@ -192,7 +198,8 @@ class DriftChatRepository implements ChatRepository {
       _db.localChatMessages,
     )..where((t) => t.id.equals(assistantMessageId))).getSingle();
     // Posledních [limit] SENT/COMPLETED zpráv před kotvou (CHC-006);
-    // FAILED a PENDING se do modelu neposílají.
+    // FAILED a PENDING se do modelu neposílají. Včetně akcí a jejich
+    // rozhodnutí — model musí vidět, co už je APPLIED (nález 3e).
     final rows =
         await (_db.select(_db.localChatMessages)
               ..where(
@@ -204,7 +211,7 @@ class DriftChatRepository implements ChatRepository {
               ..orderBy([(t) => OrderingTerm.desc(t.position)])
               ..limit(limit))
             .get();
-    return [for (final row in rows.reversed) _toModel(row)];
+    return _withActions(rows.reversed.toList());
   }
 
   Future<int> _nextPosition(String conversationId) async {
