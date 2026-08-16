@@ -100,13 +100,26 @@ void main() {
       ),
       isNull,
     );
-    // Nadlimit akcí (CHA-004).
+    // Nadlimit akcí (CHA-004: 12; celý profil v jedné zprávě projde —
+    // on-device nález 3d).
     expect(
       validateChatReply(
         jsonEncode({
           'reply': 'r',
           'actions': List.generate(
-            6,
+            12,
+            (i) => {'action': 'ADD_CONSTRAINT', 'title': 'c$i'},
+          ),
+        }),
+      ),
+      isNotNull,
+    );
+    expect(
+      validateChatReply(
+        jsonEncode({
+          'reply': 'r',
+          'actions': List.generate(
+            13,
             (i) => {'action': 'ADD_CONSTRAINT', 'title': 'c$i'},
           ),
         }),

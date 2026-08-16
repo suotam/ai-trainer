@@ -41,7 +41,7 @@ Každá akce má `"action"` + přesná pole; neznámá pole se kanonizací zahaz
 - **CHA-001** Každá mutace z chatu = potvrzená akce přes existující repos; žádná paralelní write cesta.
 - **CHA-002** Volný text (reply) se nikdy neinterpretuje jako akce; akce jen z validovaného `actions` pole.
 - **CHA-003** Dvojí role validace v jednom místě: striktní tvarová tabulka §3, kanonizace zahazuje neznámá pole, nevalidní celek se nikdy neopravuje ani částečně nepřijímá.
-- **CHA-004** Nejvýše 5 akcí na odpověď; nadlimit = nevalidní celek.
+- **CHA-004** Nejvýše 12 akcí na odpověď; nadlimit = nevalidní celek. (Původně 5 — on-device nález 3d: první zpráva s celým profilem — 4 sporty + cíl + týdenní dostupnost — přirozeně dává 8–10 akcí a limit 5 selhával celek. Strop je modelu sdělen v promptu; při větším množství má slučovat či vybrat nejdůležitější.)
 - **CHA-005** Rozhodnutí je per akce a výhradně explicitní; žádné hromadné tiché potvrzení, žádný default.
 - **CHA-006** PROPOSED akce nikdy nic nemění; efekt vzniká až potvrzením.
 - **CHA-007** Provedení používá typované výsledky repos; selhání = `FAILED` s důvodem, bez auto-retry.

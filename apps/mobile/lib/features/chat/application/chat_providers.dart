@@ -153,10 +153,13 @@ class ChatController extends Notifier<bool> {
       final reply = validateChatReply(raw);
       if (reply == null) {
         if (kDebugMode) {
-          debugPrint(
-            '[aitrainer/chat] validateChatReply=null raw(${raw.length})='
-            '${raw.substring(0, raw.length < 600 ? raw.length : 600)}',
-          );
+          // logcat ořezává dlouhé řádky — raw po kouscích.
+          for (var i = 0; i < raw.length; i += 400) {
+            debugPrint(
+              '[aitrainer/chat] raw[$i]='
+              '${raw.substring(i, i + 400 < raw.length ? i + 400 : raw.length)}',
+            );
+          }
         }
         await repo.failAssistant(
           assistantId,
