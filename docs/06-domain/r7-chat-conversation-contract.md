@@ -46,7 +46,7 @@ Definuje **konverzační nosič** chat-first rozhraní: lokální persistence ko
 - **CHC-003** Role výhradně USER/ASSISTANT; stavy výhradně SENT/PENDING/COMPLETED/FAILED s typovaným error_kind.
 - **CHC-004** PENDING nepřežívá restart jako čekání — překlopení na FAILED s explicitním retry.
 - **CHC-005** Retry je explicitní uživatelská akce nad existující FAILED zprávou; žádný auto-retry, žádné duplicitní řádky.
-- **CHC-006** Okno do modelu = chat-v1 prompt + C27 base kontext + posledních 20 SENT/COMPLETED zpráv; nic víc (PII hranice).
+- **CHC-006** Okno do modelu = aktuální chat prompt + C27 base kontext + `today` (ISO datum) + posledních 20 SENT/COMPLETED zpráv; u asistentských zpráv s akcemi (C48) je za textem záznam rozhodnutí uživatele (druh + identifikace + APPLIED/REJECTED/FAILED) — model musí vidět, co už je hotové (on-device nález 3e: bez toho navrhoval tytéž akce znovu). Nic víc (PII hranice).
 - **CHC-007** Kontext drží limity C31; zkracuje se deterministicky od nejstarších zpráv.
 - **CHC-008** Prompt `chat-v1` žije v klientském registru; vydaná verze se needituje.
 - **CHC-009** Bez klíče je chat poctivě vypnutý se srozumitelným odkazem na správu klíče; zbytek aplikace nedegraduje.

@@ -20,6 +20,8 @@ class _ScriptedChatClient implements ChatAiClient {
 
   final Future<String> Function() _behavior;
   int calls = 0;
+  List<ChatTurn> lastTurns = const [];
+  Map<String, Object?> lastContext = const {};
 
   @override
   Future<String> chat({
@@ -27,6 +29,8 @@ class _ScriptedChatClient implements ChatAiClient {
     required Map<String, Object?> profileContext,
   }) {
     calls++;
+    lastTurns = turns;
+    lastContext = profileContext;
     return _behavior();
   }
 }
@@ -179,6 +183,23 @@ void main() {
         .customSelect('SELECT COUNT(*) AS c FROM local_availability_rules')
         .getSingle();
     expect(rules.data['c'], 0);
+
+    // Další zpráva: model vidí rozhodnutí o akcích v okně a dnešní datum
+    // v kontextu (on-device nález 3e) — jinak navrhuje totéž znovu.
+    await tester.enterText(find.byKey(ChatScreen.inputKey), 'Hotovo');
+    await tester.tap(find.byKey(ChatScreen.sendButtonKey));
+    await tester.pumpAndSettle();
+    expect(client.calls, 2);
+    final assistantTurn = client.lastTurns.firstWhere(
+      (t) => t.role == 'ASSISTANT',
+    );
+    expect(assistantTurn.content, contains('Navrhuji zapsat omezení'));
+    expect(
+      assistantTurn.content,
+      contains('ADD_CONSTRAINT "Citlivé koleno": APPLIED'),
+    );
+    expect(assistantTurn.content, contains('SET_AVAILABILITY "TUE": REJECTED'));
+    expect(client.lastContext['today'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
   });
 
   testWidgets('REQUEST_PLAN: pipeline → karta návrhu z C29 → potvrzení '

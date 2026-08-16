@@ -82,6 +82,10 @@ void main() {
             .cast<String, Object?>();
     expect(format['type'], 'json_schema');
     expect((format['schema']! as Map)['required'], ['reply']);
+    // sportCode je uzavřený katalog C17 (nález 3e: SOCCER ≠ FOOTBALL).
+    expect(jsonEncode(format['schema']), contains('"FOOTBALL"'));
+    expect(jsonEncode(format['schema']), isNot(contains('SOCCER')));
+    expect('${body['system']}', contains('Never re-propose'));
     expect(seen!.headers['x-api-key'], testKey);
   });
 

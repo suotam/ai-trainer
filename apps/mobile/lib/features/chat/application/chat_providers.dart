@@ -67,6 +67,37 @@ final chatMessagesProvider = FutureProvider<List<ChatMessage>>((ref) async {
   return ref.watch(chatRepositoryProvider).messages(conversationId);
 });
 
+/// Tah okna pro model (CHC-006): u asistentské zprávy s akcemi je za
+/// textem stručný záznam rozhodnutí uživatele — model tak vidí, co už je
+/// APPLIED / REJECTED / FAILED, a nenavrhuje totéž znovu (on-device nález
+/// 3e). Formát je data, ne instrukce; payload jen identifikační pole.
+ChatTurn chatTurnFor(ChatMessage message) {
+  if (message.isUser || message.actions.isEmpty) {
+    return (role: message.role, content: message.content);
+  }
+  final lines = [
+    for (final action in message.actions)
+      '- ${action.kind} ${_actionIdentity(action.payload)}: ${action.status}'
+          '${action.error == null ? '' : ' (${action.error})'}',
+  ];
+  return (
+    role: message.role,
+    content:
+        '${message.content}\n\n[Proposed actions and the athlete\'s '
+        'decision in the app:\n${lines.join('\n')}]',
+  );
+}
+
+String _actionIdentity(Map<String, Object?> payload) {
+  final id =
+      payload['sportCode'] ??
+      payload['customName'] ??
+      payload['title'] ??
+      payload['dayOfWeek'] ??
+      payload['proposalId'];
+  return id == null ? '' : '"$id"';
+}
+
 /// Stav odesílání — jediná operace v letu (R7P-009: jedno zadání = jedno
 /// volání modelu, žádný auto-retry).
 class ChatController extends Notifier<bool> {
@@ -134,7 +165,9 @@ class ChatController extends Notifier<bool> {
     final repo = ref.read(chatRepositoryProvider);
     final now = ref.read(clockProvider)();
     final window = await repo.windowBefore(assistantId);
-    // Minimalizovaný profilový kontext = C27 base payload (CHC-006).
+    // Minimalizovaný profilový kontext = C27 base payload (CHC-006)
+    // + dnešní datum, aby relativní termíny („do Vánoc") mířily do
+    // budoucnosti (nález 3e).
     final context = await ref
         .read(aiContextBuilderProvider)
         .buildPlanProposalContext(now: now);
@@ -142,11 +175,11 @@ class ChatController extends Notifier<bool> {
       final raw = await ref
           .read(chatAiClientProvider)
           .chat(
-            turns: [
-              for (final message in window)
-                (role: message.role, content: message.content),
-            ],
-            profileContext: context.payload,
+            turns: [for (final message in window) chatTurnFor(message)],
+            profileContext: {
+              ...context.payload,
+              'today': formatLocalDate(now),
+            },
           );
       // Striktní validace tvaru s akcemi (C48 §2, CHA-003) — nevalidní
       // celek = typované selhání s retry, nikdy částečné přijetí.

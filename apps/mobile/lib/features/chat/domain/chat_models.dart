@@ -114,7 +114,8 @@ abstract interface class ChatRepository {
   Future<void> markPendingForRetry(String messageId, {required DateTime now});
 
   /// Okno do modelu (CHC-006/007): posledních [limit] zpráv SENT/COMPLETED
-  /// před danou asistentskou zprávou, v pořadí konverzace.
+  /// před danou asistentskou zprávou, v pořadí konverzace, včetně akcí
+  /// a jejich rozhodnutí (model musí vidět, co už je APPLIED).
   Future<List<ChatMessage>> windowBefore(
     String assistantMessageId, {
     int limit = 20,
