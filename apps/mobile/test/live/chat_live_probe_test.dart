@@ -67,4 +67,33 @@ void main() {
     );
     expect(reply, isNotNull, reason: 'raw viz build/live-smoke');
   }, skip: !live ? 'opt-in: AITRAINER_LIVE_SMOKE=1' : null);
+
+  test('live chat probe: neformální pozdrav vrátí validní JSON '
+      '(on-device nález 3c)', () async {
+    final client = AnthropicDirectClient(
+      keyStore: _EnvKeyStore(),
+      httpClient: http.Client(),
+    );
+    final raw = await client.chat(
+      turns: const [(role: 'USER', content: 'Ahoj, jsi můj osobní trenér?')],
+      profileContext: const {
+        'requestType': 'PLAN_PROPOSAL',
+        'sports': [],
+        'goals': [],
+        'typicalWeek': [],
+        'equipment': [],
+        'constraints': [],
+        'statistics': {
+          'periodDays': 30,
+          'plannedCount': 0,
+          'completedCount': 0,
+          'manualActivityCount': 0,
+          'manualMinutes': 0,
+        },
+      },
+    );
+    Directory('build/live-smoke').createSync(recursive: true);
+    File('build/live-smoke/chat-probe-casual-raw.txt').writeAsStringSync(raw);
+    expect(validateChatReply(raw), isNotNull, reason: 'raw viz build/live-smoke');
+  }, skip: !live ? 'opt-in: AITRAINER_LIVE_SMOKE=1' : null);
 }

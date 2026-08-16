@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../auth/domain/auth_api_client.dart';
@@ -118,6 +119,11 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
       // thinkingem patří celých 4096 tokenů odpovědi, žádné usekávání.
       'max_tokens': _maxTokens,
       'thinking': {'type': 'disabled'},
+      // Structured outputs (on-device nález 3c): API garantuje JSON dle
+      // schématu — model nemůže odpovědět prostým textem mimo formát.
+      'output_config': {
+        'format': {'type': 'json_schema', 'schema': chatReplySchema},
+      },
       'system': chatPrompt.template,
       'messages': [
         {
@@ -137,8 +143,16 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
     });
     final text = _firstTextBlock(response);
     if (text == null || text.trim().isEmpty || text.length > _maxRawChars) {
+      _debugLog(
+        'chat: no usable text block; stop=${response['stop_reason']} '
+        'content=${_contentSummary(response)}',
+      );
       throw const AiApiFailure(AiApiFailureKind.invalidOutput);
     }
+    _debugLog(
+      'chat: text len=${text.length} stop=${response['stop_reason']} '
+      'prefix=${text.substring(0, text.length < 200 ? text.length : 200)}',
+    );
     return text;
   }
 
@@ -209,6 +223,12 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
     } catch (_) {
       throw const AuthApiFailure(AuthApiFailureKind.network);
     }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      _debugLog(
+        'post: HTTP ${response.statusCode} body='
+        '${response.body.substring(0, response.body.length < 300 ? response.body.length : 300)}',
+      );
+    }
     if (response.statusCode == 401 || response.statusCode == 403) {
       throw const AiApiFailure(AiApiFailureKind.invalidKey);
     }
@@ -230,6 +250,28 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
       // spadne do invalidOutput níže
     }
     throw const AiApiFailure(AiApiFailureKind.invalidOutput);
+  }
+
+  /// Diagnostika BYOK volání pouze v debug buildu — nikdy klíč, nikdy
+  /// celé tělo; slouží on-device ladění (nález 3).
+  void _debugLog(String message) {
+    if (kDebugMode) {
+      debugPrint('[aitrainer/byok] $message');
+    }
+  }
+
+  String _contentSummary(Map<String, Object?> response) {
+    final content = response['content'];
+    if (content is! List) {
+      return 'content is ${content.runtimeType}';
+    }
+    return content
+        .map(
+          (b) => b is Map<String, Object?>
+              ? '${b['type']}(${'${b['text'] ?? b['thinking'] ?? ''}'.length})'
+              : '${b.runtimeType}',
+        )
+        .join(',');
   }
 
   /// První content blok typu `text` (BYK-006) — reasoning modely vrací

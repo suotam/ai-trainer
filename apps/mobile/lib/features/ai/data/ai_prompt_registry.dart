@@ -126,6 +126,148 @@ const AiPrompt chatPrompt = AiPrompt(
       'contents yourself in the reply.',
 );
 
+/// JSON schéma odpovědi chatu pro structured outputs
+/// (`output_config.format`, C48 §2): API garantuje tvar — model nemůže
+/// sklouznout do prostého textu (on-device nález 3c). Číselné rozsahy a
+/// délky textů structured outputs nepodporují, ty dál hlídá
+/// `validateChatReply`. Enum hodnoty zrcadlí `chat_reply_validator.dart`.
+const Map<String, Object?> chatReplySchema = {
+  'type': 'object',
+  'properties': {
+    'reply': {'type': 'string'},
+    'actions': {
+      'type': 'array',
+      'items': {
+        'anyOf': [
+          {
+            'type': 'object',
+            'properties': {
+              'action': {'type': 'string', 'enum': ['UPSERT_SPORT']},
+              'sportCode': {'type': 'string'},
+              'customName': {'type': 'string'},
+              'role': {
+                'type': 'string',
+                'enum': [
+                  'PRIMARY',
+                  'SECONDARY',
+                  'SUPPORTING',
+                  'RECREATIONAL',
+                  'OCCASIONAL',
+                  'SEASONAL',
+                ],
+              },
+              'priority': {
+                'type': 'string',
+                'enum': ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'BACKGROUND'],
+              },
+              'experienceLevel': {
+                'type': 'string',
+                'enum': [
+                  'BEGINNER',
+                  'NOVICE',
+                  'INTERMEDIATE',
+                  'ADVANCED',
+                  'EXPERT',
+                  'PROFESSIONAL',
+                  'UNKNOWN',
+                ],
+              },
+              'frequencyPerWeek': {'type': 'integer'},
+              'typicalDurationMinutes': {'type': 'integer'},
+              'environment': {
+                'type': 'string',
+                'enum': ['INDOOR', 'OUTDOOR', 'MIXED'],
+              },
+            },
+            'required': ['action', 'role', 'priority'],
+            'additionalProperties': false,
+          },
+          {
+            'type': 'object',
+            'properties': {
+              'action': {'type': 'string', 'enum': ['ADD_GOAL']},
+              'title': {'type': 'string'},
+              'goalType': {
+                'type': 'string',
+                'enum': [
+                  'PERFORMANCE',
+                  'STRENGTH',
+                  'ENDURANCE',
+                  'HABIT',
+                  'EVENT_PREPARATION',
+                  'RETURN_TO_ACTIVITY',
+                  'MAINTENANCE',
+                  'QUALITATIVE',
+                ],
+              },
+              'priority': {
+                'type': 'string',
+                'enum': ['PRIMARY', 'MAINTENANCE', 'DEFERRED'],
+              },
+              'horizon': {
+                'type': 'string',
+                'enum': [
+                  'IMMEDIATE',
+                  'SHORT_TERM',
+                  'MEDIUM_TERM',
+                  'LONG_TERM',
+                  'OPEN_ENDED',
+                ],
+              },
+              'targetLocalDate': {'type': 'string'},
+            },
+            'required': ['action', 'title', 'goalType', 'priority'],
+            'additionalProperties': false,
+          },
+          {
+            'type': 'object',
+            'properties': {
+              'action': {'type': 'string', 'enum': ['SET_AVAILABILITY']},
+              'dayOfWeek': {
+                'type': 'string',
+                'enum': ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
+              },
+              'level': {
+                'type': 'string',
+                'enum': ['AVAILABLE', 'LIMITED', 'UNAVAILABLE'],
+              },
+              'budgetMinutes': {'type': 'integer'},
+              'preferredPartOfDay': {
+                'type': 'string',
+                'enum': ['MORNING', 'AFTERNOON', 'EVENING'],
+              },
+            },
+            'required': ['action', 'dayOfWeek', 'level'],
+            'additionalProperties': false,
+          },
+          {
+            'type': 'object',
+            'properties': {
+              'action': {'type': 'string', 'enum': ['ADD_CONSTRAINT']},
+              'title': {'type': 'string'},
+            },
+            'required': ['action', 'title'],
+            'additionalProperties': false,
+          },
+          {
+            'type': 'object',
+            'properties': {
+              'action': {
+                'type': 'string',
+                'enum': ['REQUEST_PLAN', 'REQUEST_ADJUSTMENT'],
+              },
+            },
+            'required': ['action'],
+            'additionalProperties': false,
+          },
+        ],
+      },
+    },
+  },
+  'required': ['reply'],
+  'additionalProperties': false,
+};
+
 /// Identifikátory schémat strukturovaného výstupu (C28/C37).
 String schemaVersionFor(AiRequestType type) => switch (type) {
   AiRequestType.planProposal => 'plan-proposal-schema-v1',
