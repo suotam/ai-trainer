@@ -73,8 +73,9 @@ void main() {
     expect(messages[3]['role'], 'assistant');
     expect(messages[4]['role'], 'user');
     expect('${messages[4]['content']}', 'Jsem svěží.');
-    // Bounded náklad (C47 §5) — plný rozpočet kvůli thinking tokenům.
+    // Bounded náklad (C47 §5) — thinking vypnutý, celý rozpočet odpovědi.
     expect(body['max_tokens'], 4096);
+    expect(body['thinking'], {'type': 'disabled'});
     expect(seen!.headers['x-api-key'], testKey);
   });
 

@@ -61,6 +61,9 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
     final response = await _post(key, {
       'model': model,
       'max_tokens': _maxTokens,
+      // Adaptivní thinking je na claude-sonnet-5 zapnutý implicitně a čerpá
+      // z max_tokens — vypnutím patří celý rozpočet JSON odpovědi (BYK-009).
+      'thinking': {'type': 'disabled'},
       'system': prompt.template,
       'messages': [
         {
@@ -110,10 +113,11 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
     }
     final response = await _post(key, {
       'model': model,
-      // Plný bounded rozpočet (BYK-009): reasoning modely čerpají
-      // z max_tokens i thinking — 1024 usekávalo JSON odpovědi
-      // (on-device nález 3).
+      // Bounded rozpočet (BYK-009, on-device nález 3): thinking na
+      // claude-sonnet-5 běží implicitně a čerpá z max_tokens — s vypnutým
+      // thinkingem patří celých 4096 tokenů odpovědi, žádné usekávání.
       'max_tokens': _maxTokens,
+      'thinking': {'type': 'disabled'},
       'system': chatPrompt.template,
       'messages': [
         {
@@ -151,6 +155,7 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
       await _post(key, {
         'model': model,
         'max_tokens': 8,
+        'thinking': {'type': 'disabled'},
         'messages': [
           {'role': 'user', 'content': 'Reply with OK.'},
         ],
