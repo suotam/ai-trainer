@@ -9,7 +9,8 @@ class ChatReply {
 }
 
 const int _maxReplyChars = 4000;
-const int _maxActions = 5;
+// CHA-004 (12; původně 5 — on-device nález 3d: celý profil v jedné zprávě).
+const int _maxActions = 12;
 
 const Set<String> _sportRoles = {
   'PRIMARY',
