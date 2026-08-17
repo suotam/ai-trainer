@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/tables/plan_tables.dart';
 import '../../../core/database/tables/workout_tables.dart';
+import '../../workouts/domain/exercise_catalog.dart';
 import '../domain/training_plan.dart';
 import '../domain/training_plan_repository.dart';
 
@@ -220,6 +221,10 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
       for (var i = 0; i < input.exercises.length; i++) {
         final exercise = input.exercises[i];
         final stepId = newId();
+        // C51 §7: katalogový krok nese exercise_code; předpis dle zadání
+        // (DURATION při zadaném čase, jinak SET_REP) — EXC-010.
+        final isDuration = exercise.isDuration;
+        final instructions = exercise.instructions?.trim();
         await _db
             .into(_db.localWorkoutSteps)
             .insert(
@@ -231,9 +236,18 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
                 title: exercise.title.trim(),
                 priority: 'REQUIRED',
                 isSkippable: false,
-                prescriptionType: 'SET_REP',
-                plannedRepetitions: Value(exercise.repetitions),
+                prescriptionType: isDuration ? 'DURATION' : 'SET_REP',
+                plannedRepetitions: Value(
+                  isDuration ? null : exercise.repetitions,
+                ),
+                plannedDurationSeconds: Value(exercise.durationSeconds),
                 plannedWeightKg: Value(exercise.weightKg),
+                exerciseCode: Value(exercise.exerciseCode),
+                instructions: Value(
+                  instructions == null || instructions.isEmpty
+                      ? null
+                      : instructions,
+                ),
                 createdAt: nowMillis,
                 updatedAt: nowMillis,
               ),
@@ -246,8 +260,12 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
                   id: newId(),
                   workoutStepId: stepId,
                   position: setIndex,
-                  plannedRepetitions: Value(exercise.repetitions),
+                  plannedRepetitions: Value(
+                    isDuration ? null : exercise.repetitions,
+                  ),
+                  plannedDurationSeconds: Value(exercise.durationSeconds),
                   plannedWeightKg: Value(exercise.weightKg),
+                  restAfterSeconds: Value(exercise.restAfterSeconds),
                 ),
               );
         }
@@ -324,9 +342,23 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
     for (final exercise in input.exercises) {
       if (exercise.title.trim().isEmpty ||
           exercise.sets < 1 ||
-          exercise.repetitions < 1 ||
-          (exercise.weightKg ?? 0) < 0) {
+          (exercise.weightKg ?? 0) < 0 ||
+          (exercise.restAfterSeconds ?? 0) < 0) {
         return false;
+      }
+      // Předpis: buď čas (≥ 1 s), nebo opakování (≥ 1) — EXC-010.
+      if (exercise.isDuration
+          ? exercise.durationSeconds! < 1
+          : exercise.repetitions < 1) {
+        return false;
+      }
+      // Katalogový kód musí existovat (EXC-001); deprecated se nově nezadává.
+      final code = exercise.exerciseCode;
+      if (code != null) {
+        final entry = exerciseCatalogEntry(code);
+        if (entry == null || entry.deprecated) {
+          return false;
+        }
       }
     }
     return true;

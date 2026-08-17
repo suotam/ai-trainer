@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.76  
+**Verze:** 2.77  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-16
@@ -502,9 +502,15 @@ nejsou proveditelné jako vedený trénink (cvik jen název+sady+opakování,
 bez popisu, časů, pauz; tracker bez průvodce a časovačů; bez katalogu
 cviků). Další kanonický krok:
 
+**Release 8 „Vedený trénink" je naplánován**
+(`docs/13-delivery/r8-vertical-slice-plan.md`, backlog `R8-01` až `R8-05`,
+contract map C51–C54); **`R8-01` katalog cviků je implementován** (C51:
+112 stabilních kódů s popisem provedení a cue cs/en, schema v16
+`exercise_code`, výběr z katalogu v ručním plánu, vlastní cvik s povinným
+popisem — mobil 383/383). Další kanonický krok:
+
 ```text
-Naplánování Release 8 „Vedený trénink" (pokyn udělen 2026-08-16):
-C51 katalog cviků → C52 plán v2 → C53 průvodce tréninkem → C54 ilustrace
+C52 plán v2 → R8-02 → C53 průvodce → R8-03 → C54 ilustrace → R8-04 → R8-05
 ```
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.

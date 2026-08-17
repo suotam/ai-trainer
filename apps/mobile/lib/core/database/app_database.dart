@@ -51,7 +51,9 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 15 (R7-03, C48 §4): tabulka `local_chat_actions`
+  /// Schema version 16 (R8-01, C51 §7): nullable `exercise_code` na
+  /// `local_workout_steps` (vazba na katalog cviků). Verze 15 (R7-03,
+  /// C48 §4) přidala tabulku `local_chat_actions`
   /// (device-local akce chatu). Verze 14 (R7-02, C47 §2) přidala chat
   /// tabulky `local_chat_conversations` + `local_chat_messages`
   /// (device-local, CHC-001). Verze 13 (R5-01, C33 §3) přidala tabulku
@@ -66,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
   /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -197,6 +199,11 @@ class AppDatabase extends _$AppDatabase {
       // (CHA-015).
       if (from < 15) {
         await m.createTable(localChatActions);
+      }
+      // Migrace v15 → v16 (R8-01, C51 §7): nullable vazba kroku na katalog
+      // cviků — aditivní, bez backfillu (EXC-004).
+      if (from < 16) {
+        await m.addColumn(localWorkoutSteps, localWorkoutSteps.exerciseCode);
       }
     },
     beforeOpen: (details) async {

@@ -176,10 +176,7 @@ class ChatController extends Notifier<bool> {
           .read(chatAiClientProvider)
           .chat(
             turns: [for (final message in window) chatTurnFor(message)],
-            profileContext: {
-              ...context.payload,
-              'today': formatLocalDate(now),
-            },
+            profileContext: {...context.payload, 'today': formatLocalDate(now)},
           );
       // Striktní validace tvaru s akcemi (C48 §2, CHA-003) — nevalidní
       // celek = typované selhání s retry, nikdy částečné přijetí.

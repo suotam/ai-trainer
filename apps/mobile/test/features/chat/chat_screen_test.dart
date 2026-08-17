@@ -199,7 +199,10 @@ void main() {
       contains('ADD_CONSTRAINT "Citlivé koleno": APPLIED'),
     );
     expect(assistantTurn.content, contains('SET_AVAILABILITY "TUE": REJECTED'));
-    expect(client.lastContext['today'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+    expect(
+      client.lastContext['today'],
+      matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')),
+    );
   });
 
   testWidgets('REQUEST_PLAN: pipeline → karta návrhu z C29 → potvrzení '

@@ -102,4 +102,12 @@ const List<String> equipmentCatalog = [
   'CLIMBING_WALL_ACCESS',
   'POOL_ACCESS',
   'YOGA_MAT',
+  // Aditivní rozšíření C51 §4.2 (R8-01, EXC-013) — vybavení katalogu cviků.
+  'GYMNASTIC_RINGS',
+  'SUSPENSION_TRAINER',
+  'HANGBOARD',
+  'JUMP_ROPE',
+  'FOAM_ROLLER',
+  'STEP_BOX',
+  'ROWING_MACHINE',
 ];

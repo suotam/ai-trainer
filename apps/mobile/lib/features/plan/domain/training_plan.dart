@@ -46,20 +46,35 @@ class PlannedWorkoutSummary {
   final int exerciseCount;
 }
 
-/// Zadání cviku ručního workoutu (C20 §5.1).
+/// Zadání cviku ručního workoutu (C20 §5.1; C51 §6/§7).
+///
+/// [exerciseCode] = katalogový cvik (C51) — pak je [title] jen záložní
+/// snapshot názvu; `null` = vlastní cvik s [instructions] (povinné u
+/// ručního zadání, EXC-008). Předpis: [durationSeconds] → DURATION sady,
+/// jinak SET_REP s [repetitions].
 @immutable
 class PlannedExerciseInput {
   const PlannedExerciseInput({
     required this.title,
     required this.sets,
-    required this.repetitions,
+    this.repetitions = 0,
+    this.durationSeconds,
     this.weightKg,
+    this.exerciseCode,
+    this.instructions,
+    this.restAfterSeconds,
   });
 
   final String title;
   final int sets;
   final int repetitions;
+  final int? durationSeconds;
   final double? weightKg;
+  final String? exerciseCode;
+  final String? instructions;
+  final int? restAfterSeconds;
+
+  bool get isDuration => durationSeconds != null;
 }
 
 /// Zadání ručního workoutu (C20 §5.1). Cviky jsou volitelné (MPC-011).

@@ -1,3 +1,4 @@
+import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:ai_trainer_mobile/features/plan/data/drift_training_plan_repository.dart';
 import 'package:ai_trainer_mobile/features/plan/domain/training_plan.dart';
 import 'package:ai_trainer_mobile/features/workouts/application/quick_complete_workout.dart';
@@ -127,7 +128,7 @@ void main() {
 }
 
 /// Druhý workout v samostatném plánu (jeden ACTIVE plán → přidá do téhož).
-Future<String> seedWorkout2(db) async {
+Future<String> seedWorkout2(AppDatabase db) async {
   final plans = DriftTrainingPlanRepository(db);
   var seq = 0;
   final added =

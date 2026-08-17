@@ -6,6 +6,7 @@ import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/session_providers.dart';
 import '../application/workout_detail_providers.dart';
+import '../domain/exercise_catalog.dart';
 import '../domain/start_session_result.dart';
 import '../domain/workout_read_model.dart';
 import 'workout_duration_format.dart';
@@ -261,9 +262,24 @@ class _StepView extends StatelessWidget {
     final theme = Theme.of(context);
     final duration = formatDurationLabel(l10n, step.plannedDurationSeconds);
 
+    // Katalogový cvik (C51): název, popis provedení a cue z katalogu;
+    // vlastní cvik: title + instructions (nebo poctivě „bez popisu").
+    final entry = step.exerciseCode == null
+        ? null
+        : exerciseCatalogEntry(step.exerciseCode!);
+    final title = entry == null ? step.title : l10n.exerciseName(entry.code);
+    final instructions = entry == null
+        ? step.instructions
+        : l10n.exerciseInstructions(entry.code);
+    final cue = entry == null ? null : l10n.exerciseCue(entry.code);
+    final isExercise =
+        step.stepType == WorkoutStepType.exercise ||
+        step.stepType == WorkoutStepType.mobilityPosition;
+
     final subtitleParts = <String>[
       if (step.setPlans.isNotEmpty) l10n.workoutStepSets(step.setPlans.length),
       ?duration,
+      if (entry != null && !entry.bilateral) l10n.stepPerSide,
     ];
 
     return Padding(
@@ -271,9 +287,34 @@ class _StepView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(step.title, style: theme.textTheme.bodyLarge),
+          Text(title, style: theme.textTheme.bodyLarge),
           if (subtitleParts.isNotEmpty)
             Text(subtitleParts.join(' · '), style: theme.textTheme.bodySmall),
+          if (instructions != null && instructions.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(instructions, style: theme.textTheme.bodySmall),
+            )
+          else if (isExercise)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                l10n.stepNoInstructions,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          if (cue != null && cue.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                cue,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
           for (final setPlan in step.setPlans)
             Padding(
               padding: const EdgeInsets.only(left: 8, top: 2),
@@ -292,8 +333,12 @@ class _StepView extends StatelessWidget {
       '${setPlan.position + 1}.',
       if (setPlan.plannedRepetitions != null)
         l10n.workoutSetPlanReps(setPlan.plannedRepetitions!),
+      if (setPlan.plannedDurationSeconds != null)
+        l10n.workoutSetPlanSeconds(setPlan.plannedDurationSeconds!),
       if (setPlan.plannedWeightKg != null)
         l10n.workoutSetPlanWeight(_formatWeight(setPlan.plannedWeightKg!)),
+      if (setPlan.restAfterSeconds != null)
+        l10n.workoutSetPlanRest(setPlan.restAfterSeconds!),
     ];
     return parts.join('  ');
   }

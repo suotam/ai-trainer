@@ -2046,6 +2046,17 @@ class $LocalWorkoutStepsTable extends LocalWorkoutSteps
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _exerciseCodeMeta = const VerificationMeta(
+    'exerciseCode',
+  );
+  @override
+  late final GeneratedColumn<String> exerciseCode = GeneratedColumn<String>(
+    'exercise_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2086,6 +2097,7 @@ class $LocalWorkoutStepsTable extends LocalWorkoutSteps
     plannedRepetitions,
     plannedWeightKg,
     metadataJson,
+    exerciseCode,
     createdAt,
     updatedAt,
   ];
@@ -2237,6 +2249,15 @@ class $LocalWorkoutStepsTable extends LocalWorkoutSteps
         ),
       );
     }
+    if (data.containsKey('exercise_code')) {
+      context.handle(
+        _exerciseCodeMeta,
+        exerciseCode.isAcceptableOrUnknown(
+          data['exercise_code']!,
+          _exerciseCodeMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2326,6 +2347,10 @@ class $LocalWorkoutStepsTable extends LocalWorkoutSteps
         DriftSqlType.string,
         data['${effectivePrefix}metadata_json'],
       ),
+      exerciseCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}exercise_code'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
@@ -2361,6 +2386,10 @@ class LocalWorkoutStepRow extends DataClass
   final int? plannedRepetitions;
   final double? plannedWeightKg;
   final String? metadataJson;
+
+  /// Vazba na katalog cviků C51 (v16, EXC-004/005): stabilní kód, nebo
+  /// NULL = vlastní cvik / krok, který není cvikem.
+  final String? exerciseCode;
   final int createdAt;
   final int updatedAt;
   const LocalWorkoutStepRow({
@@ -2380,6 +2409,7 @@ class LocalWorkoutStepRow extends DataClass
     this.plannedRepetitions,
     this.plannedWeightKg,
     this.metadataJson,
+    this.exerciseCode,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -2417,6 +2447,9 @@ class LocalWorkoutStepRow extends DataClass
     }
     if (!nullToAbsent || metadataJson != null) {
       map['metadata_json'] = Variable<String>(metadataJson);
+    }
+    if (!nullToAbsent || exerciseCode != null) {
+      map['exercise_code'] = Variable<String>(exerciseCode);
     }
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
@@ -2457,6 +2490,9 @@ class LocalWorkoutStepRow extends DataClass
       metadataJson: metadataJson == null && nullToAbsent
           ? const Value.absent()
           : Value(metadataJson),
+      exerciseCode: exerciseCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(exerciseCode),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2488,6 +2524,7 @@ class LocalWorkoutStepRow extends DataClass
       plannedRepetitions: serializer.fromJson<int?>(json['plannedRepetitions']),
       plannedWeightKg: serializer.fromJson<double?>(json['plannedWeightKg']),
       metadataJson: serializer.fromJson<String?>(json['metadataJson']),
+      exerciseCode: serializer.fromJson<String?>(json['exerciseCode']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
     );
@@ -2514,6 +2551,7 @@ class LocalWorkoutStepRow extends DataClass
       'plannedRepetitions': serializer.toJson<int?>(plannedRepetitions),
       'plannedWeightKg': serializer.toJson<double?>(plannedWeightKg),
       'metadataJson': serializer.toJson<String?>(metadataJson),
+      'exerciseCode': serializer.toJson<String?>(exerciseCode),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
     };
@@ -2536,6 +2574,7 @@ class LocalWorkoutStepRow extends DataClass
     Value<int?> plannedRepetitions = const Value.absent(),
     Value<double?> plannedWeightKg = const Value.absent(),
     Value<String?> metadataJson = const Value.absent(),
+    Value<String?> exerciseCode = const Value.absent(),
     int? createdAt,
     int? updatedAt,
   }) => LocalWorkoutStepRow(
@@ -2563,6 +2602,7 @@ class LocalWorkoutStepRow extends DataClass
         ? plannedWeightKg.value
         : this.plannedWeightKg,
     metadataJson: metadataJson.present ? metadataJson.value : this.metadataJson,
+    exerciseCode: exerciseCode.present ? exerciseCode.value : this.exerciseCode,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2602,6 +2642,9 @@ class LocalWorkoutStepRow extends DataClass
       metadataJson: data.metadataJson.present
           ? data.metadataJson.value
           : this.metadataJson,
+      exerciseCode: data.exerciseCode.present
+          ? data.exerciseCode.value
+          : this.exerciseCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2626,6 +2669,7 @@ class LocalWorkoutStepRow extends DataClass
           ..write('plannedRepetitions: $plannedRepetitions, ')
           ..write('plannedWeightKg: $plannedWeightKg, ')
           ..write('metadataJson: $metadataJson, ')
+          ..write('exerciseCode: $exerciseCode, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2650,6 +2694,7 @@ class LocalWorkoutStepRow extends DataClass
     plannedRepetitions,
     plannedWeightKg,
     metadataJson,
+    exerciseCode,
     createdAt,
     updatedAt,
   );
@@ -2673,6 +2718,7 @@ class LocalWorkoutStepRow extends DataClass
           other.plannedRepetitions == this.plannedRepetitions &&
           other.plannedWeightKg == this.plannedWeightKg &&
           other.metadataJson == this.metadataJson &&
+          other.exerciseCode == this.exerciseCode &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -2694,6 +2740,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
   final Value<int?> plannedRepetitions;
   final Value<double?> plannedWeightKg;
   final Value<String?> metadataJson;
+  final Value<String?> exerciseCode;
   final Value<int> createdAt;
   final Value<int> updatedAt;
   final Value<int> rowid;
@@ -2714,6 +2761,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
     this.plannedRepetitions = const Value.absent(),
     this.plannedWeightKg = const Value.absent(),
     this.metadataJson = const Value.absent(),
+    this.exerciseCode = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2735,6 +2783,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
     this.plannedRepetitions = const Value.absent(),
     this.plannedWeightKg = const Value.absent(),
     this.metadataJson = const Value.absent(),
+    this.exerciseCode = const Value.absent(),
     required int createdAt,
     required int updatedAt,
     this.rowid = const Value.absent(),
@@ -2765,6 +2814,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
     Expression<int>? plannedRepetitions,
     Expression<double>? plannedWeightKg,
     Expression<String>? metadataJson,
+    Expression<String>? exerciseCode,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowid,
@@ -2788,6 +2838,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
       if (plannedRepetitions != null) 'planned_repetitions': plannedRepetitions,
       if (plannedWeightKg != null) 'planned_weight_kg': plannedWeightKg,
       if (metadataJson != null) 'metadata_json': metadataJson,
+      if (exerciseCode != null) 'exercise_code': exerciseCode,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2811,6 +2862,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
     Value<int?>? plannedRepetitions,
     Value<double?>? plannedWeightKg,
     Value<String?>? metadataJson,
+    Value<String?>? exerciseCode,
     Value<int>? createdAt,
     Value<int>? updatedAt,
     Value<int>? rowid,
@@ -2834,6 +2886,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
       plannedRepetitions: plannedRepetitions ?? this.plannedRepetitions,
       plannedWeightKg: plannedWeightKg ?? this.plannedWeightKg,
       metadataJson: metadataJson ?? this.metadataJson,
+      exerciseCode: exerciseCode ?? this.exerciseCode,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -2895,6 +2948,9 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
     if (metadataJson.present) {
       map['metadata_json'] = Variable<String>(metadataJson.value);
     }
+    if (exerciseCode.present) {
+      map['exercise_code'] = Variable<String>(exerciseCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -2926,6 +2982,7 @@ class LocalWorkoutStepsCompanion extends UpdateCompanion<LocalWorkoutStepRow> {
           ..write('plannedRepetitions: $plannedRepetitions, ')
           ..write('plannedWeightKg: $plannedWeightKg, ')
           ..write('metadataJson: $metadataJson, ')
+          ..write('exerciseCode: $exerciseCode, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -19535,6 +19592,7 @@ typedef $$LocalWorkoutStepsTableCreateCompanionBuilder =
       Value<int?> plannedRepetitions,
       Value<double?> plannedWeightKg,
       Value<String?> metadataJson,
+      Value<String?> exerciseCode,
       required int createdAt,
       required int updatedAt,
       Value<int> rowid,
@@ -19557,6 +19615,7 @@ typedef $$LocalWorkoutStepsTableUpdateCompanionBuilder =
       Value<int?> plannedRepetitions,
       Value<double?> plannedWeightKg,
       Value<String?> metadataJson,
+      Value<String?> exerciseCode,
       Value<int> createdAt,
       Value<int> updatedAt,
       Value<int> rowid,
@@ -19734,6 +19793,11 @@ class $$LocalWorkoutStepsTableFilterComposer
 
   ColumnFilters<String> get metadataJson => $composableBuilder(
     column: $table.metadataJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get exerciseCode => $composableBuilder(
+    column: $table.exerciseCode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19924,6 +19988,11 @@ class $$LocalWorkoutStepsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get exerciseCode => $composableBuilder(
+    column: $table.exerciseCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -20046,6 +20115,11 @@ class $$LocalWorkoutStepsTableAnnotationComposer
 
   GeneratedColumn<String> get metadataJson => $composableBuilder(
     column: $table.metadataJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get exerciseCode => $composableBuilder(
+    column: $table.exerciseCode,
     builder: (column) => column,
   );
 
@@ -20209,6 +20283,7 @@ class $$LocalWorkoutStepsTableTableManager
                 Value<int?> plannedRepetitions = const Value.absent(),
                 Value<double?> plannedWeightKg = const Value.absent(),
                 Value<String?> metadataJson = const Value.absent(),
+                Value<String?> exerciseCode = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -20229,6 +20304,7 @@ class $$LocalWorkoutStepsTableTableManager
                 plannedRepetitions: plannedRepetitions,
                 plannedWeightKg: plannedWeightKg,
                 metadataJson: metadataJson,
+                exerciseCode: exerciseCode,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -20251,6 +20327,7 @@ class $$LocalWorkoutStepsTableTableManager
                 Value<int?> plannedRepetitions = const Value.absent(),
                 Value<double?> plannedWeightKg = const Value.absent(),
                 Value<String?> metadataJson = const Value.absent(),
+                Value<String?> exerciseCode = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -20271,6 +20348,7 @@ class $$LocalWorkoutStepsTableTableManager
                 plannedRepetitions: plannedRepetitions,
                 plannedWeightKg: plannedWeightKg,
                 metadataJson: metadataJson,
+                exerciseCode: exerciseCode,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

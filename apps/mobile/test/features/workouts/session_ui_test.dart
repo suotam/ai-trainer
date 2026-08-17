@@ -8,7 +8,6 @@ import 'package:ai_trainer_mobile/features/workouts/application/workout_provider
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/active_session_screen.dart';
-import 'package:ai_trainer_mobile/features/workouts/presentation/today_screen.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/workout_detail_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

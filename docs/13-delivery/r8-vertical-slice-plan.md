@@ -88,7 +88,7 @@ Katalog cviků (kódy, názvy cs/en, popis provedení, svalové skupiny, vybaven
 
 | # | Kontrakt | Vlastník | Navrhovaná cesta | Před slicem | Minimum |
 |---|---|---|---|---|---|
-| C51 | Exercise catalog | Domain (workout-model) + Product | `docs/06-domain/r8-exercise-catalog-contract.md` | R8-01 | uzavřený seznam kódů (P0 rozsah pokrývá lezení/sílu bez posilovny/mobilitu/rozcvičku/kompenzaci — cca 60–80 položek), název cs/en, popis provedení + cue, svalové skupiny, vybavení, výchozí typ předpisu (reps/čas), vlastní cvik s povinným popisem, stabilita kódů, vazba na existující kroky (`metadataJson`/aditivní sloupec) |
+| C51 | Exercise catalog | Domain (workout-model) + Product | `docs/06-domain/r8-exercise-catalog-contract.md` | R8-01 | uzavřený seznam kódů (P0 rozsah pokrývá lezení/sílu bez posilovny/mobilitu/rozcvičku/kompenzaci — 112 položek), název cs/en, popis provedení + cue, svalové skupiny, vybavení, výchozí typ předpisu (reps/čas), vlastní cvik s povinným popisem, stabilita kódů, vazba na existující kroky (`metadataJson`/aditivní sloupec) |
 | C52 | Plan proposal schema v2 | Domain + Mobile (AI) | `docs/09-ai/r8-plan-schema-v2-contract.md` | R8-02 | `plan-proposal-schema-v2` a `adjustment-proposal-schema-v2`: sekce, kroky (katalog XOR vlastní+popis), předpis reps/čas, sady, pauzy, váha, limity; structured outputs (JSON schéma = validátor); prompt v3 v registru (immutable); materializace do sekcí/kroků/set planů; koexistence s v1 daty; nevalidní = celek odmítnut (SOV vzor) |
 | C53 | Guided session player | Domain (workout-model) + Mobile | `docs/06-domain/r8-guided-session-contract.md` | R8-03 | stavový model průvodce (aktuální krok/sada, běžící časovač, odpočet pauzy, pauza/pokračovat) nad existující session; obnova po přerušení; vztah k zápisu výkonů a dokončení (C22 pravidla, žádné vymyšlené hodnoty); přeskočení kroku jako poctivý stav; vedení i pro seed/ruční tréninky bez katalogu |
 | C54 | Exercise illustrations | Product + Mobile | `docs/08-mobile/r8-exercise-illustrations-contract.md` | R8-04 | formát (schematické SVG s klíčovými polohami, offline asset per kód), vazba jen na katalogový kód, fallback bez ilustrace, velikost/výkon, autorská a licenční poctivost (vlastní schémata v repu), proces revize vlastníkem na zařízení |
@@ -159,7 +159,7 @@ Katalog cviků (kódy, názvy cs/en, popis provedení, svalové skupiny, vybaven
 # 12. Řízené výjimky a otevřená rozhodnutí
 
 - **Kvalita ilustrací** — schéma, ne video; vlastník revizí rozhodne, které cviky potřebují lepší vizuál (kandidát R9: doplnění z open-source zdrojů po licenční kontrole).
-- **Rozsah katalogu P0** — cca 60–80 cviků cílených na vlastníkův profil (lezení, síla bez posilovny, mobilita, rozcvička, kompenzace); rozšiřování je aditivní.
+- **Rozsah katalogu P0** — 112 cviků cílených na vlastníkův profil (lezení, síla bez posilovny, mobilita, rozcvička, kompenzace); rozšiřování je aditivní.
 - **Existující plány v1** — zůstávají čitelné a spustitelné v průvodci (kroky bez sekcí/pauz se vedou jako jsou); přegenerování je volba uživatele.
 - **Záloha, notifikace, streaming, OS kalendář** — trvají jako kandidáti R9.
 
@@ -198,6 +198,6 @@ R8 je dokončeno pouze pokud (doloženo testy a on-device evidencí):
 
 # 15. Stav backlogu
 
-R8 backlog (`R8-01` až `R8-05`) je **definovaný, ale žádný slice není `READY`** — všechny čekají na blokující kontrakty (§7.1: C51–C54). Implementace R8 nezačala.
+R8 backlog (`R8-01` až `R8-05`): **`R8-01` je Done** (C51 vznikl, implementace mergnuta — viz `DOCUMENTATION_STATUS.md` §3); `R8-02` až `R8-05` čekají na blokující kontrakty (§7.1: C52–C54).
 
-První kanonický krok: vytvořit **C51 – Exercise catalog kontrakt** → tím se `R8-01` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices, ne všechny najednou.
+Další kanonický krok: vytvořit **C52 – Plan proposal schema v2** → tím se `R8-02` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices, ne všechny najednou.
