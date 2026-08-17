@@ -227,12 +227,34 @@ class FakeWorkoutPerformanceRepository implements WorkoutPerformanceRepository {
   @override
   Future<SessionTracker?> loadTracker(String sessionId) async => tracker;
 
+  int startSetCallCount = 0;
+  int skipStepCallCount = 0;
+
+  @override
+  Future<RecordPerformanceResult> startSet({
+    required String setPerformanceId,
+    required DateTime now,
+  }) async {
+    startSetCallCount += 1;
+    return const PerformanceSaved();
+  }
+
+  @override
+  Future<RecordPerformanceResult> skipStep({
+    required String stepPerformanceId,
+    required DateTime now,
+  }) async {
+    skipStepCallCount += 1;
+    return const PerformanceSaved();
+  }
+
   @override
   Future<RecordPerformanceResult> recordSetActuals({
     required String setPerformanceId,
     required int? actualRepetitions,
     required double? actualWeightKg,
     required DateTime now,
+    int? actualDurationSeconds,
   }) async {
     final result = _recordScript.isEmpty
         ? const PerformanceSaved()

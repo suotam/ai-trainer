@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.78  
+**Verze:** 2.79  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-16
@@ -510,11 +510,15 @@ kódů s popisem provedení a cue cs/en, schema v16 `exercise_code`) a
 katalogem nebo vlastní s popisem, sady reps/čas s pauzami, REST kroky,
 structured outputs + validátor v2, prompty v3, materializace 1:1, karta
 návrhu se strukturou; živá sonda proti reálnému modelu prošla, eval
-dataset v2) **jsou implementovány** — mobil 390/390. Další kanonický
+dataset v2) a **`R8-03` průvodce tréninkem** (C53: krokový průvodce nad
+existující session — sada X/Y, odpočet pauz, časovač DURATION, REST kroky,
+předchozí/další/přeskočit, pauza/pokračovat, uplynulý čas; stav odvozený
+z uložených značek v17 → obnovitelný po přerušení; dokončení finalizuje
+aktivní čas) **jsou implementovány** — mobil 402/402. Další kanonický
 krok:
 
 ```text
-C53 průvodce → R8-03 → C54 ilustrace → R8-04 → R8-05 E2E + Exit Review
+C54 ilustrace → R8-04 → R8-05 E2E + Exit Review (+ on-device revize)
 ```
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.

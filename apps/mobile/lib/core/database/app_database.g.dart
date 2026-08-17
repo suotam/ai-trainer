@@ -3776,6 +3776,38 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _playerPhaseMeta = const VerificationMeta(
+    'playerPhase',
+  );
+  @override
+  late final GeneratedColumn<String> playerPhase = GeneratedColumn<String>(
+    'player_phase',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _playerPhaseStartedAtMeta =
+      const VerificationMeta('playerPhaseStartedAt');
+  @override
+  late final GeneratedColumn<int> playerPhaseStartedAt = GeneratedColumn<int>(
+    'player_phase_started_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _activeSetPositionMeta = const VerificationMeta(
+    'activeSetPosition',
+  );
+  @override
+  late final GeneratedColumn<int> activeSetPosition = GeneratedColumn<int>(
+    'active_set_position',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -3854,6 +3886,9 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     completedAt,
     activeStepId,
     elapsedActiveSeconds,
+    playerPhase,
+    playerPhaseStartedAt,
+    activeSetPosition,
     notes,
     createdAt,
     updatedAt,
@@ -3960,6 +3995,33 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
     } else if (isInserting) {
       context.missing(_elapsedActiveSecondsMeta);
     }
+    if (data.containsKey('player_phase')) {
+      context.handle(
+        _playerPhaseMeta,
+        playerPhase.isAcceptableOrUnknown(
+          data['player_phase']!,
+          _playerPhaseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('player_phase_started_at')) {
+      context.handle(
+        _playerPhaseStartedAtMeta,
+        playerPhaseStartedAt.isAcceptableOrUnknown(
+          data['player_phase_started_at']!,
+          _playerPhaseStartedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('active_set_position')) {
+      context.handle(
+        _activeSetPositionMeta,
+        activeSetPosition.isAcceptableOrUnknown(
+          data['active_set_position']!,
+          _activeSetPositionMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -4051,6 +4113,18 @@ class $LocalWorkoutSessionsTable extends LocalWorkoutSessions
         DriftSqlType.int,
         data['${effectivePrefix}elapsed_active_seconds'],
       )!,
+      playerPhase: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}player_phase'],
+      ),
+      playerPhaseStartedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}player_phase_started_at'],
+      ),
+      activeSetPosition: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}active_set_position'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -4096,6 +4170,12 @@ class LocalWorkoutSessionRow extends DataClass
   final int? completedAt;
   final String? activeStepId;
   final int elapsedActiveSeconds;
+
+  /// Stav průvodce (C53 §4, v17): fáze, ukotvení běžícího odpočtu, sada.
+  /// Zařízení-lokální pomocník obnovy (GSP-003/004).
+  final String? playerPhase;
+  final int? playerPhaseStartedAt;
+  final int? activeSetPosition;
   final String? notes;
   final int createdAt;
   final int updatedAt;
@@ -4113,6 +4193,9 @@ class LocalWorkoutSessionRow extends DataClass
     this.completedAt,
     this.activeStepId,
     required this.elapsedActiveSeconds,
+    this.playerPhase,
+    this.playerPhaseStartedAt,
+    this.activeSetPosition,
     this.notes,
     required this.createdAt,
     required this.updatedAt,
@@ -4141,6 +4224,15 @@ class LocalWorkoutSessionRow extends DataClass
       map['active_step_id'] = Variable<String>(activeStepId);
     }
     map['elapsed_active_seconds'] = Variable<int>(elapsedActiveSeconds);
+    if (!nullToAbsent || playerPhase != null) {
+      map['player_phase'] = Variable<String>(playerPhase);
+    }
+    if (!nullToAbsent || playerPhaseStartedAt != null) {
+      map['player_phase_started_at'] = Variable<int>(playerPhaseStartedAt);
+    }
+    if (!nullToAbsent || activeSetPosition != null) {
+      map['active_set_position'] = Variable<int>(activeSetPosition);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -4172,6 +4264,15 @@ class LocalWorkoutSessionRow extends DataClass
           ? const Value.absent()
           : Value(activeStepId),
       elapsedActiveSeconds: Value(elapsedActiveSeconds),
+      playerPhase: playerPhase == null && nullToAbsent
+          ? const Value.absent()
+          : Value(playerPhase),
+      playerPhaseStartedAt: playerPhaseStartedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(playerPhaseStartedAt),
+      activeSetPosition: activeSetPosition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activeSetPosition),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -4203,6 +4304,11 @@ class LocalWorkoutSessionRow extends DataClass
       elapsedActiveSeconds: serializer.fromJson<int>(
         json['elapsedActiveSeconds'],
       ),
+      playerPhase: serializer.fromJson<String?>(json['playerPhase']),
+      playerPhaseStartedAt: serializer.fromJson<int?>(
+        json['playerPhaseStartedAt'],
+      ),
+      activeSetPosition: serializer.fromJson<int?>(json['activeSetPosition']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
@@ -4225,6 +4331,9 @@ class LocalWorkoutSessionRow extends DataClass
       'completedAt': serializer.toJson<int?>(completedAt),
       'activeStepId': serializer.toJson<String?>(activeStepId),
       'elapsedActiveSeconds': serializer.toJson<int>(elapsedActiveSeconds),
+      'playerPhase': serializer.toJson<String?>(playerPhase),
+      'playerPhaseStartedAt': serializer.toJson<int?>(playerPhaseStartedAt),
+      'activeSetPosition': serializer.toJson<int?>(activeSetPosition),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
@@ -4245,6 +4354,9 @@ class LocalWorkoutSessionRow extends DataClass
     Value<int?> completedAt = const Value.absent(),
     Value<String?> activeStepId = const Value.absent(),
     int? elapsedActiveSeconds,
+    Value<String?> playerPhase = const Value.absent(),
+    Value<int?> playerPhaseStartedAt = const Value.absent(),
+    Value<int?> activeSetPosition = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     int? createdAt,
     int? updatedAt,
@@ -4265,6 +4377,13 @@ class LocalWorkoutSessionRow extends DataClass
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
     activeStepId: activeStepId.present ? activeStepId.value : this.activeStepId,
     elapsedActiveSeconds: elapsedActiveSeconds ?? this.elapsedActiveSeconds,
+    playerPhase: playerPhase.present ? playerPhase.value : this.playerPhase,
+    playerPhaseStartedAt: playerPhaseStartedAt.present
+        ? playerPhaseStartedAt.value
+        : this.playerPhaseStartedAt,
+    activeSetPosition: activeSetPosition.present
+        ? activeSetPosition.value
+        : this.activeSetPosition,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -4296,6 +4415,15 @@ class LocalWorkoutSessionRow extends DataClass
       elapsedActiveSeconds: data.elapsedActiveSeconds.present
           ? data.elapsedActiveSeconds.value
           : this.elapsedActiveSeconds,
+      playerPhase: data.playerPhase.present
+          ? data.playerPhase.value
+          : this.playerPhase,
+      playerPhaseStartedAt: data.playerPhaseStartedAt.present
+          ? data.playerPhaseStartedAt.value
+          : this.playerPhaseStartedAt,
+      activeSetPosition: data.activeSetPosition.present
+          ? data.activeSetPosition.value
+          : this.activeSetPosition,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -4320,6 +4448,9 @@ class LocalWorkoutSessionRow extends DataClass
           ..write('completedAt: $completedAt, ')
           ..write('activeStepId: $activeStepId, ')
           ..write('elapsedActiveSeconds: $elapsedActiveSeconds, ')
+          ..write('playerPhase: $playerPhase, ')
+          ..write('playerPhaseStartedAt: $playerPhaseStartedAt, ')
+          ..write('activeSetPosition: $activeSetPosition, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4342,6 +4473,9 @@ class LocalWorkoutSessionRow extends DataClass
     completedAt,
     activeStepId,
     elapsedActiveSeconds,
+    playerPhase,
+    playerPhaseStartedAt,
+    activeSetPosition,
     notes,
     createdAt,
     updatedAt,
@@ -4363,6 +4497,9 @@ class LocalWorkoutSessionRow extends DataClass
           other.completedAt == this.completedAt &&
           other.activeStepId == this.activeStepId &&
           other.elapsedActiveSeconds == this.elapsedActiveSeconds &&
+          other.playerPhase == this.playerPhase &&
+          other.playerPhaseStartedAt == this.playerPhaseStartedAt &&
+          other.activeSetPosition == this.activeSetPosition &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -4383,6 +4520,9 @@ class LocalWorkoutSessionsCompanion
   final Value<int?> completedAt;
   final Value<String?> activeStepId;
   final Value<int> elapsedActiveSeconds;
+  final Value<String?> playerPhase;
+  final Value<int?> playerPhaseStartedAt;
+  final Value<int?> activeSetPosition;
   final Value<String?> notes;
   final Value<int> createdAt;
   final Value<int> updatedAt;
@@ -4401,6 +4541,9 @@ class LocalWorkoutSessionsCompanion
     this.completedAt = const Value.absent(),
     this.activeStepId = const Value.absent(),
     this.elapsedActiveSeconds = const Value.absent(),
+    this.playerPhase = const Value.absent(),
+    this.playerPhaseStartedAt = const Value.absent(),
+    this.activeSetPosition = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4420,6 +4563,9 @@ class LocalWorkoutSessionsCompanion
     this.completedAt = const Value.absent(),
     this.activeStepId = const Value.absent(),
     required int elapsedActiveSeconds,
+    this.playerPhase = const Value.absent(),
+    this.playerPhaseStartedAt = const Value.absent(),
+    this.activeSetPosition = const Value.absent(),
     this.notes = const Value.absent(),
     required int createdAt,
     required int updatedAt,
@@ -4447,6 +4593,9 @@ class LocalWorkoutSessionsCompanion
     Expression<int>? completedAt,
     Expression<String>? activeStepId,
     Expression<int>? elapsedActiveSeconds,
+    Expression<String>? playerPhase,
+    Expression<int>? playerPhaseStartedAt,
+    Expression<int>? activeSetPosition,
     Expression<String>? notes,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
@@ -4468,6 +4617,10 @@ class LocalWorkoutSessionsCompanion
       if (activeStepId != null) 'active_step_id': activeStepId,
       if (elapsedActiveSeconds != null)
         'elapsed_active_seconds': elapsedActiveSeconds,
+      if (playerPhase != null) 'player_phase': playerPhase,
+      if (playerPhaseStartedAt != null)
+        'player_phase_started_at': playerPhaseStartedAt,
+      if (activeSetPosition != null) 'active_set_position': activeSetPosition,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -4489,6 +4642,9 @@ class LocalWorkoutSessionsCompanion
     Value<int?>? completedAt,
     Value<String?>? activeStepId,
     Value<int>? elapsedActiveSeconds,
+    Value<String?>? playerPhase,
+    Value<int?>? playerPhaseStartedAt,
+    Value<int?>? activeSetPosition,
     Value<String?>? notes,
     Value<int>? createdAt,
     Value<int>? updatedAt,
@@ -4509,6 +4665,9 @@ class LocalWorkoutSessionsCompanion
       completedAt: completedAt ?? this.completedAt,
       activeStepId: activeStepId ?? this.activeStepId,
       elapsedActiveSeconds: elapsedActiveSeconds ?? this.elapsedActiveSeconds,
+      playerPhase: playerPhase ?? this.playerPhase,
+      playerPhaseStartedAt: playerPhaseStartedAt ?? this.playerPhaseStartedAt,
+      activeSetPosition: activeSetPosition ?? this.activeSetPosition,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -4554,6 +4713,17 @@ class LocalWorkoutSessionsCompanion
     if (elapsedActiveSeconds.present) {
       map['elapsed_active_seconds'] = Variable<int>(elapsedActiveSeconds.value);
     }
+    if (playerPhase.present) {
+      map['player_phase'] = Variable<String>(playerPhase.value);
+    }
+    if (playerPhaseStartedAt.present) {
+      map['player_phase_started_at'] = Variable<int>(
+        playerPhaseStartedAt.value,
+      );
+    }
+    if (activeSetPosition.present) {
+      map['active_set_position'] = Variable<int>(activeSetPosition.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -4591,6 +4761,9 @@ class LocalWorkoutSessionsCompanion
           ..write('completedAt: $completedAt, ')
           ..write('activeStepId: $activeStepId, ')
           ..write('elapsedActiveSeconds: $elapsedActiveSeconds, ')
+          ..write('playerPhase: $playerPhase, ')
+          ..write('playerPhaseStartedAt: $playerPhaseStartedAt, ')
+          ..write('activeSetPosition: $activeSetPosition, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -21046,6 +21219,9 @@ typedef $$LocalWorkoutSessionsTableCreateCompanionBuilder =
       Value<int?> completedAt,
       Value<String?> activeStepId,
       required int elapsedActiveSeconds,
+      Value<String?> playerPhase,
+      Value<int?> playerPhaseStartedAt,
+      Value<int?> activeSetPosition,
       Value<String?> notes,
       required int createdAt,
       required int updatedAt,
@@ -21066,6 +21242,9 @@ typedef $$LocalWorkoutSessionsTableUpdateCompanionBuilder =
       Value<int?> completedAt,
       Value<String?> activeStepId,
       Value<int> elapsedActiveSeconds,
+      Value<String?> playerPhase,
+      Value<int?> playerPhaseStartedAt,
+      Value<int?> activeSetPosition,
       Value<String?> notes,
       Value<int> createdAt,
       Value<int> updatedAt,
@@ -21250,6 +21429,21 @@ class $$LocalWorkoutSessionsTableFilterComposer
 
   ColumnFilters<int> get elapsedActiveSeconds => $composableBuilder(
     column: $table.elapsedActiveSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get playerPhase => $composableBuilder(
+    column: $table.playerPhase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get playerPhaseStartedAt => $composableBuilder(
+    column: $table.playerPhaseStartedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get activeSetPosition => $composableBuilder(
+    column: $table.activeSetPosition,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -21439,6 +21633,21 @@ class $$LocalWorkoutSessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get playerPhase => $composableBuilder(
+    column: $table.playerPhase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get playerPhaseStartedAt => $composableBuilder(
+    column: $table.playerPhaseStartedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get activeSetPosition => $composableBuilder(
+    column: $table.activeSetPosition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -21537,6 +21746,21 @@ class $$LocalWorkoutSessionsTableAnnotationComposer
 
   GeneratedColumn<int> get elapsedActiveSeconds => $composableBuilder(
     column: $table.elapsedActiveSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get playerPhase => $composableBuilder(
+    column: $table.playerPhase,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get playerPhaseStartedAt => $composableBuilder(
+    column: $table.playerPhaseStartedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get activeSetPosition => $composableBuilder(
+    column: $table.activeSetPosition,
     builder: (column) => column,
   );
 
@@ -21714,6 +21938,9 @@ class $$LocalWorkoutSessionsTableTableManager
                 Value<int?> completedAt = const Value.absent(),
                 Value<String?> activeStepId = const Value.absent(),
                 Value<int> elapsedActiveSeconds = const Value.absent(),
+                Value<String?> playerPhase = const Value.absent(),
+                Value<int?> playerPhaseStartedAt = const Value.absent(),
+                Value<int?> activeSetPosition = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
@@ -21732,6 +21959,9 @@ class $$LocalWorkoutSessionsTableTableManager
                 completedAt: completedAt,
                 activeStepId: activeStepId,
                 elapsedActiveSeconds: elapsedActiveSeconds,
+                playerPhase: playerPhase,
+                playerPhaseStartedAt: playerPhaseStartedAt,
+                activeSetPosition: activeSetPosition,
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -21752,6 +21982,9 @@ class $$LocalWorkoutSessionsTableTableManager
                 Value<int?> completedAt = const Value.absent(),
                 Value<String?> activeStepId = const Value.absent(),
                 required int elapsedActiveSeconds,
+                Value<String?> playerPhase = const Value.absent(),
+                Value<int?> playerPhaseStartedAt = const Value.absent(),
+                Value<int?> activeSetPosition = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
@@ -21770,6 +22003,9 @@ class $$LocalWorkoutSessionsTableTableManager
                 completedAt: completedAt,
                 activeStepId: activeStepId,
                 elapsedActiveSeconds: elapsedActiveSeconds,
+                playerPhase: playerPhase,
+                playerPhaseStartedAt: playerPhaseStartedAt,
+                activeSetPosition: activeSetPosition,
                 notes: notes,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

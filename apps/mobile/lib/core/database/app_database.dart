@@ -51,7 +51,9 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  /// Schema version 16 (R8-01, C51 §7): nullable `exercise_code` na
+  /// Schema version 17 (R8-03, C53 §4): stav průvodce na
+  /// `local_workout_sessions` (`player_phase`, `player_phase_started_at`,
+  /// `active_set_position`). Verze 16 (R8-01, C51 §7): nullable `exercise_code` na
   /// `local_workout_steps` (vazba na katalog cviků). Verze 15 (R7-03,
   /// C48 §4) přidala tabulku `local_chat_actions`
   /// (device-local akce chatu). Verze 14 (R7-02, C47 §2) přidala chat
@@ -68,7 +70,7 @@ class AppDatabase extends _$AppDatabase {
   /// synced entit; `v1 → v2` (R2-01) zachovává všechna R1 data i aktivní
   /// session (C1 `MSM-005`, PDR-009).
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -204,6 +206,22 @@ class AppDatabase extends _$AppDatabase {
       // cviků — aditivní, bez backfillu (EXC-004).
       if (from < 16) {
         await m.addColumn(localWorkoutSteps, localWorkoutSteps.exerciseCode);
+      }
+      // Migrace v16 → v17 (R8-03, C53 §4): stav průvodce na session —
+      // aditivní nullable sloupce (GSP-003).
+      if (from < 17) {
+        await m.addColumn(
+          localWorkoutSessions,
+          localWorkoutSessions.playerPhase,
+        );
+        await m.addColumn(
+          localWorkoutSessions,
+          localWorkoutSessions.playerPhaseStartedAt,
+        );
+        await m.addColumn(
+          localWorkoutSessions,
+          localWorkoutSessions.activeSetPosition,
+        );
       }
     },
     beforeOpen: (details) async {

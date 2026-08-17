@@ -77,10 +77,10 @@ void main() {
     await db.close();
   });
 
-  test('databaze vznikne od prazdneho stavu se schema verzi 16', () async {
+  test('databaze vznikne od prazdneho stavu se schema verzi 17', () async {
     // R7-03 zvýšil schema na verzi 15 (chat akce, C48 §4).
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.first, 16);
+    expect(version.data.values.first, 17);
 
     final tables = await db
         .customSelect(

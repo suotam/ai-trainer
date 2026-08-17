@@ -59,6 +59,15 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
 
       final nowMillis = now.toUtc().millisecondsSinceEpoch;
 
+      // 1b. Finalizace aktivního času (C53 GSP-011): běžící úsek ACTIVE
+      // session se přičte — summary nese poctivý activeDurationSeconds.
+      var elapsedActive = session.elapsedActiveSeconds;
+      if (session.status == 'ACTIVE') {
+        final since = session.lastResumedAt ?? session.startedAt;
+        final running = ((nowMillis - since) / 1000).floor();
+        elapsedActive += running < 0 ? 0 : running;
+      }
+
       // 2. Dopočítat dokončení kroků z completion stavu setů.
       final stepCounts = await _finalizeSteps(sessionId, nowMillis);
 
@@ -88,6 +97,10 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
         LocalWorkoutSessionsCompanion(
           status: const Value('COMPLETED'),
           completedAt: Value(nowMillis),
+          elapsedActiveSeconds: Value(elapsedActive),
+          playerPhase: const Value(null),
+          playerPhaseStartedAt: const Value(null),
+          activeSetPosition: const Value(null),
           updatedAt: Value(nowMillis),
           rowVersion: Value(session.rowVersion + 1),
         ),
@@ -122,7 +135,7 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
               workoutType: instance.workoutType,
               startedAt: session.startedAt,
               completedAt: nowMillis,
-              activeDurationSeconds: session.elapsedActiveSeconds,
+              activeDurationSeconds: elapsedActive,
               completedStepCount: stepCounts.completed,
               totalStepCount: stepCounts.total,
               overallEffort: Value(feedback?.overallEffort),
@@ -176,7 +189,12 @@ class DriftWorkoutCompletionRepository implements WorkoutCompletionRepository {
       )..where((t) => t.stepPerformanceId.equals(stepPerf.id))).get();
 
       final String status;
-      if (sets.isNotEmpty && sets.every((s) => s.status == 'COMPLETED')) {
+      if (stepPerf.status == 'SKIPPED' &&
+          !sets.any((s) => s.status == 'COMPLETED')) {
+        // Přeskočený krok zůstává poctivě SKIPPED (C53 GSP-008).
+        status = 'SKIPPED';
+      } else if (sets.isNotEmpty &&
+          sets.every((s) => s.status == 'COMPLETED')) {
         status = 'COMPLETED';
         completed += 1;
       } else if (sets.any((s) => s.status == 'COMPLETED')) {

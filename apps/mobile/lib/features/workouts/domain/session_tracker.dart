@@ -62,6 +62,7 @@ class TrackerExercise {
     required this.title,
     required this.sectionTitle,
     required this.sets,
+    this.status = StepPerformanceStatus.notStarted,
   });
 
   final String stepPerformanceId;
@@ -69,6 +70,9 @@ class TrackerExercise {
   final String title;
   final String sectionTitle;
   final List<TrackerSet> sets;
+
+  /// Stav kroku (C53: `SKIPPED` je poctivý stav přeskočení, GSP-008).
+  final StepPerformanceStatus status;
 }
 
 /// Tracker celé aktivní session — cviky se sety v pořadí.
