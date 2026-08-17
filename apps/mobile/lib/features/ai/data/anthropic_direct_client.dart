@@ -8,6 +8,7 @@ import '../../auth/domain/auth_api_client.dart';
 import '../../chat/domain/chat_ai_client.dart';
 import '../domain/ai_context.dart';
 import '../domain/byok_key_store.dart';
+import 'ai_output_schemas.dart';
 import 'ai_prompt_registry.dart';
 import 'http_ai_api_client.dart';
 
@@ -40,6 +41,7 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
   static const int _maxContextChars = 32000;
   static const int _maxRawChars = 100000;
   static const int _maxTokens = 4096;
+  static const int _maxTokensProposal = 8192;
 
   @override
   Future<PlanProposalResponse> requestPlanProposal({
@@ -61,10 +63,22 @@ class AnthropicDirectClient implements AiApiClient, ChatAiClient {
 
     final response = await _post(key, {
       'model': model,
-      'max_tokens': _maxTokens,
+      // Plán v2 (C52 PS2-013): 14 plných workoutů se sekcemi se do 4096
+      // nevejde — bounded 8192 s vypnutým thinkingem.
+      'max_tokens': _maxTokensProposal,
       // Adaptivní thinking je na claude-sonnet-5 zapnutý implicitně a čerpá
       // z max_tokens — vypnutím patří celý rozpočet JSON odpovědi (BYK-009).
       'thinking': {'type': 'disabled'},
+      // Structured outputs (C52 §3.3): tvar workout v2 vynucuje API;
+      // meze a konzistenci hlídá klientský validátor (PS2-004).
+      'output_config': {
+        'format': {
+          'type': 'json_schema',
+          'schema': type == AiRequestType.adjustmentProposal
+              ? adjustmentProposalSchemaV2
+              : planProposalSchemaV2,
+        },
+      },
       'system': prompt.template,
       'messages': [
         {

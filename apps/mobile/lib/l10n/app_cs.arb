@@ -385,6 +385,11 @@
   "aiConfirm": "Přijmout návrh",
   "aiReject": "Odmítnout",
   "aiWorkoutsHeader": "Navržené workouty",
+  "aiSectionLabel": "{type, select, WARM_UP{Rozcvička} MAIN{Hlavní část} COOLDOWN{Vyklidnění} other{{type}}}",
+  "aiRestStep": "Pauza {seconds} s",
+  "aiSetsReps": "{sets}×{reps} opak.",
+  "aiSetsDuration": "{sets}×{seconds} s",
+  "aiExerciseCount": "{count} cviků",
   "aiDayLabel": "Den {offset}",
   "aiProposalStatusLabel": "{status, select, PROPOSED{Čeká na rozhodnutí} CONFIRMED{Přijato} REJECTED{Odmítnuto} EXECUTED{Provedeno} EXECUTION_FAILED{Provedení selhalo} EXPIRED{Vypršelo} other{{status}}}"
 }

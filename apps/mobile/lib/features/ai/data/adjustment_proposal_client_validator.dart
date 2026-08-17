@@ -4,6 +4,15 @@
 /// pole). Tvarová tabulka operací přesně (ASJ-003).
 library;
 
+import 'workout_v2_validator.dart' as v2;
+
+/// Validátor tvaru `workout` uvnitř operace (v1 `exercises` nebo v2 `sections`).
+typedef _WorkoutValidator =
+    Map<String, Object?>? Function(
+      Object? raw, {
+      required bool requireDayOffset,
+    });
+
 const _workoutTypes = {
   'STRENGTH',
   'ENDURANCE',
@@ -14,7 +23,25 @@ const _workoutTypes = {
 
 const _operationKinds = {'MOVE', 'CANCEL', 'REPLACE', 'ADD'};
 
-Map<String, Object?>? validateAdjustmentProposalPayload(Object? raw) {
+Map<String, Object?>? validateAdjustmentProposalPayload(Object? raw) =>
+    _validateAdjustment(raw, _validateWorkout);
+
+/// `adjustment-proposal-schema-v2` (C52 §3.2): operace C37 beze změny,
+/// `workout` v REPLACE/ADD je workout v2 (sekce/kroky/sady) bez `reason`.
+Map<String, Object?>? validateAdjustmentProposalV2Payload(Object? raw) =>
+    _validateAdjustment(
+      raw,
+      (raw, {required requireDayOffset}) => v2.validateWorkoutV2(
+        raw,
+        requireDayOffset: requireDayOffset,
+        requireReason: false,
+      ),
+    );
+
+Map<String, Object?>? _validateAdjustment(
+  Object? raw,
+  _WorkoutValidator validateWorkout,
+) {
   if (raw is! Map) {
     return null;
   }
@@ -28,7 +55,7 @@ Map<String, Object?>? validateAdjustmentProposalPayload(Object? raw) {
   }
   final operations = <Map<String, Object?>>[];
   for (final operationRaw in operationsRaw) {
-    final operation = _validateOperation(operationRaw);
+    final operation = _validateOperation(operationRaw, validateWorkout);
     if (operation == null) {
       return null;
     }
@@ -37,7 +64,10 @@ Map<String, Object?>? validateAdjustmentProposalPayload(Object? raw) {
   return {'summary': summary, 'operations': operations};
 }
 
-Map<String, Object?>? _validateOperation(Object? raw) {
+Map<String, Object?>? _validateOperation(
+  Object? raw,
+  _WorkoutValidator validateWorkout,
+) {
   if (raw is! Map) {
     return null;
   }
@@ -78,7 +108,7 @@ Map<String, Object?>? _validateOperation(Object? raw) {
   Map<String, Object?>? workout;
   if (hasWorkout) {
     // REPLACE dědí den z targetu — dayOffset je zakázán (C37 §3).
-    workout = _validateWorkout(raw['workout'], requireDayOffset: kind == 'ADD');
+    workout = validateWorkout(raw['workout'], requireDayOffset: kind == 'ADD');
     if (workout == null) {
       return null;
     }

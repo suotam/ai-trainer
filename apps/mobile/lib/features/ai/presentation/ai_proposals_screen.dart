@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/ai_providers.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/proposal_executor.dart';
+import 'proposed_workout_structure.dart';
 
 /// AI návrhy plánu (R4-04, C29): žádost o návrh, seznam návrhů a review
 /// s důvody a dopady; potvrzení/odmítnutí výhradně explicitní akcí
@@ -209,7 +210,16 @@ class _ProposalReviewSheet extends ConsumerWidget {
             ListTile(
               dense: true,
               title: Text(_operationTitle(l10n, operation)),
-              subtitle: Text('${operation['reason']}'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${operation['reason']}'),
+                  if (operation['workout'] is Map)
+                    ProposedWorkoutStructure(
+                      workout: operation['workout'] as Map,
+                    ),
+                ],
+              ),
             ),
           for (final workout in workouts)
             ListTile(
@@ -218,13 +228,13 @@ class _ProposalReviewSheet extends ConsumerWidget {
                 '${l10n.aiDayLabel((workout['dayOffset'] as int?) ?? 0)} · '
                 '${workout['title']}',
               ),
-              subtitle: Text(
-                [
-                  workout['workoutType'],
-                  workout['reason'],
-                  if (workout['exercises'] is List)
-                    '${(workout['exercises'] as List).length}×',
-                ].join(' · '),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text([workout['workoutType'], workout['reason']].join(' · ')),
+                  // Struktura v2 (C52 §6) nebo v1 počet cviků.
+                  ProposedWorkoutStructure(workout: workout),
+                ],
               ),
             ),
           const SizedBox(height: 16),

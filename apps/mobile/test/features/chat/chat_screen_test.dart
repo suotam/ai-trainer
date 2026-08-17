@@ -225,11 +225,42 @@ void main() {
               'workoutType': 'STRENGTH',
               'dayOffset': 0,
               'reason': 'Základní stimul.',
+              // Plán v2 (C52): sekce → kroky nad katalogem C51.
+              'sections': [
+                {
+                  'sectionType': 'WARM_UP',
+                  'steps': [
+                    {
+                      'stepType': 'EXERCISE',
+                      'exerciseCode': 'JUMPING_JACKS',
+                      'prescription': 'DURATION',
+                      'sets': [
+                        {'durationSeconds': 60},
+                      ],
+                    },
+                  ],
+                },
+                {
+                  'sectionType': 'MAIN',
+                  'steps': [
+                    {
+                      'stepType': 'EXERCISE',
+                      'exerciseCode': 'RING_ROW',
+                      'prescription': 'SET_REP',
+                      'sets': [
+                        {'repetitions': 10, 'restAfterSeconds': 60},
+                        {'repetitions': 10, 'restAfterSeconds': 60},
+                      ],
+                    },
+                    {'stepType': 'REST', 'durationSeconds': 90},
+                  ],
+                },
+              ],
             },
           ],
         },
-        promptVersion: 'plan-proposal-v2',
-        schemaVersion: 'plan-proposal-schema-v1',
+        promptVersion: 'plan-proposal-v3',
+        schemaVersion: 'plan-proposal-schema-v2',
         modelId: 'fake-model',
       ),
     );
@@ -241,9 +272,16 @@ void main() {
     await tester.tap(find.byKey(ChatScreen.sendButtonKey));
     await tester.pumpAndSettle();
 
-    // Karta návrhu čte C29 úložiště (CHP-001/009).
+    // Karta návrhu čte C29 úložiště (CHP-001/009) a ukazuje strukturu v2
+    // čitelně (C52 §6): sekce, katalogové názvy, sady, pauzy.
     expect(find.text('Chat týden'), findsOneWidget);
     expect(find.textContaining('Full Body A'), findsOneWidget);
+    expect(find.text('Rozcvička'), findsOneWidget);
+    expect(find.text('Hlavní část'), findsOneWidget);
+    expect(find.textContaining('Přítahy na kruzích'), findsOneWidget);
+    expect(find.textContaining('2×10 opak.'), findsOneWidget);
+    expect(find.textContaining('pauza 60 s'), findsOneWidget);
+    expect(find.textContaining('Pauza 90 s'), findsOneWidget);
     // Před potvrzením žádný plán (CHP-004).
     Future<int> plans() async =>
         (await db
@@ -263,6 +301,24 @@ void main() {
         .customSelect('SELECT COUNT(*) AS c FROM local_workout_instances')
         .getSingle();
     expect(instances.data['c'], 1);
+    // Materializace v2 (C52 §5): 2 sekce, 3 kroky (2 cviky s kódem + REST).
+    final sections = await db
+        .customSelect('SELECT COUNT(*) AS c FROM local_workout_sections')
+        .getSingle();
+    expect(sections.data['c'], 2);
+    final steps = await db
+        .customSelect(
+          'SELECT st.step_type, st.exercise_code FROM local_workout_steps st '
+          'JOIN local_workout_sections sec ON st.section_id = sec.id '
+          'ORDER BY sec.position, st.position',
+        )
+        .get();
+    expect(steps, hasLength(3));
+    expect(steps.map((r) => r.data['exercise_code']).whereType<String>(), [
+      'JUMPING_JACKS',
+      'RING_ROW',
+    ]);
+    expect(steps.map((r) => r.data['step_type']), contains('REST'));
   });
 
   testWidgets('REQUEST_PLAN selhání pipeline je typované FAILED s retry '
