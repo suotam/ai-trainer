@@ -6,6 +6,7 @@ import '../../../app/navigation/app_routes.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../ai/application/ai_providers.dart';
 import '../../ai/domain/ai_proposal.dart';
+import '../../ai/presentation/proposed_workout_structure.dart';
 import '../application/chat_providers.dart';
 import '../domain/chat_models.dart';
 
@@ -424,18 +425,24 @@ class _ProposalCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(proposal.summary, style: theme.textTheme.bodySmall),
             const SizedBox(height: 8),
-            for (final workout in workouts)
+            for (final workout in workouts) ...[
               Text(
                 '${l10n.aiDayLabel((workout['dayOffset'] as int?) ?? 0)} · '
                 '${workout['title']} — ${workout['reason']}',
                 style: theme.textTheme.bodySmall,
               ),
-            for (final operation in operations)
+              // Struktura v2 (C52 §6): sekce → kroky čitelně.
+              ProposedWorkoutStructure(workout: workout),
+            ],
+            for (final operation in operations) ...[
               Text(
                 '${l10n.aiOperationLabel('${operation['operation']}')} — '
                 '${operation['reason']}',
                 style: theme.textTheme.bodySmall,
               ),
+              if (operation['workout'] is Map)
+                ProposedWorkoutStructure(workout: operation['workout'] as Map),
+            ],
             const SizedBox(height: 8),
             if (proposal.isPending)
               Wrap(

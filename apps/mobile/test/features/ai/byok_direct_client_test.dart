@@ -110,8 +110,16 @@ void main() {
     expect('${body['system']}', contains('"planTitle"'));
     // Klíč nikdy v těle requestu (BYK-001/003).
     expect(seen!.body.contains(testKey), isFalse);
-    expect(response.promptVersion, 'plan-proposal-v2');
-    expect(response.schemaVersion, 'plan-proposal-schema-v1');
+    // Plán v2 (C52): prompt v3 + schéma v2 + structured outputs s katalogem
+    // + bounded 8192 tokenů (PS2-013).
+    expect(response.promptVersion, 'plan-proposal-v3');
+    expect(body['max_tokens'], 8192);
+    expect(body['thinking'], {'type': 'disabled'});
+    final format = ((body['output_config']! as Map)['format']! as Map);
+    expect(format['type'], 'json_schema');
+    expect(jsonEncode(format['schema']), contains('"HANGBOARD_MAX_HANG"'));
+    expect('${body['system']}', contains('"sections"'));
+    expect(response.schemaVersion, 'plan-proposal-schema-v2');
     expect(response.modelId, 'claude-sonnet-5');
     expect(response.proposal['planTitle'], 'p');
   });
@@ -133,8 +141,8 @@ void main() {
       context: const {},
       requestType: 'ADJUSTMENT_PROPOSAL',
     );
-    expect(response.promptVersion, 'adjustment-proposal-v2');
-    expect(response.schemaVersion, 'adjustment-proposal-schema-v1');
+    expect(response.promptVersion, 'adjustment-proposal-v3');
+    expect(response.schemaVersion, 'adjustment-proposal-schema-v2');
     expect(response.proposal['summary'], 's');
   });
 

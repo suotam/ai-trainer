@@ -2,6 +2,7 @@ import '../../auth/domain/auth_api_client.dart';
 import '../data/adjustment_proposal_client_validator.dart';
 import '../data/http_ai_api_client.dart';
 import '../data/plan_proposal_client_validator.dart';
+import '../data/plan_proposal_v2_validator.dart';
 import '../domain/ai_context.dart';
 import '../domain/ai_proposal.dart';
 import '../domain/ai_proposal_repository.dart';
@@ -56,15 +57,19 @@ class RequestPlanProposal {
       return const ProposalUnavailable();
     }
 
-    // Obrana do hloubky (SOV-003): klient validuje kanonický payload
-    // znovu — validátor podle typu (C37 §4).
+    // Obrana do hloubky (SOV-003 / PS2-005): klient validuje kanonický
+    // payload znovu — validátor podle typu a verze schématu (C52 §6:
+    // nové výstupy výhradně v2; v1 validátory zůstávají pro historii).
+    final isV2 = response.schemaVersion.endsWith('-schema-v2');
     final canonical = switch (type) {
-      AiRequestType.planProposal => validatePlanProposalPayload(
-        response.proposal,
-      ),
-      AiRequestType.adjustmentProposal => validateAdjustmentProposalPayload(
-        response.proposal,
-      ),
+      AiRequestType.planProposal =>
+        isV2
+            ? validatePlanProposalV2Payload(response.proposal)
+            : validatePlanProposalPayload(response.proposal),
+      AiRequestType.adjustmentProposal =>
+        isV2
+            ? validateAdjustmentProposalV2Payload(response.proposal)
+            : validateAdjustmentProposalPayload(response.proposal),
     };
     if (canonical == null) {
       return const ProposalInvalidOutput();

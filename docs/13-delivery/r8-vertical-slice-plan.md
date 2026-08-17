@@ -198,6 +198,6 @@ R8 je dokončeno pouze pokud (doloženo testy a on-device evidencí):
 
 # 15. Stav backlogu
 
-R8 backlog (`R8-01` až `R8-05`): **`R8-01` je Done** (C51 vznikl, implementace mergnuta — viz `DOCUMENTATION_STATUS.md` §3); `R8-02` až `R8-05` čekají na blokující kontrakty (§7.1: C52–C54).
+R8 backlog (`R8-01` až `R8-05`): **`R8-01` a `R8-02` jsou Done** (C51 a C52 vznikly, implementace mergnuty — viz `DOCUMENTATION_STATUS.md` §3); `R8-03` až `R8-05` čekají na blokující kontrakty (§7.1: C53–C54).
 
-Další kanonický krok: vytvořit **C52 – Plan proposal schema v2** → tím se `R8-02` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices, ne všechny najednou.
+Další kanonický krok: vytvořit **C53 – Guided session player** → tím se `R8-03` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices, ne všechny najednou.

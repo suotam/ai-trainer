@@ -282,6 +282,108 @@ class DriftProposalExecutor implements ProposalExecutor {
     return active.single.id;
   }
 
+  /// Překlad kanonických sekcí v2 (C52 §5) na C20 vstup — 1:1, bez
+  /// dopočtu (CSE-012, PS2-010). Payload prošel validátorem v2, přesto
+  /// tvar kontrolujeme (nikdy tichý default).
+  List<PlannedSectionInput>? _sectionsInput(Object? raw) {
+    if (raw is! List) {
+      return null;
+    }
+    final sections = <PlannedSectionInput>[];
+    for (final sectionRaw in raw) {
+      if (sectionRaw is! Map) {
+        return null;
+      }
+      final sectionType = sectionRaw['sectionType'];
+      final title = sectionRaw['title'];
+      final stepsRaw = sectionRaw['steps'];
+      if (sectionType is! String || title is! String? || stepsRaw is! List) {
+        return null;
+      }
+      final steps = <PlannedStepInput>[];
+      for (final stepRaw in stepsRaw) {
+        if (stepRaw is! Map) {
+          return null;
+        }
+        final stepType = stepRaw['stepType'];
+        final note = stepRaw['note'];
+        if (stepType is! String || note is! String?) {
+          return null;
+        }
+        if (stepType == 'REST') {
+          final duration = stepRaw['durationSeconds'];
+          if (duration is! int) {
+            return null;
+          }
+          steps.add(
+            PlannedStepInput(
+              stepType: 'REST',
+              durationSeconds: duration,
+              note: note,
+            ),
+          );
+          continue;
+        }
+        final code = stepRaw['exerciseCode'];
+        final customTitle = stepRaw['customTitle'];
+        final instructions = stepRaw['instructions'];
+        final prescription = stepRaw['prescription'];
+        final setsRaw = stepRaw['sets'];
+        if (stepType != 'EXERCISE' ||
+            code is! String? ||
+            customTitle is! String? ||
+            instructions is! String? ||
+            prescription is! String ||
+            setsRaw is! List) {
+          return null;
+        }
+        final sets = <PlannedSetInput>[];
+        for (final setRaw in setsRaw) {
+          if (setRaw is! Map) {
+            return null;
+          }
+          final repetitions = setRaw['repetitions'];
+          final durationSeconds = setRaw['durationSeconds'];
+          final weight = setRaw['weightKg'];
+          final rest = setRaw['restAfterSeconds'];
+          if (repetitions is! int? ||
+              durationSeconds is! int? ||
+              weight is! num? ||
+              rest is! int?) {
+            return null;
+          }
+          sets.add(
+            PlannedSetInput(
+              repetitions: repetitions,
+              durationSeconds: durationSeconds,
+              weightKg: weight?.toDouble(),
+              restAfterSeconds: rest,
+            ),
+          );
+        }
+        steps.add(
+          PlannedStepInput(
+            stepType: 'EXERCISE',
+            exerciseCode: code,
+            customTitle: customTitle,
+            instructions: instructions,
+            prescription: prescription,
+            sets: sets,
+            note: note,
+          ),
+        );
+      }
+      sections.add(
+        PlannedSectionInput(
+          sectionType: sectionType,
+          title: title,
+          steps: steps,
+        ),
+      );
+    }
+    return sections;
+  }
+
   /// Překlad adjustment workoutu (bez per-workout reason, C37 §3).
   PlannedWorkoutInput? _workoutInputForAdjustment(
     Object? raw, {
@@ -298,6 +400,20 @@ class DriftProposalExecutor implements ProposalExecutor {
     final duration = raw['plannedDurationMinutes'];
     if (duration is! int?) {
       return null;
+    }
+    // Plán v2 (C52 §5): sekce mají přednost před legacy exercises.
+    if (raw.containsKey('sections')) {
+      final sections = _sectionsInput(raw['sections']);
+      if (sections == null) {
+        return null;
+      }
+      return PlannedWorkoutInput(
+        title: title,
+        workoutType: workoutType,
+        scheduledLocalDate: scheduledLocalDate,
+        plannedDurationMinutes: duration,
+        sections: sections,
+      );
     }
     final exercises = <PlannedExerciseInput>[];
     final exercisesRaw = raw['exercises'];
@@ -353,6 +469,20 @@ class DriftProposalExecutor implements ProposalExecutor {
     final duration = raw['plannedDurationMinutes'];
     if (duration is! int?) {
       return null;
+    }
+    // Plán v2 (C52 §5): sekce mají přednost před legacy exercises.
+    if (raw.containsKey('sections')) {
+      final sections = _sectionsInput(raw['sections']);
+      if (sections == null) {
+        return null;
+      }
+      return PlannedWorkoutInput(
+        title: title,
+        workoutType: workoutType,
+        scheduledLocalDate: scheduledDateForOffset(now, dayOffset),
+        plannedDurationMinutes: duration,
+        sections: sections,
+      );
     }
     final exercisesRaw = raw['exercises'];
     final exercises = <PlannedExerciseInput>[];

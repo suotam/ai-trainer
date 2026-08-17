@@ -201,6 +201,12 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
             ),
           );
 
+      if (input.sections != null) {
+        // Plán v2 (C52 §5): sekce → kroky → sady, 1:1 do fyzického modelu.
+        await _writeSections(instanceId, input.sections!, newId, nowMillis);
+        return PlanWriteSaved(instanceId);
+      }
+
       final sectionId = newId();
       await _db
           .into(_db.localWorkoutSections)
@@ -329,6 +335,114 @@ class DriftTrainingPlanRepository implements TrainingPlanRepository {
     }
     return row;
   }
+
+  /// Materializace plánu v2 (C52 §5, PS2-002/010): žádný dopočet — validní
+  /// kanonický vstup se zapíše 1:1 (sekce, EXERCISE/REST kroky, sady vč.
+  /// pauz a času). Snapshot `title` katalogového kroku = kód (lokalizovaný
+  /// název dodá prezentace z katalogu, C51 §7).
+  Future<void> _writeSections(
+    String instanceId,
+    List<PlannedSectionInput> sections,
+    String Function() newId,
+    int nowMillis,
+  ) async {
+    for (var s = 0; s < sections.length; s++) {
+      final section = sections[s];
+      final sectionId = newId();
+      await _db
+          .into(_db.localWorkoutSections)
+          .insert(
+            LocalWorkoutSectionsCompanion.insert(
+              id: sectionId,
+              workoutInstanceId: instanceId,
+              position: s,
+              title: section.title ?? _sectionDefaultTitle(section.sectionType),
+              sectionType: section.sectionType,
+              priority: 'REQUIRED',
+              isOptional: false,
+              createdAt: nowMillis,
+              updatedAt: nowMillis,
+            ),
+          );
+      for (var i = 0; i < section.steps.length; i++) {
+        final step = section.steps[i];
+        final stepId = newId();
+        if (step.isRest) {
+          await _db
+              .into(_db.localWorkoutSteps)
+              .insert(
+                LocalWorkoutStepsCompanion.insert(
+                  id: stepId,
+                  sectionId: sectionId,
+                  position: i,
+                  stepType: 'REST',
+                  title: 'REST',
+                  purpose: Value(step.note),
+                  priority: 'REQUIRED',
+                  isSkippable: true,
+                  prescriptionType: 'DURATION',
+                  plannedDurationSeconds: Value(step.durationSeconds),
+                  createdAt: nowMillis,
+                  updatedAt: nowMillis,
+                ),
+              );
+          continue;
+        }
+        final isDuration = step.prescription == 'DURATION';
+        await _db
+            .into(_db.localWorkoutSteps)
+            .insert(
+              LocalWorkoutStepsCompanion.insert(
+                id: stepId,
+                sectionId: sectionId,
+                position: i,
+                stepType: 'EXERCISE',
+                title: step.exerciseCode == null
+                    ? step.customTitle!
+                    : _humanizeCode(step.exerciseCode!),
+                instructions: Value(step.instructions),
+                purpose: Value(step.note),
+                priority: 'REQUIRED',
+                isSkippable: false,
+                prescriptionType: isDuration ? 'DURATION' : 'SET_REP',
+                exerciseCode: Value(step.exerciseCode),
+                createdAt: nowMillis,
+                updatedAt: nowMillis,
+              ),
+            );
+        for (var setIndex = 0; setIndex < step.sets.length; setIndex++) {
+          final set = step.sets[setIndex];
+          await _db
+              .into(_db.localSetPlans)
+              .insert(
+                LocalSetPlansCompanion.insert(
+                  id: newId(),
+                  workoutStepId: stepId,
+                  position: setIndex,
+                  plannedRepetitions: Value(set.repetitions),
+                  plannedDurationSeconds: Value(set.durationSeconds),
+                  plannedWeightKg: Value(set.weightKg),
+                  restAfterSeconds: Value(set.restAfterSeconds),
+                ),
+              );
+        }
+      }
+    }
+  }
+
+  /// Snapshot názvu katalogového kroku (C51 §7): čitelný tvar kódu; zdroj
+  /// pravdy pro zobrazení zůstává katalog + l10n.
+  static String _humanizeCode(String code) {
+    final lower = code.toLowerCase().replaceAll('_', ' ');
+    return lower[0].toUpperCase() + lower.substring(1);
+  }
+
+  static String _sectionDefaultTitle(String sectionType) =>
+      switch (sectionType) {
+        'WARM_UP' => 'Warm-up',
+        'COOLDOWN' => 'Cooldown',
+        _ => 'Main',
+      };
 
   bool _isValidWorkout(PlannedWorkoutInput input) {
     if (input.title.trim().isEmpty ||

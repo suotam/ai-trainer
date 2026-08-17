@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.77  
+**Verze:** 2.78  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-16
@@ -504,13 +504,17 @@ cviků). Další kanonický krok:
 
 **Release 8 „Vedený trénink" je naplánován**
 (`docs/13-delivery/r8-vertical-slice-plan.md`, backlog `R8-01` až `R8-05`,
-contract map C51–C54); **`R8-01` katalog cviků je implementován** (C51:
-112 stabilních kódů s popisem provedení a cue cs/en, schema v16
-`exercise_code`, výběr z katalogu v ručním plánu, vlastní cvik s povinným
-popisem — mobil 383/383). Další kanonický krok:
+contract map C51–C54); **`R8-01` katalog cviků** (C51: 112 stabilních
+kódů s popisem provedení a cue cs/en, schema v16 `exercise_code`) a
+**`R8-02` plán v2** (C52: sekce rozcvička/hlavní/vyklidnění, kroky nad
+katalogem nebo vlastní s popisem, sady reps/čas s pauzami, REST kroky,
+structured outputs + validátor v2, prompty v3, materializace 1:1, karta
+návrhu se strukturou; živá sonda proti reálnému modelu prošla, eval
+dataset v2) **jsou implementovány** — mobil 390/390. Další kanonický
+krok:
 
 ```text
-C52 plán v2 → R8-02 → C53 průvodce → R8-03 → C54 ilustrace → R8-04 → R8-05
+C53 průvodce → R8-03 → C54 ilustrace → R8-04 → R8-05 E2E + Exit Review
 ```
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.

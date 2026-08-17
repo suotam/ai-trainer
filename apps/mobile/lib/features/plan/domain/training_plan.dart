@@ -77,6 +77,70 @@ class PlannedExerciseInput {
   bool get isDuration => durationSeconds != null;
 }
 
+/// Sada kroku plánu v2 (C52 §5): opakování (SET_REP) nebo čas (DURATION).
+@immutable
+class PlannedSetInput {
+  const PlannedSetInput({
+    this.repetitions,
+    this.durationSeconds,
+    this.weightKg,
+    this.restAfterSeconds,
+  });
+
+  final int? repetitions;
+  final int? durationSeconds;
+  final double? weightKg;
+  final int? restAfterSeconds;
+}
+
+/// Krok sekce plánu v2 (C52 §2/§5): EXERCISE (katalog C51 XOR vlastní
+/// s popisem) nebo REST (jen čas).
+@immutable
+class PlannedStepInput {
+  const PlannedStepInput({
+    required this.stepType,
+    this.exerciseCode,
+    this.customTitle,
+    this.instructions,
+    this.prescription,
+    this.sets = const [],
+    this.note,
+    this.durationSeconds,
+  });
+
+  /// `EXERCISE` | `REST`.
+  final String stepType;
+  final String? exerciseCode;
+  final String? customTitle;
+  final String? instructions;
+
+  /// `SET_REP` | `DURATION` (jen EXERCISE).
+  final String? prescription;
+  final List<PlannedSetInput> sets;
+
+  /// Krátký koučovací záměr kroku → `purpose`.
+  final String? note;
+
+  /// Jen REST.
+  final int? durationSeconds;
+
+  bool get isRest => stepType == 'REST';
+}
+
+/// Sekce plánu v2 (C52 §2/§5): WARM_UP | MAIN | COOLDOWN.
+@immutable
+class PlannedSectionInput {
+  const PlannedSectionInput({
+    required this.sectionType,
+    required this.steps,
+    this.title,
+  });
+
+  final String sectionType;
+  final String? title;
+  final List<PlannedStepInput> steps;
+}
+
 /// Zadání ručního workoutu (C20 §5.1). Cviky jsou volitelné (MPC-011).
 @immutable
 class PlannedWorkoutInput {
@@ -87,6 +151,7 @@ class PlannedWorkoutInput {
     this.plannedDurationMinutes,
     this.description,
     this.exercises = const [],
+    this.sections,
   });
 
   final String title;
@@ -94,7 +159,13 @@ class PlannedWorkoutInput {
   final String scheduledLocalDate;
   final int? plannedDurationMinutes;
   final String? description;
+
+  /// Legacy v1 cviky (jedna sekce MAIN, SET_REP) — použito, když [sections]
+  /// chybí (koexistence C52 §6).
   final List<PlannedExerciseInput> exercises;
+
+  /// Plán v2 (C52 §5): sekce → kroky → sady; má přednost před [exercises].
+  final List<PlannedSectionInput>? sections;
 }
 
 /// Typovaný výsledek zápisu — nikdy raw persistence výjimka.
