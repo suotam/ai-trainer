@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:ai_trainer_mobile/core/database/app_database.dart';
 import 'package:drift/native.dart';
@@ -102,7 +102,7 @@ void main() {
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 16);
+      expect(ver, 17);
       // v16 (C51 §7, EXC-004): aditivní nullable exercise_code bez backfillu.
       final stepColumns = await db
           .customSelect('PRAGMA table_info(local_workout_steps)')
@@ -116,6 +116,19 @@ void main() {
           )
           .getSingle();
       expect(codedSteps.data['c'], 0);
+      // v17 (C53 §4, GSP-003): stav průvodce na session — aditivní, NULL.
+      final sessionColumns = await db
+          .customSelect('PRAGMA table_info(local_workout_sessions)')
+          .map((r) => r.data['name'] as String)
+          .get();
+      expect(
+        sessionColumns,
+        containsAll([
+          'player_phase',
+          'player_phase_started_at',
+          'active_set_position',
+        ]),
+      );
 
       // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>

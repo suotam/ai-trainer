@@ -88,10 +88,16 @@ void main() {
       await settle(tester);
       expect(find.byKey(ActiveSessionScreen.screenKey), findsOneWidget);
 
-      // 4. Zápis alespoň jednoho výkonu: reps prvního setu + Save.
+      // 4. Zápis alespoň jednoho výkonu: reps prvního setu + Save. Plochý
+      //    zápis je pod průvodcem (C53 §8) — nejdřív ho doscrollovat.
+      await tester.ensureVisible(find.byType(TextField).first);
+      await settle(tester);
       await tester.enterText(find.byType(TextField).first, '10');
       await settle(tester, 6);
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Save').first);
+      final saveButton = find.widgetWithText(OutlinedButton, 'Save').first;
+      await tester.ensureVisible(saveButton);
+      await settle(tester);
+      await tester.tap(saveButton);
       await settle(tester);
       // Uložení potvrzeno v UI (viditelný stav lokálního uložení).
       expect(find.text('Saved'), findsOneWidget);

@@ -216,6 +216,12 @@ class LocalWorkoutSessions extends Table {
   IntColumn get completedAt => integer().nullable()();
   TextColumn get activeStepId => text().nullable()();
   IntColumn get elapsedActiveSeconds => integer()();
+
+  /// Stav průvodce (C53 §4, v17): fáze, ukotvení běžícího odpočtu, sada.
+  /// Zařízení-lokální pomocník obnovy (GSP-003/004).
+  TextColumn get playerPhase => text().nullable()();
+  IntColumn get playerPhaseStartedAt => integer().nullable()();
+  IntColumn get activeSetPosition => integer().nullable()();
   TextColumn get notes => text().nullable()();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();

@@ -23,6 +23,21 @@ abstract interface class WorkoutPerformanceRepository {
     required int? actualRepetitions,
     required double? actualWeightKg,
     required DateTime now,
+    int? actualDurationSeconds,
+  });
+
+  /// Zahájení sady v průvodci (C53 §5): krok performance `IN_PROGRESS` +
+  /// `started_at` (poprvé). Ověří aktivní session a existenci setu.
+  Future<RecordPerformanceResult> startSet({
+    required String setPerformanceId,
+    required DateTime now,
+  });
+
+  /// Přeskočení kroku (C53 §5, GSP-008): step performance `SKIPPED`,
+  /// jeho nedokončené sady `SKIPPED`. Poctivý stav — nikdy COMPLETED.
+  Future<RecordPerformanceResult> skipStep({
+    required String stepPerformanceId,
+    required DateTime now,
   });
 
   /// Atomicky přepne dokončení setu (COMPLETED ↔ PLANNED). Ověří aktivní

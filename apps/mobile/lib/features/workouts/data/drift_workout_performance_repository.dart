@@ -205,6 +205,7 @@ class DriftWorkoutPerformanceRepository
     required int? actualRepetitions,
     required double? actualWeightKg,
     required DateTime now,
+    int? actualDurationSeconds,
   }) {
     return _db.transaction(() async {
       final context = await _loadSetContext(setPerformanceId);
@@ -222,11 +223,92 @@ class DriftWorkoutPerformanceRepository
         LocalSetPerformancesCompanion(
           actualRepetitions: Value(actualRepetitions),
           actualWeightKg: Value(actualWeightKg),
+          // DURATION skutečnost (C53 GSP-010) — jen když ji volající uvede.
+          actualDurationSeconds: actualDurationSeconds == null
+              ? const Value.absent()
+              : Value(actualDurationSeconds),
           updatedAt: Value(nowMillis),
           rowVersion: Value(context.setRowVersion + 1),
         ),
       );
       await _touchSession(context.sessionId, nowMillis);
+      return const PerformanceSaved();
+    });
+  }
+
+  @override
+  Future<RecordPerformanceResult> startSet({
+    required String setPerformanceId,
+    required DateTime now,
+  }) {
+    return _db.transaction(() async {
+      final context = await _loadSetContext(setPerformanceId);
+      if (context == null) {
+        return const PerformanceSetNotFound();
+      }
+      if (!_isActive(context.sessionStatus)) {
+        return const PerformanceSessionNotActive();
+      }
+      final nowMillis = now.toUtc().millisecondsSinceEpoch;
+      final stepPerf = await (_db.select(
+        _db.localStepPerformances,
+      )..where((t) => t.id.equals(context.stepPerformanceId))).getSingle();
+      // Krok se poprvé rozběhl: IN_PROGRESS + started_at (jen poprvé);
+      // dokončený/přeskočený krok se nevrací zpět.
+      if (stepPerf.status == 'NOT_STARTED') {
+        await (_db.update(
+          _db.localStepPerformances,
+        )..where((t) => t.id.equals(stepPerf.id))).write(
+          LocalStepPerformancesCompanion(
+            status: const Value('IN_PROGRESS'),
+            startedAt: Value(stepPerf.startedAt ?? nowMillis),
+            updatedAt: Value(nowMillis),
+            rowVersion: Value(stepPerf.rowVersion + 1),
+          ),
+        );
+      }
+      await _touchSession(context.sessionId, nowMillis);
+      return const PerformanceSaved();
+    });
+  }
+
+  @override
+  Future<RecordPerformanceResult> skipStep({
+    required String stepPerformanceId,
+    required DateTime now,
+  }) {
+    return _db.transaction(() async {
+      final stepPerf = await (_db.select(
+        _db.localStepPerformances,
+      )..where((t) => t.id.equals(stepPerformanceId))).getSingleOrNull();
+      if (stepPerf == null) {
+        return const PerformanceSetNotFound();
+      }
+      final session = await (_db.select(
+        _db.localWorkoutSessions,
+      )..where((t) => t.id.equals(stepPerf.workoutSessionId))).getSingle();
+      if (!_isActive(session.status)) {
+        return const PerformanceSessionNotActive();
+      }
+      final nowMillis = now.toUtc().millisecondsSinceEpoch;
+      await (_db.update(
+        _db.localStepPerformances,
+      )..where((t) => t.id.equals(stepPerformanceId))).write(
+        LocalStepPerformancesCompanion(
+          status: const Value('SKIPPED'),
+          completedAt: Value(nowMillis),
+          updatedAt: Value(nowMillis),
+          rowVersion: Value(stepPerf.rowVersion + 1),
+        ),
+      );
+      // Nedokončené sady poctivě SKIPPED (GSP-008); dokončené zůstávají.
+      await _db.customStatement(
+        "UPDATE local_set_performances SET status = 'SKIPPED', "
+        'updated_at = ?, row_version = row_version + 1 '
+        "WHERE step_performance_id = ? AND status <> 'COMPLETED'",
+        [nowMillis, stepPerformanceId],
+      );
+      await _touchSession(session.id, nowMillis);
       return const PerformanceSaved();
     });
   }
@@ -285,6 +367,7 @@ class DriftWorkoutPerformanceRepository
       sessionId: session.id,
       sessionStatus: session.status,
       setRowVersion: setRow.rowVersion,
+      stepPerformanceId: stepPerf.id,
     );
   }
 
@@ -317,8 +400,10 @@ class _SetContext {
     required this.sessionId,
     required this.sessionStatus,
     required this.setRowVersion,
+    required this.stepPerformanceId,
   });
   final String sessionId;
   final String sessionStatus;
   final int setRowVersion;
+  final String stepPerformanceId;
 }

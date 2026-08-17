@@ -51,5 +51,15 @@ TrackerExercise mapTrackerExercise({
     title: step.title,
     sectionTitle: sectionTitle,
     sets: sets,
+    status: decodeStepPerformanceStatus(stepPerformance.status),
   );
+}
+
+StepPerformanceStatus decodeStepPerformanceStatus(String code) {
+  for (final value in StepPerformanceStatus.values) {
+    if (value.code == code) {
+      return value;
+    }
+  }
+  throw UnsupportedPersistedValue('local_step_performances.status', code);
 }

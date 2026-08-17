@@ -11,6 +11,7 @@ import '../application/workout_detail_providers.dart';
 import '../domain/session_tracker.dart';
 import '../domain/workout_session.dart';
 import 'feedback_confirm_dialog.dart';
+import 'guided_session_card.dart';
 import 'session_time_format.dart';
 import 'session_tracker_view.dart';
 
@@ -94,6 +95,11 @@ class _ActiveSessionContent extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(l10n.activeSessionStartedAt(formatStartedAt(session.startedAt))),
         const SizedBox(height: 16),
+        // Průvodce (R8-03, C53 §8): krok za krokem s časovači — primární
+        // část; plochý zápis výkonů zůstává pod ním.
+        GuidedSessionCard(sessionId: session.id),
+        const SizedBox(height: 16),
+        Text(l10n.trackerListTitle, style: theme.textTheme.titleMedium),
         // Tracker výkonu (R1-04) — plánované vs. skutečné hodnoty, zápis.
         SessionTrackerView(sessionId: session.id),
         const SizedBox(height: 24),
