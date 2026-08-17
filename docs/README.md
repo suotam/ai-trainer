@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.79  
+**Verze:** 2.80  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-08-16
+**Poslední aktualizace:** 2026-08-17
 
 ---
 
@@ -514,11 +514,14 @@ dataset v2) a **`R8-03` průvodce tréninkem** (C53: krokový průvodce nad
 existující session — sada X/Y, odpočet pauz, časovač DURATION, REST kroky,
 předchozí/další/přeskočit, pauza/pokračovat, uplynulý čas; stav odvozený
 z uložených značek v17 → obnovitelný po přerušení; dokončení finalizuje
-aktivní čas) **jsou implementovány** — mobil 402/402. Další kanonický
+aktivní čas) a **`R8-04` ilustrace cviků** (C54: autorská schémata postavy
+vykreslená nativně, 65 archetypů pokrývá všech 112 kódů, animace v
+průvodci, miniatura v detailu, vlastní cvik poctivě bez ilustrace) **jsou
+implementovány** — mobil 405/405. Další kanonický
 krok:
 
 ```text
-C54 ilustrace → R8-04 → R8-05 E2E + Exit Review (+ on-device revize)
+R8-05 E2E + Exit Review (+ on-device revize R8-01..04 vlastníkem)
 ```
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.

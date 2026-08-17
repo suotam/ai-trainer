@@ -9,6 +9,7 @@ import '../application/workout_detail_providers.dart';
 import '../domain/exercise_catalog.dart';
 import '../domain/start_session_result.dart';
 import '../domain/workout_read_model.dart';
+import 'exercise_illustration.dart';
 import 'workout_duration_format.dart';
 
 /// Detail workoutu (VSP §13/§14, screen-spec §34).
@@ -287,7 +288,18 @@ class _StepView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: theme.textTheme.bodyLarge),
+          Row(
+            children: [
+              Expanded(child: Text(title, style: theme.textTheme.bodyLarge)),
+              // Statický náhled první polohy (C54 §3).
+              if (entry != null)
+                ExerciseIllustration(
+                  exerciseCode: entry.code,
+                  animate: false,
+                  size: 44,
+                ),
+            ],
+          ),
           if (subtitleParts.isNotEmpty)
             Text(subtitleParts.join(' · '), style: theme.textTheme.bodySmall),
           if (instructions != null && instructions.trim().isNotEmpty)
