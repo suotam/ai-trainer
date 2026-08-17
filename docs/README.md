@@ -1,9 +1,9 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.75  
+**Verze:** 2.76  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
-**Poslední aktualizace:** 2026-08-14
+**Poslední aktualizace:** 2026-08-16
 
 ---
 
@@ -490,17 +490,21 @@ naplánován** (`docs/13-delivery/r7-vertical-slice-plan.md`, backlog `R7-01`
 až `R7-06`, contract map C46–C50): osobní aplikace na jednom telefonu, chat
 jako primární rozhraní, local-first s BYOK — backend dormantní. On-device
 evidence začala (Pixel 9a; nález 1 — přetékající Today lišta — opraven).
-**Celé R7 (`R7-01` až `R7-06`) je implementováno a R7 Exit Review sepsán**
-(C46: BYOK; C47: chat; C48: profil akcemi; C49: plánování přes chat;
-C50: kalendář + quick-complete + chat jako domov; R7-06: kritická E2E —
-mobil 377/377). **Release 7 se formálně uzavře dokončením on-device
-průchodu na Pixel 9a** (viz `DOCUMENTATION_STATUS.md` §3). Další kanonický
-krok:
+**Celé R7 (`R7-01` až `R7-06`) je implementováno, R7 Exit Review proveden
+a Release 7 uzavřen** (C46: BYOK; C47: chat; C48: profil akcemi; C49:
+plánování přes chat; C50: kalendář + quick-complete + chat jako domov;
+R7-06: kritická E2E; **on-device průchod kritické cesty s reálným klíčem
+proveden 2026-08-16** — nálezy 3–3e chatu /max_tokens, thinking,
+structured outputs, strop akcí, rozhodnutí v okně/ opraveny v témže cyklu,
+tři živé opt-in sondy — mobil 377/377; viz `DOCUMENTATION_STATUS.md` §3).
+**On-device nález 4 definuje Release 8 „Vedený trénink"**: AI tréninky
+nejsou proveditelné jako vedený trénink (cvik jen název+sady+opakování,
+bez popisu, časů, pauz; tracker bez průvodce a časovačů; bez katalogu
+cviků). Další kanonický krok:
 
 ```text
-On-device průchod R7 → uzavření Release 7 → naplánování Release 8 (po pokynu)
+Naplánování Release 8 „Vedený trénink" (pokyn udělen 2026-08-16):
+C51 katalog cviků → C52 plán v2 → C53 průvodce tréninkem → C54 ilustrace
 ```
-
-Tvorba kontraktů ani implementace nezačíná bez samostatného pokynu.
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.
