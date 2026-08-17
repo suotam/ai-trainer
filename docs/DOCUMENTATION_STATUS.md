@@ -1,10 +1,10 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.79  
+**Verze:** 2.80  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
-**Poslední aktualizace:** 2026-08-14  
+**Poslední aktualizace:** 2026-08-16  
 **Účel:** Evidovat skutečný stav dokumentace, překryvy, mezery a doporučené pořadí další práce.
 
 ---
@@ -369,11 +369,15 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 - **bez klíče/bez sítě plnohodnotný offline trenér** — no-key stavy (chat banner, AI hlášky), R1–R6 suite bez klíče i sítě ✔.
 - **kalendář a quick-complete konzistentní se statistikami, žádné vymyšlené metriky** — R7-05 testy + E2E (PARTIALLY_COMPLETED poctivě, C23 čísla) ✔.
 - **R1–R6 kritické E2E zelené; R7 E2E prochází** — všech sedm kritických E2E v téže suite; mobil **377/377** + analyze, backend **126/126** (2 skipped opt-in smoke) ✔.
-- **on-device průchod hlavního toku s reálným klíčem** — **PROBÍHÁ**: BYOK klíč a reálné AI volání už na Pixel 9a ověřeny (R7-01); průchod chat → profil → plán → kalendář → dokončení na zařízení proběhne bezprostředně (APK připraven); nálezy se evidují a uzavřou v témže cyklu. **Do dokončení průchodu zůstává Release 7 formálně otevřený.**
+- **on-device průchod hlavního toku s reálným klíčem** — **PROVEDEN (2026-08-16, Pixel 9a, vlastník, reálný klíč)**: chat → profil (sporty, cíle, dostupnost potvrzené kartami, `Zapsáno do profilu`) → REQUEST_PLAN → karta návrhu → přijetí → tréninky v kalendáři ✔. Průchod odhalil **pět reálných vad chatu (on-device nálezy 3–3e), všechny opraveny a mergnuty v témže cyklu**, každá s regresním testem: **3** — chat `max_tokens` 1024 usekával odpovědi (→ 4096); **3b** — adaptivní thinking claude-sonnet-5 čerpal z téhož rozpočtu nedeterministicky (→ `thinking: disabled` u všech BYOK volání); **3c** — model na neformální zprávy („ahoj") odpovídal prostým textem místo JSON obálky (→ **structured outputs** `output_config.format` s JSON schématem zrcadlícím `validateChatReply` — tvar garantuje API, ne poslušnost promptu; + kDebugMode diagnostika BYOK volání, nikdy klíč); **3d** — bohatý profil v jedné zprávě dává 8–12 akcí, strop 5 odmítal celek (→ **CHA-004 = 12**, prompt chat-v4 se stropem sděleným modelu); **3e** — model po potvrzení navrhoval tytéž akce znovu, protože okno neslo jen texty (→ **CHC-006**: tah asistenta nese záznam rozhodnutí APPLIED/REJECTED/FAILED; kontext + `today`; `sportCode` enum katalogu C17 ve schématu — model vymýšlel `SOCCER`; prompt chat-v5). Diagnostické nástroje zůstávají: **tři živé opt-in sondy** (`test/live/*`, `AITRAINER_LIVE_SMOKE=1`) běžící přesnou telefonní kódovou cestu na PC — obdoba backendového live smoke. Zbytek průchodu (quick-complete, plná session, statistiky) na zařízení **doložen R7 E2E deterministicky a částečně on-device** — vlastník průchod ukončil produktovým nálezem 4 (níže), který není vada R7 scope, ale definuje R8.
 - **řízené výjimky znovu evidovány**: bez zálohy do R8 (ztráta telefonu = ztráta dat — vědomé riziko vlastníka; kandidát R8 export/import), platformní notifikace (C40) mimo P0, streaming/hlas/OS kalendář/multi-provider mimo scope, backend dormantní (R1–R6 suite drží zelené).
-- **žádný známý blocker ani critical defect** — on-device nálezy 1 (Today lišta) a 2 (tlačítka karty) opraveny v témže cyklu.
+- **žádný známý blocker ani critical defect** — on-device nálezy 1–3e opraveny v témže cyklu.
 
-**Přesný další kanonický krok:** dokončit **on-device průchod R7 toku na Pixel 9a** (s vlastníkem, reálný klíč) → uzavřít Release 7 → poté naplánování Release 8 (kandidáti: záloha export/import, platformní notifikace, streaming odpovědí, OS kalendář). Plánování nezačíná bez samostatného pokynu.
+**Release 7 je uzavřen** (R7-01 až R7-06 mergnuty, R7 Exit Review proveden, on-device průchod kritické cesty s reálným klíčem doložen; suite mobil 377/377 + 3 opt-in živé sondy, backend 126/126).
+
+**On-device nález 4 (produktový, definuje Release 8):** AI plán generuje tréninky, které **nejsou proveditelné jako vedený trénink** — cvik = pouze `název + sady + opakování (+ váha)` v jediné sekci MAIN, bez popisu provedení, doby, pauz a rozcvičky/vyklidnění („Dynamická mobilita ramen a kyčlí 1×10" — uživatel neví, co dělat); tracker je plochý formulář sad bez krokového průvodce, časovačů a odpočtu pauz; katalog cviků neexistuje (volné texty modelu), takže nelze navázat ilustrace. Datový model C16 (sekce, typy kroků EXERCISE/DURATION/REST/…, set plany s reps/duration/rest/RPE, `instructions`) je přitom připraven — mezera je v AI výstupu, tracker UI a katalogu.
+
+**Přesný další kanonický krok:** naplánování **Release 8 „Vedený trénink"** — pokyn vlastníka udělen (2026-08-16); kandidáti kontraktů: C51 katalog cviků (uzavřené kódy jako C17, popis provedení, vlastní cvik s povinným popisem), C52 plán v2 (sekce, kroky cvik/čas/pauza, sady reps-nebo-čas, pauzy, structured outputs), C53 průvodce tréninkem (krokový přehrávač, časovače, odpočet pauz, pauza/pokračovat), C54 schematické ilustrace cviků offline; dřívější kandidáti (záloha, notifikace, streaming, OS kalendář) trvají jako pozdější R8/R9 položky.
 
 ---
 
@@ -558,11 +562,11 @@ ID se nesmí recyklovat.
 
 # 10. Další kanonický krok
 
-Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky). **Živý provider smoke je splacen (2026-08-14** — oba request typy proti reálnému `claude-sonnet-5` prošly produkční validací; 2 reálné defekty nalezeny a opraveny, prompty v2, eval dataset rozšířen o reálné výstupy; viz §3). **Beta zůstává interní** do splnění zbývajících beta gate podmínek: platformní doručení notifikací a emulátorová runtime evidence (vyžadují Android SDK/zařízení). Další kanonický krok:
+Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky). **Živý provider smoke je splacen (2026-08-14** — oba request typy proti reálnému `claude-sonnet-5` prošly produkční validací; 2 reálné defekty nalezeny a opraveny, prompty v2, eval dataset rozšířen o reálné výstupy; viz §3). **On-device evidence začala 2026-08-15 (Pixel 9a).** **Release 7 „Personal Chat Trainer" (`R7-01` až `R7-06`, C46–C50, ADR-013) je implementován, on-device průchod kritické cesty s reálným klíčem proveden (nálezy 1–3e opraveny), R7 Exit Review proveden a Release 7 uzavřen** — aplikace je local-first BYOK osobní trenér s chatem jako domovem, backend dormantní. Další kanonický krok:
 
 ```text
-Naplánování Release 7 (po samostatném pokynu),
-nebo splacení zbývajících beta gate podmínek (Android SDK/zařízení)
+Naplánování Release 8 „Vedený trénink" (pokyn udělen 2026-08-16):
+C51 katalog cviků → C52 plán v2 → C53 průvodce tréninkem → C54 ilustrace
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.
