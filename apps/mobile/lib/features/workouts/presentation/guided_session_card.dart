@@ -6,6 +6,7 @@ import '../application/guided_session_providers.dart';
 import '../domain/exercise_catalog.dart';
 import '../domain/guided_session.dart';
 import '../domain/workout_read_model.dart';
+import 'exercise_illustration.dart';
 import 'session_time_format.dart';
 
 /// Průvodce aktivní session (C53 §8): aktuální krok s popisem a cue z
@@ -110,6 +111,16 @@ class GuidedSessionCard extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(step.sectionTitle, style: theme.textTheme.labelSmall),
             Text(title, key: stepTitleKey, style: theme.textTheme.titleLarge),
+            // Schematická ilustrace (C54): animace stojí v pauze (EXI-009);
+            // bez archetypu nic — text zůstává vždy (EXI-004/006).
+            if (step.exerciseCode != null)
+              Center(
+                child: ExerciseIllustration(
+                  exerciseCode: step.exerciseCode!,
+                  animate: !state.isPaused,
+                  size: 140,
+                ),
+              ),
             if (entry != null && !entry.bilateral)
               Text(l10n.stepPerSide, style: theme.textTheme.bodySmall),
             if (instructions != null && instructions.trim().isNotEmpty)

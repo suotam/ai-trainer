@@ -35,7 +35,7 @@ Cílová podoba: uživatel v kalendáři zmáčkne **Spustit** a aplikace ho **v
 R8-01  Exercise Catalog (uzavřené kódy, popis provedení, vlastní cvik)              (mobile)
 R8-02  Plan Proposal v2 (sekce, kroky, sady reps/čas, pauzy; structured outputs)    (mobile)
 R8-03  Guided Session Player (krokový průvodce, časovače, odpočet pauz)              (mobile)
-R8-04  Exercise Illustrations (schematické SVG animace offline)                       (mobile)
+R8-04  Exercise Illustrations (schematické animace postavy offline, nativně)          (mobile)
 R8-05  R8 Critical End-to-End Evidence and Exit Review                               (mobile)
 ```
 
@@ -120,8 +120,8 @@ Katalog cviků (kódy, názvy cs/en, popis provedení, svalové skupiny, vybaven
 **Blocking:** C53. **Evidence:** stavový model testy (přechody, časovače deterministicky přes fake clock, obnova), zápis výkonů přes existující operace, widget průchod, R1 E2E zůstává zelená.
 
 ## 9.4 R8-04 – Exercise Illustrations
-**Výsledek:** Ke každému katalogovému cviku schematická SVG animace (klíčové polohy) přibalená offline; zobrazená v průvodci a v detailu; vlastní cvik poctivě bez ilustrace; revize vlastníkem na zařízení (nálezy se opravují v témže slice).
-**Blocking:** C54. **Evidence:** test úplnosti (každý kód má asset nebo explicitní výjimku), rendering test bez sítě, velikost balíčku v limitu, on-device vizuální revize.
+**Výsledek:** Ke každému katalogovému cviku schematická animace klíčových poloh postavy (autorská schémata v repu, nativní vykreslení, offline); zobrazená v průvodci a v detailu; vlastní cvik poctivě bez ilustrace; revize vlastníkem na zařízení (nálezy se opravují v témže slice).
+**Blocking:** C54. **Evidence:** test úplnosti (každý kód má archetyp nebo explicitní výjimku), test determinismu interpolace, rendering test bez sítě, on-device vizuální revize.
 
 ## 9.5 R8-05 – R8 Critical End-to-End Evidence and Exit Review
 **Výsledek:** Automatizovaný důkaz hlavní hodnoty R8 + Exit Review.
@@ -198,6 +198,6 @@ R8 je dokončeno pouze pokud (doloženo testy a on-device evidencí):
 
 # 15. Stav backlogu
 
-R8 backlog (`R8-01` až `R8-05`): **`R8-01`, `R8-02` a `R8-03` jsou Done** (C51–C53 vznikly, implementace mergnuty — viz `DOCUMENTATION_STATUS.md` §3); `R8-04` a `R8-05` čekají (§7.1: C54).
+R8 backlog (`R8-01` až `R8-05`): **`R8-01` až `R8-04` jsou Done** (C51–C54 vznikly, implementace mergnuty — viz `DOCUMENTATION_STATUS.md` §3); `R8-05` je `READY` (Ready podmínka R8-01…04 Done splněna).
 
-Další kanonický krok: vytvořit **C54 – Exercise illustrations** → tím se `R8-04` stane `READY`. Kontrakty se tvoří postupně před příslušnými slices, ne všechny najednou.
+Další kanonický krok: **`R8-05` – kritická R8 E2E + Exit Review** (§9.5, §13); on-device revize R8-01..04 vlastníkem je součást Exit Review (EXI-008, R8P-012).
