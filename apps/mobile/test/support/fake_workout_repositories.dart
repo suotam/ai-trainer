@@ -415,12 +415,15 @@ WorkoutInstanceSummary buildSummary({
   plannedDurationSeconds: plannedDurationSeconds,
 );
 
-WorkoutInstanceDetail buildDetail({String id = 'wi1'}) => WorkoutInstanceDetail(
+WorkoutInstanceDetail buildDetail({
+  String id = 'wi1',
+  WorkoutInstanceStatus status = WorkoutInstanceStatus.ready,
+}) => WorkoutInstanceDetail(
   id: id,
   title: 'Demo workout',
   workoutType: 'STRENGTH',
   scheduledLocalDate: '2026-07-20',
-  status: WorkoutInstanceStatus.ready,
+  status: status,
   revisionNumber: 1,
   plannedDurationSeconds: 2700,
   sections: [

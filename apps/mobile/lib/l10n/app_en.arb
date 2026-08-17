@@ -152,6 +152,10 @@
   "@startWorkoutConflictOpen": {
     "description": "Action to open the existing active session."
   },
+  "startWorkoutFinished": "This workout is already finished — it can't be started again.",
+  "@startWorkoutFinished": {
+    "description": "Shown instead of the start button for completed, partially completed, skipped or cancelled workouts (on-device finding 9)."
+  },
   "activeSessionScreenTitle": "Active session",
   "@activeSessionScreenTitle": {
     "description": "Title of the active session screen."

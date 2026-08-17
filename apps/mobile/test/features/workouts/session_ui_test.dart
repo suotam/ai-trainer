@@ -7,6 +7,7 @@ import 'package:ai_trainer_mobile/features/workouts/application/session_tracker_
 import 'package:ai_trainer_mobile/features/workouts/application/workout_providers.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/r1_seed_repository.dart';
 import 'package:ai_trainer_mobile/features/workouts/domain/start_session_result.dart';
+import 'package:ai_trainer_mobile/features/workouts/domain/workout_read_model.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/active_session_screen.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/workout_detail_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,6 +61,26 @@ void main() {
     );
 
     expect(find.byKey(WorkoutDetailScreen.startButtonKey), findsOneWidget);
+  });
+
+  testWidgets('uzavřený workout (nález 9): bez tlačítka start, poctivý stav', (
+    tester,
+  ) async {
+    await pumpAt(
+      tester,
+      detailLocation,
+      workouts: FakeWorkoutInstanceRepository(
+        detailsById: {
+          'wi1': buildDetail(
+            id: 'wi1',
+            status: WorkoutInstanceStatus.partiallyCompleted,
+          ),
+        },
+      ),
+      sessions: FakeWorkoutSessionRepository(),
+    );
+    expect(find.byKey(WorkoutDetailScreen.startButtonKey), findsNothing);
+    expect(find.byKey(WorkoutDetailScreen.finishedKey), findsOneWidget);
   });
 
   testWidgets('úspěšný start naviguje na active session screen', (

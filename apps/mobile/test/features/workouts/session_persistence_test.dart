@@ -111,6 +111,27 @@ void main() {
     expect(count.data['c'], 1);
   });
 
+  test('uzavřený workout vrátí typovaný WorkoutAlreadyFinished, ne výjimku '
+      '(on-device nález 9: pád na CHECK completed_at)', () async {
+    await seed();
+    await db.customStatement(
+      "UPDATE local_workout_instances SET status = 'PARTIALLY_COMPLETED', "
+      'completed_at = ? WHERE id = ?',
+      [now.millisecondsSinceEpoch, 'demo-w1-instance'],
+    );
+    final result = await sessions.startSession(
+      workoutInstanceId: 'demo-w1-instance',
+      newSessionId: 'ses-finished',
+      now: now,
+    );
+    expect(result, isA<WorkoutAlreadyFinished>());
+    expect((result as WorkoutAlreadyFinished).status, 'PARTIALLY_COMPLETED');
+    final count = await db
+        .customSelect('SELECT COUNT(*) AS c FROM local_workout_sessions')
+        .getSingle();
+    expect(count.data['c'], 0);
+  });
+
   test('neexistující workout vrátí workout-not-found', () async {
     await seed();
     final result = await sessions.startSession(

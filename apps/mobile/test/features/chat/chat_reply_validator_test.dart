@@ -56,6 +56,29 @@ void main() {
     expect(fenced.actions, isEmpty);
   });
 
+  test('on-device nález 7: koncová čárka a fence uvnitř textu odpovědi '
+      'nerozbijí validaci; obsah řetězců se nemění', () {
+    // Přesný tvar z telefonu: `{"reply": "…", }`.
+    final trailing = validateChatReply(
+      '{"reply": "Ještě ne, teď to teprve navrhuji.", }',
+    )!;
+    expect(trailing.text, 'Ještě ne, teď to teprve navrhuji.');
+    expect(trailing.actions, isEmpty);
+    final trailingInList = validateChatReply(
+      '{"reply":"ok","actions":[{"action":"REQUEST_PLAN"},]}',
+    )!;
+    expect(trailingInList.actions, [
+      {'action': 'REQUEST_PLAN'},
+    ]);
+    // Čárka a fence uvnitř řetězce zůstávají netknuté.
+    final inside = validateChatReply(
+      '{"reply":"Rutina: ```\\n1) kočka, }\\n```, pak dech.","actions":[]}',
+    )!;
+    expect(inside.text, 'Rutina: ```\n1) kočka, }\n```, pak dech.');
+    // Skutečně rozbité JSON dál = null.
+    expect(validateChatReply('{"reply": "x", "actions": [}'), isNull);
+  });
+
   test('nevalidní celek = null: neznámý druh, špatný enum, XOR sportu, '
       'nadlimit akcí, chybějící reply, plain text (CHA-003/004)', () {
     Map<String, Object?> base(String kind) => {

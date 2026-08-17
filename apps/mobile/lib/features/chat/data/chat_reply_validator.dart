@@ -67,11 +67,18 @@ ChatReply? validateChatReply(String raw) {
   if (json == null) {
     return null;
   }
-  final Object? decoded;
+  Object? decoded;
   try {
     decoded = jsonDecode(json);
   } on FormatException {
-    return null;
+    // On-device nález 7: model vrátil `{"reply": "…", }` (koncová čárka)
+    // i pod structured outputs. Odstranění koncových čárek před `}`/`]` je
+    // syntaktická normalizace, ne oprava obsahu (CHA-003 platí dál).
+    try {
+      decoded = jsonDecode(_stripTrailingCommas(json));
+    } on FormatException {
+      return null;
+    }
   }
   if (decoded is! Map<String, Object?>) {
     return null;
@@ -275,6 +282,11 @@ int? _optionalInt(Map<String, Object?> node, String key, int min, int max) {
 
 String? _extractJson(String raw) {
   final trimmed = raw.trim();
+  // Structured outputs vrací čistý JSON objekt — fence uvnitř textu odpovědi
+  // (např. ukázka rutiny v ```) nesmí extrakci rozbít.
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    return trimmed;
+  }
   final fence = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(trimmed);
   if (fence != null) {
     return fence.group(1);
@@ -285,4 +297,46 @@ String? _extractJson(String raw) {
     return null;
   }
   return trimmed.substring(start, end + 1);
+}
+
+/// Koncové čárky mimo řetězce (`, }` / `, ]`) → odstraněny; obsah řetězců
+/// se nemění (respektuje escapování).
+String _stripTrailingCommas(String json) {
+  final out = StringBuffer();
+  var inString = false;
+  var escaped = false;
+  for (var i = 0; i < json.length; i++) {
+    final ch = json[i];
+    if (inString) {
+      out.write(ch);
+      if (escaped) {
+        escaped = false;
+      } else if (ch == r'\') {
+        escaped = true;
+      } else if (ch == '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (ch == '"') {
+      inString = true;
+      out.write(ch);
+      continue;
+    }
+    if (ch == ',') {
+      var j = i + 1;
+      while (j < json.length &&
+          (json[j] == ' ' ||
+              json[j] == '\n' ||
+              json[j] == '\r' ||
+              json[j] == '\t')) {
+        j++;
+      }
+      if (j < json.length && (json[j] == '}' || json[j] == ']')) {
+        continue; // koncová čárka
+      }
+    }
+    out.write(ch);
+  }
+  return out.toString();
 }

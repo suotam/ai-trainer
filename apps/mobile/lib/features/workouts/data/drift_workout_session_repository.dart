@@ -14,6 +14,13 @@ import 'workout_session_row_mappers.dart';
 /// a uložení active-session pointeru. Partial unique index
 /// `idx_one_active_session_per_instance` je poslední linií ochrany invariantu.
 class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
+  static const _finishedStatuses = {
+    'COMPLETED',
+    'PARTIALLY_COMPLETED',
+    'SKIPPED',
+    'CANCELLED',
+  };
+
   DriftWorkoutSessionRepository(this._db);
 
   final AppDatabase _db;
@@ -32,6 +39,11 @@ class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
       )..where((t) => t.id.equals(workoutInstanceId))).getSingleOrNull();
       if (instance == null) {
         return const WorkoutNotFound();
+      }
+      // Uzavřený workout se znovu nestartuje (nález 9) — typovaný výsledek
+      // místo pádu na CHECK constraint (`completed_at` ⇒ COMPLETED/PARTIAL).
+      if (_finishedStatuses.contains(instance.status)) {
+        return WorkoutAlreadyFinished(instance.status);
       }
 
       // Globální invariant: nejvýše jedna aktivní/pozastavená session.

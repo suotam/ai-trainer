@@ -58,11 +58,15 @@ class QuickCompleteWorkout {
       SessionResumedExisting(:final sessionId) => sessionId,
       ConflictWithAnotherSession() => null,
       WorkoutNotFound() => null,
+      WorkoutAlreadyFinished() => null,
     };
     if (sessionId == null) {
-      return started is WorkoutNotFound
-          ? const QuickWorkoutNotFound()
-          : const QuickBlockedByOtherSession();
+      return switch (started) {
+        WorkoutNotFound() => const QuickWorkoutNotFound(),
+        // Uzavřený workout (nález 9) = už dokončeno, poctivě bez další session.
+        WorkoutAlreadyFinished() => const QuickAlreadyCompleted(),
+        _ => const QuickBlockedByOtherSession(),
+      };
     }
     final completed = await _completion.completeWorkout(
       sessionId: sessionId,

@@ -34,6 +34,7 @@ class WorkoutDetailScreen extends ConsumerWidget {
   static const Key startNotFoundKey = Key('workout_detail_start_not_found');
   static const Key conflictKey = Key('workout_detail_conflict');
   static const Key conflictOpenKey = Key('workout_detail_conflict_open');
+  static const Key finishedKey = Key('workout_detail_finished');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,8 +70,9 @@ class WorkoutDetailScreen extends ConsumerWidget {
             : _DetailContent(workout: workout),
       ),
       bottomNavigationBar: detail.maybeWhen(
-        data: (workout) =>
-            workout == null ? null : _StartActionBar(workoutId: workoutId),
+        data: (workout) => workout == null
+            ? null
+            : _StartActionBar(workoutId: workoutId, status: workout.status),
         orElse: () => null,
       ),
     );
@@ -79,9 +81,19 @@ class WorkoutDetailScreen extends ConsumerWidget {
 
 /// Spodní akční lišta se startem session (R1-03).
 class _StartActionBar extends ConsumerWidget {
-  const _StartActionBar({required this.workoutId});
+  const _StartActionBar({required this.workoutId, required this.status});
 
   final String workoutId;
+  final WorkoutInstanceStatus status;
+
+  /// Uzavřené workouty (nález 9) nemají start — místo tlačítka poctivý stav.
+  bool get _isFinished => switch (status) {
+    WorkoutInstanceStatus.completed ||
+    WorkoutInstanceStatus.partiallyCompleted ||
+    WorkoutInstanceStatus.skipped ||
+    WorkoutInstanceStatus.cancelled => true,
+    _ => false,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,6 +120,18 @@ class _StartActionBar extends ConsumerWidget {
     });
 
     final isStarting = startState is StartSessionInProgress;
+    if (_isFinished ||
+        (startState is StartSessionSuccess &&
+            startState.result is WorkoutAlreadyFinished)) {
+      return SafeArea(
+        minimum: const EdgeInsets.all(16),
+        child: Text(
+          l10n.startWorkoutFinished,
+          key: WorkoutDetailScreen.finishedKey,
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
 
     final children = <Widget>[
       SizedBox(

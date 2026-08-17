@@ -31,6 +31,7 @@
   "startWorkoutNotFound": "Tento workout není dostupný.",
   "startWorkoutConflict": "Už je aktivní jiný workout.",
   "startWorkoutConflictOpen": "Otevřít aktivní workout",
+  "startWorkoutFinished": "Tento workout je už uzavřený — znovu ho spustit nejde.",
   "activeSessionScreenTitle": "Aktivní session",
   "activeSessionLabel": "Session je aktivní",
   "trackerListTitle": "Všechny sady",

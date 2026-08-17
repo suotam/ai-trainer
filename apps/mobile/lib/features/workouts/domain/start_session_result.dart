@@ -35,3 +35,11 @@ class ConflictWithAnotherSession extends StartSessionResult {
 class WorkoutNotFound extends StartSessionResult {
   const WorkoutNotFound();
 }
+
+/// Workout už je uzavřený (dokončený, částečně dokončený, přeskočený nebo
+/// zrušený) — novou session nelze zahájit (on-device nález 9: dřív pád na
+/// CHECK constraint `completed_at`).
+class WorkoutAlreadyFinished extends StartSessionResult {
+  const WorkoutAlreadyFinished(this.status);
+  final String status;
+}
