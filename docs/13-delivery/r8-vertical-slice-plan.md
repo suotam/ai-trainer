@@ -198,6 +198,6 @@ R8 je dokončeno pouze pokud (doloženo testy a on-device evidencí):
 
 # 15. Stav backlogu
 
-R8 backlog (`R8-01` až `R8-05`): **`R8-01` až `R8-04` jsou Done** (C51–C54 vznikly, implementace mergnuty — viz `DOCUMENTATION_STATUS.md` §3); `R8-05` je `READY` (Ready podmínka R8-01…04 Done splněna).
+R8 backlog (`R8-01` až `R8-05`): **`R8-01` až `R8-05` jsou Done** (C51–C54 vznikly, implementace mergnuty, R8 E2E deterministicky prochází, R8 Exit Review zapsán — viz `DOCUMENTATION_STATUS.md` §3). **Release 8 zůstává otevřen** do on-device revize vlastníkem (§13: průchod s reálným klíčem + revize ilustrací EXI-008).
 
-Další kanonický krok: **`R8-05` – kritická R8 E2E + Exit Review** (§9.5, §13); on-device revize R8-01..04 vlastníkem je součást Exit Review (EXI-008, R8P-012).
+Další kanonický krok: on-device revize R8 vlastníkem (instalace APK, průchod „chat → plán v2 → Spustit → průvodce → dokončení", vizuální revize ilustrací), nálezy opravit v témže cyklu → uzavření R8 → plán R9.

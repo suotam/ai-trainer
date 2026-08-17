@@ -127,5 +127,20 @@ void main() {
       find.byKey(ExerciseIllustration.illustrationKey('PUSH_UP')),
       findsOneWidget,
     );
+    // Změna kódu ve stejném elementu (průvodce přepne krok): nový controller
+    // bez chyby tickeru, klíč sleduje kód (regrese z R8 E2E).
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExerciseIllustration(exerciseCode: 'BODYWEIGHT_SQUAT'),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      find.byKey(ExerciseIllustration.illustrationKey('BODYWEIGHT_SQUAT')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 }
