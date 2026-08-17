@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/time/clock.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../workouts/domain/exercise_catalog.dart';
 import '../application/plan_providers.dart';
 import '../domain/calendar_operations.dart';
 import '../domain/training_plan.dart';
@@ -332,18 +333,174 @@ class _ExerciseDraft {
     : title = TextEditingController(),
       sets = TextEditingController(text: '3'),
       reps = TextEditingController(text: '10'),
-      weight = TextEditingController();
+      weight = TextEditingController(),
+      instructions = TextEditingController(),
+      titleFocus = FocusNode();
 
   final TextEditingController title;
+  final FocusNode titleFocus;
   final TextEditingController sets;
+
+  /// Opakování (SET_REP) nebo sekundy (DURATION) — dle vybraného cviku.
   final TextEditingController reps;
   final TextEditingController weight;
+  final TextEditingController instructions;
+
+  /// Vybraný katalogový cvik (C51); `null` = vlastní cvik s povinným
+  /// popisem (EXC-008).
+  String? exerciseCode;
+
+  bool get isDuration =>
+      exerciseCode != null &&
+      exerciseCatalogEntry(exerciseCode!)?.defaultPrescription ==
+          ExercisePrescription.duration;
 
   void dispose() {
     title.dispose();
     sets.dispose();
     reps.dispose();
     weight.dispose();
+    instructions.dispose();
+    titleFocus.dispose();
+  }
+}
+
+/// Pole jednoho cviku ručního formuláře (C51 §6/§10): název jako výběr
+/// z katalogu (Autocomplete nad lokalizovanými názvy) nebo volný text =
+/// vlastní cvik s povinným popisem; u DURATION cviku sekundy místo opakování.
+class _ExerciseFields extends StatelessWidget {
+  const _ExerciseFields({
+    required this.index,
+    required this.draft,
+    required this.onCatalogChanged,
+  });
+
+  final int index;
+  final _ExerciseDraft draft;
+  final VoidCallback onCatalogChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final catalog = activeExerciseCatalog();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        RawAutocomplete<ExerciseCatalogEntry>(
+          key: Key('exercise_autocomplete_$index'),
+          textEditingController: draft.title,
+          focusNode: draft.titleFocus,
+          displayStringForOption: (entry) => l10n.exerciseName(entry.code),
+          optionsBuilder: (value) {
+            final query = value.text.trim().toLowerCase();
+            if (query.isEmpty) {
+              return const Iterable<ExerciseCatalogEntry>.empty();
+            }
+            return catalog.where(
+              (entry) =>
+                  l10n.exerciseName(entry.code).toLowerCase().contains(query) ||
+                  entry.code.toLowerCase().contains(query),
+            );
+          },
+          onSelected: (entry) {
+            draft.exerciseCode = entry.code;
+            if (draft.isDuration && (int.tryParse(draft.reps.text) ?? 0) < 15) {
+              draft.reps.text = '30';
+            }
+            onCatalogChanged();
+          },
+          fieldViewBuilder: (context, controller, focusNode, onSubmit) =>
+              TextField(
+                key: Key('exercise_name_$index'),
+                controller: controller,
+                focusNode: focusNode,
+                onChanged: (text) {
+                  // Ruční přepis názvu ruší vazbu na katalog — vlastní cvik.
+                  final selected = draft.exerciseCode;
+                  if (selected != null &&
+                      text.trim() != l10n.exerciseName(selected)) {
+                    draft.exerciseCode = null;
+                    onCatalogChanged();
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: l10n.planExerciseName,
+                  hintText: l10n.planExerciseCatalogHint,
+                  suffixIcon: draft.exerciseCode == null
+                      ? null
+                      : const Icon(Icons.menu_book_outlined, size: 18),
+                ),
+              ),
+          optionsViewBuilder: (context, onSelected, options) => Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 220,
+                  maxWidth: 360,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    for (final option in options.take(12))
+                      ListTile(
+                        key: Key('exercise_option_${option.code}'),
+                        dense: true,
+                        title: Text(l10n.exerciseName(option.code)),
+                        onTap: () => onSelected(option),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                key: Key('exercise_sets_$index'),
+                controller: draft.sets,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.planExerciseSets),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                key: Key('exercise_reps_$index'),
+                controller: draft.reps,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: draft.isDuration
+                      ? l10n.planExerciseSeconds
+                      : l10n.planExerciseReps,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: draft.weight,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: l10n.planExerciseWeight),
+              ),
+            ),
+          ],
+        ),
+        if (draft.exerciseCode == null)
+          TextField(
+            key: Key('exercise_instructions_$index'),
+            controller: draft.instructions,
+            decoration: InputDecoration(
+              labelText: l10n.planExerciseInstructions,
+            ),
+          ),
+        const SizedBox(height: 8),
+      ],
+    );
   }
 }
 
@@ -430,49 +587,19 @@ class _WorkoutFormState extends ConsumerState<_WorkoutForm> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             for (var i = 0; i < _exercises.length; i++)
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      key: Key('exercise_name_$i'),
-                      controller: _exercises[i].title,
-                      decoration: InputDecoration(
-                        labelText: l10n.planExerciseName,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _exercises[i].sets,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: l10n.planExerciseSets,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _exercises[i].reps,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: l10n.planExerciseReps,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _exercises[i].weight,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: l10n.planExerciseWeight,
-                      ),
-                    ),
-                  ),
-                ],
+              _ExerciseFields(
+                index: i,
+                draft: _exercises[i],
+                onCatalogChanged: () => setState(() {}),
+              ),
+            if (_customWithoutInstructions)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  l10n.planExerciseCustomNeedsInstructions,
+                  key: const Key('workout_form_custom_needs_instructions'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ),
             TextButton.icon(
               key: const Key('workout_form_add_exercise'),
@@ -492,7 +619,22 @@ class _WorkoutFormState extends ConsumerState<_WorkoutForm> {
     );
   }
 
+  bool _customWithoutInstructions = false;
+
   Future<void> _save() async {
+    // Vlastní cvik bez popisu provedení se neuloží (C51 EXC-008).
+    final missing = _exercises.any(
+      (e) =>
+          e.exerciseCode == null &&
+          e.title.text.trim().isNotEmpty &&
+          e.instructions.text.trim().isEmpty,
+    );
+    if (missing != _customWithoutInstructions) {
+      setState(() => _customWithoutInstructions = missing);
+    }
+    if (missing) {
+      return;
+    }
     final input = PlannedWorkoutInput(
       title: _title.text,
       workoutType: _type,
@@ -503,8 +645,17 @@ class _WorkoutFormState extends ConsumerState<_WorkoutForm> {
           PlannedExerciseInput(
             title: exercise.title.text,
             sets: int.tryParse(exercise.sets.text.trim()) ?? 0,
-            repetitions: int.tryParse(exercise.reps.text.trim()) ?? 0,
+            repetitions: exercise.isDuration
+                ? 0
+                : int.tryParse(exercise.reps.text.trim()) ?? 0,
+            durationSeconds: exercise.isDuration
+                ? int.tryParse(exercise.reps.text.trim()) ?? 0
+                : null,
             weightKg: double.tryParse(exercise.weight.text.trim()),
+            exerciseCode: exercise.exerciseCode,
+            instructions: exercise.exerciseCode == null
+                ? exercise.instructions.text
+                : null,
           ),
       ],
     );

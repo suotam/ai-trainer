@@ -5,6 +5,7 @@
 library;
 
 import '../../../core/database/app_database.dart';
+import '../domain/exercise_catalog.dart';
 import '../domain/workout_read_model.dart';
 
 T _decode<T extends Enum>(
@@ -52,6 +53,18 @@ StepPrescriptionType decodePrescriptionType(String code) => _decode(
 WorkoutPriority decodePriority(String field, String code) =>
     _decode(field, code, WorkoutPriority.values, (v) => v.code);
 
+/// Vazba kroku na katalog C51: neznámý persistovaný kód je typovaná chyba
+/// čtení, ne tichý default (EXC-011); `deprecated` položky se čtou.
+String? decodeExerciseCode(String? code) {
+  if (code == null) {
+    return null;
+  }
+  if (!isKnownExerciseCode(code)) {
+    throw UnsupportedPersistedValue('local_workout_steps.exercise_code', code);
+  }
+  return code;
+}
+
 WorkoutInstanceSummary mapInstanceSummary(LocalWorkoutInstanceRow row) =>
     WorkoutInstanceSummary(
       id: row.id,
@@ -87,6 +100,7 @@ WorkoutStep mapStep(
   priority: decodePriority('local_workout_steps.priority', row.priority),
   isSkippable: row.isSkippable,
   prescriptionType: decodePrescriptionType(row.prescriptionType),
+  exerciseCode: decodeExerciseCode(row.exerciseCode),
   instructions: row.instructions,
   purpose: row.purpose,
   plannedDurationSeconds: row.plannedDurationSeconds,

@@ -64,9 +64,7 @@ class DriftChatRepository implements ChatRepository {
   }
 
   /// Akce zpráv (C48) jedním dotazem, seskupené k message_id.
-  Future<List<ChatMessage>> _withActions(
-    List<LocalChatMessageRow> rows,
-  ) async {
+  Future<List<ChatMessage>> _withActions(List<LocalChatMessageRow> rows) async {
     if (rows.isEmpty) {
       return const [];
     }

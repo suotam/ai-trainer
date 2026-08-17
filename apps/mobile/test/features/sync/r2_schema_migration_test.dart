@@ -97,12 +97,25 @@ void main() {
       addTearDown(db.close);
       await db.customSelect('SELECT 1').get(); // vynutĂ­ otevĹ™enĂ­ + migraci
 
-      // Schema version je aktuální (v15 od R7-03).
+      // Schema version je aktuální (v16 od R8-01).
       final ver = await db
           .customSelect('PRAGMA user_version')
           .map((r) => r.data.values.first as int)
           .getSingle();
-      expect(ver, 15);
+      expect(ver, 16);
+      // v16 (C51 §7, EXC-004): aditivní nullable exercise_code bez backfillu.
+      final stepColumns = await db
+          .customSelect('PRAGMA table_info(local_workout_steps)')
+          .map((r) => r.data['name'] as String)
+          .get();
+      expect(stepColumns, contains('exercise_code'));
+      final codedSteps = await db
+          .customSelect(
+            'SELECT COUNT(*) AS c FROM local_workout_steps '
+            'WHERE exercise_code IS NOT NULL',
+          )
+          .getSingle();
+      expect(codedSteps.data['c'], 0);
 
       // 3. ZachovĂˇnĂ­ dat â€” poÄŤty beze zmÄ›ny.
       Future<int> count(String table) async =>

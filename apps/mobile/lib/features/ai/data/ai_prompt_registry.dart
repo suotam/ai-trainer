@@ -162,7 +162,10 @@ final Map<String, Object?> chatReplySchema = {
           {
             'type': 'object',
             'properties': {
-              'action': {'type': 'string', 'enum': ['UPSERT_SPORT']},
+              'action': {
+                'type': 'string',
+                'enum': ['UPSERT_SPORT'],
+              },
               // Katalog C17 je uzavřený — neznámý kód nikdy nevznikne
               // (nález 3e: model vymyslel SOCCER místo FOOTBALL).
               'sportCode': {
@@ -210,7 +213,10 @@ final Map<String, Object?> chatReplySchema = {
           {
             'type': 'object',
             'properties': {
-              'action': {'type': 'string', 'enum': ['ADD_GOAL']},
+              'action': {
+                'type': 'string',
+                'enum': ['ADD_GOAL'],
+              },
               'title': {'type': 'string'},
               'goalType': {
                 'type': 'string',
@@ -247,7 +253,10 @@ final Map<String, Object?> chatReplySchema = {
           {
             'type': 'object',
             'properties': {
-              'action': {'type': 'string', 'enum': ['SET_AVAILABILITY']},
+              'action': {
+                'type': 'string',
+                'enum': ['SET_AVAILABILITY'],
+              },
               'dayOfWeek': {
                 'type': 'string',
                 'enum': ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
@@ -268,7 +277,10 @@ final Map<String, Object?> chatReplySchema = {
           {
             'type': 'object',
             'properties': {
-              'action': {'type': 'string', 'enum': ['ADD_CONSTRAINT']},
+              'action': {
+                'type': 'string',
+                'enum': ['ADD_CONSTRAINT'],
+              },
               'title': {'type': 'string'},
             },
             'required': ['action', 'title'],

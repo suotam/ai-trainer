@@ -77,9 +77,8 @@ void main() {
     expect(body['max_tokens'], 4096);
     expect(body['thinking'], {'type': 'disabled'});
     // Structured outputs (nález 3c) — tvar odpovědi vynucuje API.
-    final format =
-        ((body['output_config']! as Map)['format']! as Map)
-            .cast<String, Object?>();
+    final format = ((body['output_config']! as Map)['format']! as Map)
+        .cast<String, Object?>();
     expect(format['type'], 'json_schema');
     expect((format['schema']! as Map)['required'], ['reply']);
     // sportCode je uzavřený katalog C17 (nález 3e: SOCCER ≠ FOOTBALL).

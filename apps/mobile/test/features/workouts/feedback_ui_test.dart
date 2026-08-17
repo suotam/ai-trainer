@@ -13,7 +13,6 @@ import 'package:ai_trainer_mobile/features/workouts/presentation/active_session_
 import 'package:ai_trainer_mobile/features/workouts/presentation/completed_workout_detail_screen.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/feedback_confirm_dialog.dart';
 import 'package:ai_trainer_mobile/features/workouts/presentation/history_screen.dart';
-import 'package:ai_trainer_mobile/features/workouts/presentation/today_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

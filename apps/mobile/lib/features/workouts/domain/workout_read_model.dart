@@ -113,6 +113,7 @@ class WorkoutStep {
     this.plannedDistanceMeters,
     this.plannedRepetitions,
     this.plannedWeightKg,
+    this.exerciseCode,
   });
 
   final String id;
@@ -122,6 +123,9 @@ class WorkoutStep {
   final WorkoutPriority priority;
   final bool isSkippable;
   final StepPrescriptionType prescriptionType;
+
+  /// Vazba na katalog cviků C51 (`null` = vlastní cvik / krok bez cviku).
+  final String? exerciseCode;
   final String? instructions;
   final String? purpose;
   final int? plannedDurationSeconds;

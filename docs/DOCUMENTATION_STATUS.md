@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Status and Gap Analysis
 
-**Verze:** 2.80  
+**Verze:** 2.81  
 **Stav:** Draft  
 **Soubor:** `docs/DOCUMENTATION_STATUS.md`  
 **Auditovaný branch:** `main`  
@@ -377,7 +377,13 @@ R3-08 je poslední R3 slice, proto je proveden R3 Exit Review (R3 plán §13). K
 
 **On-device nález 4 (produktový, definuje Release 8):** AI plán generuje tréninky, které **nejsou proveditelné jako vedený trénink** — cvik = pouze `název + sady + opakování (+ váha)` v jediné sekci MAIN, bez popisu provedení, doby, pauz a rozcvičky/vyklidnění („Dynamická mobilita ramen a kyčlí 1×10" — uživatel neví, co dělat); tracker je plochý formulář sad bez krokového průvodce, časovačů a odpočtu pauz; katalog cviků neexistuje (volné texty modelu), takže nelze navázat ilustrace. Datový model C16 (sekce, typy kroků EXERCISE/DURATION/REST/…, set plany s reps/duration/rest/RPE, `instructions`) je přitom připraven — mezera je v AI výstupu, tracker UI a katalogu.
 
-**Přesný další kanonický krok:** naplánování **Release 8 „Vedený trénink"** — pokyn vlastníka udělen (2026-08-16); kandidáti kontraktů: C51 katalog cviků (uzavřené kódy jako C17, popis provedení, vlastní cvik s povinným popisem), C52 plán v2 (sekce, kroky cvik/čas/pauza, sady reps-nebo-čas, pauzy, structured outputs), C53 průvodce tréninkem (krokový přehrávač, časovače, odpočet pauz, pauza/pokračovat), C54 schematické ilustrace cviků offline; dřívější kandidáti (záloha, notifikace, streaming, OS kalendář) trvají jako pozdější R8/R9 položky.
+## R8 – Guided Workout (Vedený trénink) — plán a první slice
+
+**R8 je naplánované** (`docs/13-delivery/r8-vertical-slice-plan.md`, backlog `R8-01` až `R8-05`, blocking contract map **C51–C54**, `R8P-001..012`): katalog cviků → plán v2 se structured outputs → průvodce session s časovači → schematické ilustrace offline → E2E. Datový model workoutu se nepřepisuje, jen plní; AI navrhuje, doména provádí; katalog uzavřený; ilustrace schematické, offline, autorované v repu.
+
+`R8-01 – Exercise Catalog` je implementován (blocking kontrakt **C51 – Exercise catalog** /`docs/06-domain/r8-exercise-catalog-contract.md`, `EXC-001..014`/ vznikl v témže cyklu) — **aplikace má uzavřený doménový slovník cviků, na který lze navázat popis provedení, model i ilustrace**. **Katalog:** in-app statická data (`exercise_catalog.dart`, EXC-003) — **112 stabilních kódů** v 9 kategoriích (rozcvička, mobilita, tlaky, tahy, nohy, střed těla, lezecké, vytrvalost, regenerace), každý s výchozím předpisem (SET_REP/DURATION), vybavením, hlavními svaly, `bilateral` (strany) a `deprecated` (EXC-002); C19 katalog vybavení aditivně rozšířen o 7 kódů (kruhy, TRX, hangboard, švihadlo, válec, stupínek, veslo — EXC-013). **Texty:** název, popis provedení (výchozí pozice → pohyb → návrat) a cue (technika/bezpečnost) pro každý kód **v cs i en** (l10n `select` vzor sportName, EXC-006/007). **Vazba:** schema **v16** — aditivní nullable `local_workout_steps.exercise_code` bez backfillu (EXC-004; struktura sync R6 ho nese automaticky přes `SELECT *`/`insertRaw`); read model `WorkoutStep.exerciseCode`, mapper odmítá neznámý kód typovaně a čte deprecated (EXC-011); historické kroky = vlastní cviky (EXC-009). **Zápis:** `PlannedExerciseInput` nese `exerciseCode`, `instructions`, `durationSeconds`, `restAfterSeconds` → materializace plní kód, předpis (DURATION při čase), popis a pauzu do existujícího modelu (EXC-010/014); validace odmítá neznámý/deprecated kód. **UI:** detail tréninku ukazuje u katalogového kroku název/popis/cue z katalogu (+ „každou stranu zvlášť", čas a pauza sady), u vlastního název + popis nebo poctivě „bez popisu"; ruční formulář plánu = výběr z katalogu (Autocomplete nad lokalizovanými názvy, sekundy u DURATION cviků) nebo vlastní cvik s **povinným popisem** (EXC-008 — bez něj se neuloží; AI v1 návrhy do C52 tolerovány jako historická cesta). Ověřeno **6 novými testy** (katalog: 112 unikátních kódů + úplnost cs/en textů + vybavení jen známé kódy + deprecated mimo výběr + mapper matice; widget detailu: katalogový vs vlastní krok; formulář: vlastní bez popisu odmítnut → s popisem uložen + katalogový PLANK má `exercise_code` a DURATION) + rozšířený migrační test v15→v16 (sloupec existuje, žádný backfill) — mobile suite **383 testů**, analyze čistý; backend beze změny.
+
+**Přesný další kanonický krok:** **C52 – Plan proposal schema v2** (`docs/09-ai/r8-plan-schema-v2-contract.md`) → tím se `R8-02` stane `READY`; kontrakty se tvoří postupně před slices (C53, C54 později). Dřívější kandidáti (záloha, notifikace, streaming, OS kalendář) trvají jako R9 položky.
 
 ---
 
@@ -565,8 +571,8 @@ ID se nesmí recyklovat.
 Release 1, 2, 3 i 4 jsou uzavřené (Exit Review provedeny, viz §3). Existuje kanonický R5 vertical-slice plán (`docs/13-delivery/r5-vertical-slice-plan.md`, backlog `R5-01` až `R5-08`, contract map C33–C40 — kompletní). **Celé R5 je implementováno, R5 Exit Review proveden a Release 5 uzavřen**; beta baseline scénář doložen s výjimkou bezpečné obnovy (pull sync) a živého provider smoke — **beta je interní**. Existuje kanonický R6 vertical-slice plán (`docs/13-delivery/r6-vertical-slice-plan.md`, backlog `R6-01` až `R6-06`, contract map C41–C45 — kompletní). **Celé R6 (`R6-01` až `R6-06`) je implementováno, R6 Exit Review proveden a Release 6 uzavřen** (pull endpoint, merge engine, struktura workoutů, delete tombstones — SXC-010 i SXC-011 splaceny, obnova nového zařízení, kritická R6 E2E; beta baseline kroky 1–10 doloženy deterministicky). **Živý provider smoke je splacen (2026-08-14** — oba request typy proti reálnému `claude-sonnet-5` prošly produkční validací; 2 reálné defekty nalezeny a opraveny, prompty v2, eval dataset rozšířen o reálné výstupy; viz §3). **On-device evidence začala 2026-08-15 (Pixel 9a).** **Release 7 „Personal Chat Trainer" (`R7-01` až `R7-06`, C46–C50, ADR-013) je implementován, on-device průchod kritické cesty s reálným klíčem proveden (nálezy 1–3e opraveny), R7 Exit Review proveden a Release 7 uzavřen** — aplikace je local-first BYOK osobní trenér s chatem jako domovem, backend dormantní. Další kanonický krok:
 
 ```text
-Naplánování Release 8 „Vedený trénink" (pokyn udělen 2026-08-16):
-C51 katalog cviků → C52 plán v2 → C53 průvodce tréninkem → C54 ilustrace
+R8 běží: R8-01 katalog cviků hotov (C51, v16) → C52 plán v2 → R8-02
+→ C53 průvodce → R8-03 → C54 ilustrace → R8-04 → R8-05 E2E + Exit Review
 ```
 
 Plánování ani implementace nezačíná bez samostatného pokynu; před další prací je nutné načíst aktuální GitHub, ověřit skutečnou strukturu repozitáře a stav dluhů dle R5 Exit Review (§3), `definition-of-ready-and-done.md` a `coding-agent-guide.md`.

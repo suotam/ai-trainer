@@ -249,13 +249,13 @@ Formát: `code` — kategorie — výchozí předpis — vybavení — hlavní s
 | `BOX_BREATHING` | DURATION | — | — |
 | `WALKING_COOLDOWN` | DURATION | — | CARDIO |
 
-Celkem **105 položek**. Kódy z §5 jsou závazné; každá má název, popis provedení a cue v cs i en (§8). Rozšíření = nový řádek + l10n, nikdy změna kódu.
+Celkem **112 položek**. Kódy z §5 jsou závazné; každá má název, popis provedení a cue v cs i en (§8). Rozšíření = nový řádek + l10n, nikdy změna kódu.
 
 ---
 
 # 6. Vlastní cvik
 
-- Krok bez `exerciseCode` je **vlastní cvik**: `title` povinný (1–120), `instructions` **povinné** (1–500) — bez popisu provedení vlastní cvik nevznikne z AI ani z ručního zadání (`EXC-008`).
+- Krok bez `exerciseCode` je **vlastní cvik**: `title` povinný (1–120), `instructions` **povinné** (1–500) — bez popisu provedení vlastní cvik nevznikne z ručního zadání ani z AI plánu v2 (`EXC-008`). Přechodně: AI návrhy **v1** (C28/C37, do nahrazení C52) vytvářejí vlastní cviky bez popisu jako historická cesta — evidováno, průvodce je zobrazí „bez popisu" (`EXC-009`).
 - Vlastní cvik nemá kategorii, vybavení, svaly ani ilustraci; průvodce zobrazí název + popis.
 - Vlastní cvik se **nikdy automaticky nemapuje** na katalog (žádné fuzzy párování názvů — deterministické jádro); uživatel může krok při ruční editaci nahradit katalogovým.
 - Existující kroky z R1–R7 (seed, ruční, AI v1) jsou vlastní cviky s tolerancí: `instructions` mohou chybět (historická data, `EXC-009`) — průvodce ukáže „bez popisu provedení".
@@ -289,7 +289,7 @@ Celkem **105 položek**. Kódy z §5 jsou závazné; každá má název, popis p
 - **EXC-005** `exercise_code` jen u typů kroků, které jsou cvikem; jinak `NULL`.
 - **EXC-006** Popis provedení a cue patří ke katalogu (l10n), nikdy k modelu; model cvik pouze vybírá.
 - **EXC-007** Každý kód má název, popis i cue v cs a en.
-- **EXC-008** Vlastní cvik = krok bez kódu s povinným `title` a `instructions` (u nových zápisů); bez ilustrace.
+- **EXC-008** Vlastní cvik = krok bez kódu s povinným `title` a `instructions` u ručního zadání a plánu v2 (AI v1 do C52 tolerována jako historická cesta); bez ilustrace.
 - **EXC-009** Historické kroky bez kódu a bez `instructions` jsou tolerované vlastní cviky (poctivé „bez popisu").
 - **EXC-010** Katalog dává výchozí předpis; konkrétní sady/časy/pauzy vždy určuje krok/set plan; předpis kroku může výchozí přepsat.
 - **EXC-011** Neznámý persistovaný kód = typovaná chyba čtení, ne tichý default; `deprecated` kódy se čtou.

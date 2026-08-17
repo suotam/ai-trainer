@@ -25,53 +25,61 @@ class _EnvKeyStore implements ByokKeyStore {
 void main() {
   final live = Platform.environment['AITRAINER_LIVE_SMOKE'] == '1';
 
-  test('repro: bohatý profil s více akcemi', () async {
-    final client = AnthropicDirectClient(
-      keyStore: _EnvKeyStore(),
-      httpClient: http.Client(),
-    );
-    final raw = await client.chat(
-      turns: const [
-        (
-          role: 'USER',
-          content:
-              'Lezu na stěně 3-4x týdně (pokročilý), k tomu florbal v úterý, '
-              'čtvrtek a neděli večer, ve středu fotbal, v sobotu skála. '
-              'Doma mám kruhy a TRX, posilovnu ne. Ráno mám 30-40 minut. '
-              'Cíl: zlepšit se v lezení a nezranit prsty. Ulož mi to do '
-              'profilu a pak mi sestav plán.',
-        ),
-      ],
-      profileContext: const {
-        'requestType': 'PLAN_PROPOSAL',
-        'sports': [],
-        'goals': [],
-        'typicalWeek': [],
-        'equipment': [],
-        'constraints': [],
-        'statistics': {
-          'periodDays': 30,
-          'plannedCount': 0,
-          'completedCount': 0,
-          'manualActivityCount': 0,
-          'manualMinutes': 0,
-        },
-      },
-    );
-    Directory('build/live-smoke').createSync(recursive: true);
-    File('build/live-smoke/chat-repro-raw.json').writeAsStringSync(raw);
-    final decoded = jsonDecode(raw) as Map<String, Object?>;
-    final actions = (decoded['actions'] as List?) ?? const [];
-    final buffer = StringBuffer();
-    for (final a in actions) {
-      final single = jsonEncode({'reply': 'x', 'actions': [a]});
-      buffer.writeln(
-        '${validateChatReply(single) == null ? 'REJECT' : 'ok    '} '
-        '${jsonEncode(a)}',
+  test(
+    'repro: bohatý profil s více akcemi',
+    () async {
+      final client = AnthropicDirectClient(
+        keyStore: _EnvKeyStore(),
+        httpClient: http.Client(),
       );
-    }
-    File('build/live-smoke/chat-repro-verdict.txt')
-        .writeAsStringSync(buffer.toString());
-    expect(validateChatReply(raw), isNotNull);
-  }, skip: !live ? 'opt-in: AITRAINER_LIVE_SMOKE=1' : null);
+      final raw = await client.chat(
+        turns: const [
+          (
+            role: 'USER',
+            content:
+                'Lezu na stěně 3-4x týdně (pokročilý), k tomu florbal v úterý, '
+                'čtvrtek a neděli večer, ve středu fotbal, v sobotu skála. '
+                'Doma mám kruhy a TRX, posilovnu ne. Ráno mám 30-40 minut. '
+                'Cíl: zlepšit se v lezení a nezranit prsty. Ulož mi to do '
+                'profilu a pak mi sestav plán.',
+          ),
+        ],
+        profileContext: const {
+          'requestType': 'PLAN_PROPOSAL',
+          'sports': [],
+          'goals': [],
+          'typicalWeek': [],
+          'equipment': [],
+          'constraints': [],
+          'statistics': {
+            'periodDays': 30,
+            'plannedCount': 0,
+            'completedCount': 0,
+            'manualActivityCount': 0,
+            'manualMinutes': 0,
+          },
+        },
+      );
+      Directory('build/live-smoke').createSync(recursive: true);
+      File('build/live-smoke/chat-repro-raw.json').writeAsStringSync(raw);
+      final decoded = jsonDecode(raw) as Map<String, Object?>;
+      final actions = (decoded['actions'] as List?) ?? const [];
+      final buffer = StringBuffer();
+      for (final a in actions) {
+        final single = jsonEncode({
+          'reply': 'x',
+          'actions': [a],
+        });
+        buffer.writeln(
+          '${validateChatReply(single) == null ? 'REJECT' : 'ok    '} '
+          '${jsonEncode(a)}',
+        );
+      }
+      File(
+        'build/live-smoke/chat-repro-verdict.txt',
+      ).writeAsStringSync(buffer.toString());
+      expect(validateChatReply(raw), isNotNull);
+    },
+    skip: !live ? 'opt-in: AITRAINER_LIVE_SMOKE=1' : null,
+  );
 }

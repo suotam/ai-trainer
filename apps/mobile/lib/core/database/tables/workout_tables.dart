@@ -133,6 +133,10 @@ class LocalWorkoutSteps extends Table {
   IntColumn get plannedRepetitions => integer().nullable()();
   RealColumn get plannedWeightKg => real().nullable()();
   TextColumn get metadataJson => text().nullable()();
+
+  /// Vazba na katalog cviků C51 (v16, EXC-004/005): stabilní kód, nebo
+  /// NULL = vlastní cvik / krok, který není cvikem.
+  TextColumn get exerciseCode => text().nullable()();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 

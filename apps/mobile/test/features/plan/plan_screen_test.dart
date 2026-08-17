@@ -60,12 +60,42 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('workout_form_add_exercise')));
     await tester.pumpAndSettle();
+    // Vlastní cvik bez popisu provedení se neuloží (C51 EXC-008).
     await tester.enterText(find.byKey(const Key('exercise_name_0')), 'Dřep');
+    await tester.tap(find.byKey(const Key('workout_form_save')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('workout_form_custom_needs_instructions')),
+      findsOneWidget,
+    );
+    await tester.enterText(
+      find.byKey(const Key('exercise_instructions_0')),
+      'Nohy na šířku ramen, dřep do paralelu.',
+    );
+    // Druhý cvik z katalogu: výběr z návrhů nastaví exercise_code (C51 §7).
+    await tester.tap(find.byKey(const Key('workout_form_add_exercise')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('exercise_name_1')), 'plank');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exercise_option_PLANK')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('workout_form_save')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(PlanScreen.workoutsEmptyKey), findsNothing);
     expect(find.text('Silový A'), findsOneWidget);
+    final steps = await database
+        .customSelect(
+          'SELECT title, exercise_code, instructions, prescription_type '
+          'FROM local_workout_steps ORDER BY position',
+        )
+        .get();
+    expect(steps, hasLength(2));
+    expect(steps[0].data['exercise_code'], isNull);
+    expect(steps[0].data['instructions'], contains('paralelu'));
+    expect(steps[1].data['exercise_code'], 'PLANK');
+    // PLANK je DURATION cvik — výchozí předpis katalogu (EXC-010).
+    expect(steps[1].data['prescription_type'], 'DURATION');
   });
 
   testWidgets('zrušení workoutu z menu: stav Cancelled viditelný v plánu '
