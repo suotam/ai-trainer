@@ -1,6 +1,6 @@
 # AI Trainer – Documentation Map
 
-**Verze:** 2.80  
+**Verze:** 2.81  
 **Stav:** Draft  
 **Soubor:** `docs/README.md`  
 **Poslední aktualizace:** 2026-08-17
@@ -516,12 +516,15 @@ předchozí/další/přeskočit, pauza/pokračovat, uplynulý čas; stav odvozen
 z uložených značek v17 → obnovitelný po přerušení; dokončení finalizuje
 aktivní čas) a **`R8-04` ilustrace cviků** (C54: autorská schémata postavy
 vykreslená nativně, 65 archetypů pokrývá všech 112 kódů, animace v
-průvodci, miniatura v detailu, vlastní cvik poctivě bez ilustrace) **jsou
-implementovány** — mobil 405/405. Další kanonický
-krok:
+průvodci, miniatura v detailu, vlastní cvik poctivě bez ilustrace) a
+**`R8-05` kritická R8 E2E** (chat → plán v2 → přijetí → kalendář → detail
+→ Spustit → průvodce s časovkou, odpočty, REST a přeskočením → dokončení →
+statistiky; deterministicky) **jsou implementovány** — mobil 406/406,
+**R8 Exit Review zapsán s výhradou**: Release 8 zůstává otevřen do
+on-device revize vlastníkem. Další kanonický krok:
 
 ```text
-R8-05 E2E + Exit Review (+ on-device revize R8-01..04 vlastníkem)
+on-device revize R8 (reálný klíč, ilustrace) → uzavření R8 → plán R9
 ```
 
 Před další prací se znovu načte aktuální `main`, ověří reálná struktura repozitáře a Ready stav podle delivery a coding-agent kontraktů.

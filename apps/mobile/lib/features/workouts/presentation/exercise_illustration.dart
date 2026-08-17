@@ -26,7 +26,7 @@ class ExerciseIllustration extends StatefulWidget {
 }
 
 class _ExerciseIllustrationState extends State<ExerciseIllustration>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   AnimationController? _controller;
 
   ExercisePoseAnimation? get _animation => illustrationFor(widget.exerciseCode);
